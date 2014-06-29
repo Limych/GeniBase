@@ -10,7 +10,12 @@ define('Q_LIMIT',	20);
 
 
 // Базовые настройки системы
-mb_internal_encoding("UTF-8");
+mb_internal_encoding('UTF-8');
+//
+setlocale(LC_ALL, 'ru_RU.utf8');
+bindtextdomain(WWI_TXTDOM, dirname(__FILE__) . '/lang');
+textdomain(WWI_TXTDOM);
+bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
 
 
 
@@ -258,6 +263,12 @@ function paginator($pg, $max_pg){
 function mb_ucfirst($text){
 	return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
 }
+
+
+
+/********************************************************************************
+ * Функции работы с языками
+ */
 
 
 
