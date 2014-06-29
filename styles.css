@@ -1,0 +1,175 @@
+body	{
+	font-family: sans-serif;
+}
+h1	{
+	margin: 0 3em;
+	text-align: center;
+}
+a	{
+	text-decoration: none;
+}
+a:hover	{
+	text-decoration: underline;
+}
+form	{
+	margin: 1em auto;
+	max-width: 30em;
+	background-color: #FFE9BF;
+	padding: 1em 3em;
+}
+form h2	{
+	margin: 0 0 1em;
+	text-align: center;
+	font-size: 120%;
+}
+form p	{
+	text-align: justify;
+}
+form .field	{
+	display: table-row;
+}
+form .field label,
+form .field input	{
+	display: table-cell;
+	vertical-align: top;
+}
+form .field label	{
+	text-align: right;
+	padding-right: 0.5em;
+}
+form .field input	{
+	width: 24em;
+}
+form .field input[type='date']	{
+	width: auto;
+}
+form button	{
+	margin: 0.5em 0 1em auto;
+	display: block;
+}
+
+
+
+.nb	{
+	font-size: 85%;
+	font-style: italic;
+}
+.aligncenter	{
+	text-align: center;
+}
+.alignright	{
+	text-align: right;
+}
+.small	{
+	font-size: smaller;
+}
+
+
+
+table	{
+	border-spacing: 0;
+}
+table caption	{
+	margin-bottom: 0.5em;
+}
+table td	{
+	padding: 0.25em 1em;
+}
+thead	{
+	font-weight: bold;
+}
+table.report,
+table.stat	{
+	border: 1px solid #CCC;
+}
+table.report	{
+	margin: 1em auto;
+}
+table.stat	{
+	float: left;
+	margin: 1em;
+}
+th	{
+	background-color: #FFA500;
+	padding: 0.25em 1em;
+}
+tr.odd	{
+	background-color: #F9F9F9;
+}
+tr.even	{
+	background-color: #EEE;
+}
+tr.brief:hover	{
+	background-color: #FFD280;
+}
+tr.brief	{
+	cursor: pointer;
+}
+.detailed	{
+	background-color: #FFE9BF;
+	padding: 0.5em;
+	font-size: 90%;
+}
+.detailed table th	{
+	background-color: transparent;
+	padding: 0 0.5em 0 0;
+	text-align: right;
+}
+.detailed table td	{
+	padding: 0.125em 0.5em;
+}
+.detailed table td.comments	{
+	padding-top: 1em;
+	text-align: justify;
+	font-style: italic;
+}
+.arrow:after	{
+	content: "↓";
+}
+.arrow.up:after	{
+	content: "↑";
+}
+.stat .region .comment	{
+	font-style: italic;
+	font-size: 85%;
+}
+.stat .region_2	{
+	padding-left: 2.5em;
+}
+.stat .region_3	{
+	padding-left: 4em;
+}
+.stat .region_4	{
+	padding-left: 5.5em;
+}
+.stat .region_5	{
+	padding-left: 7em;
+}
+
+
+/*** Пагинация ***/
+.paginator	{
+	margin: 1em auto;
+	text-align: center;
+}
+.paginator a,
+.paginator span	{
+	min-width: 1.5em;
+	display: inline-block;
+	padding: 0.1em;
+}
+.paginator a	{
+	background-color: #EEE;
+}
+.paginator a:hover	{
+	text-decoration: none;
+	background-color: #FFD280;
+}
+.paginator .prev,
+.paginator .next	{
+	width: 3em;
+	margin: 0 2em;
+}
+.paginator .current	{
+	background-color: #FFA500;
+}
