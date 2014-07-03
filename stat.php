@@ -2,12 +2,12 @@
 require_once('functions.php');	// Общие функции системы
 
 $result = db_query('SELECT COUNT(*) FROM persons');
-$cnt = mysql_fetch_array($result, MYSQL_NUM);
-mysql_free_result($result);
+$cnt = $result->fetch_array(MYSQL_NUM);
+$result->free();
 
 $result = db_query('SELECT COUNT(*) FROM persons_raw');
-$cnt2 = mysql_fetch_array($result, MYSQL_NUM);
-mysql_free_result($result);
+$cnt2 = $result->fetch_array(MYSQL_NUM);
+$result->free();
 
 $txt = format_num($cnt[0], ' запись.', ' записи.', ' записей.');
 if($cnt[0] != $cnt2[0]){
@@ -40,15 +40,15 @@ region_stat();
 <?php
 $even = 0;
 $result = db_query('SELECT DISTINCT rank FROM persons WHERE rank != "" ORDER BY rank');
-while($row = mysql_fetch_object($result)){
+while($row = $result->fetch_object()){
 	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE rank = "' . $row->rank . '"');
-	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-	mysql_free_result($result2);
+	$cnt = $result2->fetch_array(MYSQL_NUM);
+	$result2->free();
 	
 	$even = 1-$even;
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->rank) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
 }
-mysql_free_result($result);
+$result->free();
 ?>
 </tbody></table>
 
@@ -61,12 +61,12 @@ mysql_free_result($result);
 <?php
 $even = 0;
 $result = db_query('SELECT id, religion, religion_cnt FROM dic_religion ORDER BY religion');
-while($row = mysql_fetch_object($result)){
+while($row = $result->fetch_object()){
 	if(empty($row->religion_cnt))	continue;
 	$even = 1-$even;
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->religion) . "</td>\n\t<td class='alignright'>" . format_num($row->religion_cnt) . "</td>\n</tr>";
 }
-mysql_free_result($result);
+$result->free();
 ?>
 </tbody></table>
 
@@ -79,11 +79,11 @@ mysql_free_result($result);
 <?php
 $even = 0;
 $result = db_query('SELECT id, marital, marital_cnt FROM dic_marital ORDER BY marital');
-while($row = mysql_fetch_object($result)){
+while($row = $result->fetch_object()){
 	$even = 1-$even;
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->marital) . "</td>\n\t<td class='alignright'>" . format_num($row->marital_cnt) . "</td>\n</tr>";
 }
-mysql_free_result($result);
+$result->free();
 ?>
 </tbody></table>
 
@@ -96,15 +96,15 @@ mysql_free_result($result);
 <?php
 $even = 0;
 $result = db_query('SELECT DISTINCT reason FROM persons WHERE reason != "" ORDER BY reason');
-while($row = mysql_fetch_object($result)){
+while($row = $result->fetch_object()){
 	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE reason = "' . $row->reason . '"');
-	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-	mysql_free_result($result2);
+	$cnt = $result2->fetch_array(MYSQL_NUM);
+	$result2->free();
 	
 	$even = 1-$even;
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->reason) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
 }
-mysql_free_result($result);
+$result->free();
 ?>
 </tbody></table>
 <?php
@@ -117,13 +117,13 @@ function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
 	$result = db_query('SELECT id, title, region_comment, region_cnt FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
-	while($row = mysql_fetch_object($result)){
+	while($row = $result->fetch_object()){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
 
 		region_stat($row->id, $level + 1);
 	}
-	mysql_free_result($result);
+	$result->free();
 }
 
 ?>

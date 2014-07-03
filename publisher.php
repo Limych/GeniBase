@@ -16,10 +16,10 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 // Делаем выборку записей для публикации
 $drafts = array();
 $result = db_query('SELECT * FROM persons_raw WHERE status = "Draft" ORDER BY rank, reason LIMIT ' . P_LIMIT);
-while($row = mysql_fetch_array($result, MYSQL_ASSOC)){
+while($row = $result->fetch_array(MYSQL_ASSOC)){
 	$drafts[] = $row;
 }
-mysql_free_result($result);
+$result->free();
 
 // Нормирование данных
 foreach($drafts as $row){

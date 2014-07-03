@@ -113,15 +113,15 @@ function rus_metaphone($word, $trim_surname = false){
  * Соединяемся с СУБД, выбираем базу данных
  */
 function db_open($open = true){
-	static $link = null;
+	static $dbase = null;
 
-	if(!empty($link) || !$open)	return $link;
+	if(!empty($dbase) || !$open)	return $dbase;
 
-	$link = mysql_connect('u62106.mysql.masterhost.ru', 'u62106', 'comendreoi3i')
-		or die('Не удалось соединиться: ' . mysql_error());
-	mysql_select_db('u62106_1914') or die('Не удалось выбрать базу данных');
-	mysql_set_charset('utf8',$link);
-	return $link;
+	$dbase = new MySQLi('u62106.mysql.masterhost.ru', 'u62106', 'comendreoi3i')
+		or die('Не удалось соединиться: ' . $dbase->error);
+	$dbase->select_db('u62106_1914') or die('Не удалось выбрать базу данных');
+	$dbase->set_charset('utf8');
+	return $dbase;
 }
 
 
@@ -130,8 +130,8 @@ function db_open($open = true){
  * Отправляем запрос в СУБД
  */
 function db_query($query){
-	db_open();
-	$result = mysql_query($query) or die('Запрос не удался: ' . mysql_error());
+	$dbase = db_open();
+	$result = $dbase->query($query) or die('Запрос не удался: ' . $dbase->error);
 	return $result;
 }
 
@@ -141,82 +141,83 @@ function db_query($query){
  * Выполняем обновление вычисляемых данных и закрываем соединение с СУБД
  */
 function db_close(){
+	$dbase = db_open();
 	// Процедура постепенного обновления вычисляемых данных
 
 	// Генерируем фонетические ключи
 	$result = db_query('SELECT DISTINCT surname FROM persons WHERE surname_key = "" ORDER BY list_nr LIMIT 120');
 	$tmp = array();
-	while($row = mysql_fetch_array($result, MYSQL_NUM)){
+	while($row = $result->fetch_array(MYSQL_NUM)){
 		$tmp[] = $row[0];
 	}
-	mysql_free_result($result);
+	$result->free();
 	shuffle($tmp);
 	foreach(array_slice($tmp, 0, 12) as $surname){
-		db_query('UPDATE persons SET surname_key = "' . mysql_escape_string(rus_metaphone(strtok($surname, ' '), true)) . '" WHERE surname = "' . mysql_escape_string($surname) . '"');
+		db_query('UPDATE persons SET surname_key = "' . $dbase->escape_string(rus_metaphone(strtok($surname, ' '), true)) . '" WHERE surname = "' . $dbase->escape_string($surname) . '"');
 	}
 	
 	// Обновляем списки вложенных регионов, если это необходимо
 	$result = db_query('SELECT id, parent_id FROM dic_region WHERE region_ids = ""');
-	while($region = mysql_fetch_object($result)){
+	while($region = $result->fetch_object()){
 		$result2 = db_query('SELECT region_ids FROM dic_region WHERE parent_id = ' . $region->id);
 		$tmp = array();
-		while($row = mysql_fetch_array($result2, MYSQL_NUM)){
+		while($row = $result2->fetch_array(MYSQL_NUM)){
 			$tmp[] = $row[0];
 		}
-		mysql_free_result($result2);
+		$result2->free();
 		array_unshift($tmp, $region->id);
-		db_query('UPDATE dic_region SET region_ids = "' . mysql_escape_string(implode(',', $tmp)) . '" WHERE id = ' . $region->id);
+		db_query('UPDATE dic_region SET region_ids = "' . $dbase->escape_string(implode(',', $tmp)) . '" WHERE id = ' . $region->id);
 		db_query('UPDATE dic_region SET region_ids = "" WHERE id = ' . $region->parent_id);
 	}
-	mysql_free_result($result);
+	$result->free();
 	
 	// Обновляем полные наименования регионов, если это необходимо
 	$result = db_query('SELECT id, parent_id, title FROM dic_region WHERE region = ""');
-	while($region = mysql_fetch_object($result)){
+	while($region = $result->fetch_object()){
 		$result2 = db_query('SELECT region FROM dic_region WHERE id = ' . $region->parent_id);
-		$parent = mysql_fetch_object($result2);
-		mysql_free_result($result2);
+		$parent = $result2->fetch_object();
+		$result2->free();
 		$tmp = (empty($parent) ? '' : $parent->region . ', ') . $region->title;
-		db_query('UPDATE dic_region SET region = "' . mysql_escape_string($tmp) . '" WHERE id = ' . $region->id);
+		db_query('UPDATE dic_region SET region = "' . $dbase->escape_string($tmp) . '" WHERE id = ' . $region->id);
 		db_query('UPDATE dic_region SET region = "" WHERE parent_id = ' . $region->id);
 	}
-	mysql_free_result($result);
+	$result->free();
 	
 	// Обновляем статистику…
 	//
 	// … по регионам
 	$result = db_query('SELECT id, region_ids FROM dic_region ORDER BY RAND() LIMIT 1');
-	while($row = mysql_fetch_object($result)){
+	while($row = $result->fetch_object()){
 		if(empty($row->region_ids))	$row->region_ids = $row->id;
 		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE region_id IN (' . $row->region_ids . ')');
-		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-		mysql_free_result($result2);
+		$cnt = $result2->fetch_array(MYSQL_NUM);
+		$result2->free();
 		db_query('UPDATE dic_region SET region_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
 	}
-	mysql_free_result($result);
+	$result->free();
 	//
 	// … по религиям
 	$result = db_query('SELECT id FROM dic_religion ORDER BY RAND() LIMIT 1');
-	while($row = mysql_fetch_object($result)){
+	while($row = $result->fetch_object()){
 		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE religion_id = ' . $row->id);
-		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-		mysql_free_result($result2);
+		$cnt = $result2->fetch_array(MYSQL_NUM);
+		$result2->free();
 		db_query('UPDATE dic_religion SET religion_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
 	}
-	mysql_free_result($result);
+	$result->free();
 	//
 	// … по семейным положениям
 	$result = db_query('SELECT id FROM dic_marital ORDER BY RAND() LIMIT 1');
-	while($row = mysql_fetch_object($result)){
+	while($row = $result->fetch_object()){
 		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE marital_id = ' . $row->id);
-		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-		mysql_free_result($result2);
+		$cnt = $result2->fetch_array(MYSQL_NUM);
+		$result2->free();
 		db_query('UPDATE dic_marital SET marital_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
 	}
-	mysql_free_result($result);
+	$result->free();
 
 	// Закрываем соединение с СУБД
-	mysql_close(db_open());
+	$dbase->close();
 }
 
 
@@ -474,9 +475,12 @@ function prepublish($row, &$have_trouble, &$date_norm){
 		'иудей'	=> 2,
 		// Старообрядческое
 		'стар'	=> 3,
-		'раск'	=> 3,
+		'старов'	=> 3,
 		'старовер'	=> 3,
 		'староверъ'	=> 3,
+		'раск'	=> 3,
+		'раскольник'	=> 3,
+		'раскольникъ'	=> 3,
 		// Магометанское
 		'маг'	=> 4,
 		'магом'	=> 4,
@@ -530,7 +534,10 @@ function prepublish($row, &$have_trouble, &$date_norm){
 		'един'	=> 15,
 		'единов'	=> 15,
 		// Протестантское
+		'протес'	=> 16,
 		'протест'	=> 16,
+		// Марийское
+		'мар'	=> 17,
 	);
 	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($row['religion'])));
 // if(defined('P_DEBUG'))	var_export($tmp);
@@ -566,27 +573,45 @@ function prepublish($row, &$have_trouble, &$date_norm){
 	if(empty($row['list_nr'])){
 		$row['source_id'] = 0;
 	}else{
-		$result = db_query('SELECT id FROM dic_source WHERE source LIKE "Именной список №' . $row['list_nr'] . ' %"');
-		$res = mysql_fetch_array($result, MYSQL_NUM);
-		mysql_free_result($result);
+		$dbase = db_open();
+		$stmt = $dbase->prepare('SELECT id FROM dic_source WHERE source LIKE ?');
+		$tmp = "Именной список №${row[list_nr]} %";
+		$stmt->bind_param("s", $tmp);
+		$stmt->execute();
+		$stmt->bind_result($res);
+		$stmt->fetch();
+		$stmt->close();
 		if($res)
-			$row['source_id'] = $res[0];
+			$row['source_id'] = $res;
 		else{
-			db_query('INSERT INTO dic_source (source) VALUES ("Именной список №' . $row['list_nr'] . ' убитым, раненым и без вести пропавшим нижним чинам.")');
-			$row['source_id'] = mysql_insert_id();
+			$stmt = $dbase->prepare('INSERT INTO dic_source (source) VALUES (?)');
+			$tmp = "Именной список №${row[list_nr]} убитым, раненым и без вести пропавшим нижним чинам.";
+			$stmt->bind_param("s", $tmp);
+			$stmt->execute();
+			$stmt->close();
+			$row['source_id'] = $dbase->insert_id;
 		}
 	}
 	
 	// Уточняем региональную привязку
 	if(!empty($row['uyezd'])){
-		$result = db_query('SELECT id FROM dic_region WHERE parent_id = ' . $row['region_id'] . ' AND title LIKE "' . mysql_escape_string($row['uyezd']) . ' %"');
-		$res = mysql_fetch_array($result, MYSQL_NUM);
-		mysql_free_result($result);
+		$dbase = db_open();
+		$stmt = $dbase->prepare('SELECT id FROM dic_region WHERE parent_id = ? AND title LIKE ?');
+		$tmp = $row['uyezd'] . ' %';
+		$stmt->bind_param("is", $row['region_id'], $tmp);
+		$stmt->execute();
+		$stmt->bind_result($res);
+		$stmt->fetch();
+		$stmt->close();
 		if($res)
-			$row['region_id'] = $res[0];
+			$row['region_id'] = $res;
 		else{
-			db_query('INSERT INTO dic_region (parent_id, title) VALUES (' . $row['region_id'] . ', "' . mysql_escape_string($row['uyezd']) . ' ")');
-			$row['region_id'] = mysql_insert_id();
+			$stmt = $dbase->prepare('INSERT INTO dic_region (parent_id, title) VALUES (?, ?)');
+			$tmp = $row['uyezd'] . ' ';
+			$stmt->bind_param("is", $row['region_id'], $tmp);
+			$stmt->execute();
+			$stmt->close();
+			$row['region_id'] = $dbase->insert_id;
 		}
 	}
 
@@ -595,63 +620,53 @@ function prepublish($row, &$have_trouble, &$date_norm){
 		$row['date_from']	= '1914-07-28';
 		$row['date_to']		= '1918-11-11';
 	}else{
+		$row['date'] = strtr($row['date'], array(
+			'-Jan-'	=> '.янв.',		'-Feb-'	=> '.фев.',		'-Mar-'	=> '.мар.',		'-Apr-'	=> '.апр.',		'-May-'	=> '.мая.',
+			'-Jun-'	=> '.июн.',		'-Jul-'	=> '.июл.',		'-Aug-'	=> '.авг.',		'-Sep-'	=> '.сен.',		'-Oct-'	=> '.окт.',
+			'-Nov-'	=> '.ноя.',		'-Dec-'	=> '.дек.',
+		));
 		$date_norm = $row['date'];
+
 		// Переводим все буквы в строчные, обрезаем концевые пробелы и корректируем русские буквы
 		$date_norm = fix_russian(trim(mb_strtolower($date_norm)));
-
-		// Переводим текстовые названия месяцев в числовые
-		static $date_fixes = array(
-			'/(?<=^|[\d\W])янв(?=[\d\W]|$)/uS'		=> '.01.',
-			'/(?<=^|[\d\W])января(?=[\d\W]|$)/uS'	=> '.01.',
-			'/(?<=^|[\d\W])фев(?=[\d\W]|$)/uS'		=> '.02.',
-			'/(?<=^|[\d\W])фвр(?=[\d\W]|$)/uS'		=> '.02.',
-			'/(?<=^|[\d\W])февраля(?=[\d\W]|$)/uS'	=> '.02.',
-			'/(?<=^|[\d\W])мрт(?=[\d\W]|$)/uS'		=> '.03.',
-			'/(?<=^|[\d\W])мар(?=[\d\W]|$)/uS'		=> '.03.',
-			'/(?<=^|[\d\W])марта?(?=[\d\W]|$)/uS'	=> '.03.',
-			'/(?<=^|[\d\W])апр(?=[\d\W]|$)/uS'		=> '.04.',
-			'/(?<=^|[\d\W])апреля(?=[\d\W]|$)/uS'	=> '.04.',
-			'/(?<=^|[\d\W])мая(?=[\d\W]|$)/uS'		=> '.05.',
-			'/(?<=^|[\d\W])июн(?=[\d\W]|$)/uS'		=> '.06.',
-			'/(?<=^|[\d\W])июня(?=[\d\W]|$)/uS'		=> '.06.',
-			'/(?<=^|[\d\W])июл(?=[\d\W]|$)/uS'		=> '.07.',
-			'/(?<=^|[\d\W])июля(?=[\d\W]|$)/uS'		=> '.07.',
-			'/(?<=^|[\d\W])ав(?=[\d\W]|$)/uS'		=> '.08.',
-			'/(?<=^|[\d\W])авг(?=[\d\W]|$)/uS'		=> '.08.',
-			'/(?<=^|[\d\W])августа?(?=[\d\W]|$)/uS'	=> '.08.',
-			'/(?<=^|[\d\W])сен(?=[\d\W]|$)/uS'		=> '.09.',
-			'/(?<=^|[\d\W])снт(?=[\d\W]|$)/uS'		=> '.09.',
-			'/(?<=^|[\d\W])сент(?=[\d\W]|$)/uS'		=> '.09.',
-			'/(?<=^|[\d\W])сентября(?=[\d\W]|$)/uS'	=> '.09.',
-			'/(?<=^|[\d\W])окт(?=[\d\W]|$)/uS'		=> '.10.',
-			'/(?<=^|[\d\W])октября(?=[\d\W]|$)/uS'	=> '.10.',
-			'/(?<=^|[\d\W])нбр(?=[\d\W]|$)/uS'		=> '.11.',
-			'/(?<=^|[\d\W])ноя(?=[\d\W]|$)/uS'		=> '.11.',
-			'/(?<=^|[\d\W])нояб(?=[\d\W]|$)/uS'		=> '.11.',
-			'/(?<=^|[\d\W])ноября(?=[\d\W]|$)/uS'	=> '.11.',
-			'/(?<=^|[\d\W])дек(?=[\d\W]|$)/uS'		=> '.12.',
-			'/(?<=^|[\d\W])дкб(?=[\d\W]|$)/uS'		=> '.12.',
-			'/(?<=^|[\d\W])декабря(?=[\d\W]|$)/uS'	=> '.12.',
-		);
-		$date_norm = preg_replace(array_keys($date_fixes), array_values($date_fixes), $date_norm);
-		
 		// Убираем префикс «с »
-		$date_norm = preg_replace('/^съ?/uS', '', $date_norm);
+		$date_norm = preg_replace('/^съ?\s*/uS', '', $date_norm);
 		// Заменяем частички « по » и « на » на дефис
-		$date_norm = preg_replace('/(?<=[\d\W])(?:по|на)(?=[\d\W])/uS', '-', $date_norm);
+		$date_norm = preg_replace('/(?<=[\d\W])\s*(?:по|на)\s*(?=[\d\W])/uS', '-', $date_norm);
 		// Заменяем частички « и » и « или » на запятую
-		$date_norm = preg_replace('/(?<=[\d\W])и(ли)?(?=[\d\W])/uS', ',', $date_norm);
-		// Убираем окончание «г.» или «года»
-		$date_norm = preg_replace('/г\w*\.?\s*$/uS', '', $date_norm);
-
-		// Убираем все пробелы
-		$date_norm = preg_replace('/\s+/uS', '', $date_norm);
+		$date_norm = preg_replace('/(?<=[\d\W])\s*и(ли)?\s*(?=[\d\W])/uS', ',', $date_norm);
+		// Убираем окончание «г[ода][.]»
+		$date_norm = preg_replace('/\s*г\w*\.?\s*$/uS', '', $date_norm);
+		// Заменяем все пробелы на точки
+		$date_norm = preg_replace('/\s+/uS', '.', $date_norm);
 		// Сокращаем несколько точек или дефисов в один
-		$date_norm = preg_replace('/([\.\-]){2,}/uS', '\\1', $date_norm);
+		$date_norm = preg_replace('/([\.\-])\\1*/uS', '\\1', $date_norm);
 
 		// Шаблоны для поиска дат
-		static	$reg_date_left	= "(\d\d?)(?:[\.\/](?:(\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";	// дд[.мм[.[гг]гг]]
-		static	$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?(\d\d?))?[\.\/])?(\d\d\d\d)";	// [[дд.]мм.]гггг
+		static	$month_names = array(
+			'январь'	=> '01',		'января'	=> '01',		'янв'	=> '01',
+			'февраль'	=> '02',		'февраля'	=> '02',		'фев'	=> '02',		'фвр'	=> '02',
+			'март'		=> '03',		'марта'		=> '03',		'мрт'	=> '03',		'мар'	=> '03',
+			'апрель'	=> '04',		'апреля'	=> '04',		'апр'	=> '04',
+			'май'		=> '05',		'мая'		=> '05',
+			'июнь'		=> '06',		'июня'		=> '06',		'июн'	=> '06',
+			'июль'		=> '07',		'июля'		=> '07',		'июл'	=> '07',
+			'август'	=> '08',		'августа'	=> '08',		'ав'	=> '08',		'авг'	=> '08',
+			'сентябрь'	=> '09',		'сентября'	=> '09',		'сен'	=> '09',		'снт'	=> '09',		'сент'	=> '09',
+			'октябрь'	=> '10',		'октября'	=> '10',		'окт'	=> '10',
+			'ноябрь'	=> '11',		'ноября'	=> '11',		'нбр'	=> '11',		'ноя'	=> '11',		'нояб'	=> '11',
+			'декабрь'	=> '12',		'декабря'	=> '12',		'дек'	=> '12',		'дкб'	=> '12',
+		);
+		static	$reg_months = '';
+		static	$reg_date_left	= '';
+		static	$reg_date_right	= '';
+		if(empty($reg_months)){
+			$reg_months = '(?:' . implode('|', array_keys($month_names)) . ')';
+			// дд[.мм[.[гг]гг]] или дд[.ммм[.[гг]гг]]
+			$reg_date_left	= "(\d\d?)(?:[\.\/](?:($reg_months|\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";
+			// [[дд.]мм.]гггг или [[дд.]ммм.]гггг
+			$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?($reg_months|\d\d?))?[\.\/])?(\d\d\d\d)";
+		}
 
 		// Запись «1914/15»
 		if($date_norm == '1914/15'){
@@ -685,10 +700,13 @@ function prepublish($row, &$have_trouble, &$date_norm){
 
 			if($matches[3] < 100)	$matches[3] += 1900;
 			if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '07' : '01');
+			elseif(!is_numeric($matches[2]))	$matches[2] = $month_names[$matches[2]];
 			if(empty($matches[1]))	$matches[1] = (($matches[3] == 1914) && ($matches[2] == 7) ? '28' : '01');;
 			$row['date_from']	= implode('-', array($matches[3], $matches[2], $matches[1]));
+			//
 			if($matches[6] < 100)	$matches[6] += 1900;
 			if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
+			elseif(!is_numeric($matches[5]))	$matches[5] = $month_names[$matches[5]];
 			if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
 			$row['date_to']	= implode('-', array($matches[6], $matches[5], $matches[4]));
 			
@@ -751,7 +769,7 @@ class ww1_solders_set extends ww1_records_set{
 		parent::__construct($page);
 		
 		$this->records = array();
-		while($row = mysql_fetch_object($sql_result))
+		while($row = $sql_result->fetch_object())
 			$this->records[] = $row;
 
 		$this->records_cnt = ($records_cnt !== NULL ? $records_cnt : count($this->records));
@@ -917,8 +935,8 @@ class ww1_database_solders extends ww1_database {
 		// Считаем, сколько всего записей в базе
 		$query = 'SELECT COUNT(*) FROM persons';
 		$result = db_query($query);
-		$cnt = mysql_fetch_array($result, MYSQL_NUM);
-		mysql_free_result($result);
+		$cnt = $result->fetch_array(MYSQL_NUM);
+		$result->free();
 		$this->records_cnt = intval($cnt[0]);
 	}
 
@@ -944,34 +962,34 @@ class ww1_database_solders extends ww1_database {
 			// Получаем список всех вариантов значений воиских званий
 			$dics['rank'] = array();
 			$result = db_query('SELECT DISTINCT rank FROM persons WHERE rank != "" ORDER BY rank');
-			while($row = mysql_fetch_array($result, MYSQL_NUM)){
+			while($row = $result->fetch_array(MYSQL_NUM)){
 				$dics['rank'][$row[0]] = $row[0];
 			}
-			mysql_free_result($result);
+			$result->free();
 
 			// Получаем список всех вариантов значений вероисповеданий
 			$dics['religion'] = array();
 			$result = db_query('SELECT * FROM dic_religion ORDER BY religion');
-			while($row = mysql_fetch_object($result)){
+			while($row = $result->fetch_object()){
 				$dics['religion'][$row->id] = $row->religion;
 			}
-			mysql_free_result($result);
+			$result->free();
 
 			// Получаем список всех вариантов значений семейных положений
 			$dics['marital'] = array();
 			$result = db_query('SELECT * FROM dic_marital ORDER BY marital');
-			while($row = mysql_fetch_object($result)){
+			while($row = $result->fetch_object()){
 				$dics['marital'][$row->id] = $row->marital;
 			}
-			mysql_free_result($result);
+			$result->free();
 
 			// Получаем список всех вариантов значений причин выбытия
 			$dics['reason'] = array();
 			$result = db_query('SELECT DISTINCT reason FROM persons WHERE reason != "" ORDER BY reason');
-			while($row = mysql_fetch_array($result, MYSQL_NUM)){
+			while($row = $result->fetch_array(MYSQL_NUM)){
 				$dics['reason'][$row[0]] = $row[0];
 			}
-			mysql_free_result($result);
+			$result->free();
 
 			// Выводим html-поля
 			$fields = array(
@@ -1015,6 +1033,8 @@ class ww1_database_solders extends ww1_database {
 
 	// Осуществление поиска и генерация класса результатов поиска
 	function do_search(){
+		$dbase = db_open();
+		
 		if($this->query_mode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 
@@ -1023,18 +1043,18 @@ class ww1_database_solders extends ww1_database {
 			foreach($this->query as $key => $val){
 				if(empty($val))	continue;
 				if(false != ($reg = preg_match('/[_%]/uS', $val)))
-					$tmp = $key . ' LIKE "' . mysql_escape_string($val) . '"';
+					$tmp = "`$key` LIKE '" . $dbase->escape_string($val) . "'";
 				else{
-					$tmp = 'MATCH (' . $key . ') AGAINST ("' . mysql_escape_string($val) . '" IN BOOLEAN MODE)';
+					$tmp = "MATCH (`$key`) AGAINST ('" . $dbase->escape_string($val) . "' IN BOOLEAN MODE)";
 					if($key == 'surname')
-						$tmp = '(' . $tmp . ' OR surname_key = "' . mysql_escape_string(rus_metaphone($val, true)) . '")';
+						$tmp = "($tmp OR `surname_key` = '" . $dbase->escape_string(rus_metaphone($val, true)) . "')";
 				}
 				if($key == 'place'){
-					$tmp = '(' . $tmp . ' OR ';
+					$tmp = "($tmp OR ";
 					if($reg)
-						$tmp .= 'region LIKE "' . mysql_escape_string($val) . '"';
+						$tmp .= "`region` LIKE '" . $dbase->escape_string($val) . "'";
 					else
-						$tmp .= 'MATCH (region) AGAINST ("' . mysql_escape_string($val) . '" IN BOOLEAN MODE)';
+						$tmp .= "MATCH (`region`) AGAINST ('" . $dbase->escape_string($val) . "' IN BOOLEAN MODE)";
 					$tmp .= ')';
 				}
 				$w[] = $tmp;
@@ -1051,18 +1071,18 @@ class ww1_database_solders extends ww1_database {
 				if(empty($val))	continue;
 				if($key == 'date_from'){
 					// Дата с
-					$tmp = 'date_to >= STR_TO_DATE("' . mysql_escape_string($val) . '", "%Y-%m-%d")';
+					$tmp = '`date_to` >= STR_TO_DATE("' . $dbase->escape_string($val) . '", "%Y-%m-%d")';
 				}elseif($key == 'date_to'){
 					// Дата по
-					$tmp = 'date_from <= STR_TO_DATE("' . mysql_escape_string($val) . '", "%Y-%m-%d")';
+					$tmp = '`date_from` <= STR_TO_DATE("' . $dbase->escape_string($val) . '", "%Y-%m-%d")';
 				}elseif(!in_array($key, $nums)){
 					// Текстовые данные
 					if(!is_array($val))
-						$tmp = $key . ' LIKE "' . mysql_escape_string($val) . '"';
+						$tmp = "`$key` LIKE '" . $dbase->escape_string($val) . "'";
 					else{
 						$tmp = array();
 						foreach($val as $v)
-							$tmp[] = $key . ' = "' . mysql_escape_string($v) . '"';
+							$tmp[] = "`$key` = '" . $dbase->escape_string($v) . "'";
 						$tmp = '(' . implode(' OR ', $tmp) . ')';
 					}
 				}else{
@@ -1073,9 +1093,9 @@ class ww1_database_solders extends ww1_database {
 						$val = preg_split('/\D+/uS', trim($val));
 					$val = implode(', ', array_map('intval', $val));
 					if(false === strchr($val, ','))
-						$tmp = $key . ' = ' . intval($val);	// Одиночное значение
+						$tmp = "`$key` = $val";	// Одиночное значение
 					else
-						$tmp = $key . ' IN (' . $val . ')';	// Множественное значение
+						$tmp = "`$key` IN ($val)";	// Множественное значение
 				}
 				$w[] = $tmp;
 			}
@@ -1085,14 +1105,14 @@ class ww1_database_solders extends ww1_database {
 		// Считаем, сколько результатов найдено
 		$query = 'SELECT COUNT(*) FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id WHERE ' . $w;
 		$result = db_query($query);
-		$cnt = mysql_fetch_array($result, MYSQL_NUM);
-		mysql_free_result($result);
+		$cnt = $result->fetch_array(MYSQL_NUM);
+		$result->free();
 		
 		// Запрашиваем текущую порцию результатов для вывода в таблицу
 		$query = 'SELECT * FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY surname, name LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
 		$result = db_query($query);
 		$report = new ww1_solders_set($this->page, $result, $cnt[0]);
-		mysql_free_result($result);
+		$result->free();
 
 		return $report;
 	}

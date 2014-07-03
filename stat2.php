@@ -8,7 +8,7 @@ html_header();
 
 $name_reductions = $names = $patronymic_reductions = $patronymics = array();
 $result = db_query('SELECT DISTINCT name FROM persons_raw');
-while($row = mysql_fetch_array($result, MYSQL_NUM)){
+while($row = $result->fetch_array(MYSQL_NUM)){
 	$row = preg_split('/\s+/uS', $row[0]);
 	if(empty($row))	continue;
 	$key = array_shift($row);
@@ -23,34 +23,34 @@ while($row = mysql_fetch_array($result, MYSQL_NUM)){
 			$patronymics[$key] = 0;
 	}
 }
-mysql_free_result($result);
+$result->free();
 
 foreach(array_keys($name_reductions) as $key){
 	$result = db_query('SELECT COUNT(*) FROM persons_raw WHERE name = "' . $key . '" OR name LIKE "' . $key . ' %"');
-	$row = mysql_fetch_array($result, MYSQL_NUM);
-	mysql_free_result($result);
+	$row = $result->fetch_array(MYSQL_NUM);
+	$result->free();
 	$name_reductions[$key] = $row[0];
 }
 uasort($name_reductions, 'cmp');
 
 // foreach(array_keys($names) as $key){
 	// $result = db_query('SELECT COUNT(*) FROM persons_raw WHERE name = "' . $key . '" OR name LIKE "' . $key . ' %"');
-	// $row = mysql_fetch_array($result, MYSQL_NUM);
-	// mysql_free_result($result);
+	// $row = $result->fetch_array(MYSQL_NUM);
+	// $result->free();
 	// $names[$key] = $row[0];
 // }
 
 // foreach($patronymic_reductions as $key){
 	// $result = db_query('SELECT COUNT(*) FROM persons_raw WHERE name LIKE "% ' . $key . '" OR name LIKE "% ' . $key . ' %"');
-	// $row = mysql_fetch_array($result, MYSQL_NUM);
-	// mysql_free_result($result);
+	// $row = $result->fetch_array(MYSQL_NUM);
+	// $result->free();
 	// $patronymic_reductions[$key] = $row[0];
 // }
 
 // foreach($patronymics as $key){
 	// $result = db_query('SELECT COUNT(*) FROM persons_raw WHERE name LIKE "% ' . $key . '" OR name LIKE "% ' . $key . ' %"');
-	// $row = mysql_fetch_array($result, MYSQL_NUM);
-	// mysql_free_result($result);
+	// $row = $result->fetch_array(MYSQL_NUM);
+	// $result->free();
 	// $patronymics[$key] = $row[0];
 // }
 ?>

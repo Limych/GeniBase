@@ -18,6 +18,9 @@ form	{
 	background-color: #FFE9BF;
 	padding: 1em 3em;
 }
+form.editor	{
+	max-width: none;
+}
 form h2	{
 	margin: 0 0 1em;
 	text-align: center;
@@ -45,8 +48,12 @@ form .field input[type='date']	{
 	width: auto;
 }
 form button	{
-	margin: 0.5em 0 1em auto;
 	display: block;
+	margin: 0.5em 0 1em auto;
+}
+form.editor button	{
+	display: inline;
+	margin: 0;
 }
 
 
