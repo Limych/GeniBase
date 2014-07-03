@@ -144,14 +144,14 @@ function db_close(){
 	// Процедура постепенного обновления вычисляемых данных
 
 	// Генерируем фонетические ключи
-	$result = db_query('SELECT DISTINCT surname FROM persons WHERE surname_key = "" ORDER BY list_nr LIMIT 500');
+	$result = db_query('SELECT DISTINCT surname FROM persons WHERE surname_key = "" ORDER BY list_nr LIMIT 120');
 	$tmp = array();
 	while($row = mysql_fetch_array($result, MYSQL_NUM)){
 		$tmp[] = $row[0];
 	}
 	mysql_free_result($result);
 	shuffle($tmp);
-	foreach(array_slice($tmp, 0, 30) as $surname){
+	foreach(array_slice($tmp, 0, 12) as $surname){
 		db_query('UPDATE persons SET surname_key = "' . mysql_escape_string(rus_metaphone(strtok($surname, ' '), true)) . '" WHERE surname = "' . mysql_escape_string($surname) . '"');
 	}
 	
@@ -181,6 +181,39 @@ function db_close(){
 		db_query('UPDATE dic_region SET region = "" WHERE parent_id = ' . $region->id);
 	}
 	mysql_free_result($result);
+	
+	// Обновляем статистику…
+	//
+	// … по регионам
+	$result = db_query('SELECT id, region_ids FROM dic_region ORDER BY RAND() LIMIT 1');
+	while($row = mysql_fetch_object($result)){
+		if(empty($row->region_ids))	$row->region_ids = $row->id;
+		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE region_id IN (' . $row->region_ids . ')');
+		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
+		mysql_free_result($result2);
+		db_query('UPDATE dic_region SET region_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
+	}
+	mysql_free_result($result);
+	//
+	// … по религиям
+	$result = db_query('SELECT id FROM dic_religion ORDER BY RAND() LIMIT 1');
+	while($row = mysql_fetch_object($result)){
+		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE religion_id = ' . $row->id);
+		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
+		mysql_free_result($result2);
+		db_query('UPDATE dic_religion SET religion_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
+	}
+	mysql_free_result($result);
+	//
+	// … по семейным положениям
+	$result = db_query('SELECT id FROM dic_marital ORDER BY RAND() LIMIT 1');
+	while($row = mysql_fetch_object($result)){
+		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE marital_id = ' . $row->id);
+		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
+		mysql_free_result($result2);
+		db_query('UPDATE dic_marital SET marital_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
+	}
+	mysql_free_result($result);
 
 	// Закрываем соединение с СУБД
 	mysql_close(db_open());
@@ -201,7 +234,7 @@ function html_header(){
 	<link rel="stylesheet" type="text/css" href="styles.css" />
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
 </head><body>
-<p style="color: red; text-align: center">Система находится в состоянии разработки. Все правки пока делаются «по-живому». Возможна нестабильная работа.</p>
+<p style="color: red; text-align: center">Система находится в состоянии разработки. Все правки пока делаются «по-живому». Возможна нестабильная работа. Вся информация пока загружается в тестовом режиме: возможны любые неточности и пробелы в предоставляемых результатах поиска — обязательно перепроверяйте информацию по текстовым спискам и/или архивным копиям списков потерь.</p>
 <h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
 <?php
 }
@@ -213,8 +246,10 @@ function html_header(){
  */
 function html_footer(){
 ?>
+<p class="copyright">Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях не может быть осуществлено без согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 </body></html>
 <?php
+flush();
 }
 
 
@@ -263,6 +298,421 @@ function paginator($pg, $max_pg){
 function mb_ucfirst($text){
 	return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
 }
+
+
+
+/**
+ * Функция нормирования русского текста
+ */
+function fix_russian($text){
+	static $alf = array(
+		// Старо-русские буквы
+		'ѣ'	=> 'Е',		'Ѣ'	=> 'е',
+		'Ѵ'	=> 'И',		'ѵ'	=> 'и',
+		'І'	=> 'И',		'і'	=> 'и',
+		'Ѳ'	=> 'Ф',		'ѳ'	=> 'ф',
+		"\u1029"	=> 'З',		"\u1109"	=> 'з',	// Зело
+
+		// «Подделки» под русские буквы
+		'I'	=> 'И',		'i'	=> 'и',
+		'İ'	=> 'И',		'i'	=> 'и',
+		'V'	=> 'И',		'v'	=> 'и',
+		'S'	=> 'З',		's'	=> 'з',
+		// латиница → кириллица
+		'A'	=> 'А',		'a'	=> 'а',
+		'B'	=> 'В',		'b'	=> 'в',
+		'E'	=> 'Е',		'e'	=> 'е',
+		'K'	=> 'К',		'k'	=> 'к',
+		'M'	=> 'М',		'm'	=> 'м',
+		'H'	=> 'Н',		'h'	=> 'н',
+						'n'	=> 'п',
+		'O'	=> 'О',		'o'	=> 'о',
+		'P'	=> 'Р',		'p'	=> 'р',
+		'C'	=> 'С',		'c'	=> 'с',
+		'T'	=> 'Т',		't'	=> 'т',
+		'Y'	=> 'У',		'y'	=> 'у',
+		'X'	=> 'Х',		'x'	=> 'х',
+	);
+	
+	return strtr($text, $alf);
+}
+
+
+
+/**
+ * Функция нормирования исходных данных
+ */
+function prepublish($row, &$have_trouble, &$date_norm){
+	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
+
+	foreach($str_fields as $key){
+		// Убираем концевые пробелы и сокращаем множественные пробелы
+		$row[$key] = trim(preg_replace('/\s\s+/uS', ' ', $row[$key]));
+
+		// Конвертируем старо-русские буквы в современные
+		$row[$key] = fix_russian($row[$key]);
+
+		// Правим регистр букв в текстах
+		if(($key == 'surname') || ($key == 'name')){
+			// Первые буквы каждого слова в верхний регистр
+			$row[$key] = preg_replace_callback('/\b\w+(?:-\w+)\b/uS', function ($matches){
+				return mb_ucfirst($matches[0]);
+			}, $row[$key]);
+		}else{
+			// Первую букву в верхний регистр
+			$row[$key] = mb_ucfirst($row[$key]);
+		}
+	}
+	
+	// Расшифровываем сокращения имён
+	// static $names = array(
+		// 'Ив.'		=> 'Иван',			'Вас.'		=> 'Василий',		'Мих.'		=> 'Михаил',
+		// 'Григ.'		=> 'Григорий',		'Никол.'	=> 'Николай',		'Степ.'		=> 'Степан',
+		// 'Андр.'		=> 'Андрей',		'Пав.'		=> 'Павел',			'Дм.'		=> 'Дмитрий',
+		// 'Сем.'		=> 'Семён',			'Як.'		=> 'Яков',			'Афан.'		=> 'Афанасий',
+		// 'Фед.'		=> 'Фёдор',			'Серг.'		=> 'Сергей',		'Васил.'	=> 'Василий',
+		// 'Дмитр.'	=> 'Дмитрий',		'Гавр.'		=> 'Гавриил',		'Макс.'		=> 'Максим',
+		// 'Конст.'	=> 'Константин',	'Дан.'		=> 'Даниил',		'Троф.'		=> 'Трофим',
+		// 'Георг.'	=> 'Георгий',		'Гр.'		=> 'Григорий',		'Никиф.'	=> 'Никифор',
+		// 'Тимоф.'	=> 'Тимофей',		'Тим.'		=> 'Тимофей',		'Емел.'		=> 'Емельян',
+		// 'Матв.'		=> 'Матвей',		'Владим.'	=> 'Владимир',		'Ант.'		=> 'Антон',
+		// 'Анд.'		=> 'Андрей',		'Филип.'	=> 'Филипп',		'Григор.'	=> 'Григорий',
+		// 'Куз.'		=> 'Кузьма',		'Игн.'		=> 'Игнатий',		'Стеф.'		=> 'Стефан',
+		// 'Прок.'		=> 'Прокопий',		'Ром.'		=> 'Роман',			'Ник.'		=> 'Николай',
+		// 'Зах.'		=> 'Захарий',		'Иос.'		=> 'Иосиф',			'Леонт.'	=> 'Леонтий',
+		// 'Герас.'	=> 'Герасим',		'Иллар.'	=> 'Илларион',		'Кирил.'	=> 'Кирилл',
+		// 'Митроф.'	=> 'Митрофан',		'Кондр.'	=> 'Кондратий',		'Моис.'		=> 'Моисей',
+		// 'Лавр.'		=> 'Лаврентий',		'Констант.'	=> 'Константин',	'Тих.'		=> 'Тихон',
+		// 'Пантел.'	=> 'Пантелеймон',	'Евдок.'	=> 'Евдоким',		'Еф.'		=> 'Ефим',
+		// 'Харит.'	=> 'Харитон',		'Игнат.'	=> 'Игнатий',		'Прокоф.'	=> 'Прокопий',
+		// 'Терент.'	=> 'Терентий',		'Спирид.'	=> 'Спиридон',		'Дав.'		=> 'Давыд Давид',
+		// 'Исид.'		=> 'Исидор',		'Викт.'		=> 'Виктор',		'Ег.'		=> '',
+		// 'Прох.'		=> 'Прохор',		'Аф.'		=> 'Афанасий',		'Митр.'		=> 'Митрофан',
+		// 'Артем.'	=> 'Артемий',		'Федор.'	=> '',				'Станисл.'	=> 'Станислав',
+		// 'Порф.'		=> 'Порфирий',		'Стан.'		=> 'Станислав',		'Пант.'		=> 'Пантелеймон',
+		// 'Евстаф.'	=> 'Евстафий',		'Спир.'		=> 'Спиридон',		'Абр.'		=> 'Абрам',
+		// 'Ефр.'		=> '',				'Прокоп.'	=> 'Прокопий',		'Род.'		=> 'Родион',
+		// 'Федос.'	=> '',				'Фил.'		=> 'Филипп',		'Плат.'		=> 'Платон',
+		// 'Захар.'	=> 'Захарий',		'Триф.'		=> 'Трифон',		'Ал-др.'	=> 'Александр',
+		// 'Афанас.'	=> 'Афанасий',		'Влад.'		=> 'Владимир',		'Елис.'		=> 'Елисей',
+		// 'Порфир.'	=> 'Порфирий',		'Онис.'		=> '',				'Савел.'	=> 'Савелий',
+		// 'Евтих.'	=> '',
+		// 'Арс.'	=> '',
+		// 'Корн.'	=> '',
+		// 'Феодос.'	=> '',
+		// 'Алекс.'	=> '',
+		// 'Пет.'	=> '',
+		// 'Арсен.'	=> '',
+		// 'Дороф.'	=> '',
+		// 'Mиx.'	=> '',
+		// 'Тер.'	=> '',
+		// 'Ден.'	=> '',
+		// 'Полик.'	=> '',
+		// 'Март.'	=> '',
+		// 'Анис.'	=> '',
+		// 'Петр.'	=> '',
+		// 'Никл.'	=> '',
+		// 'Бор.'	=> '',
+		// 'Нест.'	=> '',
+		// 'Арх.'	=> '',
+		// 'Мак.'	=> '',
+		// 'Терен.'	=> '',
+		// 'Фридр.'	=> '',
+		// 'Горд.'	=> '',
+		// 'Онуфр.'	=> '',
+		// 'Владисл.'	=> '',
+		// 'Харл.'	=> '',
+		// 'Кир.'	=> '',
+		// 'Ерем.'	=> '',
+		// 'Анан.'	=> '',
+		// 'Никит.'	=> '',
+		// 'Евген.'	=> '',
+		// 'Викент.'	=> '',
+		// 'Зинов.'	=> '',
+		// 'Феод.'	=> '',
+		// 'Ероф.'	=> '',
+		// 'Лаврент.'	=> '',
+		// 'Дмит.'	=> '',
+		// 'Янк.'	=> '',
+		// 'Генр.'	=> '',
+		// 'Феокт.'	=> '',
+		// 'Харламп.'	=> '',
+		// 'Мефод.'	=> '',
+		// 'Лаз.'	=> '',
+		// 'Филим.'	=> '',
+		// 'Тар.'	=> '',
+		// 'Авр.'	=> '',
+		// 'Иван.'	=> '',
+		// 'Макар.'	=> '',
+		// 'Дем.'	=> '',
+		// 'Дионис.'	=> '',
+		// 'Гер.'	=> '',
+		// 'Леон.'	=> '',
+		// 'Христ.'	=> '',
+		// 'Болесл.'	=> '',
+		// 'Ерм.'	=> '',
+		// 'Пантелейм.'	=> '',
+		// 'Антон.'	=> '',
+		// 'Купр.'	=> '',
+		// 'Казим.'	=> '',
+		// 'Авкс.'	=> '',
+		// 'Наз.'	=> '',
+		// 'Иосиф.'	=> '',
+		// 'Констан.'	=> '',
+		// 'Демент.'	=> '',
+		// 'Менд.'	=> '',
+	// );
+
+	// Расшифровываем вероисповедания
+	static $religions = array(
+		''		=> 0,
+		// Православное
+		'прав'	=> 1,
+		'правосл'	=> 1,
+		// Иудейское
+		'иуд'	=> 2,
+		'иудей'	=> 2,
+		// Старообрядческое
+		'стар'	=> 3,
+		'раск'	=> 3,
+		'старовер'	=> 3,
+		'староверъ'	=> 3,
+		// Магометанское
+		'маг'	=> 4,
+		'магом'	=> 4,
+		'магомет'	=> 4,
+		'магометанин'	=> 4,
+		'магометанинъ'	=> 4,
+		// Евангелическо-лютеранское
+		'е лют'	=> 5,
+		'ев лют'	=> 5,
+		'евг'	=> 5,
+		'еванг'	=> 5,
+		'лют'	=> 5,
+		'лютер'	=> 5,
+		'лютеранин'	=> 5,
+		'лютеранинъ'	=> 5,
+		// Римско-католическое
+		'р кат'	=> 8,
+		'р катол'	=> 8,
+		'кат'	=> 6,
+		'катол'	=> 6,
+		'католик'	=> 6,
+		'католикъ'	=> 6,
+		// Армянско-григорианское
+		'ар гр'	=> 7,
+		'ар григор'	=> 7,
+		'григ'	=> 7,
+		// Субботники
+		'субботн'	=> 8,
+		// Караимское
+		'караим'	=> 9,
+		// Баптистское
+		'бабт'	=> 10,
+		'бапт'	=> 10,
+		// Молоканское
+		'мол'	=> 11,
+		'молок'	=> 11,
+		'молоканин'	=> 11,
+		'молоканинъ'	=> 11,
+		// Сектантское
+		'сект'	=> 12,
+		'сектант'	=> 12,
+		'сектантъ'	=> 12,
+		// Реформаторское
+		'реф'	=> 13,
+		// Языческое
+		'языч'	=> 14,
+		'язычн'	=> 14,
+		'язычник'	=> 14,
+		'язычникъ'	=> 14,
+		// Единоверское
+		'един'	=> 15,
+		'единов'	=> 15,
+		// Протестантское
+		'протест'	=> 16,
+	);
+	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($row['religion'])));
+// if(defined('P_DEBUG'))	var_export($tmp);
+	if(isset($religions[$tmp]))
+		$row['religion_id'] = $religions[$tmp];
+
+	// Расшифровываем семейные положения
+	static $maritals = array(
+		''		=> 0,
+		// Женатые
+		'ж'	=> 1,
+		'жен'	=> 1,
+		'женат'	=> 1,
+		'женатъ'	=> 1,
+		// Холостые
+		'х'	=> 2,
+		'хол'	=> 2,
+		'холост'	=> 2,
+		'холостъ'	=> 2,
+		// Вдовые
+		'вд'	=> 3,
+		'вдв'	=> 3,
+		'вдов'	=> 3,
+		'вдовъ'	=> 3,
+		'вдовец'	=> 3,
+	);
+	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($row['marital'])));
+// if(defined('P_DEBUG'))	var_export($tmp);
+	if(isset($maritals[$tmp]))
+		$row['marital_id'] = $maritals[$tmp];
+
+	// Расшифровываем источники
+	if(empty($row['list_nr'])){
+		$row['source_id'] = 0;
+	}else{
+		$result = db_query('SELECT id FROM dic_source WHERE source LIKE "Именной список №' . $row['list_nr'] . ' %"');
+		$res = mysql_fetch_array($result, MYSQL_NUM);
+		mysql_free_result($result);
+		if($res)
+			$row['source_id'] = $res[0];
+		else{
+			db_query('INSERT INTO dic_source (source) VALUES ("Именной список №' . $row['list_nr'] . ' убитым, раненым и без вести пропавшим нижним чинам.")');
+			$row['source_id'] = mysql_insert_id();
+		}
+	}
+	
+	// Уточняем региональную привязку
+	if(!empty($row['uyezd'])){
+		$result = db_query('SELECT id FROM dic_region WHERE parent_id = ' . $row['region_id'] . ' AND title LIKE "' . mysql_escape_string($row['uyezd']) . ' %"');
+		$res = mysql_fetch_array($result, MYSQL_NUM);
+		mysql_free_result($result);
+		if($res)
+			$row['region_id'] = $res[0];
+		else{
+			db_query('INSERT INTO dic_region (parent_id, title) VALUES (' . $row['region_id'] . ', "' . mysql_escape_string($row['uyezd']) . ' ")');
+			$row['region_id'] = mysql_insert_id();
+		}
+	}
+
+	// Расшифровываем даты
+	if(empty($row['date'])){
+		$row['date_from']	= '1914-07-28';
+		$row['date_to']		= '1918-11-11';
+	}else{
+		$date_norm = $row['date'];
+		// Переводим все буквы в строчные, обрезаем концевые пробелы и корректируем русские буквы
+		$date_norm = fix_russian(trim(mb_strtolower($date_norm)));
+
+		// Переводим текстовые названия месяцев в числовые
+		static $date_fixes = array(
+			'/(?<=^|[\d\W])янв(?=[\d\W]|$)/uS'		=> '.01.',
+			'/(?<=^|[\d\W])января(?=[\d\W]|$)/uS'	=> '.01.',
+			'/(?<=^|[\d\W])фев(?=[\d\W]|$)/uS'		=> '.02.',
+			'/(?<=^|[\d\W])фвр(?=[\d\W]|$)/uS'		=> '.02.',
+			'/(?<=^|[\d\W])февраля(?=[\d\W]|$)/uS'	=> '.02.',
+			'/(?<=^|[\d\W])мрт(?=[\d\W]|$)/uS'		=> '.03.',
+			'/(?<=^|[\d\W])мар(?=[\d\W]|$)/uS'		=> '.03.',
+			'/(?<=^|[\d\W])марта?(?=[\d\W]|$)/uS'	=> '.03.',
+			'/(?<=^|[\d\W])апр(?=[\d\W]|$)/uS'		=> '.04.',
+			'/(?<=^|[\d\W])апреля(?=[\d\W]|$)/uS'	=> '.04.',
+			'/(?<=^|[\d\W])мая(?=[\d\W]|$)/uS'		=> '.05.',
+			'/(?<=^|[\d\W])июн(?=[\d\W]|$)/uS'		=> '.06.',
+			'/(?<=^|[\d\W])июня(?=[\d\W]|$)/uS'		=> '.06.',
+			'/(?<=^|[\d\W])июл(?=[\d\W]|$)/uS'		=> '.07.',
+			'/(?<=^|[\d\W])июля(?=[\d\W]|$)/uS'		=> '.07.',
+			'/(?<=^|[\d\W])ав(?=[\d\W]|$)/uS'		=> '.08.',
+			'/(?<=^|[\d\W])авг(?=[\d\W]|$)/uS'		=> '.08.',
+			'/(?<=^|[\d\W])августа?(?=[\d\W]|$)/uS'	=> '.08.',
+			'/(?<=^|[\d\W])сен(?=[\d\W]|$)/uS'		=> '.09.',
+			'/(?<=^|[\d\W])снт(?=[\d\W]|$)/uS'		=> '.09.',
+			'/(?<=^|[\d\W])сент(?=[\d\W]|$)/uS'		=> '.09.',
+			'/(?<=^|[\d\W])сентября(?=[\d\W]|$)/uS'	=> '.09.',
+			'/(?<=^|[\d\W])окт(?=[\d\W]|$)/uS'		=> '.10.',
+			'/(?<=^|[\d\W])октября(?=[\d\W]|$)/uS'	=> '.10.',
+			'/(?<=^|[\d\W])нбр(?=[\d\W]|$)/uS'		=> '.11.',
+			'/(?<=^|[\d\W])ноя(?=[\d\W]|$)/uS'		=> '.11.',
+			'/(?<=^|[\d\W])нояб(?=[\d\W]|$)/uS'		=> '.11.',
+			'/(?<=^|[\d\W])ноября(?=[\d\W]|$)/uS'	=> '.11.',
+			'/(?<=^|[\d\W])дек(?=[\d\W]|$)/uS'		=> '.12.',
+			'/(?<=^|[\d\W])дкб(?=[\d\W]|$)/uS'		=> '.12.',
+			'/(?<=^|[\d\W])декабря(?=[\d\W]|$)/uS'	=> '.12.',
+		);
+		$date_norm = preg_replace(array_keys($date_fixes), array_values($date_fixes), $date_norm);
+		
+		// Убираем префикс «с »
+		$date_norm = preg_replace('/^съ?/uS', '', $date_norm);
+		// Заменяем частички « по » и « на » на дефис
+		$date_norm = preg_replace('/(?<=[\d\W])(?:по|на)(?=[\d\W])/uS', '-', $date_norm);
+		// Заменяем частички « и » и « или » на запятую
+		$date_norm = preg_replace('/(?<=[\d\W])и(ли)?(?=[\d\W])/uS', ',', $date_norm);
+		// Убираем окончание «г.» или «года»
+		$date_norm = preg_replace('/г\w*\.?\s*$/uS', '', $date_norm);
+
+		// Убираем все пробелы
+		$date_norm = preg_replace('/\s+/uS', '', $date_norm);
+		// Сокращаем несколько точек или дефисов в один
+		$date_norm = preg_replace('/([\.\-]){2,}/uS', '\\1', $date_norm);
+
+		// Шаблоны для поиска дат
+		static	$reg_date_left	= "(\d\d?)(?:[\.\/](?:(\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";	// дд[.мм[.[гг]гг]]
+		static	$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?(\d\d?))?[\.\/])?(\d\d\d\d)";	// [[дд.]мм.]гггг
+
+		// Запись «1914/15»
+		if($date_norm == '1914/15'){
+			$matches = array('', '28', '07', '1914', '31', '12', '1915');
+
+		// Простая запись дд.мм.гггг или мм.гггг или гггг
+		}elseif(preg_match("/^$reg_date_left$/uS", $date_norm, $matches)
+		|| preg_match("/^$reg_date_right$/uS", $date_norm, $matches)){
+			if(empty($matches[3]))	$matches[3] = ($matches[2] >= 7 ? 1914 : 1915);
+			$matches[4] = $matches[1];
+			$matches[5] = $matches[2];
+			$matches[6] = $matches[3];
+
+		// Периодическая запись дд-дд.мм.гггг или дд.мм-дд.мм.гггг или дд.мм.гггг-дд.мм.гггг
+		}elseif(preg_match("/^$reg_date_left-$reg_date_left$/uS", $date_norm, $matches)
+		|| preg_match("/^$reg_date_left-$reg_date_right$/uS", $date_norm, $matches)){
+			if(empty($matches[6]))	$matches[6] = ($matches[5] >= 7 ? 1914 : 1915);
+			if(empty($matches[2]))	$matches[2] = $matches[5];
+			if(empty($matches[3]))	$matches[3] = $matches[6];
+
+		// Списочная запись дд,дд,дд.мм.гггг
+		}elseif(preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_left$/uS", $date_norm, $matches)
+		|| preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_right$/uS", $date_norm, $matches)){
+			if(empty($matches[4]))	$matches[4] = ($matches[3] >= 7 ? 1914 : 1915);
+			array_splice($matches, 2, 0, array($matches[3], $matches[4]));
+		}
+
+		// Нормализуем данные и формируем новые поля
+		if(!empty($matches)){
+			static $last_days = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+			if($matches[3] < 100)	$matches[3] += 1900;
+			if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '07' : '01');
+			if(empty($matches[1]))	$matches[1] = (($matches[3] == 1914) && ($matches[2] == 7) ? '28' : '01');;
+			$row['date_from']	= implode('-', array($matches[3], $matches[2], $matches[1]));
+			if($matches[6] < 100)	$matches[6] += 1900;
+			if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
+			if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
+			$row['date_to']	= implode('-', array($matches[6], $matches[5], $matches[4]));
+			
+			if(($row['date_from'] < '1914-07-28') || ($row['date_from'] > '1918-11-11')
+			|| ($row['date_to'] < '1914-07-28') || ($row['date_to'] > '1918-11-11')){
+				unset($row['date_from']);
+				unset($row['date_to']);
+			}
+		}
+// var_export($matches);
+	}
+
+	// Собираем данные для занесения в основную таблицу
+if(defined('P_DEBUG'))	var_export($row);
+	$have_trouble = false;
+	$pub = array();
+	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason date date_from date_to source_id list_nr list_pg') as $key){
+		if(isset($row[$key]))	
+			$pub[$key] = $row[$key];
+		else
+			$have_trouble = true;
+	}
+	return $pub;
+}	// function prepublish
 
 
 

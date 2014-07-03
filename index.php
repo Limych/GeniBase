@@ -37,9 +37,8 @@ if($dbase->have_query){
 	$report->show_report($brief_fields, $detailed_fields);
 }
 ?>
-<p style="text-align: center"><a href="/stat.php">Статистика</a> | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>)</p>
+<p style="text-align: center"><a href="/stat.php">Статистика</a> | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
 <?php
 html_footer();
-require_once('publisher.php');	// Внесение новых данных в систему
 db_close();
 ?>

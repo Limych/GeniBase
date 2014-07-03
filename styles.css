@@ -1,5 +1,6 @@
 body	{
 	font-family: sans-serif;
+	padding: 1em 1.5em;
 }
 h1	{
 	margin: 0 3em;
@@ -62,6 +63,23 @@ form button	{
 }
 .small	{
 	font-size: smaller;
+}
+.crue strong	{
+	display: block;
+}
+.crue .name	{
+	display: inline-block;
+	width: 12em;
+}
+.copyright	{
+	clear: both;
+	margin-top: 3em;
+	font-size: 85%;
+	text-align: center;
+	font-style: italic;
+}
+.trouble	{
+	background: #FCC;
 }
 
 
@@ -172,4 +190,13 @@ tr.brief	{
 }
 .paginator .current	{
 	background-color: #FFA500;
+}
+
+
+/*** Формы ***/
+input[type="text"]	{
+	border: 1px solid #CCC;
+}
+input[readonly]	{
+	background: #EEE;
 }

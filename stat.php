@@ -39,11 +39,9 @@ region_stat();
 </tr></thead><tbody>
 <?php
 $even = 0;
-$query = 'SELECT DISTINCT rank FROM persons WHERE rank != "" ORDER BY rank';
-$result = db_query($query);
+$result = db_query('SELECT DISTINCT rank FROM persons WHERE rank != "" ORDER BY rank');
 while($row = mysql_fetch_object($result)){
-	$query = 'SELECT COUNT(*) FROM persons WHERE rank = "' . $row->rank . '"';
-	$result2 = db_query($query);
+	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE rank = "' . $row->rank . '"');
 	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
 	mysql_free_result($result2);
 	
@@ -62,17 +60,11 @@ mysql_free_result($result);
 </tr></thead><tbody>
 <?php
 $even = 0;
-$query = 'SELECT id, religion FROM dic_religion ORDER BY religion';
-$result = db_query($query);
+$result = db_query('SELECT id, religion, religion_cnt FROM dic_religion ORDER BY religion');
 while($row = mysql_fetch_object($result)){
-	$query = 'SELECT COUNT(*) FROM persons WHERE religion_id = ' . $row->id;
-	$result2 = db_query($query);
-	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-	mysql_free_result($result2);
-	if(empty($cnt[0]))	continue;
-	
+	if(empty($row->religion_cnt))	continue;
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->religion) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->religion) . "</td>\n\t<td class='alignright'>" . format_num($row->religion_cnt) . "</td>\n</tr>";
 }
 mysql_free_result($result);
 ?>
@@ -86,16 +78,10 @@ mysql_free_result($result);
 </tr></thead><tbody>
 <?php
 $even = 0;
-$query = 'SELECT id, marital FROM dic_marital ORDER BY marital';
-$result = db_query($query);
+$result = db_query('SELECT id, marital, marital_cnt FROM dic_marital ORDER BY marital');
 while($row = mysql_fetch_object($result)){
-	$query = 'SELECT COUNT(*) FROM persons WHERE marital_id = ' . $row->id;
-	$result2 = db_query($query);
-	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-	mysql_free_result($result2);
-	
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->marital) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->marital) . "</td>\n\t<td class='alignright'>" . format_num($row->marital_cnt) . "</td>\n</tr>";
 }
 mysql_free_result($result);
 ?>
@@ -109,11 +95,9 @@ mysql_free_result($result);
 </tr></thead><tbody>
 <?php
 $even = 0;
-$query = 'SELECT DISTINCT reason FROM persons WHERE reason != "" ORDER BY reason';
-$result = db_query($query);
+$result = db_query('SELECT DISTINCT reason FROM persons WHERE reason != "" ORDER BY reason');
 while($row = mysql_fetch_object($result)){
-	$query = 'SELECT COUNT(*) FROM persons WHERE reason = "' . $row->reason . '"';
-	$result2 = db_query($query);
+	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE reason = "' . $row->reason . '"');
 	$cnt = mysql_fetch_array($result2, MYSQL_NUM);
 	mysql_free_result($result2);
 	
@@ -132,16 +116,10 @@ db_close();
 function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
-	$result = db_query('SELECT id, title, region_ids, region_comment FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
+	$result = db_query('SELECT id, title, region_comment, region_cnt FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
 	while($row = mysql_fetch_object($result)){
-		if(empty($row->region_ids))	$row->region_ids = $row->id;
-		$query = 'SELECT COUNT(*) FROM persons WHERE region_id IN (' . $row->region_ids . ')';
-		$result2 = db_query($query);
-		$cnt = mysql_fetch_array($result2, MYSQL_NUM);
-		mysql_free_result($result2);
-
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n";
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
 
 		region_stat($row->id, $level + 1);
 	}
