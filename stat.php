@@ -95,14 +95,10 @@ $result->free();
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = db_query('SELECT DISTINCT reason FROM persons WHERE reason != "" ORDER BY reason');
+$result = db_query('SELECT id, reason, reason_cnt FROM dic_reason WHERE reason_cnt != 0 ORDER BY reason');
 while($row = $result->fetch_object()){
-	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE reason = "' . $row->reason . '"');
-	$cnt = $result2->fetch_array(MYSQL_NUM);
-	$result2->free();
-	
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->reason) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->reason) . "</td>\n\t<td class='alignright'>" . format_num($row->reason_cnt) . "</td>\n</tr>";
 }
 $result->free();
 ?>

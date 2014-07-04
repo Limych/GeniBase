@@ -1,5 +1,6 @@
 <?php
 require_once('functions.php');	// Общие функции системы
+require_once('publisher.php');	// Функции формализации данных
  
 // define('DEBUG', 1);	// Признак режима отладки
 
@@ -69,7 +70,7 @@ $result->free();
 $cnt->cant_publish = $r[0];
 
 // Делаем выборку справочников
-$dic_religion = $dic_marital = $dic_source = array();
+$dic_religion = $dic_marital = $dic_source = $dic_reason = array();
 //
 $dic_religion[0] = '(не определено)';
 $result = db_query('SELECT id, religion FROM dic_religion ORDER BY religion');
@@ -89,6 +90,13 @@ $dic_source[0] = '(не определено)';
 $result = db_query('SELECT id, source FROM dic_source ORDER BY source');
 while($r = $result->fetch_array(MYSQL_NUM)){
 	$dic_source[$r[0]] = $r[1];
+}
+$result->free();
+//
+$dic_reason[0] = '(не определено)';
+$result = db_query('SELECT id, reason FROM dic_reason ORDER BY reason');
+while($r = $result->fetch_array(MYSQL_NUM)){
+	$dic_reason[$r[0]] = $r[1];
 }
 $result->free();
 
@@ -114,7 +122,7 @@ $fields = array(
 	'comments'	=> 'Комментарии',
 );
 $dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_nr list_pg uyezd');
-$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason date list_nr list_pg comments date_from date_to source_id');
+$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_nr list_pg comments date_from date_to source_id');
 ?>
 <p>Форма пока не работает — только смотрим… :)</p>
 <form method="post" class="editor">
@@ -155,6 +163,12 @@ foreach($fields as $key => $def){
 		}elseif($key == 'source_id'){
 			print "<select name='pub[$key]'>\n";
 			foreach($dic_source as $k => $d){
+				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+			}
+			print "</select>";
+		}elseif($key == 'reason_id'){
+			print "<select name='pub[$key]'>\n";
+			foreach($dic_reason as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
