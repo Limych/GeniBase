@@ -25,12 +25,12 @@ if(defined('DEBUG'))	var_export($mod);
 		switch($_POST['mode']){
 		case 'raw':
 			// Исправление исходных данных во всех похожих записях
-			$dbase = db_open();
+			$db = db_open();
 			$fix = $cond = array();
 			$cond[]	= "`status` != 'Published'";
 			foreach($mod as $key => $val){
-				$fix[]	= "`$key` = '" . $dbase->escape_string($val) . "'";
-				$cond[]	= "`$key` = '" . $dbase->escape_string($raw[$key]) . "'";
+				$fix[]	= "`$key` = '" . $db->escape_string($val) . "'";
+				$cond[]	= "`$key` = '" . $db->escape_string($raw[$key]) . "'";
 				$raw[$key] = $val;
 			}
 			db_query('UPDATE persons_raw SET ' . implode(', ', $fix) . ' WHERE ' . implode(' AND ', $cond));

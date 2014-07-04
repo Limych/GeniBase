@@ -32,10 +32,15 @@ form p	{
 form .field	{
 	display: table-row;
 }
+form .field .block,
 form .field label,
 form .field input	{
 	display: table-cell;
 	vertical-align: top;
+}
+form .field .block input,
+form .field .block label	{
+	display: initial;
 }
 form .field label	{
 	text-align: right;
@@ -44,7 +49,8 @@ form .field label	{
 form .field input	{
 	width: 24em;
 }
-form .field input[type='date']	{
+form .field input[type='date'],
+form .field input[type='checkbox']	{
 	width: auto;
 }
 form button	{
@@ -52,7 +58,7 @@ form button	{
 	margin: 0.5em 0 1em auto;
 }
 form.editor button	{
-	display: inline;
+	display: initial;
 	margin: 0;
 }
 
