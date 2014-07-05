@@ -16,7 +16,7 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 
 // Делаем выборку записей для публикации
 $drafts = array();
-$result = db_query('SELECT * FROM persons_raw WHERE status = "Draft" ORDER BY rank, reason LIMIT ' . P_LIMIT);
+$result = db_query('SELECT * FROM persons_raw WHERE status = "Draft" ORDER BY list_pg LIMIT ' . P_LIMIT);
 while($row = $result->fetch_array(MYSQL_ASSOC)){
 	$drafts[] = $row;
 }

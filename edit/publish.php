@@ -1,8 +1,10 @@
 <?php
-require_once('functions.php');	// Общие функции системы
-require_once('publisher.php');	// Функции формализации данных
+require_once('../functions.php');	// Общие функции системы
+require_once('../publisher.php');	// Функции формализации данных
  
 // define('DEBUG', 1);	// Признак режима отладки
+
+
 
 // Делаем выборку записей для публикации
 // $result = db_query('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY rank, reason LIMIT 1');

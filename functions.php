@@ -242,7 +242,7 @@ function html_header(){
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head>
 	<meta charset="UTF-8" />
 	
-	<link rel="stylesheet" type="text/css" href="styles.css" />
+	<link rel="stylesheet" type="text/css" href="/styles.css" />
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
 </head><body>
 <p style="color: red; text-align: center">Система находится в состоянии разработки. Все правки пока делаются «по-живому». Возможна нестабильная работа. Вся информация пока загружается в тестовом режиме: возможны любые неточности и пробелы в предоставляемых результатах поиска — обязательно перепроверяйте информацию по текстовым спискам и/или архивным копиям списков потерь.</p>

@@ -115,11 +115,25 @@ function region_stat($parent_id = 0, $level = 1){
 	$result = db_query('SELECT id, title, region_comment, region_cnt FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
 	while($row = $result->fetch_object()){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level id_" . $row->id . "'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
 
 		region_stat($row->id, $level + 1);
 	}
 	$result->free();
 }
+
+// function hierarhical_stat($field, $parent_id = 0, $level = 1, $tfield = NULL){
+	// global $even;
+
+	// if(empty($tfield))	$tfield = $field;
+	// $result = db_query("SELECT id, $tfield, ${field}_comment, ${field}_cnt FROM dic_${field} WHERE parent_id = $parent_id ORDER BY $tfield");
+	// while($row = $result->fetch_array(MYSQL_ASSOC)){
+		// $even = 1-$even;
+		// print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level id_${row[id]}'>" . htmlspecialchars($row[$tfield]) . (empty($row[$tfield.'_comment']) ? '' : ' <span class="comment">' . htmlspecialchars($row[$tfield.'_comment']) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row[$tfield.'_cnt']) . "</td>\n";
+
+		// hierarhical_stat($field, $row->id, $level + 1, $tfield);
+	// }
+	// $result->free();
+// }
 
 ?>

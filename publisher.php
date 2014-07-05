@@ -13,6 +13,119 @@ require_once('functions.php');	// Общие функции системы
 
 
 /**
+ * Функция нормирования дат
+ */
+function prepublish_date(&$raw, &$date_norm){
+	if(empty($raw['date'])){
+		$raw['date_from']	= '1914-08-01';
+		$raw['date_to']		= '1918-11-11';
+		return;
+	}
+
+	$raw['date'] = strtr($raw['date'], array(
+		'-Jan-'	=> '.янв.',		'-Feb-'	=> '.фев.',		'-Mar-'	=> '.мар.',		'-Apr-'	=> '.апр.',		'-May-'	=> '.мая.',
+		'-Jun-'	=> '.июн.',		'-Jul-'	=> '.июл.',		'-Aug-'	=> '.авг.',		'-Sep-'	=> '.сен.',		'-Oct-'	=> '.окт.',
+		'-Nov-'	=> '.ноя.',		'-Dec-'	=> '.дек.',
+	));
+	$date_norm = $raw['date'];
+
+	// Переводим все буквы в строчные, обрезаем концевые пробелы и корректируем русские буквы
+	$date_norm = fix_russian(trim(mb_strtolower($date_norm)));
+	// Убираем префикс «с »
+	$date_norm = preg_replace('/^съ?\s*/uS', '', $date_norm);
+	// Заменяем частички « по » и « на » на дефис
+	$date_norm = preg_replace('/(?<=[\d\W])\s*(?:по|на)\s*(?=[\d\W])/uS', '-', $date_norm);
+	// Заменяем частички « и » и « или » на запятую
+	$date_norm = preg_replace('/(?<=[\d\W])\s*и(ли)?\s*(?=[\d\W])/uS', ',', $date_norm);
+	// Убираем окончание «г[ода][.]»
+	$date_norm = preg_replace('/\s*г\w*\.?\s*$/uS', '', $date_norm);
+	// Заменяем на точки пробелы рядом со словами, остальные — убираем
+	$date_norm = preg_replace('/(?<=[А-Яа-я])\s+|\s+(?=[А-Яа-я])/uS', '.', $date_norm);
+	$date_norm = preg_replace('/\s+/uS', '', $date_norm);
+	// Сокращаем несколько точек или дефисов в один
+	$date_norm = preg_replace('/([\.\-])\\1*/uS', '\\1', $date_norm);
+
+	// Шаблоны для поиска дат
+	static	$month_names = array(
+		'январь'	=> '01',		'января'	=> '01',		'янв'	=> '01',
+		'февраль'	=> '02',		'февраля'	=> '02',		'фев'	=> '02',		'фвр'	=> '02',
+		'март'		=> '03',		'марта'		=> '03',		'мрт'	=> '03',		'мар'	=> '03',
+		'апрель'	=> '04',		'апреля'	=> '04',		'апр'	=> '04',
+		'май'		=> '05',		'мая'		=> '05',
+		'июнь'		=> '06',		'июня'		=> '06',		'июн'	=> '06',
+		'июль'		=> '07',		'июля'		=> '07',		'июл'	=> '07',
+		'август'	=> '08',		'августа'	=> '08',		'ав'	=> '08',		'авг'	=> '08',
+		'сентябрь'	=> '09',		'сентября'	=> '09',		'сен'	=> '09',		'снт'	=> '09',		'сент'	=> '09',
+		'октябрь'	=> '10',		'октября'	=> '10',		'окт'	=> '10',
+		'ноябрь'	=> '11',		'ноября'	=> '11',		'нбр'	=> '11',		'ноя'	=> '11',		'нояб'	=> '11',
+		'декабрь'	=> '12',		'декабря'	=> '12',		'дек'	=> '12',		'дкб'	=> '12',
+	);
+	static	$reg_months = '';
+	static	$reg_date_left	= '';
+	static	$reg_date_right	= '';
+	if(empty($reg_months)){
+		$reg_months = '(?:' . implode('|', array_keys($month_names)) . ')';
+		// дд[.мм[.[гг]гг]] или дд[.ммм[.[гг]гг]]
+		$reg_date_left	= "(\d\d?)(?:[\.\/](?:($reg_months|\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";
+		// [[дд.]мм.]гггг или [[дд.]ммм.]гггг
+		$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?($reg_months|\d\d?))?[\.\/])?(\d\d\d\d)";
+	}
+
+	// Запись «1914/15»
+	if($date_norm == '1914/15'){
+		$matches = array('', '01', '08', '1914', '31', '12', '1915');
+
+	// Простая запись дд.мм.гггг или мм.гггг или гггг
+	}elseif(preg_match("/^$reg_date_left$/uS", $date_norm, $matches)
+	|| preg_match("/^$reg_date_right$/uS", $date_norm, $matches)){
+		if(empty($matches[3]))	$matches[3] = ($matches[2] >= 8 ? 1914 : 1915);
+		$matches[4] = $matches[1];
+		$matches[5] = $matches[2];
+		$matches[6] = $matches[3];
+
+	// Периодическая запись дд-дд.мм.гггг или дд.мм-дд.мм.гггг или дд.мм.гггг-дд.мм.гггг
+	}elseif(preg_match("/^$reg_date_left-$reg_date_left$/uS", $date_norm, $matches)
+	|| preg_match("/^$reg_date_left-$reg_date_right$/uS", $date_norm, $matches)
+	|| preg_match("/^$reg_date_right-$reg_date_right$/uS", $date_norm, $matches)){
+		if(empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
+		if(empty($matches[2]))	$matches[2] = $matches[5];
+		if(empty($matches[3]))	$matches[3] = $matches[6];
+
+	// Списочная запись дд,дд,дд.мм.гггг
+	}elseif(preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_left$/uS", $date_norm, $matches)
+	|| preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_right$/uS", $date_norm, $matches)){
+		if(empty($matches[4]))	$matches[4] = ($matches[3] >= 8 ? 1914 : 1915);
+		array_splice($matches, 2, 0, array($matches[3], $matches[4]));
+	}
+
+	// Нормализуем данные и формируем новые поля
+	if(!empty($matches)){
+		static $last_days = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+		if($matches[3] < 100)	$matches[3] += 1900;
+		if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '08' : '01');
+		elseif(!is_numeric($matches[2]))	$matches[2] = $month_names[$matches[2]];
+		if(empty($matches[1]))	$matches[1] = '01';
+		$raw['date_from']	= implode('-', array($matches[3], $matches[2], $matches[1]));
+		//
+		if($matches[6] < 100)	$matches[6] += 1900;
+		if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
+		elseif(!is_numeric($matches[5]))	$matches[5] = $month_names[$matches[5]];
+		if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
+		$raw['date_to']	= implode('-', array($matches[6], $matches[5], $matches[4]));
+		
+		if(($raw['date_from'] < '1914-08-01') || ($raw['date_from'] > '1918-11-11')
+		|| ($raw['date_to'] < '1914-08-01') || ($raw['date_to'] > '1918-11-11')){
+			unset($raw['date_from']);
+			unset($raw['date_to']);
+		}
+	}
+// var_export($matches);
+}
+
+
+
+/**
  * Функция нормирования исходных данных
  */
 function prepublish($raw, &$have_trouble, &$date_norm){
@@ -39,7 +152,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 
 	// Расшифровываем вероисповедания
 	static $religions = array(
-		''		=> 0,
+		''		=> 18,
 		// Православное
 		'прав'	=> 1,
 		'правосл'	=> 1,
@@ -111,6 +224,8 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		'протест'	=> 16,
 		// Марийское
 		'мар'	=> 17,
+		//
+		//		=> 18, занято!
 	);
 	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['religion'])));
 // if(defined('P_DEBUG'))	var_export($tmp);
@@ -119,7 +234,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 
 	// Расшифровываем семейные положения
 	static $maritals = array(
-		''		=> 0,
+		''		=> 4,
 		// Женатые
 		'ж'	=> 1,
 		'жен'	=> 1,
@@ -404,109 +519,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	}
 
 	// Расшифровываем даты
-	if(empty($raw['date'])){
-		$raw['date_from']	= '1914-07-28';
-		$raw['date_to']		= '1918-11-11';
-	}else{
-		$raw['date'] = strtr($raw['date'], array(
-			'-Jan-'	=> '.янв.',		'-Feb-'	=> '.фев.',		'-Mar-'	=> '.мар.',		'-Apr-'	=> '.апр.',		'-May-'	=> '.мая.',
-			'-Jun-'	=> '.июн.',		'-Jul-'	=> '.июл.',		'-Aug-'	=> '.авг.',		'-Sep-'	=> '.сен.',		'-Oct-'	=> '.окт.',
-			'-Nov-'	=> '.ноя.',		'-Dec-'	=> '.дек.',
-		));
-		$date_norm = $raw['date'];
-
-		// Переводим все буквы в строчные, обрезаем концевые пробелы и корректируем русские буквы
-		$date_norm = fix_russian(trim(mb_strtolower($date_norm)));
-		// Убираем префикс «с »
-		$date_norm = preg_replace('/^съ?\s*/uS', '', $date_norm);
-		// Заменяем частички « по » и « на » на дефис
-		$date_norm = preg_replace('/(?<=[\d\W])\s*(?:по|на)\s*(?=[\d\W])/uS', '-', $date_norm);
-		// Заменяем частички « и » и « или » на запятую
-		$date_norm = preg_replace('/(?<=[\d\W])\s*и(ли)?\s*(?=[\d\W])/uS', ',', $date_norm);
-		// Убираем окончание «г[ода][.]»
-		$date_norm = preg_replace('/\s*г\w*\.?\s*$/uS', '', $date_norm);
-		// Заменяем на точки пробелы рядом со словами, остальные — убираем
-		$date_norm = preg_replace('/(?<=[А-Яа-я])\s+|\s+(?=[А-Яа-я])/uS', '.', $date_norm);
-		$date_norm = preg_replace('/\s+/uS', '', $date_norm);
-		// Сокращаем несколько точек или дефисов в один
-		$date_norm = preg_replace('/([\.\-])\\1*/uS', '\\1', $date_norm);
-
-		// Шаблоны для поиска дат
-		static	$month_names = array(
-			'январь'	=> '01',		'января'	=> '01',		'янв'	=> '01',
-			'февраль'	=> '02',		'февраля'	=> '02',		'фев'	=> '02',		'фвр'	=> '02',
-			'март'		=> '03',		'марта'		=> '03',		'мрт'	=> '03',		'мар'	=> '03',
-			'апрель'	=> '04',		'апреля'	=> '04',		'апр'	=> '04',
-			'май'		=> '05',		'мая'		=> '05',
-			'июнь'		=> '06',		'июня'		=> '06',		'июн'	=> '06',
-			'июль'		=> '07',		'июля'		=> '07',		'июл'	=> '07',
-			'август'	=> '08',		'августа'	=> '08',		'ав'	=> '08',		'авг'	=> '08',
-			'сентябрь'	=> '09',		'сентября'	=> '09',		'сен'	=> '09',		'снт'	=> '09',		'сент'	=> '09',
-			'октябрь'	=> '10',		'октября'	=> '10',		'окт'	=> '10',
-			'ноябрь'	=> '11',		'ноября'	=> '11',		'нбр'	=> '11',		'ноя'	=> '11',		'нояб'	=> '11',
-			'декабрь'	=> '12',		'декабря'	=> '12',		'дек'	=> '12',		'дкб'	=> '12',
-		);
-		static	$reg_months = '';
-		static	$reg_date_left	= '';
-		static	$reg_date_right	= '';
-		if(empty($reg_months)){
-			$reg_months = '(?:' . implode('|', array_keys($month_names)) . ')';
-			// дд[.мм[.[гг]гг]] или дд[.ммм[.[гг]гг]]
-			$reg_date_left	= "(\d\d?)(?:[\.\/](?:($reg_months|\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";
-			// [[дд.]мм.]гггг или [[дд.]ммм.]гггг
-			$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?($reg_months|\d\d?))?[\.\/])?(\d\d\d\d)";
-		}
-
-		// Запись «1914/15»
-		if($date_norm == '1914/15'){
-			$matches = array('', '01', '08', '1914', '31', '12', '1915');
-
-		// Простая запись дд.мм.гггг или мм.гггг или гггг
-		}elseif(preg_match("/^$reg_date_left$/uS", $date_norm, $matches)
-		|| preg_match("/^$reg_date_right$/uS", $date_norm, $matches)){
-			if(empty($matches[3]))	$matches[3] = ($matches[2] >= 8 ? 1914 : 1915);
-			$matches[4] = $matches[1];
-			$matches[5] = $matches[2];
-			$matches[6] = $matches[3];
-
-		// Периодическая запись дд-дд.мм.гггг или дд.мм-дд.мм.гггг или дд.мм.гггг-дд.мм.гггг
-		}elseif(preg_match("/^$reg_date_left-$reg_date_left$/uS", $date_norm, $matches)
-		|| preg_match("/^$reg_date_left-$reg_date_right$/uS", $date_norm, $matches)){
-			if(empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
-			if(empty($matches[2]))	$matches[2] = $matches[5];
-			if(empty($matches[3]))	$matches[3] = $matches[6];
-
-		// Списочная запись дд,дд,дд.мм.гггг
-		}elseif(preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_left$/uS", $date_norm, $matches)
-		|| preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_right$/uS", $date_norm, $matches)){
-			if(empty($matches[4]))	$matches[4] = ($matches[3] >= 8 ? 1914 : 1915);
-			array_splice($matches, 2, 0, array($matches[3], $matches[4]));
-		}
-
-		// Нормализуем данные и формируем новые поля
-		if(!empty($matches)){
-			static $last_days = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
-
-			if($matches[3] < 100)	$matches[3] += 1900;
-			if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '08' : '01');
-			elseif(!is_numeric($matches[2]))	$matches[2] = $month_names[$matches[2]];
-			if(empty($matches[1]))	$matches[1] = '01';
-			$raw['date_from']	= implode('-', array($matches[3], $matches[2], $matches[1]));
-			//
-			if($matches[6] < 100)	$matches[6] += 1900;
-			if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
-			elseif(!is_numeric($matches[5]))	$matches[5] = $month_names[$matches[5]];
-			if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
-			$raw['date_to']	= implode('-', array($matches[6], $matches[5], $matches[4]));
-			
-			if(($raw['date_from'] < '1914-08-01') || ($raw['date_from'] > '1918-11-11')
-			|| ($raw['date_to'] < '1914-08-01') || ($raw['date_to'] > '1918-11-11')){
-				unset($raw['date_from']);
-				unset($raw['date_to']);
-			}
-		}
-// var_export($matches);
-	}
+	prepublish_date($raw, $date_norm);
 
 	// Собираем данные для занесения в основную таблицу
 if(defined('P_DEBUG'))	var_export($raw);
