@@ -21,27 +21,29 @@ if(defined('DEBUG'))	var_export($pub);
 // Если режим правки данных…
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
 	// Вычисляем вносимые изменения
-	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
 if(defined('DEBUG'))	print "\n\n=== Edit ===================================\n";
+	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
 if(defined('DEBUG'))	var_export($mod);
-	if(!empty($mod)){
-		switch($_POST['mode']){
-		case 'raw':
-			// Исправление исходных данных во всех похожих записях
-			$db = db_open();
-			foreach($mod as $key => $val){
-				db_query("UPDATE `persons_raw` SET `$key` = '" . $db->escape_string($val) . "' WHERE `status` != 'Published' AND `$key` = '" . $db->escape_string($raw[$key]) . "'");
-				$raw[$key] = $val;
-			}
-			$pub = prepublish($raw, $have_trouble, $date_norm);
+	switch($_POST['mode']){
+	case 'raw':
+		// Исправление исходных данных во всех похожих записях
+		$db = db_open();
+		foreach($mod as $key => $val){
+			db_query("UPDATE `persons_raw` SET `$key` = '" . $db->escape_string($val) . "' WHERE `status` != 'Published' AND `$key` = '" . $db->escape_string($raw[$key]) . "'");
+			$raw[$key] = $val;
+		}
+		$pub = prepublish($raw, $have_trouble, $date_norm);
+		break;
+	case 'pub':
+		// Исправление только текущей формализованной записи
+		foreach($mod as $key => $val){
+			$pub[$key] = $val;
+		}
+		$pub = prepublish_make_data($pub, $have_trouble);
+		break;
+	}
 if(defined('DEBUG'))	var_export($have_trouble);
 if(defined('DEBUG'))	var_export($pub);
-			break;
-		case 'pub':
-			// Исправление публикуемых данных только в текущей записи
-			break;
-		}
-	}
 }
 
 // Если формализация сейчас прошла успешно …
@@ -122,10 +124,13 @@ $fields = array(
 $dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_nr list_pg uyezd');
 $pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_nr list_pg comments date_from date_to source_id');
 ?>
-<p>Форма пока не работает — только смотрим… :)</p>
+<p>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</p>
 <script type="text/javascript">
 	$(function(){
 		$('input').on('keyup', function(){
+			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
+		});
+		$('input').each(function(){
 			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
 		});
 	});

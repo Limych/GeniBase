@@ -19,6 +19,13 @@ html_header();
 <p><a href="/">« Вернуться к поиску</a></p>
 <h1>Общая статистика по базе данных</h1>
 <p>На данный момент в базе содержится <?php print $txt?></p>
+<?php
+
+dic_stat('Распределение по&nbsp;вероисповеданию', 'Вероисповедание', 'religion');
+dic_stat('Распределение по&nbsp;семейному положению', 'Семейное положение', 'marital');
+dic_stat('Распределение по&nbsp;причине выбытия', 'Причина выбытия', 'reason');
+
+?>
 <table class="stat">
 	<caption>Распределение по&nbsp;регионам Российской Империи</caption>
 <thead><tr>
@@ -39,66 +46,13 @@ region_stat();
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = db_query('SELECT DISTINCT rank FROM persons WHERE rank != "" ORDER BY rank');
-while($row = $result->fetch_object()){
-	$result2 = db_query('SELECT COUNT(*) FROM persons WHERE rank = "' . $row->rank . '"');
-	$cnt = $result2->fetch_array(MYSQL_NUM);
-	$result2->free();
-	
+//							0		1
+$result = db_query('SELECT rank, COUNT(*) FROM persons GROUP BY rank ORDER BY rank');
+while($row = $result->fetch_array(MYSQLI_NUM)){
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->rank) . "</td>\n\t<td class='alignright'>" . format_num($cnt[0]) . "</td>\n</tr>";
-}
-$result->free();
-?>
-</tbody></table>
-
-<table class="stat">
-	<caption>Распределение по&nbsp;вероисповеданию</caption>
-<thead><tr>
-	<th>Вероисповедание</th>
-	<th>Записей</th>
-</tr></thead><tbody>
-<?php
-$even = 0;
-$result = db_query('SELECT id, religion, religion_cnt FROM dic_religion ORDER BY religion');
-while($row = $result->fetch_object()){
-	if(empty($row->religion_cnt))	continue;
-	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->religion) . "</td>\n\t<td class='alignright'>" . format_num($row->religion_cnt) . "</td>\n</tr>";
-}
-$result->free();
-?>
-</tbody></table>
-
-<table class="stat">
-	<caption>Распределение по&nbsp;семейному положению</caption>
-<thead><tr>
-	<th>Семейное положение</th>
-	<th>Записей</th>
-</tr></thead><tbody>
-<?php
-$even = 0;
-$result = db_query('SELECT id, marital, marital_cnt FROM dic_marital ORDER BY marital');
-while($row = $result->fetch_object()){
-	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->marital) . "</td>\n\t<td class='alignright'>" . format_num($row->marital_cnt) . "</td>\n</tr>";
-}
-$result->free();
-?>
-</tbody></table>
-
-<table class="stat">
-	<caption>Распределение по&nbsp;причине выбытия</caption>
-<thead><tr>
-	<th>Причина выбытия</th>
-	<th>Записей</th>
-</tr></thead><tbody>
-<?php
-$even = 0;
-$result = db_query('SELECT id, reason, reason_cnt FROM dic_reason WHERE reason_cnt != 0 ORDER BY reason');
-while($row = $result->fetch_object()){
-	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row->reason) . "</td>\n\t<td class='alignright'>" . format_num($row->reason_cnt) . "</td>\n</tr>";
+	if(empty($row[0]))
+		$row[0] = '(не указано)';
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[0]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
 }
 $result->free();
 ?>
@@ -135,5 +89,28 @@ function region_stat($parent_id = 0, $level = 1){
 	// }
 	// $result->free();
 // }
+
+function dic_stat($caption, $field_title, $field){
+?>
+
+<table class="stat">
+	<caption><?php print $caption; ?></caption>
+<thead><tr>
+	<th><?php print $field_title; ?></th>
+	<th>Записей</th>
+</tr></thead><tbody>
+<?php
+$even = 0;
+//							0			1
+$result = db_query("SELECT ${field}, ${field}_cnt FROM dic_${field} WHERE ${field}_cnt != 0 ORDER BY ${field}");
+while($row = $result->fetch_array(MYSQLI_NUM)){
+	$even = 1-$even;
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[0]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
+}
+$result->free();
+?>
+</tbody></table>
+<?php
+}
 
 ?>

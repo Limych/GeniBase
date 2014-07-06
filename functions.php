@@ -349,7 +349,12 @@ function fix_russian($text){
 		'X'	=> 'Х',		'x'	=> 'х',
 	);
 	
-	return strtr($text, $alf);
+	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+	for($i = 0; $i < count($text); $i += 2){
+		if(preg_match('/[а-яА-Я]/uS', $text[$i]))
+			$text[$i] = strtr($text[$i], $alf);
+	}
+	return implode($text);
 }
 
 
@@ -1114,7 +1119,7 @@ class ww1_database_solders extends ww1_database {
 		$result->free();
 		
 		// Запрашиваем текущую порцию результатов для вывода в таблицу
-		$query = 'SELECT * FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY surname, name LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
+		$query = 'SELECT *, persons.id FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY surname, name LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
 		$result = db_query($query);
 		$report = new ww1_solders_set($this->page, $result, $cnt[0]);
 		$result->free();

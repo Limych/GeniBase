@@ -192,6 +192,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		// Армянско-григорианское
 		'ар гр'	=> 7,
 		'ар григор'	=> 7,
+		'арм'	=> 7,
 		'григ'	=> 7,
 		// Субботники
 		'субботн'	=> 8,
@@ -468,7 +469,6 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	);
 	$tmp = trim(mb_strtolower($raw['reason']));
 // if(defined('P_DEBUG'))	var_export($tmp);
-	$raw['reason_id'] = 0;
 	if(isset($reasons[$tmp]))
 		$raw['reason_id'] = $reasons[$tmp];
 
@@ -523,15 +523,25 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 
 	// Собираем данные для занесения в основную таблицу
 if(defined('P_DEBUG'))	var_export($raw);
+	return prepublish_make_data($raw, $have_trouble);
+} // function prepublish
+
+
+
+/**
+ * Функция подготовки данных для занесения в систему
+ */
+function prepublish_make_data($raw_norm, &$have_trouble){
 	$have_trouble = false;
 	$pub = array();
 	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_nr list_pg') as $key){
-		if(isset($raw[$key]))	
-			$pub[$key] = $raw[$key];
-		else
+		if(!isset($raw_norm[$key])
+		|| (empty($raw_norm[$key]) && $key != 'source_id' && preg_match('/_id$/uS', $key)))
 			$have_trouble = true;
+		else
+			$pub[$key] = $raw_norm[$key];
 	}
 	return $pub;
-} // function prepublish
+}
 
 ?>
