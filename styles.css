@@ -61,6 +61,12 @@ form.editor button	{
 	display: initial;
 	margin: 0;
 }
+form .trouble	{
+	background: #FCC;
+}
+form .modifyed	{
+	background: #CFC;
+}
 
 
 
@@ -90,9 +96,6 @@ form.editor button	{
 	font-size: 85%;
 	text-align: center;
 	font-style: italic;
-}
-.trouble	{
-	background: #FCC;
 }
 
 

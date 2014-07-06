@@ -29,14 +29,10 @@ if(defined('DEBUG'))	var_export($mod);
 		case 'raw':
 			// Исправление исходных данных во всех похожих записях
 			$db = db_open();
-			$fix = $cond = array();
-			$cond[]	= "`status` != 'Published'";
 			foreach($mod as $key => $val){
-				$fix[]	= "`$key` = '" . $db->escape_string($val) . "'";
-				$cond[]	= "`$key` = '" . $db->escape_string($raw[$key]) . "'";
+				db_query("UPDATE `persons_raw` SET `$key` = '" . $db->escape_string($val) . "' WHERE `status` != 'Published' AND `$key` = '" . $db->escape_string($raw[$key]) . "'");
 				$raw[$key] = $val;
 			}
-			db_query('UPDATE persons_raw SET ' . implode(', ', $fix) . ' WHERE ' . implode(' AND ', $cond));
 			$pub = prepublish($raw, $have_trouble, $date_norm);
 if(defined('DEBUG'))	var_export($have_trouble);
 if(defined('DEBUG'))	var_export($pub);
@@ -127,6 +123,13 @@ $dfields = explode(' ', 'surname name region_id place rank religion marital reas
 $pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_nr list_pg comments date_from date_to source_id');
 ?>
 <p>Форма пока не работает — только смотрим… :)</p>
+<script type="text/javascript">
+	$(function(){
+		$('input').on('keyup', function(){
+			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
+		});
+	});
+</script>
 <form method="post" class="editor">
 <input type='hidden' name='id' value='<?php print $raw['id']?>' />
 <table class="report"><tr>

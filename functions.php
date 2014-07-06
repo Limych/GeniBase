@@ -2,6 +2,9 @@
 // Запрещено непосредственное исполнение этого скрипта
 if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
 
+// Флаги режимов отладки
+// define('SQL_DEBUG',	1);
+
 
 
 // Лимит числа строк в одном отчёте
@@ -131,7 +134,7 @@ function db_open($open = true){
  */
 function db_query($query){
 	$db = db_open();
-	$result = $db->query($query) or die('Запрос не удался: ' . $db->error);
+	$result = $db->query($query) or die('Запрос не удался: ' . $db->error . (!defined('SQL_DEBUG') ? '' : '<br/>Запрос: ' . $query));
 	return $result;
 }
 
@@ -241,9 +244,10 @@ function html_header(){
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head>
 	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript"></script>
 </head><body>
 <p style="color: red; text-align: center">Система находится в состоянии разработки. Все правки пока делаются «по-живому». Возможна нестабильная работа. Вся информация пока загружается в тестовом режиме: возможны любые неточности и пробелы в предоставляемых результатах поиска — обязательно перепроверяйте информацию по текстовым спискам и/или архивным копиям списков потерь.</p>
 <h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
@@ -795,7 +799,7 @@ class ww1_solders_set extends ww1_records_set{
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
 			$even = 1-$even;
-			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . "'>\n";
+			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row->id . "'>\n";
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
 			foreach(array_keys($brief_fields) as $key){
 				print "\t\t<td>" . htmlspecialchars($row->$key) . "</td>\n";
@@ -1055,8 +1059,8 @@ class ww1_database_solders extends ww1_database {
 
 			// Формируем основной поисковый запрос в БД
 			$w = array();
-			$nums = explode(' ', 'religion marital list_nr list_pg');	// Список полей, в которых передаются числовые данные
-			$ids = explode(' ', 'religion marital');	// Список полей, в которых передаются идентификаторы
+			$nums = explode(' ', 'religion marital reason list_nr list_pg');	// Список полей, в которых передаются числовые данные
+			$ids = explode(' ', 'religion marital reason');	// Список полей, в которых передаются идентификаторы
 			foreach($this->query as $key=>$val){
 				if(empty($val))	continue;
 				if($key == 'date_from'){
