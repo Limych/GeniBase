@@ -1,9 +1,12 @@
 <?php
 // Запрещено непосредственное исполнение этого скрипта
-if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
+if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('<b>ERROR:</b> Direct execution forbidden!');
+
+// Проверка версии PHP
+if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5.3+ needed!');
 
 // Подключаем настройки системы
-if(!file_exists('_config.php'))	die('Unable to find configuration file!');
+if(!file_exists('_config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
 require_once('_config.php');
 
 
@@ -118,6 +121,10 @@ function db_open($open = true){
 
 	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD)
 		or die('Не удалось соединиться: ' . $db->error);
+
+	// Проверка версии MySQL
+	if(version_compare($db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
+
 	$db->select_db(DB_BASE) or die('Не удалось выбрать базу данных');
 	$db->set_charset('utf8');
 	return $db;

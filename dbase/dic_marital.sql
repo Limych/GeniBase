@@ -29,7 +29,7 @@ INSERT INTO `dic_marital` (`id`, `marital`) VALUES
 (2, 'Холост'),
 (3, 'Вдов'),
 (4, '(не указано)'),
-(5, '(иное; см. источник)'),
+(5, '(иное; см. источник)');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
