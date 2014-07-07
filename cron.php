@@ -5,12 +5,6 @@ require_once('publisher.php');	// Функции формализации дан
 /**
  * Формализация и публикация записей
  */
- 
-// define('DEBUG', 1);	// Признак режима отладки
-
-define('P_LIMIT', 70);	// Лимит числа единовременно публикуемых записей
-
-
 
 if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	header('Content-Type: text/plain; charset=utf-8');
 

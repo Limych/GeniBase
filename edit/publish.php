@@ -127,7 +127,7 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 <p>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</p>
 <script type="text/javascript">
 	$(function(){
-		$('input').on('keyup', function(){
+		$('input').on('keyup change reset', function(){
 			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
 		});
 		$('input').each(function(){
@@ -189,17 +189,23 @@ foreach($fields as $key => $def){
 		}else{
 			print "<input type='text' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' />";
 			if($key == 'date')
-				print " <small>«${date_norm}»</small>";
+				print " <small>Машина это видит как «${date_norm}»</small>";
 		}
 		print "</td>\n";
 	}
 	print "</tr>";
 }
 ?><tr>
-	<td></td>
+	<td class="aligncenter"><button type="reset">Сброс изменений</button></td>
 	<td class="aligncenter"><button name="mode" value="raw">Изменить исходные данные</button><br/><small>(во всех подобных записях)</small></td>
 	<td class="aligncenter"><button name="mode" value="pub">Изменить формализованные данные</button><br/><small>(только в текущей записи)</small></td>
-</tr></table></form>
+</tr></table>
+<p class="nb">Причина невозможности автоматической обработки всегда выделена красным фоном. Но это вовсе не значит, что править надо именно её.</p>
+<p class="nb">Если видим ошибку в тексте, править лучше в исходных данных (слева), т.к. это применится ко всем таким же случаям. Если же случай явно разовый, то проще исправить его в формализованных данных (справа).</p>
+<p class="nb">Даты лучше вообще всегда стараться править только слева. Машина ждёт указание даты в порядке день, месяц, год и в промежутке с 01.авг.1914 (дата объявления войны России) по 11.ноя.1918 (дата окончания войны). Разделители частей даты — точки «.» или слеши «/».</p>
+<p class="nb">Графа «Губерния, Уезд, Волость» пока показывается в виде внутренних идентификаторов регионов — их лучше пока всегда оставлять «как есть».</p>
+<p class="nb">Если изменения получились пригодными к публикации, машина покажет следующую «плохую» запись. Иначе же на экране останется та же самая запись (с выделением красным фоном проблемного места).</p>
+</form>
 <?php
 
 html_footer();

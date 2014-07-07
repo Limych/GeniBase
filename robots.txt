@@ -390,4 +390,5 @@ Disallow: /
 User-agent: *
 Disallow: /cgi-bin/
 Disallow: /stat
+Disallow: /edit/
 Crawl-delay: 5

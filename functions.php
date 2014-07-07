@@ -2,13 +2,9 @@
 // Запрещено непосредственное исполнение этого скрипта
 if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
 
-// Флаги режимов отладки
-// define('SQL_DEBUG',	1);
-
-
-
-// Лимит числа строк в одном отчёте
-define('Q_LIMIT',	20);
+// Подключаем настройки системы
+if(!file_exists('_config.php'))	die('Unable to find configuration file!');
+require_once('_config.php');
 
 
 
@@ -120,9 +116,9 @@ function db_open($open = true){
 
 	if(!empty($db) || !$open)	return $db;
 
-	$db = new MySQLi('u62106.mysql.masterhost.ru', 'u62106', 'comendreoi3i')
+	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD)
 		or die('Не удалось соединиться: ' . $db->error);
-	$db->select_db('u62106_1914') or die('Не удалось выбрать базу данных');
+	$db->select_db(DB_BASE) or die('Не удалось выбрать базу данных');
 	$db->set_charset('utf8');
 	return $db;
 }
@@ -352,7 +348,7 @@ function fix_russian($text){
 	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	for($i = 0; $i < count($text); $i += 2){
 		if(preg_match('/[а-яА-Я]/uS', $text[$i]))
-			$text[$i] = strtr($text[$i], $alf);
+			$text[$i] = preg_replace('/ъ$/uS', '', strtr($text[$i], $alf));
 	}
 	return implode($text);
 }
