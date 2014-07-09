@@ -12,9 +12,13 @@ a	{
 a:hover	{
 	text-decoration: underline;
 }
+li	{
+	margin-top: 0.75em;
+}
+
 form	{
 	margin: 1em auto;
-	max-width: 30em;
+	max-width: 40em;
 	background-color: #FFE9BF;
 	padding: 1em 3em;
 }
@@ -62,7 +66,7 @@ form.editor button	{
 	margin: 0;
 }
 form .trouble	{
-	background: #FCC;
+	background: #F60;
 }
 form .modifyed	{
 	background: #CFC;
@@ -70,6 +74,9 @@ form .modifyed	{
 
 
 
+.h	{
+	display: none;
+}
 .nb	{
 	font-size: 85%;
 	font-style: italic;
@@ -89,6 +96,13 @@ form .modifyed	{
 .crue .name	{
 	display: inline-block;
 	width: 12em;
+}
+.lastq	{
+	font-size: 85%;
+}
+.notfound	{
+	max-width: 40em;
+	margin: 0 auto;
 }
 .copyright	{
 	clear: both;
@@ -215,4 +229,7 @@ input[type="text"]	{
 }
 input[readonly]	{
 	background: #EEE;
+}
+input[type='number']	{
+	text-align: right;
 }

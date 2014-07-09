@@ -4,6 +4,7 @@ require_once('functions.php');	// Общие функции системы
 $dbase = new ww1_database_solders(Q_EXTENDED);
 
 html_header();
+show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHPH_SELF']?>#report">
 	<h2>Форма расширенного поиска</h2>
@@ -19,6 +20,7 @@ html_header();
 </form>
 <?php
 if($dbase->have_query){
+	log_event();
 	$report = $dbase->do_search();
 
 	// Определяем, какие поля будут выводиться в поле краткой информации, а какие в подробной

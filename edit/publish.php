@@ -8,7 +8,7 @@ require_once('../publisher.php');	// Функции формализации д�
 
 // Делаем выборку записей для публикации
 // $result = db_query('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY rank, reason LIMIT 1');
-$result = db_query('SELECT * FROM persons_raw WHERE ' . (!empty($_POST['id']) ? 'id = ' . intval($_POST['id']) : 'status = "Cant publish" ORDER BY RAND() LIMIT 1'));
+$result = db_query('SELECT * FROM persons_raw WHERE ' . (!empty($_POST['id']) && isset($_POST['mode']) ? 'id = ' . intval($_POST['id']) : 'status = "Cant publish" ORDER BY RAND() LIMIT 1'));
 $raw = $result->fetch_array(MYSQL_ASSOC);
 $result->free();
 
@@ -19,7 +19,7 @@ if(defined('DEBUG'))	var_export($have_trouble);
 if(defined('DEBUG'))	var_export($pub);
 
 // Если режим правки данных…
-if($_SERVER['REQUEST_METHOD'] == 'POST'){
+if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 	// Вычисляем вносимые изменения
 if(defined('DEBUG'))	print "\n\n=== Edit ===================================\n";
 	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
@@ -29,7 +29,8 @@ if(defined('DEBUG'))	var_export($mod);
 		// Исправление исходных данных во всех похожих записях
 		$db = db_open();
 		foreach($mod as $key => $val){
-			db_query("UPDATE `persons_raw` SET `$key` = '" . $db->escape_string($val) . "' WHERE `status` != 'Published' AND `$key` = '" . $db->escape_string($raw[$key]) . "'");
+			if(!empty($_POST['raw_similar']))
+				db_query("UPDATE `persons_raw` SET `$key` = '" . $db->escape_string($val) . "' WHERE `status` != 'Published' AND `$key` = '" . $db->escape_string($raw[$key]) . "'");
 			$raw[$key] = $val;
 		}
 		$pub = prepublish($raw, $have_trouble, $date_norm);
@@ -52,7 +53,7 @@ if(!$have_trouble){
 	db_query('REPLACE INTO persons (' . implode(', ', array_keys($pub)) . ') VALUES ("' . implode('", "', array_values($pub)) . '")');
 	db_query('UPDATE persons_raw SET status = "Published" WHERE id = ' . $raw['id']);
 
-	header('Location: ' . $_SERVER['PHP_SELF']);
+	header('Location: ' . $_SERVER['PHP_SELF'] . '?rnd=' . rand());
 	die();
 }
 
@@ -136,6 +137,7 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 	});
 </script>
 <form method="post" class="editor">
+<div class="alignright"><button>Пропустить эту запись</button></div>
 <input type='hidden' name='id' value='<?php print $raw['id']?>' />
 <table class="report"><tr>
 	<td></td>
@@ -197,12 +199,18 @@ foreach($fields as $key => $def){
 }
 ?><tr>
 	<td class="aligncenter"><button type="reset">Сброс изменений</button></td>
-	<td class="aligncenter"><button name="mode" value="raw">Изменить исходные данные</button><br/><small>(во всех подобных записях)</small></td>
-	<td class="aligncenter"><button name="mode" value="pub">Изменить формализованные данные</button><br/><small>(только в текущей записи)</small></td>
+	<td class="aligncenter">
+		<small><label><input type="checkbox" name="raw_similar" value="1" checked="checked" /> применить ко всем подобным записям</label></small><br/>
+		<button name="mode" value="raw">Изменить исходные данные</button>
+	</td>
+	<td class="aligncenter">
+		<button name="mode" value="pub">Изменить формализованные данные</button><br/>
+		<small>(только в текущей записи)</small>
+	</td>
 </tr></table>
 <p class="nb">Причина невозможности автоматической обработки всегда выделена красным фоном. Но это вовсе не значит, что править надо именно её.</p>
 <p class="nb">Если видим ошибку в тексте, править лучше в исходных данных (слева), т.к. это применится ко всем таким же случаям. Если же случай явно разовый, то проще исправить его в формализованных данных (справа).</p>
-<p class="nb">Даты лучше вообще всегда стараться править только слева. Машина ждёт указание даты в порядке день, месяц, год и в промежутке с 01.авг.1914 (дата объявления войны России) по 11.ноя.1918 (дата окончания войны). Разделители частей даты — точки «.» или слеши «/».</p>
+<p class="nb">Даты лучше вообще всегда стараться править только слева. Машина ждёт указание даты в порядке день, месяц, год и в промежутке с 01.авг.1914 (дата объявления войны России) по 11.ноя.1918 (дата окончания войны). Разделители частей даты — точки «.» и/или пробелы.</p>
 <p class="nb">Графа «Губерния, Уезд, Волость» пока показывается в виде внутренних идентификаторов регионов — их лучше пока всегда оставлять «как есть».</p>
 <p class="nb">Если изменения получились пригодными к публикации, машина покажет следующую «плохую» запись. Иначе же на экране останется та же самая запись (с выделением красным фоном проблемного места).</p>
 </form>

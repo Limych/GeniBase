@@ -1,43 +1,18 @@
 <?php
 require_once('functions.php');	// Общие функции системы
 
-$result = db_query('SELECT COUNT(*) FROM persons');
-$cnt = $result->fetch_array(MYSQL_NUM);
-$result->free();
-
-$result = db_query('SELECT COUNT(*) FROM persons_raw');
-$cnt2 = $result->fetch_array(MYSQL_NUM);
-$result->free();
-
-$txt = format_num($cnt[0], ' запись.', ' записи.', ' записей.');
-if($cnt[0] != $cnt2[0]){
-	$txt = format_num($cnt2[0], ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
-}
-
 html_header();
 ?>
 <p><a href="/">« Вернуться к поиску</a></p>
 <h1>Общая статистика по базе данных</h1>
-<p>На данный момент в базе содержится <?php print $txt?></p>
 <?php
+show_records_stat();
 
 dic_stat('Распределение по&nbsp;вероисповеданию', 'Вероисповедание', 'religion');
 dic_stat('Распределение по&nbsp;семейному положению', 'Семейное положение', 'marital');
 dic_stat('Распределение по&nbsp;причине выбытия', 'Причина выбытия', 'reason');
 
 ?>
-<table class="stat">
-	<caption>Распределение по&nbsp;регионам Российской Империи</caption>
-<thead><tr>
-	<th>Губерния, Уезд</th>
-	<th>Записей</th>
-</tr></thead><tbody>
-<?php
-$even = 0;
-region_stat();
-?>
-</tbody></table>
-
 <table class="stat">
 	<caption>Распределение по&nbsp;воинским званиям</caption>
 <thead><tr>
@@ -55,6 +30,18 @@ while($row = $result->fetch_array(MYSQLI_NUM)){
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[0]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
 }
 $result->free();
+?>
+</tbody></table>
+
+<table class="stat">
+	<caption>Распределение по&nbsp;регионам Российской Империи</caption>
+<thead><tr>
+	<th>Губерния, Уезд</th>
+	<th>Записей</th>
+</tr></thead><tbody>
+<?php
+$even = 0;
+region_stat();
 ?>
 </tbody></table>
 <?php

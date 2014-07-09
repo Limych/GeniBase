@@ -5,9 +5,15 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 // Проверка версии PHP
 if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5.3+ needed!');
 
+// Запоминаем текущий каталог, как основу для всех подключаемых файлов системы
+define('BASE_DIR',	dirname(__FILE__));
+
 // Подключаем настройки системы
-if(!file_exists('_config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
-require_once('_config.php');
+if(!file_exists(BASE_DIR . '/_config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
+require_once(BASE_DIR . '/_config.php');
+
+// Включение в режиме отладки полной отладочной информации
+if(defined('DEBUG'))	error_reporting(E_ALL);	// Включить показ всех ошибок
 
 
 
@@ -15,9 +21,51 @@ require_once('_config.php');
 mb_internal_encoding('UTF-8');
 //
 setlocale(LC_ALL, 'ru_RU.utf8');
-bindtextdomain(WWI_TXTDOM, dirname(__FILE__) . '/lang');
-textdomain(WWI_TXTDOM);
-bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
+// bindtextdomain(WWI_TXTDOM, dirname(__FILE__) . '/lang');
+// textdomain(WWI_TXTDOM);
+// bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
+
+
+
+/**
+ *
+ */
+function publish_cron($force = false){
+	if(!$force){
+		$result = db_query('SELECT MAX(update_datetime) FROM `persons_raw`');
+		$row = $result->fetch_array(MYSQL_NUM);
+		$result->free();
+		$tmp = date_diff(date_create($row[0]), date_create('now'));
+		$tmp = intval($tmp->format('%i'));
+// var_export($tmp);
+		if($tmp < 1)	return;
+	}
+
+	require_once('publisher.php');	// Функции формализации данных
+
+	// Делаем выборку записей для публикации
+	$drafts = array();
+	$result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
+	// $result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
+	while($row = $result->fetch_array(MYSQL_ASSOC)){
+		$drafts[] = $row;
+	}
+	$result->free();
+
+	// Нормирование данных
+	foreach($drafts as $raw){
+if(defined('DEBUG'))	print "\n\n======================================\n";
+if(defined('DEBUG'))	var_export($row);
+	$pub = prepublish($raw, $have_trouble, $date_norm);
+if(defined('DEBUG'))	var_export($have_trouble);
+if(defined('DEBUG'))	var_export($pub);
+		// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
+		if(!$have_trouble){
+			db_query('REPLACE INTO `persons` (' . implode(', ', array_keys($pub)) . ') VALUES ("' . implode('", "', array_values($pub)) . '")');
+		}
+		db_query('UPDATE `persons_raw` SET `status` = "' . ($have_trouble ? 'Cant publish' : 'Published') . '" WHERE `id` = ' . $raw['id']);
+	}
+}
 
 
 
@@ -27,17 +75,16 @@ bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
 function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 	$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', number_format($number, 0, ',', ' '));
 
-// "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11) ? 0 : ((n%10>=2 && n"
-// "%10<=4 && (n%100<10 || n%100>=20)) ? 1 : 2);\n"
 	if(!empty($tail_1)){
 		if($tail_2 == Null)	$tail_2 = $tail_1;
 		if($tail_5 == Null)	$tail_5 = $tail_2;
 
 		$sng = intval($number) % 10;
-		$dec = intval($number) % 100;
-// var_export(array($sng, $dec));
-		$formatted .= ($sng == 1 && $dec != 11) ? $tail_1 :
-			($sng >= 2 && $sng <= 4 && ($dec < 10 || $dec > 20)) ? $tail_2 : $tail_5;
+		$dec = intval($number) % 100 - $sng;
+		$formatted .=
+			($dec == 10 ? $tail_5 :
+			($sng == 1 ? $tail_1 :
+			($sng >= 2 && $sng <= 4 ? $tail_2 : $tail_5)));
 	}
 
 	return $formatted;
@@ -61,8 +108,8 @@ function rus_metaphone($word, $trim_surname = false){
 	$ch		= 'ОЮЕЭЯЁЫ';	// образец гласных
 	$ct		= 'АУИИАИИ';	// замена гласных
 	$ends	= array(	// Шаблоны для «сжатия» окончания наиболее распространённых фамилий
-		'/ОВСК(?:ИЙ|АЯ)$/uS'	=> '0',	// -овский, -овская
-		'/ЕВСК(?:ИЙ|АЯ)$/uS'	=> '1',	// -евский, -евская
+		'/ОВСК(?:И[ЙХ]|АЯ)$/uS'	=> '0',	// -овский, -овских, -овская
+		'/ЕВСК(?:И[ЙХ]|АЯ)$/uS'	=> '1',	// -евский, -евских, -евская
 		'/[ЕИ]?Н(?:ОК|КО(?:В|ВА)?)$/uS'
 								=> '2',	// -енко, -енков, -енкова, -енок, -инко, -инков, -инкова, -инок, -нко, -нков, -нкова, -нок
 		'/(?:[ИЕ]?Е|О)ВА?$/uS'	=> '3',	// -ов, -ев, -иев, -еев, -ова, -ева, -иева, -еева
@@ -119,13 +166,13 @@ function db_open($open = true){
 
 	if(!empty($db) || !$open)	return $db;
 
-	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD)
-		or die('Не удалось соединиться: ' . $db->error);
+	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD, DB_BASE);
+	if($db->connect_error)
+		die('Ошибка подключения (' . $db->connect_errno . ') ' . $db->connect_error);
 
 	// Проверка версии MySQL
-	if(version_compare($db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
+	// if(version_compare($db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
 
-	$db->select_db(DB_BASE) or die('Не удалось выбрать базу данных');
 	$db->set_charset('utf8');
 	return $db;
 }
@@ -149,6 +196,9 @@ function db_query($query){
 function db_close(){
 	$db = db_open();
 	// Процедура постепенного обновления вычисляемых данных
+
+	// Запуск системы периодической публикации новых данных
+	publish_cron();
 
 	// Генерируем фонетические ключи
 	$result = db_query('SELECT DISTINCT surname FROM persons WHERE surname_key = "" ORDER BY list_nr LIMIT 120');
@@ -183,9 +233,11 @@ function db_close(){
 		$result2 = db_query('SELECT region FROM dic_region WHERE id = ' . $region->parent_id);
 		$parent = $result2->fetch_object();
 		$result2->free();
-		$tmp = (empty($parent) ? '' : $parent->region . ', ') . $region->title;
-		db_query('UPDATE dic_region SET region = "' . $db->escape_string($tmp) . '" WHERE id = ' . $region->id);
-		db_query('UPDATE dic_region SET region = "" WHERE parent_id = ' . $region->id);
+		$tmp = trim((empty($parent) || substr($parent->region, 0, 1) == '(' ? '' : $parent->region . ', ') . (substr($region->title, 0, 1) == '(' ? '' : $region->title), ', ');
+		if($tmp){
+			db_query('UPDATE dic_region SET region = "' . $db->escape_string($tmp) . '" WHERE id = ' . $region->id);
+			db_query('UPDATE dic_region SET region = "" WHERE parent_id = ' . $region->id);
+		}
 	}
 	$result->free();
 	
@@ -252,7 +304,6 @@ function html_header(){
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript"></script>
 </head><body>
-<p style="color: red; text-align: center">Система находится в состоянии разработки. Все правки пока делаются «по-живому». Возможна нестабильная работа. Вся информация пока загружается в тестовом режиме: возможны любые неточности и пробелы в предоставляемых результатах поиска — обязательно перепроверяйте информацию по текстовым спискам и/или архивным копиям списков потерь.</p>
 <h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
 <?php
 }
@@ -264,7 +315,7 @@ function html_header(){
  */
 function html_footer(){
 ?>
-<p class="copyright">Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях не может быть осуществлено без согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
+<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 </body></html>
 <?php
 flush();
@@ -721,9 +772,52 @@ function extend_names($names){
 
 
 
-/********************************************************************************
- * Функции работы с языками
+/**
+ * Функция вывода общей статистики о числе записей в системе
  */
+function show_records_stat(){
+	$result = db_query('SELECT COUNT(*) FROM persons');
+	$cnt = $result->fetch_array(MYSQL_NUM);
+	$result->free();
+	//
+	$result = db_query('SELECT COUNT(*) FROM persons_raw');
+	$cnt2 = $result->fetch_array(MYSQL_NUM);
+	$result->free();
+	//
+	$txt = format_num($cnt[0], ' запись.', ' записи.', ' записей.');
+	if($cnt[0] != $cnt2[0]){
+		$txt = format_num($cnt2[0], ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
+	}
+	print "<p class='aligncenter'>На данный момент в базе содержится $txt</p>\n";
+}
+
+
+
+/********************************************************************************
+ * Функции протоколирования использования системы
+ */
+function log_event(){
+	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
+		return trim(preg_replace('/(?<=^|&)(\w+=|pg=\d+)(?=&|$)/uS', '', $matches[1]), '&');
+	}, $_SERVER['REQUEST_URI']);
+
+	$db = db_open();
+	$stmt = $db->prepare('SELECT 1 FROM `logs` WHERE `url` = ? AND `datetime` >= NOW() - INTERVAL 1 HOUR');
+	$stmt->bind_param("s", $url);
+	$stmt->execute();
+	$res = $stmt->fetch();
+	$stmt->close();
+	if($res)	return;
+
+	$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
+	$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
+	$squery = trim($squery);
+
+	$stmt = $db->prepare('INSERT `logs` (`query`, `url`) VALUES (?, ?)');
+	$stmt->bind_param("ss", $squery, $url);
+	$stmt->execute();
+	$stmt->close();
+}
 
 
 
@@ -856,6 +950,21 @@ class ww1_solders_set extends ww1_records_set{
 </tbody></table>
 <?php
 		print $pag;	// Вывод пагинатора
+		if($num != 0):
+			print "<p class='nb aligncenter'>Обратите внимание: По клику на строке интересной Вам записи открывается дополнительная информация.</p>";
+		else:
+?>
+<div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>
+<ol>
+	<li>Попробовать разные близкие варианты написания имён, фамилий, мест.
+		<div class="nb">Изначально списки писались от-руки в&nbsp;условиях войны и&nbsp;не&nbsp;всегда очень грамотными писарями. Во&nbsp;время их написания, набора в&nbsp;типографии и&nbsp;во&nbsp;время оцифровки их волонтёрами могли закрасться различные ошибки;</div></li>
+	<li>Повторить поиск, исключив один из&nbsp;критериев.
+		<div class="nb">Возможно, искомые Вами данные по&nbsp;какой-то причине занесены в&nbsp;систему не&nbsp;полностью;</div></li>
+	<li>Подождать неделю-другую и повторить поиск.
+		<div class="nb">Система постоянно пополняется новыми материалами и, возможно, необходимая Вам информация будет добавлена в&nbsp;неё через некоторое время.</div></li>
+</ol></div>
+<?php
+		endif;
 	}
 }
 

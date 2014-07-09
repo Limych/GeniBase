@@ -22,11 +22,36 @@ function prepublish_date(&$raw, &$date_norm){
 		return;
 	}
 
+	// Автоматическая корректировка «машинных» форматов дат в привычные для людей
 	$raw['date'] = strtr($raw['date'], array(
-		'-Jan-'	=> '.янв.',		'-Feb-'	=> '.фев.',		'-Mar-'	=> '.мар.',		'-Apr-'	=> '.апр.',		'-May-'	=> '.мая.',
-		'-Jun-'	=> '.июн.',		'-Jul-'	=> '.июл.',		'-Aug-'	=> '.авг.',		'-Sep-'	=> '.сен.',		'-Oct-'	=> '.окт.',
-		'-Nov-'	=> '.ноя.',		'-Dec-'	=> '.дек.',
+		'-Jan-'	=> ' янв.',		'-Feb-'	=> ' фев.',		'-Mar-'	=> ' мар.',		'-Apr-'	=> ' апр.',		'-May-'	=> ' мая ',
+		'-Jun-'	=> ' июн.',		'-Jul-'	=> ' июл.',		'-Aug-'	=> ' авг.',		'-Sep-'	=> ' сен.',		'-Oct-'	=> ' окт.',
+		'-Nov-'	=> ' ноя.',		'-Dec-'	=> ' дек.',
 	));
+	//
+	static $month_names_norm = array(
+		1	=> ' янв.',		2	=> ' фев.',		3	=> ' мар.',		4	=> ' апр.',		5	=> ' мая ', 	6	=> ' июн.',
+		7	=> ' июл.',		8	=> ' авг.',		9	=> ' сен.',		10	=> ' окт.',		11	=> ' ноя.',		12	=> ' дек.',
+	);
+	// yyyy-mm-dd
+	$raw['date'] = preg_replace_callback('/^(\d{4})-(\d{2})-(\d{2})$/uS', function($matches) use ($month_names_norm) {
+		if(!isset($month_names_norm[intval($matches[2])]))
+			return $matches[0];
+		return $matches[3] . $month_names_norm[intval($matches[2])] . $matches[1];
+	}, $raw['date']);
+	// mm/dd/yyyy
+	$raw['date'] = preg_replace_callback('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/uS', function($matches) use ($month_names_norm) {
+		if(!isset($month_names_norm[intval($matches[1])]))
+			return $matches[0];
+		return $matches[2] . $month_names_norm[intval($matches[1])] . $matches[3];
+	}, $raw['date']);
+	// dd.mm.yyyy
+	$raw['date'] = preg_replace_callback('/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/uS', function($matches) use ($month_names_norm) {
+		if(!isset($month_names_norm[intval($matches[2])]))
+			return $matches[0];
+		return $matches[1] . $month_names_norm[intval($matches[2])] . $matches[3];
+	}, $raw['date']);
+
 	$date_norm = $raw['date'];
 
 	// Переводим все буквы в строчные, обрезаем концевые пробелы и корректируем русские буквы
@@ -38,7 +63,7 @@ function prepublish_date(&$raw, &$date_norm){
 	// Заменяем частички « и » и « или » на запятую
 	$date_norm = preg_replace('/(?<=[\d\W])\s*и(ли)?\s*(?=[\d\W])/uS', ',', $date_norm);
 	// Убираем окончание «г[ода][.]»
-	$date_norm = preg_replace('/\s*г\w*\.?\s*$/uS', '', $date_norm);
+	$date_norm = preg_replace('/\s*г(?:ода?)?\.?\s*$/uS', '', $date_norm);
 	// Заменяем на точки пробелы рядом со словами, остальные — убираем
 	$date_norm = preg_replace('/(?<=[А-Яа-я])\s+|\s+(?=[А-Яа-я])/uS', '.', $date_norm);
 	$date_norm = preg_replace('/\s+/uS', '', $date_norm);
@@ -48,7 +73,7 @@ function prepublish_date(&$raw, &$date_norm){
 	// Шаблоны для поиска дат
 	static	$month_names = array(
 		'январь'	=> '01',		'января'	=> '01',		'янв'	=> '01',
-		'февраль'	=> '02',		'февраля'	=> '02',		'фев'	=> '02',		'фвр'	=> '02',
+		'февраль'	=> '02',		'февраля'	=> '02',		'февр'	=> '02',		'фев'	=> '02',		'фвр'	=> '02',
 		'март'		=> '03',		'марта'		=> '03',		'мрт'	=> '03',		'мар'	=> '03',
 		'апрель'	=> '04',		'апреля'	=> '04',		'апр'	=> '04',
 		'май'		=> '05',		'мая'		=> '05',
@@ -66,9 +91,9 @@ function prepublish_date(&$raw, &$date_norm){
 	if(empty($reg_months)){
 		$reg_months = '(?:' . implode('|', array_keys($month_names)) . ')';
 		// дд[.мм[.[гг]гг]] или дд[.ммм[.[гг]гг]]
-		$reg_date_left	= "(\d\d?)(?:[\.\/](?:($reg_months|\d\d?)(?:[\.\/]((?:\d\d)?\d\d)?)?)?)?";
+		$reg_date_left	= "(\d\d?)(?:\.(?:($reg_months|\d\d?)(?:\.((?:\d\d)?\d\d)?)?)?)?";
 		// [[дд.]мм.]гггг или [[дд.]ммм.]гггг
-		$reg_date_right	= "(?:(?:(?:(\d\d?)?[\.\/])?($reg_months|\d\d?))?[\.\/])?(\d\d\d\d)";
+		$reg_date_right	= "(?:(?:(?:(\d\d?)?\.)?($reg_months|\d\d?))?\.)?(\d\d\d\d)";
 	}
 
 	// Запись «1914/15»
@@ -106,16 +131,20 @@ function prepublish_date(&$raw, &$date_norm){
 		if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '08' : '01');
 		elseif(!is_numeric($matches[2]))	$matches[2] = $month_names[$matches[2]];
 		if(empty($matches[1]))	$matches[1] = '01';
-		$raw['date_from']	= implode('-', array($matches[3], $matches[2], $matches[1]));
+		$tmp = date_create(implode('-', array($matches[3], $matches[2], $matches[1])));
+		if($tmp)
+			$raw['date_from'] = $tmp->format('Y-m-d');
 		//
 		if($matches[6] < 100)	$matches[6] += 1900;
 		if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
 		elseif(!is_numeric($matches[5]))	$matches[5] = $month_names[$matches[5]];
 		if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
-		$raw['date_to']	= implode('-', array($matches[6], $matches[5], $matches[4]));
+		$tmp = date_create(implode('-', array($matches[6], $matches[5], $matches[4])));
+		if($tmp)
+			$raw['date_to'] = $tmp->format('Y-m-d');
 		
-		if(($raw['date_from'] < '1914-08-01') || ($raw['date_from'] > '1918-11-11')
-		|| ($raw['date_to'] < '1914-08-01') || ($raw['date_to'] > '1918-11-11')){
+		if(($raw['date_from'] < '1914-07-01') || ($raw['date_from'] > '1920-12-31')
+		|| ($raw['date_to'] < '1914-07-01') || ($raw['date_to'] > '1920-12-31')){
 			unset($raw['date_from']);
 			unset($raw['date_to']);
 		}
@@ -167,24 +196,27 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		'раск'	=> 3,
 		'раскольник'	=> 3,
 		'раскольникъ'	=> 3,
-		// Магометанское
+		'старообряд'	=> 3,
+		// Мусульманское
 		'маг'	=> 4,
 		'магом'	=> 4,
 		'магомет'	=> 4,
 		'магометанин'	=> 4,
 		'магометанинъ'	=> 4,
+		'мус'	=> 4,
 		// Евангелическо-лютеранское
 		'е лют'	=> 5,
 		'ев лют'	=> 5,
 		'евг'	=> 5,
 		'еванг'	=> 5,
+		'евангелист'	=> 5,
 		'лют'	=> 5,
 		'лютер'	=> 5,
 		'лютеранин'	=> 5,
 		'лютеранинъ'	=> 5,
 		// Римско-католическое
-		'р кат'	=> 8,
-		'р катол'	=> 8,
+		'р кат'	=> 6,
+		'р катол'	=> 6,
 		'кат'	=> 6,
 		'катол'	=> 6,
 		'католик'	=> 6,
@@ -465,7 +497,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		'утонул'	=> 45,				'утонул.'	=> 45,							'уш. ноги'	=> 46,
 		'ушиб'	=> 46,					'ушиб.'	=> 46,								'ушибл.'	=> 46,
 		'ушиблен лошадьми'	=> 46,		'ушиблен'	=> 46,							'ушиблен, ост. в стр.'	=> 47,
-		'эвак. по болезни'	=> 9,		'явился из плена'	=> 6,
+		'эвак. по болезни'	=> 9,		'явился из плена'	=> 6,					'пропал бвести'	=> 3,
 	);
 	$tmp = trim(mb_strtolower($raw['reason']));
 // if(defined('P_DEBUG'))	var_export($tmp);
@@ -488,7 +520,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 			$raw['source_id'] = $res;
 		else{
 			$stmt = $db->prepare('INSERT INTO dic_source (source) VALUES (?)');
-			$tmp = "Именной список №${raw[list_nr]} убитым, раненым и без вести пропавшим нижним чинам.";
+			$tmp = "Именной список №${raw[list_nr]} убитым, раненым и без вести пропавшим " . ($raw['list_nr'] < 974 ? "нижним чинам." : "солдатам.");
 			$stmt->bind_param("s", $tmp);
 			$stmt->execute();
 			$stmt->close();
