@@ -6,6 +6,65 @@ require_once('../publisher.php');	// Функции формализации д�
 
 
 
+// Поддержка запросов данных через AJAX
+if($_REQUEST['mode'] == 'get_data'){
+	if(isset($_REQUEST['region_id'])){
+		if(intval($_REQUEST['region_id']) < 1)	exit;
+
+		$cur_id = intval($_REQUEST['region_id']);
+		$html = array();
+
+		$result = db_query('SELECT id, title FROM dic_region WHERE parent_id = ' . $cur_id . ' ORDER BY title');
+		$tmp = array();
+		while($r = $result->fetch_array(MYSQL_ASSOC)){
+			$tmp[] = "<option value='${r[id]}'>${r[title]}</option>";
+		}
+		$result->free();
+		if($tmp)	$html[] = "<select>" . implode($tmp) . "</select>";
+
+		do{
+			$result = db_query('SELECT parent_id FROM dic_region WHERE id = ' . $cur_id);
+			$r = $result->fetch_array(MYSQL_ASSOC);
+			$result->free();
+			if(!$r)		exit;
+
+			$result = db_query('SELECT id, title FROM dic_region WHERE parent_id = ' . $r['parent_id'] . ' ORDER BY title');
+			$tmp = array();
+			while($r2 = $result->fetch_array(MYSQL_ASSOC)){
+				$tmp[] = "<option value='${r2[id]}'" . ($r2['id'] != $cur_id ? "" : " selected='selected'") . ">${r2[title]}</option>";
+			}
+			$result->free();
+
+			array_unshift($html, "<select>" . implode($tmp) . "</select>");
+			$cur_id = $r['parent_id'];
+		}while($cur_id);
+
+		$level = 0;
+		foreach($html as $h){
+			$level++;
+			print "<div class='level_$level'>$h</div>";
+		}
+		exit;
+
+	}elseif(isset($_REQUEST['source_id'])){
+		if(intval($_REQUEST['source_id']) < 1)	exit;
+
+		$result = db_query('SELECT source, source_url, pg_correction FROM dic_source WHERE id = ' . intval($_REQUEST['source_id']));
+		$r = $result->fetch_array(MYSQL_ASSOC);
+		$result->free();
+		if(!$r || empty($r['source_url']))	exit;
+
+		$pg = intval($_REQUEST['list_pg']);
+		$url = str_replace('{pg}', $pg + $r['pg_correction'], $r['source_url']);
+		$text = trim_text($r['source'], 40);
+		print "<small>Ссылка на источник: «<a href='$url' target='_blank'>$text</a>», стр.$pg</small>";
+		exit;
+	}
+	exit;
+}
+
+
+
 // Делаем выборку записей для публикации
 // $result = db_query('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY rank, reason LIMIT 1');
 $result = db_query('SELECT * FROM persons_raw WHERE ' . (!empty($_POST['id']) && isset($_POST['mode']) ? 'id = ' . intval($_POST['id']) : 'status = "Cant publish" ORDER BY RAND() LIMIT 1'));
@@ -88,11 +147,19 @@ while($r = $result->fetch_array(MYSQL_NUM)){
 $result->free();
 //
 $dic_source[0] = '(не определено)';
-$result = db_query('SELECT id, source FROM dic_source ORDER BY source');
+$result = db_query('SELECT id, source FROM dic_source');
 while($r = $result->fetch_array(MYSQL_NUM)){
 	$dic_source[$r[0]] = $r[1];
 }
 $result->free();
+uasort($dic_source, function($a, $b){
+	if(preg_match('/№(\d+)/uS', $a, $ma) && preg_match('/№(\d+)/uS', $b, $mb)){
+		if(intval($ma[1]) == intval($mb[1]))
+			return 0;
+		return (intval($ma[1]) < intval($mb[1])) ? -1 : 1;
+	}
+	return strcmp($a, $b);
+});
 //
 $dic_reason[0] = '(не определено)';
 $result = db_query('SELECT id, reason FROM dic_reason ORDER BY reason');
@@ -128,13 +195,49 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 <p>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</p>
 <script type="text/javascript">
 	$(function(){
-		$('input').on('keyup change reset', function(){
+		$('form').on('reset', function(){
+			el = $('form *.modifyed').removeClass('modifyed');
+			$('#regions').empty();
+			setTimeout("el.trigger('change');load_region(region_id)", 100);
+		});
+		$('input, textarea').on('keyup change', function(){
 			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
 		});
-		$('input').each(function(){
-			$(this).toggleClass('modifyed', $(this).val() != this.defaultValue);
+		$('select').on('keyup change', function(){
+			$(this).toggleClass('modifyed', $(this).find('option:selected').val() != $(this).find('option[selected]').val());
 		});
+		$('#source_id').on('change', function(){
+			$('#source_link').load('<?php print SELF_URL ?>', {
+				mode: 'get_data',
+				source_id: $('#source_id').val(),
+				list_pg: $('#list_pg').val()
+			});
+		});
+		$('#list_pg').on('keyup change', function(){
+			$('#source_id').trigger('change');
+		});
+		
+		region_id = $('#region_id').val();
+		$('#region_id').after('<div id="regions"></div>').remove();
+		$('#regions').before('<input id="region_id" type="hidden" name="region_id" value="' + region_id + '" />');
+		load_region(region_id);
+
+		$('input, #source_id').trigger('change');
 	});
+
+	function load_region(region){
+		$('#region_id').val(region);
+		$('#regions').load('<?php print SELF_URL ?>', {
+			mode: 'get_data',
+			region_id: region
+		}, function(){
+console.log(region_id);
+console.log($('#region_id').val());
+			$('#regions select').toggleClass('modifyed', region_id != $('#region_id').prop('defaultValue')).on('change', function(){
+				load_region($(this).find('option:selected').val());
+			});
+		});
+	}
 </script>
 <form method="post" class="editor">
 <div class="alignright"><button>Пропустить эту запись</button></div>
@@ -161,35 +264,35 @@ foreach($fields as $key => $def){
 	else{
 		print "\t<td" . ($key == 'comments' || isset($pub[$key]) ? '' : ' class="trouble"') . ">";
 		if($key == 'religion_id'){
-			print "<select name='pub[$key]'>\n";
+			print "<select id='$key' name='pub[$key]'>\n";
 			foreach($dic_religion as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'marital_id'){
-			print "<select name='pub[$key]'>\n";
+			print "<select id='$key' name='pub[$key]'>\n";
 			foreach($dic_marital as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'source_id'){
-			print "<select name='pub[$key]'>\n";
+			print "<select id='$key' name='pub[$key]'>\n";
 			foreach($dic_source as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
-			print "</select>";
+			print "</select><div id='source_link'></div>";
 		}elseif($key == 'reason_id'){
-			print "<select name='pub[$key]'>\n";
+			print "<select id='$key' name='pub[$key]'>\n";
 			foreach($dic_reason as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'date_from' || $key == 'date_to'){
-			print "<input type='date' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' min='1914-07-28' max='1918-11-11'>";
+			print "<input id='$key' type='date' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' min='1914-07-28' max='1918-11-11'>";
 		}elseif($key == 'comments'){
-			print "<textarea name='pub[$key]' rows='7' cols='30'>" . htmlspecialchars($pub[$key]) . "</textarea>";
+			print "<textarea id='$key' name='pub[$key]' rows='7' cols='30'>" . htmlspecialchars($pub[$key]) . "</textarea>";
 		}else{
-			print "<input type='text' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' />";
+			print "<input id='$key' type='text' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' />";
 			if($key == 'date')
 				print " <small>Машина это видит как «${date_norm}»</small>";
 		}
@@ -198,7 +301,7 @@ foreach($fields as $key => $def){
 	print "</tr>";
 }
 ?><tr>
-	<td class="aligncenter"><button type="reset">Сброс изменений</button></td>
+	<td class="aligncenter"><button id="reset" type="reset">Сброс изменений</button></td>
 	<td class="aligncenter">
 		<small><label><input type="checkbox" name="raw_similar" value="1" checked="checked" /> применить ко всем подобным записям</label></small><br/>
 		<button name="mode" value="raw">Изменить исходные данные</button>

@@ -10,7 +10,10 @@ show_records_stat();
 	<h2>Форма расширенного поиска</h2>
 	<p class="small alignright"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>
 	<?php $dbase->search_form(); ?>
-	<button type="submit">Искать</button>
+	<div class="buttons">
+		<button class="search" type="submit">Искать</button>
+		<button class="clearForm" type="button">Очистить</button>
+	</div>
 	<a name="help"></a>
 	<p class="nb">Фонетический поиск по фамилиям учитывает близость произношения разных звуков. Изначально списки были рукописными и часто писались «со слов», потому одна и та же фамилия может в списках быть записана очень по-разному.</p>
 	<p class="nb">Расширение поиска по именам автоматически добавляет в результаты поиска наиболее часто встречающиеся варианты сокращённых записей имени и/или отчества.</p>
@@ -20,8 +23,9 @@ show_records_stat();
 </form>
 <?php
 if($dbase->have_query){
-	log_event();
+	load_check();
 	$report = $dbase->do_search();
+	log_event($report->records_cnt);
 
 	// Определяем, какие поля будут выводиться в поле краткой информации, а какие в подробной
 	$brief_fields = array(

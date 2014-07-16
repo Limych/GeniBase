@@ -57,13 +57,14 @@ form .field input[type='date'],
 form .field input[type='checkbox']	{
 	width: auto;
 }
-form button	{
+form .buttons	{
 	display: block;
-	margin: 0.5em 0 1em auto;
+	margin: 0.5em 0 1em;
+	text-align: right;
 }
-form.editor button	{
-	display: initial;
-	margin: 0;
+form .buttons button	{
+	display: inline-block;
+	margin-left: 1em;
 }
 form .trouble	{
 	background: #F60;
@@ -181,18 +182,23 @@ tr.brief	{
 	font-style: italic;
 	font-size: 85%;
 }
-.stat .region_2	{
-	padding-left: 2.5em;
-}
-.stat .region_3	{
-	padding-left: 4em;
-}
-.stat .region_4	{
-	padding-left: 5.5em;
-}
-.stat .region_5	{
-	padding-left: 7em;
-}
+
+
+/*** «Лесенка» уровней ***/
+.level_1	{	padding-left: 0;	}
+td.level_1	{	padding-left: 1em;	}
+
+.level_2	{	padding-left: 1.5em;	}
+td.level_2	{	padding-left: 2.5em;	}
+
+.level_3	{	padding-left: 3em;	}
+td.level_3	{	padding-left: 4em;	}
+
+.level_4	{	padding-left: 4.5em;	}
+td.level_4	{	padding-left: 5.5em;	}
+
+.level_5	{	padding-left: 6em;	}
+td.level_5	{	padding-left: 7em;	}
 
 
 /*** Пагинация ***/
@@ -223,6 +229,7 @@ tr.brief	{
 }
 
 
+
 /*** Формы ***/
 input[type="text"]	{
 	border: 1px solid #CCC;
@@ -232,4 +239,23 @@ input[readonly]	{
 }
 input[type='number']	{
 	text-align: right;
+}
+
+
+
+/*** Кнопки клавиатуры ***/
+.kbdKey	{
+	border-color: #A9A9A9 #8C8C8C #C6C6C6 #C0C0C0;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1px 1px 2px;
+	box-shadow: -1px 1px 1px #484848, 1px 1px 1px #484848;
+	font-family: "Courier New",Courier,monospace;
+	font-size: 90%;
+	padding: 1px 5px;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+	text-transform: capitalize;
+	margin: 0 0.25em;
+	position: relative;
+	top: -2px;
 }

@@ -8,6 +8,9 @@ if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5
 // Запоминаем текущий каталог, как основу для всех подключаемых файлов системы
 define('BASE_DIR',	dirname(__FILE__));
 
+// Создаём константу для быстрого обращения к текущему скрипту
+define('SELF_URL',	preg_replace('/\?.+$/uS', '', $_SERVER["REQUEST_URI"]));
+
 // Подключаем настройки системы
 if(!file_exists(BASE_DIR . '/_config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
 require_once(BASE_DIR . '/_config.php');
@@ -45,8 +48,8 @@ function publish_cron($force = false){
 
 	// Делаем выборку записей для публикации
 	$drafts = array();
-	$result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
-	// $result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
+	// $result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
+	$result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
 	while($row = $result->fetch_array(MYSQL_ASSOC)){
 		$drafts[] = $row;
 	}
@@ -101,27 +104,28 @@ function rus_metaphone($word, $trim_surname = false){
 //
 // NB: Оригинальный алгоритм модифицирован для нужд данной поисковой системы
 
-	$alf	= 'ОЕАИУЭЮЯПСТРКЛМНБВГДЖЗЙФХЦЧШЩЁЫ';	// алфавит кроме исключаемых букв
-	$cns1	= 'БЗДВГ';	// звонкие согласные
-	$cns2	= 'ПСТФК';	// глухие согласные
-	$cns3	= 'ПСТКБВГДЖЗФХЦЧШЩ';	// согласные, перед которыми звонкие оглушаются
-	$ch		= 'ОЮЕЭЯЁЫ';	// образец гласных
-	$ct		= 'АУИИАИИ';	// замена гласных
-	$ends	= array(	// Шаблоны для «сжатия» окончания наиболее распространённых фамилий
+	static $alf	= 'ОЕАИУЭЮЯПСТРКЛМНБВГДЖЗЙФХЦЧШЩЁЫ';	// алфавит кроме исключаемых букв
+	static $cns1	= 'БЗДВГ';	// звонкие согласные
+	static $cns2	= 'ПСТФК';	// глухие согласные
+	static $cns3	= 'ПСТКБВГДЖЗФХЦЧШЩ';	// согласные, перед которыми звонкие оглушаются
+	static $ch		= 'ОЮЕЭЯЁЫ';	// образец гласных
+	static $ct		= 'АУИИАИИ';	// замена гласных
+	static $ends	= array(	// Шаблоны для «сжатия» окончания наиболее распространённых фамилий
 		'/ОВСК(?:И[ЙХ]|АЯ)$/uS'	=> '0',	// -овский, -овских, -овская
 		'/ЕВСК(?:И[ЙХ]|АЯ)$/uS'	=> '1',	// -евский, -евских, -евская
 		'/[ЕИ]?Н(?:ОК|КО(?:В|ВА)?)$/uS'
 								=> '2',	// -енко, -енков, -енкова, -енок, -инко, -инков, -инкова, -инок, -нко, -нков, -нкова, -нок
-		'/(?:[ИЕ]?Е|О)ВА?$/uS'	=> '3',	// -ов, -ев, -иев, -еев, -ова, -ева, -иева, -еева
+		'/[ИЕ]?ЕВА?$/uS'		=> '3',	// -иев, -еев, -иева, -еева
 		'/ИНА?$/uS'				=> '4',	// -ин, -ина
 		'/[УЮ]К$/uS'			=> '5',	// -ук, -юк
 		'/[ИЕ]К$/uS'			=> '6',	// -ик, -ек
 		'/[ЫИ]Х$/uS'			=> '7',	// -ых, -их
 		'/(?:[ЫИ]Й|АЯ)$/uS'		=> '8',	// -ый, -ий, -ая
+		'/[ЕО]ВА?$/uS'			=> '9',	// -ов, -ев, -ова, -ева
 	);
-	$ij		= array(	// Шаблоны для замены двубуквенных конструкций однобуквенными
-		'/[ЙИ]О/uS'	=> 'И',
-		'/[ЙИ]Е/uS'	=> 'И',
+	static $ij		= array(	// Шаблоны для замены двубуквенных конструкций
+		'/[ЙИ][ОЕ]/uS'				=> 'И',
+		'/(?<=[АУИОЮЕЭЯЁЫ])Й/uS'	=> 'И',
 	);
 	$callback	= function($match) use ($cns1, $cns2){
 		return strtr($match[1], $cns1, $cns2);
@@ -191,14 +195,21 @@ function db_query($query){
 
 
 /**
- * Выполняем обновление вычисляемых данных и закрываем соединение с СУБД
+ * Закрываем соединение с СУБД
  */
 function db_close(){
-	$db = db_open();
-	// Процедура постепенного обновления вычисляемых данных
+	$db = db_open(false);
+	if($db)		$db->close();
+}
 
-	// Запуск системы периодической публикации новых данных
-	publish_cron();
+
+
+/**
+ * Выполняем периодическое обновление вычисляемых данных
+ */
+function db_update(){
+	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
+	db_query("DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL AND TIMESTAMPDIFF(HOUR, `banned_to_datetime`, NOW()) > 3) OR `banned_to_datetime` < NOW()");
 
 	// Генерируем фонетические ключи
 	$result = db_query('SELECT DISTINCT surname FROM persons WHERE surname_key = "" ORDER BY list_nr LIMIT 120');
@@ -233,7 +244,15 @@ function db_close(){
 		$result2 = db_query('SELECT region FROM dic_region WHERE id = ' . $region->parent_id);
 		$parent = $result2->fetch_object();
 		$result2->free();
-		$tmp = trim((empty($parent) || substr($parent->region, 0, 1) == '(' ? '' : $parent->region . ', ') . (substr($region->title, 0, 1) == '(' ? '' : $region->title), ', ');
+		$tmp = trim((empty($parent) || substr($parent->region, 0, 1) == '(' ? '' : $parent->region . ', ') . (substr($region->title, 0, 1) == '(' ? '' : strtr($region->title, array(
+			' генерал-губернаторство'	=> ' ген.-губ.',
+			' наместничество'	=> ' нам.',
+			' губерния'	=> ' губ.',
+			' область'	=> ' обл.',
+			' уезд'	=> ' у.',
+			' волость'	=> ' вол.',
+			' округа'	=> ' окр.',
+		))), ', ');
 		if($tmp){
 			db_query('UPDATE dic_region SET region = "' . $db->escape_string($tmp) . '" WHERE id = ' . $region->id);
 			db_query('UPDATE dic_region SET region = "" WHERE parent_id = ' . $region->id);
@@ -244,7 +263,7 @@ function db_close(){
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = db_query('SELECT id, region_ids FROM dic_region ORDER BY RAND() LIMIT 1');
+	$result = db_query('SELECT id, region_ids FROM dic_region ORDER BY RAND() LIMIT 12');
 	while($row = $result->fetch_object()){
 		if(empty($row->region_ids))	$row->region_ids = $row->id;
 		$result2 = db_query('SELECT COUNT(*) FROM persons WHERE region_id IN (' . $row->region_ids . ')');
@@ -283,9 +302,6 @@ function db_close(){
 		db_query('UPDATE dic_reason SET reason_cnt = ' . intval($cnt[0]) . ' WHERE id = ' . $row->id);
 	}
 	$result->free();
-
-	// Закрываем соединение с СУБД
-	$db->close();
 }
 
 
@@ -302,9 +318,18 @@ function html_header(){
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" type="text/javascript"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
 </head><body>
 <h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.clearForm').on('click', function (){
+			f_el = $(this).parents('form');
+			f_el.find(':input').not(':button, :submit, :reset, :hidden, :checkbox, :radio').val('');
+			f_el.find(':checkbox, :radio').prop('checked', false);
+		});
+	});
+</script>
 <?php
 }
 
@@ -406,7 +431,7 @@ function fix_russian($text){
 	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	for($i = 0; $i < count($text); $i += 2){
 		if(preg_match('/[а-яА-Я]/uS', $text[$i]))
-			$text[$i] = preg_replace('/ъ$/uS', '', strtr($text[$i], $alf));
+			$text[$i] = preg_replace('/[ъЪ]$/uS', '', strtr($text[$i], $alf));
 	}
 	return implode($text);
 }
@@ -416,359 +441,51 @@ function fix_russian($text){
 /**
  * Функция расширения поискового запроса по именам
  */
-function extend_names($names){
-	static $name_reductions = array(
-		// ''		=> 'анис',
-		// ''		=> 'арх',
-		// ''		=> 'болесл',
-		// ''		=> 'бор',
-		// ''		=> 'гер',
-		// ''		=> 'горд',
-		// ''		=> 'дан',
-		'дементий'		=> 'дем',
-		'денис'		=> 'ден',
-		'евдоким'		=> 'евд',
-		'еремей'		=> 'ерем',
-		'ефрем'		=> 'ефр',
-		// ''		=> 'каз',
-		// ''		=> 'кир',
-		// ''		=> 'леон',
-		// ''		=> 'мир',
-		// ''		=> 'наз',
-		// ''		=> 'нест',
-		// ''		=> 'никл',
-		// ''		=> 'онис',
-		// ''		=> 'ос',
-		// ''		=> 'род',
-		// ''		=> 'стеф',
-		// ''		=> 'тер',
-		// ''		=> 'федос',
-		// ''		=> 'феодос',
-		// ''		=> 'янк',
-		'абрам'			=> 'абр',					'александр'		=> 'ал-др ал-р',		'алексей'		=> 'ал-ей ал-сей алекс',
-		'андрей'		=> 'анд андр',				'антон'			=> 'ант',				'арсений'		=> 'арс арсен',
-		'артемий'		=> 'арт артем',				'афанасий'		=> 'аф афан афанас',	'бронислав'		=> 'брон бронисл',
-		'валентин'		=> 'валент',				'василий'		=> 'вас васил',			'вацлав'		=> 'вацл',
-		'викентий'		=> 'викент',				'виктор'		=> 'викт',				'вильгельм'		=> 'вильг',
-		'владимир'		=> 'влад владим вл-р',		'владислав'		=> 'владисл',			'гавриил'		=> 'гавр',
-		'генрих'		=> 'генр',					'георгий'		=> 'георг',				'герасим'		=> 'герас',
-		'григорий'		=> 'гр григ григор',		'густав'		=> 'густ',				'давид'			=> 'дав',
-		'давыд'			=> 'дав',					'дмитрий'		=> 'дм дмитр дмит',		'дорофей'		=> 'дороф',
-		'евгений'		=> 'евг евген',				'евдоким'		=> 'евдок',				'евстафий'		=> 'евстаф',
-		'евтихий'		=> 'евтих',					'егор'			=> 'ег',				'емельян'		=> 'емел',
-		'ермолай'		=> 'ермол',					'ефим'			=> 'еф',				'захарий'		=> 'зах захар',
-		'зиновий'		=> 'зинов',					'иван'			=> 'ив',				'игнатий'		=> 'игн игнат',
-		'илларион'		=> 'иллар',					'иосиф'			=> 'иос',				'исидор'		=> 'исид',
-		'казимир'		=> 'казим',					'кирилл'		=> 'кирил',				'кондратий'		=> 'кондр',
-		'константин'	=> 'констан конст констант',	'корней'		=> 'корн',			'кузьма'		=> 'куз',
-		'куприян'		=> 'купр',					'лаврентий'		=> 'лавр',				'леонтий'		=> 'леонт',
-		'людвиг'		=> 'людв',					'макар'			=> 'мак',				'максим'		=> 'макс',
-		'мартын'		=> 'март',					'матвей'		=> 'матв',				'мефодий'		=> 'мефод',
-		'митрофан'		=> 'митр митроф',			'михаил'		=> 'мих',				'моисей'		=> 'моис',
-		'никанор'		=> 'никан',					'никита'		=> 'ник',				'никифор'		=> 'никиф',
-		'николай'		=> 'ник никол',				'онуфрий'		=> 'онуфр',				'павел'			=> 'пав',
-		'пантелеймон'	=> 'пант пантел',			'пётр'			=> 'пет',				'платон'		=> 'плат',
-		'поликарп'		=> 'полик',					'порфирий'		=> 'порф порфир',		'прокопий'		=> 'прок прокоп прокоф',
-		'прокофий'		=> 'прок прокоп прокоф',	'прохор'		=> 'прох',				'роман'			=> 'ром',
-		'савелий'		=> 'савел',					'семён'			=> 'сем',				'сергей'		=> 'серг',
-		'сильвестр'		=> 'сильв',					'спиридон'		=> 'спир спирид',		'станислав'		=> 'стан станисл',
-		'степан'		=> 'степ',					'терентий'		=> 'терент',			'тимофей'		=> 'тим тимоф',
-		'тихон'			=> 'тих',					'трифон'		=> 'триф',				'трофим'		=> 'троф',
-		'фёдор'			=> 'фед',					'федот'			=> 'фед',				'филимон'		=> 'фил филим',
-		'филипп'		=> 'фил филип',				'фридрих'		=> 'фридр',				'харитон'		=> 'харит',
-		'яков'			=> 'як',
-	);
-	static $patronimic_reductions = array(
-		'абрамов'		=> 'абр абрам',
-		'адамов'		=> 'адам',
-		'акимов'		=> 'аким',
-		'александров'	=> 'ал-др',
-		'алексеев'		=> 'ал ал-ев алекс',
-		'андреев'		=> 'анд андр',
-		'антонов'		=> 'ант антон',
-		'артемов'		=> 'артем',
-		'архипов'		=> 'архип',
-		'афанасьев'		=> 'аф афан',
-		'борисов'		=> 'борис',
-		'вадимов'		=> 'владим',
-		'васильев'		=> 'вас васил',
-		'викентьев'		=> 'викент',
-		'викторов'		=> 'викт',
-		'владимиров'		=> 'влад',
-		'власов'		=> 'влас',
-		'гаврилов'		=> 'гавр',
-		'георгиев'	=> 'георг',
-		'герасимов'		=> 'герас',
-		'гордеев'		=> 'горд',
-		'григорьев'		=> 'гр григ григор',
-		'давидов'		=> 'дав давид',
-		'давыдов'		=> 'дав',
-		'данилов'		=> 'дан данил',
-		'демидов'		=> 'дем демид',
-		'демьянов'		=> 'дем демьян',
-		'денисов'		=> 'денис',
-		'дмитриев'		=> 'дм дмитр',
-		'евгеньев'		=> 'ег',
-		'евгениев'		=> 'ег',
-		'евдокимов'		=> 'евдок',
-		'евстафиев'		=> 'евстаф евстаф',
-		'егоров'		=> 'егор',
-		'емельянов'		=> 'емел',
-		'еремеев'		=> 'ерем',
-		'ефимов'		=> 'еф ефим',
-		'ефремов'		=> 'ефр ефрем',
-		'захаров'		=> 'зах захар',
-		'иванов'		=> 'ив иван',
-		'игнатьев'		=> 'игн игнат',
-		'илларионов'		=> 'иллар',
-		'ильин'		=> 'ил ильич',
-		'ильич'		=> 'ил ильин',
-		'иосифов'		=> 'иос иосиф',
-		'исидоров'		=> 'исид',
-		'казимиров'		=> 'казим',
-		'карлов'		=> 'карл',
-		'карпов'		=> 'карп',
-		'кириллов'		=> 'кир кирил',
-		'климов'		=> 'клим',
-		'кондратьев'		=> 'кондр',
-		'константинов'	=> 'конст',
-		'корнеев'		=> 'корн',
-		'кузьмин'		=> 'куз кузьм',
-		'кузьмич'		=> 'куз кузьм',
-		'лаврентиев'		=> 'лавр лавр',
-		'леонов'		=> 'леон',
-		'леонтьев'		=> 'леон леонт',
-		'лукин'		=> 'лук лук',
-		'лукьянов'		=> 'лукьян',
-		'людвигов'		=> 'людв',
-		'макаров'		=> 'макар',
-		'максимов'		=> 'макс максим',
-		'марков'		=> 'марк',
-		'мартынов'		=> 'март',
-		'матвеев'		=> 'матв',
-		'миронов'		=> 'мирон',
-		'митрофанов'		=> 'митр митроф',
-		'михайлов'		=> 'мих михайл',
-		'моисеев'		=> 'моис',
-		'назаров'		=> 'назар',
-		'наумов'		=> 'наум',
-		'никит'		=> 'ник никит',
-		'никифоров'	=> 'ник никиф',
-		'николаев'		=> 'ник никол',
-		'онисимов'		=> 'онис',
-		'онуфриев'		=> 'онуфр',
-		'осипов'		=> 'ос осип',
-		'павлов'		=> 'пав павл',
-		'пантелеев'		=> 'пант пантел',
-		'пантелеймонов'		=> 'пант пантел',
-		'петров'		=> 'петр',
-		'платонов'		=> 'плат',
-		'прокофьев'		=> 'прокоф',
-		'прохоров'		=> 'прох',
-		'романов'		=> 'ром роман',
-		'савелиев'		=> 'сав савел',
-		'савельев'		=> 'сав савел',
-		'семёнов'		=> 'сем семен',
-		'сергеев'		=> 'серг',
-		'сидоров'		=> 'сидор',
-		'спиридонов'		=> 'спир',
-		'станиславов'		=> 'стан станисл',
-		'степанов'		=> 'степ степан',
-		'стефанов'		=> 'стеф',
-		'тарасов'		=> 'тарас',
-		'терентьев'		=> 'терент',
-		'тимофеев'		=> 'тим тимоф',
-		'тихонов'		=> 'тих тихон',
-		'трофимов'		=> 'троф',
-		'устинов'		=> 'устин',
-		'фёдоров'		=> 'фед федор',
-		'федосов'		=> 'федос',
-		'федотов'		=> 'фед федот',
-		'филимонов'		=> 'фил',
-		'филиппов'		=> 'фил филипп филип',
-		'фомин'		=> 'фом фомич',
-		'фомич'		=> 'фом фомин',
-		'францев'		=> 'франц',
-		'фролов'		=> 'фрол',
-		'харитонов'		=> 'харит',
-		'яковлев'		=> 'як яков яковл',
-		// ''		=> 'войц',
-		// ''		=> 'лейб',
-		// ''		=> 'прок',
-		// ''		=> 'хаим',
-		// ''		=> 'арх',
-		// ''		=> 'тер',
-		// ''		=> 'ян',
-		// ''		=> 'исаак',
-		// ''		=> 'пет',
-		// ''		=> 'спирид',
-		// ''		=> 'парф',
-		// ''		=> 'гаврил',
-		// ''		=> 'род',
-		// ''		=> 'анис',
-		// ''		=> 'евд',
-		// ''		=> 'каз',
-		// ''		=> 'юзеф',
-		// ''		=> 'родион',
-		// ''		=> 'лазар',
-		// ''		=> 'ст',
-		// ''		=> 'ал-дров',
-		// ''		=> 'елис',
-		// ''		=> 'сильв',
-		// ''		=> 'сид',
-		// ''		=> 'янкел',
-		// ''		=> 'кирилл',
-		// ''		=> 'гер',
-		// ''		=> 'трофим',
-		// ''		=> 'ермол',
-		// ''		=> 'анан',
-		// ''		=> 'полик',
-		// ''		=> 'август',
-		// ''		=> 'вик',
-		// ''		=> 'савв',
-		// ''		=> 'никл',
-		// ''		=> 'мартын',
-		// ''		=> 'ал-еев',
-		// ''		=> 'самойл',
-		// ''		=> 'викен',
-		// ''		=> 'мир',
-		// ''		=> 'фридр',
-		// ''		=> 'яким',
-		// ''		=> 'афанас',
-		// ''		=> 'купр',
-		// ''		=> 'мак',
-		// ''		=> 'герш',
-		// ''		=> 'арт',
-		// ''		=> 'филим',
-		// ''		=> 'авкс',
-		// ''		=> 'тит',
-		// ''		=> 'павлов',
-		// ''		=> 'берк',
-		// ''		=> 'дороф',
-		// ''		=> 'янк',
-		// ''		=> 'бор',
-		// ''		=> 'зин',
-		// ''		=> 'нест',
-		// ''		=> 'феликс',
-		// ''		=> 'ал-др',
-		// ''		=> 'евст',
-		// ''		=> 'андреев',
-		// ''		=> 'триф',
-		// ''		=> 'кон',
-		// ''		=> 'евс',
-		// ''		=> 'никон',
-		// ''		=> 'фр',
-		// ''		=> 'нестер',
-		// ''		=> 'ероф',
-		// ''		=> 'андриан',
-		// ''		=> 'демент',
-		// ''		=> 'мошк',
-		// ''		=> 'евтих',
-		// ''		=> 'самуил',
-		// ''		=> 'ден',
-		// ''		=> 'христ',
-		// ''		=> 'арс',
-		// ''		=> 'дмит',
-		// ''		=> 'ал-дров',
-		// ''		=> 'клем',
-		// ''		=> 'зинов',
-		// ''		=> 'порф',
-		// ''		=> 'ульян',
-		// ''		=> 'авг',
-		// ''		=> 'федоров',
-		// ''		=> 'прокоп',
-		// ''		=> 'вильг',
-		// ''		=> 'арсен',
-		// ''		=> 'ал-еев',
-		// ''		=> 'алексеев',
-		// ''		=> 'ицк',
-		// ''		=> 'алек',
-		// ''		=> 'конон',
-		// ''		=> 'агаф',
-		// ''		=> 'валент',
-		// ''		=> 'шлем',
-		// ''		=> 'шмул',
-		// ''		=> 'венед',
-		// ''		=> 'уст',
-		// ''		=> 'наз',
-		// ''		=> 'хар',
-		// ''		=> 'севаст',
-		// ''		=> 'мефод',
-		// ''		=> 'авраам',
-		// ''		=> 'констант',
-		// ''		=> 'терен',
-		// ''		=> 'варф',
-		// ''		=> 'евген',
-		// ''		=> 'потап',
-		// ''		=> 'васильев',
-		// ''		=> 'кален',
-		// ''		=> 'лаврент',
-		// ''		=> 'якуб',
-		// ''		=> 'тар',
-		// ''		=> 'мовш',
-		// ''		=> 'томаш',
-		// ''		=> 'авксент',
-		// ''		=> 'арон',
-		// ''		=> 'давыд',
-		// ''		=> 'готлиб',
-		// ''		=> 'авер',
-		// ''		=> 'кондрат',
-		// ''		=> 'феодос',
-		// ''		=> 'николаев',
-		// ''		=> 'янов',
-		// ''		=> 'сафр',
-		// ''		=> 'варфол',
-		// ''		=> 'виктор',
-		// ''		=> 'людвиг',
-		// ''		=> 'михайлов',
-		// ''		=> 'войцех',
-		// ''		=> 'емельян',
-		// ''		=> 'сам',
-		// ''		=> 'евсеев',
-		// ''		=> 'гершк',
-		// ''		=> 'меер',
-		// ''		=> 'калин',
-		// ''		=> 'панф',
-		// ''		=> 'мат',
-		// ''		=> 'калистр',
-		// ''		=> 'евламп',
-		// ''		=> 'исак',
-	);
-
-	$names = array_map('mb_strtolower', preg_split('/\s+/uS', $names));
+function expand_names($names){
+	$names = array_map('mb_strtolower', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$have_name = false;
 	foreach($names as $key => $n){
-		$ext = array($n);
+		$exp = array($n);
 		if(preg_match('/\b\w+(вна|[вмт]ич|[мт]ична|ин|[ое]в(н?а)?)\b/uS', $n)){
 			// Это отчество
 			$n2 = preg_replace('/на$/uS', 'а', preg_replace('/ич$/uS', '', $n));
 			if($n != $n2)
-				$ext[] = $n2;
-			if(isset($patronimic_reductions[$n]))
-				$ext = array_merge($ext, explode(' ', $patronimic_reductions[$n]));
-			if(isset($patronimic_reductions[$n2]))
-				$ext = array_merge($ext, explode(' ', $patronimic_reductions[$n2]));
+				$exp[] = $n2;
 
-			$names[$key] = '[[:blank:]](' . implode('|', array_unique($ext)) . ')[[:>:]]';
-		}elseif($have_name){
-			// Это непонятно что
-			if(isset($name_reductions[$n]))
-				$ext = array_merge($ext, explode(' ', $name_reductions[$n]));
-			if(isset($patronimic_reductions[$n]))
-				$ext = array_merge($ext, explode(' ', $patronimic_reductions[$n]));
+			$db = db_open();
+			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` IN ("' . implode('", "', array_map(array($db, 'escape_string'), $exp)) . '") AND `is_patronimic` = 1');
+			while($tmp = $result->fetch_array(MYSQL_NUM)){
+				$exp = array_merge($exp, explode(' ', $tmp[0]));
+			}
+			$result->free();
 
-			$names[$key] = '[[:blank:]](' . implode('|', array_unique($ext)) . ')[[:>:]]';
-		}else{
+			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+		}elseif(!$have_name){
 			// Это имя
-			if(isset($name_reductions[$n]))
-				$ext = array_merge($ext, explode(' ', $name_reductions[$n]));
+			$db = db_open();
+			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` = "' . $db->escape_string($n) . '" AND `is_patronimic` = 0');
+			while($tmp = $result->fetch_array(MYSQL_NUM)){
+				$exp = array_merge($exp, explode(' ', $tmp[0]));
+			}
+			$result->free();
 
-			$names[$key] = '^(' . implode('|', array_unique($ext)) . ')[[:>:]]';
+			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
 			$have_name = true;
+		}else{
+			// Это непонятно что
+			$db = db_open();
+			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` = "' . $db->escape_string($n) . '"');
+			while($tmp = $result->fetch_array(MYSQL_NUM)){
+				$exp = array_merge($exp, explode(' ', $tmp[0]));
+			}
+			$result->free();
+
+			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 		}
 	}
+// print "<!-- "; var_export($names); print " -->";
 	return $names;
-} // function extend_name
+} // function expand_names
 
 
 
@@ -796,9 +513,12 @@ function show_records_stat(){
 /********************************************************************************
  * Функции протоколирования использования системы
  */
-function log_event(){
+function log_event($records_found = 0){
+	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
-		return trim(preg_replace('/(?<=^|&)(\w+=|pg=\d+)(?=&|$)/uS', '', $matches[1]), '&');
+		return implode('&', array_filter(preg_split('/&/uS', $matches[1]), function($val){
+			return !preg_match('/^(pg=\d+|.*=)$/uS', $val);
+		}));
 	}, $_SERVER['REQUEST_URI']);
 
 	$db = db_open();
@@ -813,10 +533,35 @@ function log_event(){
 	$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
 	$squery = trim($squery);
 
-	$stmt = $db->prepare('INSERT `logs` (`query`, `url`) VALUES (?, ?)');
-	$stmt->bind_param("ss", $squery, $url);
+	$stmt = $db->prepare('INSERT `logs` (`query`, `url`, `records_found`) VALUES (?, ?, ?)');
+	$stmt->bind_param("ssi", $squery, $url, $records_found);
 	$stmt->execute();
 	$stmt->close();
+}
+
+
+
+function load_check(){
+	$db = db_open();
+	$ip = '"' . $db->escape_string($_SERVER["REMOTE_ADDR"]) . '"';
+
+	$result = db_query("SELECT CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`, `banned_to_datetime` >= NOW() AS `banned` FROM `load_check` WHERE `ip` = $ip");
+	$row = $result->fetch_object();
+	$result->free();
+
+// print "<!-- "; var_export($row); print " -->";
+	if(null === $row){
+		// Первый заход пользователя
+		db_query("INSERT INTO `load_check` (`ip`) VALUES ($ip)");
+	}elseif($row->banned || $row->speed < 3){
+		// Пользователь проштрафился
+		db_query("UPDATE `load_check` SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, " . OVERLOAD_BAN_TIME . ", NOW()) WHERE `ip` = $ip");
+		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
+		die();
+	}else{
+		// Очередной заход пользователя
+		db_query("UPDATE `load_check` SET `requests_counter` = `requests_counter` + 1 WHERE `ip` = $ip");
+	}
 }
 
 
@@ -843,15 +588,34 @@ abstract class ww1_records_set {
  */
 class ww1_solders_set extends ww1_records_set{
 	protected	$records;
-	protected	$records_cnt;
+	public	$records_cnt;
 
 	// Создание экземпляра класса и сохранение результатов поиска
 	function __construct($page, $sql_result, $records_cnt = NULL){
 		parent::__construct($page);
 		
 		$this->records = array();
-		while($row = $sql_result->fetch_object())
+		while($row = $sql_result->fetch_object()){
+			if($row->religion == '(иное)'){
+				$result = db_query('SELECT religion FROM `persons_raw` WHERE `id` = ' . $row->id);
+				$tmp = $result->fetch_array(MYSQL_NUM);
+				$result->free();
+				$row->religion = $tmp[0];
+			}
+			if($row->marital == '(иное)'){
+				$result = db_query('SELECT marital FROM `persons_raw` WHERE `id` = ' . $row->id);
+				$tmp = $result->fetch_array(MYSQL_NUM);
+				$result->free();
+				$row->marital = $tmp[0];
+			}
+			if($row->reason == '(иное)'){
+				$result = db_query('SELECT reason FROM `persons_raw` WHERE `id` = ' . $row->id);
+				$tmp = $result->fetch_array(MYSQL_NUM);
+				$result->free();
+				$row->reason = $tmp[0];
+			}
 			$this->records[] = $row;
+		}
 
 		$this->records_cnt = ($records_cnt !== NULL ? $records_cnt : count($this->records));
 	}
@@ -874,6 +638,14 @@ class ww1_solders_set extends ww1_records_set{
 		$(".report tr.brief").click(function(){
 			$(this).next("tr").toggle();
 			$(this).find(".arrow").toggleClass("up");
+		});
+		$('body').keydown(function(e){
+			if(e.ctrlKey && e.keyCode == 37){	// Ctrl+Left
+				location.href = $('.paginator:first .prev').attr('href');
+			}
+			if(e.ctrlKey && e.keyCode == 39){	// Ctrl+Right
+				location.href = $('.paginator:first .next').attr('href');
+			}
 		});
 	});
 </script>
@@ -951,7 +723,13 @@ class ww1_solders_set extends ww1_records_set{
 <?php
 		print $pag;	// Вывод пагинатора
 		if($num != 0):
-			print "<p class='nb aligncenter'>Обратите внимание: По клику на строке интересной Вам записи открывается дополнительная информация.</p>";
+			static $hints = array(
+				'По клику на строке интересной Вам записи открывается дополнительная информация.',
+				'По страницам результатов поиска можно перемещаться, используя клавиши <span class="kbdKey">Ctrl</span>+<span class="kbdKey">→</span> и <span class="kbdKey">Ctrl</span>+<span class="kbdKey">←</span>.',
+				'Многие записи снабжены ссылками на электронные копии источников, по которым создавалась эта база данных.',
+			);
+			shuffle($hints);
+			print "<p class='nb aligncenter' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
 		else:
 ?>
 <div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>
@@ -1158,7 +936,7 @@ class ww1_database_solders extends ww1_database {
 					if($key == 'surname')
 						$tmp = "($tmp OR `surname_key` = '" . $db->escape_string(rus_metaphone($val, true)) . "')";
 					elseif($key == 'name')
-						$tmp = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", extend_names($val)) . "'";
+						$tmp = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", array_map(array($db, 'escape_string'), expand_names($val))) . "'";
 				}
 				if($key == 'place'){
 					$tmp = "($tmp OR ";
@@ -1214,7 +992,7 @@ class ww1_database_solders extends ww1_database {
 							if($key == 'surname' && $this->surname_ext)
 								$tmp = "($tmp OR `surname_key` = '" . $db->escape_string(rus_metaphone($val, true)) . "')";
 							elseif($key == 'name' && $this->name_ext)
-								$tmp = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", extend_names($val)) . "'";
+								$tmp = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", array_map(array($db, 'escape_string'), expand_names($val))) . "'";
 						}
 					}
 				}
@@ -1231,7 +1009,7 @@ class ww1_database_solders extends ww1_database {
 		$result->free();
 		
 		// Запрашиваем текущую порцию результатов для вывода в таблицу
-		$query = 'SELECT *, persons.id FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY surname, name LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
+		$query = 'SELECT *, persons.id FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY surname, name, region LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
 		$result = db_query($query);
 		$report = new ww1_solders_set($this->page, $result, $cnt[0]);
 		$result->free();

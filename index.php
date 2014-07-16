@@ -13,7 +13,10 @@ show_records_stat();
 	<h2>Поиск персоны</h2>
 	<p class="small alignright"><a href="/extsearch.php">Расширенный поиск</a></p>
 	<?php $dbase->search_form(); ?>
-	<button type="submit">Искать</button>
+	<div class="buttons">
+		<button class="search" type="submit">Искать</button>
+		<button class="clearForm" type="button">Очистить</button>
+	</div>
 	<a name="help"></a>
 	<p class="nb">Система при поиске автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий.</p>
 	<p class="nb"><strong>Обратите внимание:</strong> во&nbsp;времена Первой Мировой Войны не&nbsp;было современных республик и&nbsp;областей&nbsp;— были губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются от&nbsp;границ современных территорий. Места жительства в&nbsp;системе указываются по&nbsp;состоянию на&nbsp;даты войны.</p>
@@ -21,8 +24,9 @@ show_records_stat();
 </form>
 <?php
 if($dbase->have_query){
-	log_event();
+	load_check();
 	$report = $dbase->do_search();
+	log_event($report->records_cnt);
 
 	// Выводим результаты в html
 	$brief_fields = array(
@@ -48,7 +52,7 @@ if($dbase->have_query){
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
 $db = db_open();
-$stmt = $db->prepare('SELECT `query`, `url` FROM `logs` WHERE `query` != "" ORDER BY datetime DESC LIMIT 12');
+$stmt = $db->prepare('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found` ORDER BY datetime DESC LIMIT 12');
 $stmt->execute();
 $stmt->bind_result($squery, $url);
 $res = array();

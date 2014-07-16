@@ -168,7 +168,12 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		$raw[$key] = fix_russian($raw[$key]);
 
 		// Правим регистр букв в текстах
-		if(($key == 'surname') || ($key == 'name')){
+		if($key == 'surname'){
+			// Первые буквы каждого слова в верхний регистр
+			$raw[$key] = preg_replace_callback('/\b\w+\b/uS', function ($matches){
+				return mb_ucfirst(mb_strtolower($matches[0]));
+			}, $raw[$key]);
+		}elseif($key == 'name'){
 			// Первые буквы каждого слова в верхний регистр
 			$raw[$key] = preg_replace_callback('/\b\w+(?:-\w+)\b/uS', function ($matches){
 				return mb_ucfirst($matches[0]);

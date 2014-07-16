@@ -56,7 +56,7 @@ function region_stat($parent_id = 0, $level = 1){
 	$result = db_query('SELECT id, title, region_comment, region_cnt FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
 	while($row = $result->fetch_object()){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level id_" . $row->id . "'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" . $row->id . "'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
 
 		region_stat($row->id, $level + 1);
 	}
