@@ -165,7 +165,7 @@ function prepublish_date(&$raw, &$date_norm){
  */
 function prepublish($raw, &$have_trouble, &$date_norm){
 	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
-
+	
 	foreach($str_fields as $key){
 		// Убираем концевые пробелы и сокращаем множественные пробелы
 		$raw[$key] = trim(preg_replace('/\s\s+/uS', ' ', $raw[$key]));
@@ -191,101 +191,28 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	}
 
 	// Расшифровываем вероисповедания
-	static $religions = array(
-		''		=> 18,
-		// Православное
-		'прав'	=> 1,
-		'правосл'	=> 1,
-		// Иудейское
-		'иуд'	=> 2,
-		'иудей'	=> 2,
-		'еврей'	=> 2,
-		// Старообрядческое
-		'стар'	=> 3,
-		'старов'	=> 3,
-		'старовер'	=> 3,
-		'староверъ'	=> 3,
-		'раск'	=> 3,
-		'раскольн'	=> 3,
-		'раскольник'	=> 3,
-		'раскольникъ'	=> 3,
-		'старообряд'	=> 3,
-		// Мусульманское
-		'маг'	=> 4,
-		'магом'	=> 4,
-		'магомет'	=> 4,
-		'магометанин'	=> 4,
-		'магометанинъ'	=> 4,
-		'мус'	=> 4,
-		// Евангелическо-лютеранское
-		'е лют'	=> 5,
-		'ев лют'	=> 5,
-		'евг'	=> 5,
-		'еванг'	=> 5,
-		'евангелист'	=> 5,
-		'лют'	=> 5,
-		'лютер'	=> 5,
-		'лютеранин'	=> 5,
-		'лютеранинъ'	=> 5,
-		// Римско-католическое
-		'р кат'	=> 6,
-		'р катол'	=> 6,
-		'р католик'	=> 6,
-		'кат'	=> 6,
-		'катол'	=> 6,
-		'католик'	=> 6,
-		'католикъ'	=> 6,
-		// Армянско-григорианское
-		'ар гр'	=> 7,
-		'ар григор'	=> 7,
-		'арм'	=> 7,
-		'армян'	=> 7,
-		'григ'	=> 7,
-		// Субботники
-		'субботн'	=> 8,
-		// Караимское
-		'крм'	=> 9,
-		'караим'	=> 9,
-		// Баптистское
-		'бабт'	=> 10,
-		'бапт'	=> 10,
-		// Молоканское
-		'мол'	=> 11,
-		'молок'	=> 11,
-		'молоканин'	=> 11,
-		'молоканинъ'	=> 11,
-		// Сектантское
-		'сект'	=> 12,
-		'сектант'	=> 12,
-		'сектантъ'	=> 12,
-		// Реформаторское
-		'реф'	=> 13,
-		'рефор'	=> 13,
-		// Языческое
-		'яз'	=> 14,
-		'языч'	=> 14,
-		'язычн'	=> 14,
-		'язычник'	=> 14,
-		'язычникъ'	=> 14,
-		// Единоверское
-		'един'	=> 15,
-		'единов'	=> 15,
-		// Протестантское
-		'прот'	=> 16,
-		'протес'	=> 16,
-		'протест'	=> 16,
-		// Марийское
-		'мар'	=> 17,
-		'чер'	=> 17,
-		'черемис'	=> 17,
-		//
-		//		=> 18, занято!
-		//		=> 19, занято!
-	);
-	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['religion'])));
+	/** @var	int[]	Array of correspondences between contractions of religion names and their IDs in the database. */
+	static	$religion_conts = array();
+	//
+	// Fetch religion names and reductions from dbase
+	if (empty($religion_conts)) {
+		$religion_conts[''] = 18;	// Special ID for "(not set)"
+
+		$query = 'SELECT `id`, `religion`, `contractions` FROM `dic_religion` WHERE `religion` NOT LIKE "(%"';
+		$result = db_query($query);	/* @var $result mysqli_result */
+		while ($row = $result->fetch_object()) {
+			$tmp = array_merge((array) mb_strtolower($row->religion), preg_split('/\W+/uS', mb_strtolower($row->contractions), -1, PREG_SPLIT_NO_EMPTY));
+			foreach ($tmp as $key) {
+				$religion_conts[$key] = $row->id;
+			}
+		}
+		$result->free();
+	}
+ 	//
+	$tmp = trim(preg_replace('/\W+/uS', '-', mb_strtolower($raw['religion'])), '-');
 // if(defined('P_DEBUG'))	var_export($tmp);
-	if(isset($religions[$tmp]))
-		$raw['religion_id'] = $religions[$tmp];
+	if(isset($religion_conts[$tmp]))
+		$raw['religion_id'] = $religion_conts[$tmp];
 
 	// Расшифровываем семейные положения
 	static $maritals = array(
