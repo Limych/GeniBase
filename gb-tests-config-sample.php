@@ -13,7 +13,7 @@ define( 'GB_DEBUG', true );
 // ** MySQL settings ** //
 
 // This configuration file will be used by the copy of GeniBase being tested.
-// wordpress/gb-config.php will be ignored.
+// GeniBase/gb-config.php will be ignored.
 
 // WARNING WARNING WARNING!
 // These tests will DROP ALL TABLES in the database with the prefix named below.
