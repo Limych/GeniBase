@@ -182,6 +182,9 @@ tr.brief	{
 	font-style: italic;
 	font-size: 85%;
 }
+.nonstrict-match	{
+	color: darkred;
+}
 
 
 /*** «Лесенка» уровней ***/

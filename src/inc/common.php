@@ -280,6 +280,16 @@ function html_header(){
 
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
 </head><body>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('.clearForm').on('click', function (){
+				f_el = $(this).parents('form');
+				f_el.find(':input').not(':button, :submit, :reset, :hidden, :checkbox, :radio').val('');
+				f_el.find(':checkbox, :radio').prop('checked', false);
+			});
+		});
+	</script>
 	<h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
 <?php
 }
@@ -291,16 +301,6 @@ function html_header(){
  */
 function html_footer(){
 ?>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-	$(document).ready(function(){
-		$('.clearForm').on('click', function (){
-			f_el = $(this).parents('form');
-			f_el.find(':input').not(':button, :submit, :reset, :hidden, :checkbox, :radio').val('');
-			f_el.find(':checkbox, :radio').prop('checked', false);
-		});
-	});
-</script>
 <p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -539,7 +539,8 @@ class ww1_solders_set extends ww1_records_set{
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
 			$even = 1-$even;
-			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row->id . "'>\n";
+			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row->id . (!isset($row->strictMatch) || !empty($row->strictMatch) ? '' : ' nonstrict-match') . "'>\n";
+// if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($row);	print "\n -->\n";	}
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
 			foreach(array_keys($brief_fields) as $key){
 				print "\t\t<td>" . htmlspecialchars($row->$key) . "</td>\n";
@@ -787,7 +788,10 @@ class ww1_database_solders extends ww1_database {
 
 	// Осуществление поиска и генерация класса результатов поиска
 	function do_search(){
-		$sort_by = 'surname';
+		/** @var	string  */
+		$sort_by = '`surname` ASC, `name`';
+		/** @var	string  */
+		$strictMatch = '';
 
 /*** ↓↓↓ Удалить после августа 2014 ↓↓↓ *************************************************/
 		// Проверка на старые метасимволы и выдача предупреждения
@@ -822,7 +826,8 @@ class ww1_database_solders extends ww1_database {
 					$q = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", db_escape(db_regex($val_a))) . "'";
 					if($key == 'surname' && !$is_regex){
 						$q = "($q OR `surname_key` RLIKE '" . implode("' AND `surname_key` RLIKE '", db_escape(db_regex(make_search_keys($val_a)))) . "')";
-						$sort_by = '(surname = "' . db_escape($val) . '") DESC, surname_key';
+						$strictMatch = ', `surname` LIKE "%' . db_escape($val) . '%" AS `strictMatch`';
+						$sort_by = '`strictMatch` DESC, `name` ASC, `surname_key`';
 					}
 				}
 				if($key == 'place'){
@@ -887,7 +892,8 @@ class ww1_database_solders extends ww1_database {
 							$q = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", db_escape(db_regex($val_a))) . "'";
 							if($key == 'surname' && $this->surname_ext && !$is_regex){
 								$q = "($q OR `surname_key` RLIKE '" . implode("' AND `surname_key` RLIKE '", db_escape(db_regex(make_search_keys($val_a)))) . "')";
-								$sort_by = '(surname = "' . db_escape($val) . '") DESC, surname_key';
+								$strictMatch = ', `surname` LIKE "%' . db_escape($val) . '%" AS `strictMatch`';
+								$sort_by = '`strictMatch` DESC, `name` ASC, `surname_key`';
 							}
 						}
 					}
@@ -897,7 +903,7 @@ class ww1_database_solders extends ww1_database {
 			$w = implode(' AND ', $w);
 		}
 
-if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($w);	print "\n -->\n";	}
+// if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($w);	print "\n -->\n";	}
 		// Считаем, сколько результатов найдено
 		$query = 'SELECT COUNT(*) FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id WHERE ' . $w;
 		$result = db_query($query);
@@ -905,7 +911,7 @@ if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($w);	print "\n -->\n"
 		$result->free();
 		
 		// Запрашиваем текущую порцию результатов для вывода в таблицу
-		$query = 'SELECT *, persons.id FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY ' . $sort_by . ' ASC, name ASC, region ASC, place ASC LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
+		$query = 'SELECT *, persons.id' . $strictMatch . ' FROM persons LEFT JOIN dic_region ON dic_region.id=persons.region_id LEFT JOIN dic_religion ON dic_religion.id=persons.religion_id LEFT JOIN dic_marital ON dic_marital.id=persons.marital_id LEFT JOIN dic_reason ON dic_reason.id=persons.reason_id LEFT JOIN dic_source ON dic_source.id=persons.source_id WHERE ' . $w . ' ORDER BY ' . $sort_by . ' ASC, region ASC, place ASC LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
 		$result = db_query($query);
 		$report = new ww1_solders_set($this->page, $result, $cnt[0]);
 		$result->free();

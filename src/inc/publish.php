@@ -165,7 +165,7 @@ function prepublish_date(&$raw, &$date_norm){
  */
 function prepublish($raw, &$have_trouble, &$date_norm){
 	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
-	
+
 	foreach($str_fields as $key){
 		// Убираем концевые пробелы и сокращаем множественные пробелы
 		$raw[$key] = trim(preg_replace('/\s\s+/uS', ' ', $raw[$key]));

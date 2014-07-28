@@ -78,6 +78,7 @@ function rus_metascript($word){
 		'/щ/uS'	=> 'ш',
 		'/ъ/uS'	=> 'ь',
 		'/й/uS'	=> 'и',
+		'/ы/uS'	=> 'м',
 	);
 	$word = preg_replace(array_keys($subs), array_values($subs), $word);
 	return $word;
