@@ -35,8 +35,8 @@ before_install:
        sed -i "s/youremptytestdbnamehere/genibase_tests/" gb-tests-config.php
        sed -i "s/yourusernamehere/travis/" gb-tests-config.php
        sed -i "s/yourpasswordhere//" gb-tests-config.php
-#        svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/genibase-importer
     fi
+#        svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/genibase-importer
 
 # Before script, failures in this section will result in build status 'failed'
 before_script:
