@@ -30,12 +30,12 @@ before_install:
   - GB_CORE_DIR=/tmp/genibase/
   - >
     if [[ "$GB_TRAVISCI" == "travis:phpunit" ]]; then
-#        mysql -e "CREATE DATABASE wordpress_tests;" -uroot
-#        cp gb-tests-config-sample.php gb-tests-config.php
-#        sed -i "s/youremptytestdbnamehere/wordpress_tests/" gb-tests-config.php
-#        sed -i "s/yourusernamehere/travis/" gb-tests-config.php
-#        sed -i "s/yourpasswordhere//" gb-tests-config.php
-#        svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/wordpress-importer
+       mysql -e "CREATE DATABASE genibase_tests;" -uroot
+       cp gb-tests-config-sample.php gb-tests-config.php
+       sed -i "s/youremptytestdbnamehere/genibase_tests/" gb-tests-config.php
+       sed -i "s/yourusernamehere/travis/" gb-tests-config.php
+       sed -i "s/yourpasswordhere//" gb-tests-config.php
+#        svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/genibase-importer
     fi
 
 # Before script, failures in this section will result in build status 'failed'
