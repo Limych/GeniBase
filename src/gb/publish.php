@@ -221,17 +221,14 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		'ж'	=> 1,
 		'жен'	=> 1,
 		'женат'	=> 1,
-		'женатъ'	=> 1,
 		// Холостые
 		'х'	=> 2,
 		'хол'	=> 2,
 		'холост'	=> 2,
-		'холостъ'	=> 2,
 		// Вдовые
 		'вд'	=> 3,
 		'вдв'	=> 3,
 		'вдов'	=> 3,
-		'вдовъ'	=> 3,
 		'вдовец'	=> 3,
 	);
 	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['marital'])));
@@ -509,14 +506,20 @@ if(defined('P_DEBUG'))	var_export($raw);
 
 
 /**
- * Функция подготовки данных для занесения в систему
+ * Функция подготовки данных для занесения в систему.
+ * 
+ * @param	mixed[]	$raw_norm		Исходные данные для нормализации.
+ * @param	bool	$have_trouble	Признак невозможности автоматически формализовать данные.
+ * @return	mixed[]		Формализованная версия данных.
  */
 function prepublish_make_data($raw_norm, &$have_trouble){
 	$have_trouble = false;
 	$pub = array();
 	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_nr list_pg') as $key){
 		if(!isset($raw_norm[$key])
-		|| (empty($raw_norm[$key]) && $key != 'source_id' && preg_match('/_id$/uS', $key)))
+		|| ((empty($raw_norm[$key]) || absint($raw_norm[$key]) != $raw_norm[$key]) && $key != 'source_id' && preg_match('/(^|_)id$/uS', $key))
+		|| ($key == 'date_from' && ($raw_norm['date_from'] < '1914-07-01' || $raw_norm['date_from'] > '1920-12-31'))
+		|| ($key == 'date_to' && ($raw_norm['date_to'] < '1914-07-01' || $raw_norm['date_to'] > '1920-12-31')))
 			$have_trouble = true;
 		else
 			$pub[$key] = $raw_norm[$key];

@@ -1,5 +1,5 @@
 <?php
-require_once('inc/common.php');	// Общие функции системы
+require_once('gb/common.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_EXTENDED);
 

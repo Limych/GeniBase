@@ -1,5 +1,5 @@
 <?php
-require_once('inc/common.php');	// Общие функции системы
+require_once('gb/common.php');	// Общие функции системы
 
 define('MIN_NAMES_CNT', 50);
 

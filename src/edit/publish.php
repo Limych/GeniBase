@@ -1,5 +1,5 @@
 <?php
-require_once('../inc/common.php');	// Общие функции системы
+require_once('../gb/common.php');	// Общие функции системы
 require_once(INC_DIR . '/publish.php');	// Функции формализации данных
  
 // define('DEBUG', 1);	// Признак режима отладки
@@ -71,18 +71,18 @@ $result = db_query('SELECT * FROM persons_raw WHERE ' . (!empty($_POST['id']) &&
 $raw = $result->fetch_array(MYSQL_ASSOC);
 $result->free();
 
-if(defined('DEBUG'))	print "\n\n======================================\n";
-if(defined('DEBUG'))	var_export($raw);
+if(defined('P_DEBUG'))	print "\n\n======================================\n";
+if(defined('P_DEBUG'))	var_export($raw);
 $pub = prepublish($raw, $have_trouble, $date_norm);
-if(defined('DEBUG'))	var_export($have_trouble);
-if(defined('DEBUG'))	var_export($pub);
+if(defined('P_DEBUG'))	var_export($have_trouble);
+if(defined('P_DEBUG'))	var_export($pub);
 
 // Если режим правки данных…
 if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 	// Вычисляем вносимые изменения
-if(defined('DEBUG'))	print "\n\n=== Edit ===================================\n";
+if(defined('P_DEBUG'))	print "\n\n=== Edit ===================================\n";
 	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
-if(defined('DEBUG'))	var_export($mod);
+if(defined('P_DEBUG'))	var_export($mod);
 	switch($_POST['mode']){
 	case 'raw':
 		// Исправление исходных данных во всех похожих записях
@@ -100,8 +100,8 @@ if(defined('DEBUG'))	var_export($mod);
 		$pub = prepublish_make_data($pub, $have_trouble);
 		break;
 	}
-if(defined('DEBUG'))	var_export($have_trouble);
-if(defined('DEBUG'))	var_export($pub);
+if(defined('P_DEBUG'))	var_export($have_trouble);
+if(defined('P_DEBUG'))	var_export($pub);
 }
 
 // Если формализация сейчас прошла успешно …

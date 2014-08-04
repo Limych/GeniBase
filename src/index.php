@@ -2,7 +2,7 @@
 // Проверка версии PHP
 if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5.3+ needed!');
 
-require_once('inc/common.php');	// Общие функции системы
+require_once('gb/common.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_SIMPLE);
 

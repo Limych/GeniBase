@@ -32,7 +32,10 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 
 
 /**
- * Функция вычисления поисковых ключей слов
+ * Функция вычисления поисковых ключей слов.
+ * 
+ * @param	string|string[]	$text		Текст, для которого необходимо вычислить поисковые ключи.
+ * @param	boolean			$make_regex	Признак, что надо создавать поисковое регулярное выражение, вместо простого текста.
  */
 function make_search_keys($text, $make_regex = true){
 	if(!is_array($text))
@@ -50,7 +53,10 @@ function make_search_keys($text, $make_regex = true){
 
 
 /**
- * Функция вычисления письменного ключа русского слова
+ * Функция вычисления письменного ключа русского слова.
+ * 
+ * @param	string|string[]	$word	Исходное слово или массив слов.
+ * @return	string|string[]		Письменный ключ слова или набор ключей для набора слов.
  */
 function rus_metascript($word){
 	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
@@ -79,6 +85,7 @@ function rus_metascript($word){
 		'/ъ/uS'	=> 'ь',
 		'/й/uS'	=> 'и',
 		'/ы/uS'	=> 'м',
+		'/в/uS'	=> 'з',
 	);
 	$word = preg_replace(array_keys($subs), array_values($subs), $word);
 	return $word;
@@ -87,14 +94,15 @@ function rus_metascript($word){
 
 
 /**
- * Функция вычисления фонетического ключа русского слова
+ * Функция вычисления фонетического ключа русского слова.
+ * 
+ * NB: Оригинальный алгоритм модифицирован для нужд данной поисковой системы.
+ * 
+ * @param	string|string[]	$word			Исходное слово или массив слов.
+ * @param	boolean			$trim_surname	Признак, что передана фамилия. У фамилий сокращаются типичные окончания.
+ * @return	string|string[]		Фонетический ключ слова или набор ключей для набора слов.
  */
 function rus_metaphone($word, $trim_surname = false){
-// Второй вариант — пожалуй, лучший.
-// Заменяет ЙО, ЙЕ и др.; неплохо оптимизирован.
-//
-// NB: Оригинальный алгоритм модифицирован для нужд данной поисковой системы
-
 	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
 	if(is_array($word)){
 		foreach($word as $key => $val)
@@ -161,7 +169,10 @@ function rus_metaphone($word, $trim_surname = false){
 
 
 /**
- * Функция перевода первой буквы в верхний регистр
+ * Функция перевода первой буквы в верхний регистр.
+ * 
+ * @param	string	$text	Исходный текст.
+ * @return	string		Изменённый текст.
  */
 function mb_ucfirst($text){
 	return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
@@ -170,7 +181,10 @@ function mb_ucfirst($text){
 
 
 /**
- * Функция нормирования русского текста
+ * Функция нормирования русского текста.
+ * 
+ * @param	string	$text	Исходный текст для нормирования.
+ * @return	string		Нормированный текст. 
  */
 function fix_russian($text){
 	static $alf = array(

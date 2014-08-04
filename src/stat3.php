@@ -1,5 +1,5 @@
 <?php
-require_once('inc/common.php');	// Общие функции системы
+require_once('gb/common.php');	// Общие функции системы
 
 define('HIST_WIDTH',	600);
 
@@ -9,7 +9,6 @@ $result = db_query('SELECT MAX(list_nr) FROM `persons`');
 $row = $result->fetch_array(MYSQL_NUM);
 $result->free();
 $max_list_nr = $row[0];
-$result->free();
 
 if(!isset($_REQUEST['ignore_per']))
 	$_REQUEST['ignore_per'] = 40;
@@ -28,33 +27,25 @@ html_header();
 if($_REQUEST['list_from'] && $_REQUEST['list_to']):
 	$ignore_per = intval($_REQUEST['ignore_per']);
 	
-	// Получаем минимальное и максимальное значение дат
-	$result = db_query('SELECT MIN(`date_from`), MAX(`date_to`) FROM `persons` WHERE `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']));
-	list($date_min, $date_max) = $result->fetch_array(MYSQL_NUM);
+	$result = db_query('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`), MIN(`date_from`)) AS `days` FROM `persons` WHERE `date_from` AND `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']));
+	list($date_min, $to) = $result->fetch_array(MYSQL_NUM);
 	$result->free();
-	$date_min = date_create($date_min);
-
 	$date = array();
-	$tmp = date_diff($date_min, date_create($date_max));
-	$tmp = $tmp->format('%a');
-	for($i = 0; $i < $tmp; $i++)
+	for($i = 0; $i < $to; $i++)
 		$date[$i] = 0;
 
 	$cnt = 0;
-	$result = db_query('SELECT `date_from`, `date_to` FROM `persons` WHERE `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']));
-	while($row = $result->fetch_array(MYSQL_NUM)){
-		$cnt++;
-		$tmp = date_diff($date_min, date_create($row[0]));
-		$i = intval($tmp->format('%a'));
-		$tmp = date_diff($date_min, date_create($row[1]));
-		$tmp = intval($tmp->format('%a'));
-		if($ignore_per && ($tmp - $i) >= $ignore_per)
-			continue;
-		for(; $i <= $tmp; $i++){
-			$date[$i]++;
+	$result = db_query('SELECT DATEDIFF(`date_from`, "' . $date_min . '") AS `first`, DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM `persons` WHERE `date_from` AND `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']) . ' GROUP BY `date_from`, `days` HAVING `days` <= ' . $ignore_per);
+	while($row = $result->fetch_object()){
+		$i = intval($row->first);
+		$to = $i + intval($row->days);
+		$cnt += intval($row->cnt);
+		for(; $i <= $to; $i++){
+			$date[$i] += intval($row->cnt);
 		}
 	}
 	$result->free();
+	$date_min = date_create($date_min);
 	if($ignore_per){
 		while(count($date) && !$date[0]){
 			array_shift($date);
@@ -66,7 +57,7 @@ if($_REQUEST['list_from'] && $_REQUEST['list_to']):
 	}
 // var_export($date);
 ?>
-<p>Всего в этот подсчёте участвует <?php print format_num($cnt, ' запись.', ' записи.', ' записей.')?></p>
+<p>Всего в этом подсчёте участвует <?php print format_num($cnt, ' запись.', ' записи.', ' записей.')?></p>
 <table class="stat">
 	<caption>Частота встречаемости дат в списке</caption>
 <thead><tr>
