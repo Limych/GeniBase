@@ -13,7 +13,7 @@ $max_list_nr = $row[0];
 if(!isset($_REQUEST['ignore_per']))
 	$_REQUEST['ignore_per'] = 40;
 
-html_header();
+html_header('Статистика');
 ?>
 <p><a href="/">« Вернуться к поиску</a></p>
 <h1>Специальная статистика дат по базе данных</h1>

@@ -1,7 +1,7 @@
 <?php
 require_once('gb/common.php');	// Общие функции системы
 
-html_header();
+html_header('Команда проекта');
 ?>
 <p><a href="/">« Вернуться к поиску</a></p>
 <h1>Команда проекта</h1>

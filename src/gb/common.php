@@ -293,8 +293,10 @@ function db_update(){
 
 /**
  * Вывод начальной части страницы
+ * 
+ * @param	string	$title	Title of page.
  */
-function html_header(){
+function html_header($title){
 	header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
@@ -312,12 +314,9 @@ function html_header(){
 		}
 	}
 /*** ↑↑↑ Удалить после августа 2014 ↑↑↑ *************************************************/
-
-	$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
-	$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
-	$squery = trim($squery);
 ?>
-	<title>Поиск <?php echo (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'); ?> - Первая Мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
+
+	<title><?php echo $title; ?> - Первая Мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
 </head><body>
