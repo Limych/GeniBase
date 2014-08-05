@@ -23,7 +23,7 @@ module.exports = function(grunt) {
 //					'gb-admin/css/*.css',
 					'gb/css/*.css'
 				]
-			},
+			}
 		},
 		clean: {
 			all: [BUILD_DIR],

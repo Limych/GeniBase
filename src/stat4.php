@@ -28,27 +28,36 @@ $result->free();
 // var_export($hist);
 ?>
 <p>Всего в этом подсчёте участвует <?php print format_num($cnt, ' запись.', ' записи.', ' записей.')?></p>
-<?php
-$max = max($hist);
-$month = explode(' ', 'Янв Фев Мар Апр Май Июн Июл Авг Сен Окт Ноя Дек');
-$years = explode(' ', 'red orange green lightblue blue purple');
 
-print "<div style='height: 20em'>\n";
-for($i = 7; $i <= 58; $i++){
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+	google.load("visualization", "1", {packages:["corechart"]});
+	google.setOnLoadCallback(drawChart);
+
+	function drawChart() {
+		var data = google.visualization.arrayToDataTable([
+			['Месяц/Год',  'Потери'],
+<?php
+$month = explode(' ', 'Янв Фев Мар Апр Май Июн Июл Авг Сен Окт Ноя Дек');
+
+for($i = 6; $i <= 58; $i++){
 	$m = $month[$i % 12];
 	$y = 1914 + intval($i / 12);
-	$tmp = strtr(round(98 * $hist[$i] / $max + ($hist[$i] ? 2 : 0), 2), ',', '.');
-	print "<span style='height: $tmp%; background: " . $years[intval($i / 12)] . "; display: inline-block; width: 1.92%; vertical-align: text-bottom;' title='$m $y: ${hist[$i]}'>&nbsp;</span>";
+	print "\t\t\t['$m $y',  ${hist[$i]}],\n";
 }
-print "</div>\n";
-
-$tmp = array();
-for($y = 1914; $y <= 1918; $y++){
-	$tmp[] = "<span style='background: " . $years[$y - 1914] . "; padding: 0.25em 1em'>$y</span>";
-}
-print "<p>" . implode(' ', $tmp) . "</p>";
-
+?>
+		]);
+		
+		var options = {
+			vAxis:	{minValue: 0,	title: 'Потери'},
+			legend:	{position: 'none'},
+		};
+		
+		var chart = new google.visualization.SteppedAreaChart(document.getElementById('chart_div'));
+		chart.draw(data, options);
+	}
+</script>
+<div id="chart_div" style="width: 100%; height: 500px"></div>
+<?php
 html_footer();
 db_close();
-
-?>

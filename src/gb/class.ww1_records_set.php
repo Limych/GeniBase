@@ -93,7 +93,7 @@ class ww1_solders_set extends ww1_records_set{
 		$pag = paginator($this->page, $max_pg);
 		print $pag;	// Вывод пагинатора
 ?>
-<table class="report"><thead>
+<table id="report" class="report"><thead>
 	<tr>
 		<th>№ <nobr>п/п</nobr></th>
 <?php
