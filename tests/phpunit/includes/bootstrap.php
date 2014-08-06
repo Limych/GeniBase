@@ -45,7 +45,7 @@ $PHP_SELF = $GLOBALS['PHP_SELF'] = $_SERVER['PHP_SELF'] = '/index.php';
 
 // system( GB_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) );
 
-require_once dirname( __FILE__ ) . '/functions.php';
+/*require_once dirname( __FILE__ ) . '/functions.php';
 
 $GLOBALS['_gb_die_disabled'] = false;
 // Allow tests to override gb_die
@@ -62,7 +62,7 @@ if(isset($GLOBALS['gb_tests_options'])) {
 	foreach ( array_keys( $GLOBALS['gb_tests_options'] ) as $key ) {
 		tests_add_filter( 'pre_option_'.$key, 'gb_tests_options' );
 	}
-}
+}/**/
 
 // Load GeniBase
 require_once ABSPATH . '/gb-settings.php';

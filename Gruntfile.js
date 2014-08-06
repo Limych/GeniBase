@@ -20,10 +20,10 @@ module.exports = function(grunt) {
 				cwd: SOURCE_DIR,
 				dest: SOURCE_DIR,
 				src: [
-//					'gb-admin/css/*.css',
+					'gb-admin/css/*.css',
 					'gb/css/*.css'
 				]
-			}
+			},
 		},
 		clean: {
 			all: [BUILD_DIR],
@@ -103,12 +103,12 @@ module.exports = function(grunt) {
 			}
 		},
 		sass: {
-			colors: {
+			core: {
 				expand: true,
 				cwd: SOURCE_DIR,
 				dest: BUILD_DIR,
 				ext: '.css',
-				src: ['gb-admin/css/colors/*/colors.scss'],
+				src: [ 'gb/css/*.scss' ],
 				options: {
 					outputStyle: 'expanded'
 				}
@@ -116,7 +116,7 @@ module.exports = function(grunt) {
 		},
 		cssmin: {
 			options: {
-				'gb-admin': ['gb-admin', 'color-picker', 'customize-controls', 'customize-widgets', 'ie', 'install', 'login', 'deprecated-*']
+//				'gb-admin': ['gb-admin', 'color-picker', 'customize-controls', 'customize-widgets', 'ie', 'install', 'login', 'deprecated-*']
 			},
 			core: {
 				expand: true,
@@ -124,7 +124,7 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				ext: '.min.css',
 				src: [
-					'gb-admin/css/{<%= cssmin.options["gb-admin"] %>}.css',
+//					'gb-admin/css/{<%= cssmin.options["gb-admin"] %>}.css',
 					'gb/css/*.css'
 				]
 			},
@@ -134,19 +134,10 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				ext: '.min.css',
 				src: [
-					'gb-admin/css/{<%= cssmin.options["gb-admin"] %>}-rtl.css',
+//					'gb-admin/css/{<%= cssmin.options["gb-admin"] %>}-rtl.css',
 					'gb/css/*-rtl.css'
 				]
 			},
-			colors: {
-				expand: true,
-				cwd: BUILD_DIR,
-				dest: BUILD_DIR,
-				ext: '.min.css',
-				src: [
-					'gb-admin/css/colors/*/*.css'
-				]
-			}
 		},
 		cssjanus: {
 			core: {
@@ -161,22 +152,8 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				ext: '-rtl.css',
 				src: [
-					'gb-admin/css/*.css',
+//					'gb-admin/css/*.css',
 					'gb/css/*.css'
-				]
-			},
-			colors: {
-				options: {
-					processContent: function( src ) {
-						return src.replace( /([^/]+)\.css/gi, '$1-rtl.css' );
-					}
-				},
-				expand: true,
-				cwd: BUILD_DIR,
-				dest: BUILD_DIR,
-				ext: '-rtl.css',
-				src: [
-					'gb-admin/css/colors/*/colors.css'
 				]
 			},
 			dynamic: {
@@ -216,15 +193,12 @@ module.exports = function(grunt) {
 				src: [
 					'gb-admin/js/*.js',
 					'gb/js/*.js',
-					// WordPress scripts inside directories
+					// GeniBase scripts inside directories
 					'gb/js/jquery/jquery.table-hotkeys.js',
 					'gb/js/mediaelement/gb-mediaelement.js',
 					'gb/js/plupload/handlers.js',
 					'gb/js/plupload/gb-plupload.js',
-					'gb/js/tinymce/plugins/wordpress/plugin.js',
-					'gb/js/tinymce/plugins/wp*/plugin.js',
 					// Third party scripts
-					'!gb-admin/js/farbtastic.js',
 					'!gb/js/backbone*.js',
 					'!gb/js/swfobject.js',
 					'!gb/js/underscore*.js',
@@ -313,10 +287,6 @@ module.exports = function(grunt) {
 				cmd: 'phpunit',
 				args: ['-c', 'phpunit.xml.dist', '--group', 'ajax']
 			},
-			multisite: {
-				cmd: 'phpunit',
-				args: ['-c', 'tests/phpunit/multisite.xml']
-			}
 		},
 		uglify: {
 			core: {
@@ -344,30 +314,30 @@ module.exports = function(grunt) {
 			}
 		},
 		concat: {
-			tinymce: {
-				options: {
-					separator: '\n',
-					process: function( src, filepath ) {
-						return '// Source: ' + filepath.replace( BUILD_DIR, '' ) + '\n' + src;
-					}
-				},
-				src: [
-					BUILD_DIR + 'gb/js/tinymce/tinymce.min.js',
-					BUILD_DIR + 'gb/js/tinymce/themes/modern/theme.min.js',
-					BUILD_DIR + 'gb/js/tinymce/plugins/*/plugin.min.js'
-				],
-				dest: BUILD_DIR + 'gb/js/tinymce/gb-tinymce.js'
-			}
+//			tinymce: {
+//				options: {
+//					separator: '\n',
+//					process: function( src, filepath ) {
+//						return '// Source: ' + filepath.replace( BUILD_DIR, '' ) + '\n' + src;
+//					}
+//				},
+//				src: [
+//					BUILD_DIR + 'gb/js/tinymce/tinymce.min.js',
+//					BUILD_DIR + 'gb/js/tinymce/themes/modern/theme.min.js',
+//					BUILD_DIR + 'gb/js/tinymce/plugins/*/plugin.min.js'
+//				],
+//				dest: BUILD_DIR + 'gb/js/tinymce/gb-tinymce.js'
+//			}
 		},
 		compress: {
-			tinymce: {
-				options: {
-					mode: 'gzip',
-					level: 9
-				},
-				src: '<%= concat.tinymce.dest %>',
-				dest: BUILD_DIR + 'gb/js/tinymce/gb-tinymce.js.gz'
-			}
+//			tinymce: {
+//				options: {
+//					mode: 'gzip',
+//					level: 9
+//				},
+//				src: '<%= concat.tinymce.dest %>',
+//				dest: BUILD_DIR + 'gb/js/tinymce/gb-tinymce.js.gz'
+//			}
 		},
 		jsvalidate:{
 			options: {
@@ -389,8 +359,7 @@ module.exports = function(grunt) {
 				expand: true,
 				cwd: SOURCE_DIR,
 				src: [
-					'gb-{admin,includes}/images/**/*.{png,jpg,gif,jpeg}',
-					'gb/js/tinymce/skins/wordpress/images/*.{png,jpg,gif,jpeg}'
+					'gb{,-admin}/images/**/*.{png,jpg,gif,jpeg}'
 				],
 				dest: SOURCE_DIR
 			}
@@ -408,10 +377,6 @@ module.exports = function(grunt) {
 					spawn: false,
 					interval: 2000
 				}
-			},
-			colors: {
-				files: [SOURCE_DIR + 'gb-admin/css/colors/**'],
-				tasks: ['sass:colors']
 			},
 			rtl: {
 				files: [
@@ -437,10 +402,7 @@ module.exports = function(grunt) {
 	// Register tasks.
 
 	// RTL task.
-	grunt.registerTask('rtl', ['cssjanus:core', 'cssjanus:colors']);
-
-	// Color schemes task.
-	grunt.registerTask('colors', ['sass:colors', 'autoprefixer:colors']);
+	grunt.registerTask('rtl', ['cssjanus:core']);
 
 	// JSHint task.
 	grunt.registerTask('jshint:corejs', ['jshint:grunt', 'jshint:tests', 'jshint:themes', 'jshint:core']);
@@ -453,8 +415,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('copy:all', ['copy:files', 'copy:gb-admin-rtl', 'copy:version']);
 
 	// Build task.
-	grunt.registerTask('build', ['clean:all', 'copy:all', 'cssmin:core', 'colors', 'rtl', 'cssmin:rtl', 'cssmin:colors',
-		'uglify:core', 'concat:tinymce', 'compress:tinymce', 'clean:tinymce', 'jsvalidate:build']);
+	grunt.registerTask('build', ['clean:all', 'copy:all', 'sass:core', 'cssmin:core', 'rtl', 'cssmin:rtl',
+		'uglify:core', 'jsvalidate:build']);
 
 	// Testing tasks.
 	grunt.registerMultiTask('phpunit', 'Runs PHPUnit tests, including the ajax and multisite tests.', function() {
