@@ -224,12 +224,12 @@ function db_update(){
 	while($row = $result->fetch_array(MYSQL_NUM)){
 		$tmp = implode(' ', make_search_keys($row[0], false));
 		// Обновление в основной таблице (старое)
-		db_query('UPDATE `persons` SET `surname_key` = "' . db_escape($tmp) . '", `update_datetime` = NOW() WHERE `surname` = "' . db_escape($row[0]) . '"');
+		db_query('UPDATE LOW_PRIORITY `persons` SET `surname_key` = "' . db_escape($tmp) . '", `update_datetime` = NOW() WHERE `surname` = "' . db_escape($row[0]) . '"');
 
 		// Обновление в отдельной таблице (новое)
-		db_query('DELETE FROM `idx_surname_keys` USING `idx_surname_keys` INNER JOIN `persons` WHERE `persons`.`surname` = "' . db_escape($row[0]) . '" AND `persons`.`id` = `idx_surname_keys`.`person_id`');
+		db_query('DELETE LOW_PRIORITY FROM `idx_surname_keys` USING `idx_surname_keys` INNER JOIN `persons` WHERE `persons`.`surname` = "' . db_escape($row[0]) . '" AND `persons`.`id` = `idx_surname_keys`.`person_id`');
 		foreach (explode(' ', $tmp) as $key) {
-			db_query('INSERT INTO `idx_surname_keys` (`person_id`, `surname_key`) SELECT `id`, "' . db_escape($key) . '" FROM `persons` WHERE `surname` = "' . db_escape($row[0]) . '"');
+			db_query('INSERT LOW_PRIORITY IGNORE INTO `idx_surname_keys` (`person_id`, `surname_key`) SELECT `id`, "' . db_escape($key) . '" FROM `persons` WHERE `surname` = "' . db_escape($row[0]) . '"');
 		}
 	}
 	$result->free();
@@ -241,8 +241,8 @@ function db_update(){
 		$ids = $result2->fetch_array(MYSQL_NUM);
 		$result2->free();
 		$ids = trim(preg_replace('/,,+/uS', ',', $ids[0]) ,',');
-		db_query('UPDATE `dic_region` SET `region_ids` = "' . $region->id . (empty($ids) ? '' : ',' . $ids) . '" WHERE `id` = ' . $region->id);
-		db_query('UPDATE `dic_region` SET `region_ids` = "" WHERE `id` = ' . $region->parent_id);
+		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_ids` = "' . $region->id . (empty($ids) ? '' : ',' . $ids) . '" WHERE `id` = ' . $region->id);
+		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_ids` = "" WHERE `id` = ' . $region->parent_id);
 	}
 	$result->free();
 	
@@ -255,8 +255,8 @@ function db_update(){
 		global $region_short;
 		$tmp = trim((empty($parent) || substr($parent->region, 0, 1) == '(' ? '' : $parent->region . ', ') . (substr($region->title, 0, 1) == '(' ? '' : strtr($region->title, $region_short)), ', ');
 		if($tmp){
-			db_query('UPDATE `dic_region` SET `region` = "' . db_escape($tmp) . '" WHERE `id` = ' . $region->id);
-			db_query('UPDATE `dic_region` SET `region` = "" WHERE `parent_id` = ' . $region->id);
+			db_query('UPDATE LOW_PRIORITY `dic_region` SET `region` = "' . db_escape($tmp) . '" WHERE `id` = ' . $region->id);
+			db_query('UPDATE LOW_PRIORITY `dic_region` SET `region` = "" WHERE `parent_id` = ' . $region->id);
 		}
 	}
 	$result->free();
@@ -275,7 +275,7 @@ function db_update(){
 			$result2->free();
 			$cnt = $childs[0] . ' + ';
 		}
-		db_query('UPDATE `dic_region` SET `region_cnt` = ' . $cnt . '( SELECT COUNT(*) FROM `persons` WHERE `region_id` = ' . intval($row->region_ids) . ' ), `update_datetime` = NOW() WHERE `id` = ' . $row->id);
+		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_cnt` = ' . $cnt . '( SELECT COUNT(*) FROM `persons` WHERE `region_id` = ' . intval($row->region_ids) . ' ), `update_datetime` = NOW() WHERE `id` = ' . $row->id);
 	}
 	$result->free();
 	//
@@ -283,7 +283,7 @@ function db_update(){
 	foreach(explode(' ', 'religion marital reason') as $key){
 		$result = db_query("SELECT `id` FROM `dic_${key}` ORDER BY `update_datetime` ASC LIMIT 1");
 		while($row = $result->fetch_array(MYSQL_NUM)){
-			db_query("UPDATE `dic_${key}` SET `${key}_cnt` = ( SELECT COUNT(*) FROM `persons` WHERE `${key}_id` = ${row[0]} ), `update_datetime` = NOW() WHERE `id` = ${row[0]}");
+			db_query("UPDATE LOW_PRIORITY `dic_${key}` SET `${key}_cnt` = ( SELECT COUNT(*) FROM `persons` WHERE `${key}_id` = ${row[0]} ), `update_datetime` = NOW() WHERE `id` = ${row[0]}");
 		}
 		$result->free();
 	}

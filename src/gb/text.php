@@ -42,7 +42,17 @@ function make_search_keys($text, $make_regex = true){
 		$text = preg_split('/[^\w\?\*]+/uS', $text, -1, PREG_SPLIT_NO_EMPTY);
 
 	foreach($text as $key => $word){
-		$word = array_merge((array) rus_metaphone($word, true), (array) rus_metascript(mb_ucfirst($word)));
+		$word = array_merge(
+			(array) rus_metaphone($word, true),
+			(array) rus_metascript(mb_ucfirst($word))
+		);
+// print "<!-- "; var_export($word); print " -->";
+		$word = array_filter(
+			$word,
+			function ($val){
+				return mb_strlen($val) >= 2;
+			}
+		);
 // print "<!-- "; var_export($word); print " -->";
 		$text[$key] = (!$make_regex ? implode(' ', $word) : '(' . implode('|', $word) . ')');
 	}
@@ -63,7 +73,7 @@ function rus_metascript($word){
 	if(is_array($word)){
 		foreach($word as $key => $val)
 			$word[$key] = rus_metascript($val);
-		return $word;
+		return array_filter($word);
 	}
 
 	static $subs = array(
@@ -107,7 +117,7 @@ function rus_metaphone($word, $trim_surname = false){
 	if(is_array($word)){
 		foreach($word as $key => $val)
 			$word[$key] = rus_metaphone($val, $trim_surname);
-		return $word;
+		return array_filter($word);
 	}
 
 	static $alf	= 'ОЕАИУЭЮЯПСТРКЛМНБВГДЖЗЙФХЦЧШЩЁЫ\?\*';	// алфавит кроме исключаемых букв
@@ -215,6 +225,9 @@ function fix_russian($text){
 		'Y'	=> 'У',		'y'	=> 'у',
 		'X'	=> 'Х',		'x'	=> 'х',
 	);
+
+	// Сжимаем множественные звёздочки
+	$text = preg_replace("/\*{2,}/uS", '*', $text);
 	
 	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	for($i = 0; $i < count($text); $i += 2){

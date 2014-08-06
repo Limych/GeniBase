@@ -10,7 +10,7 @@ $tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
 $squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
-html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
+html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
