@@ -123,8 +123,12 @@ function db_open($open = true){
 	if(!empty($db) || !$open)	return $db;
 
 	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD, DB_BASE);
-	if($db->connect_error)
+	if ($db->connect_error) {
+		@header('HTTP/1.1 503 Service Temporarily Unavailable');
+		@header('Status: 503 Service Temporarily Unavailable');
+		@header('Retry-After: 600');	// 600 seconds
 		die('Ошибка подключения (' . $db->connect_errno . ') ' . $db->connect_error);
+	}
 
 	// Проверка версии MySQL
 	// if(version_compare($db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
@@ -202,7 +206,7 @@ function db_query($query){
  */
 function db_close(){
 	// Раз в 30 запусков делаем апдейт обновляемых данных
-	if(rand(0, 30) == 0)	db_update();
+// 	if(rand(0, 30) == 0)	db_update();
 
 	// Закрываем соединение с СУБД
 	$db = db_open(false);
@@ -219,16 +223,11 @@ function db_update(){
 	db_query("DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3) OR `banned_to_datetime` < NOW()");
 
 	// Генерируем поисковые ключи для фамилий
-	// $result = db_query('SELECT DISTINCT `surname` FROM `persons` WHERE `surname_key` = "" ORDER BY `update_datetime` ASC LIMIT 12');
-	$result = db_query('SELECT DISTINCT `surname` FROM `persons` ORDER BY `update_datetime` ASC LIMIT 12');
+	$result = db_query('SELECT DISTINCT `surname` FROM `persons` ORDER BY `update_datetime` ASC LIMIT 7');
 	while($row = $result->fetch_array(MYSQL_NUM)){
-		$tmp = implode(' ', make_search_keys($row[0], false));
-		// Обновление в основной таблице (старое)
-		db_query('UPDATE LOW_PRIORITY `persons` SET `surname_key` = "' . db_escape($tmp) . '", `update_datetime` = NOW() WHERE `surname` = "' . db_escape($row[0]) . '"');
-
-		// Обновление в отдельной таблице (новое)
+		$keys = make_search_keys($row[0], false);
 		db_query('DELETE LOW_PRIORITY FROM `idx_surname_keys` USING `idx_surname_keys` INNER JOIN `persons` WHERE `persons`.`surname` = "' . db_escape($row[0]) . '" AND `persons`.`id` = `idx_surname_keys`.`person_id`');
-		foreach (explode(' ', $tmp) as $key) {
+		foreach ($keys as $key) {
 			db_query('INSERT LOW_PRIORITY IGNORE INTO `idx_surname_keys` (`person_id`, `surname_key`) SELECT `id`, "' . db_escape($key) . '" FROM `persons` WHERE `surname` = "' . db_escape($row[0]) . '"');
 		}
 	}
@@ -264,7 +263,7 @@ function db_update(){
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = db_query('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 12');
+	$result = db_query('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 7');
 	while($row = $result->fetch_object()){
 		if(empty($row->region_ids))	$row->region_ids = $row->id;
 		$cnt = '';

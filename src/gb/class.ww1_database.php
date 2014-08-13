@@ -53,7 +53,7 @@ class ww1_database_solders extends ww1_database {
 	var	$name_ext		= false;
 	const simple_fields		= 'surname name place';
 	const extended_fields	= 'surname name rank religion marital region place reason date_from date_to list_nr list_pg';
-	const query_fields		= 'persons.id persons.surname persons.name persons.rank dic_religion.religion dic_marital.marital dic_region.region persons.place dic_reason.reason persons.date dic_source.source dic_source.source_url dic_source.pg_correction persons.list_pg persons.comments';
+	const query_fields		= 'id surname name rank religion.religion marital.marital region.region place reason.reason date source.source source.source_url source.pg_correction list_pg comments';
 	
 	/**
 	 * Создание экземпляра класса.
@@ -67,6 +67,8 @@ class ww1_database_solders extends ww1_database {
 			// Простой режим поиска ******************************************
 			foreach(explode(' ', self::simple_fields) as $key){
 				$this->query[$key] = ($_REQUEST[$key] ? $_REQUEST[$key] : '');
+				if (is_translit($this->query[$key]))
+					$this->query[$key] = translit2rus($this->query[$key]);
 				$this->have_query |= !empty($this->query[$key]);
 			}
 		}else{
@@ -74,6 +76,8 @@ class ww1_database_solders extends ww1_database {
 			$dics = explode(' ', 'rank religion marital reason');
 			foreach(explode(' ', self::extended_fields) as $key){
 				$this->query[$key] = ($_REQUEST[$key] ? $_REQUEST[$key] : '');
+				if (is_translit($this->query[$key]))
+					$this->query[$key] = translit2rus($this->query[$key]);
 				if(in_array($key, $dics) && !is_array($this->query[$key]))
 					$this->query[$key] = array();
 				$this->have_query |= !empty($this->query[$key]);
@@ -190,6 +194,8 @@ class ww1_database_solders extends ww1_database {
 			}	// switch
 	}	// function
 
+	
+	
 	/**
 	 * Осуществление поиска и генерация класса результатов поиска.
 	 */
@@ -197,6 +203,7 @@ class ww1_database_solders extends ww1_database {
 		$sort_by = '`surname` ASC, `name`';
 		$strictMatch = '';
 		$cond = array();
+		$select = 'SELECT ' . (!defined('SQL_DEBUG_PROF') ? '' : 'SQL_NO_CACHE ');
 		
 /*** ↓↓↓ Удалить после августа 2014 ↓↓↓ *************************************************/
 		// Проверка на старые метасимволы и выдача предупреждения
@@ -221,7 +228,7 @@ class ww1_database_solders extends ww1_database {
 				$is_regex = preg_match('/[?*]/uS', $val);
 				$q = '';
 				if($key == 'name' && !$is_regex)
-					$q = "LOWER(`name`) RLIKE '" . implode("' AND LOWER(`name`) RLIKE '", db_escape(expand_names($val))) . "'";
+					$q = 'LOWER(`name`) RLIKE "' . implode('" AND LOWER(`name`) RLIKE "', db_escape(expand_names($val))) . '"';
 				else{
 					if($key == 'place'){
 						// Удаляем слова типа «губерния», «уезд» и т.п.
@@ -229,27 +236,37 @@ class ww1_database_solders extends ww1_database {
 						$val = strtr($val, array_fill_keys(array_merge(array_keys($region_short), array_values($region_short)), ''));
 					}
 					$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtolower($val), -1, PREG_SPLIT_NO_EMPTY);
-					$q = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", db_escape(db_regex($val_a))) . "'";
+					$q = "LOWER(`$key`) RLIKE \"" . implode("\" AND LOWER(`$key`) RLIKE \"", db_escape(db_regex($val_a))) . '"';
 					if($key == 'surname' && !$is_regex){
-						$q = "($q OR `surname_key` RLIKE '" . implode("' AND `surname_key` RLIKE '", db_escape(db_regex(make_search_keys($val_a)))) . "')";
+						$tmp = array();
+						foreach (make_search_keys($val_a) as $term){
+							$tmp[] = (is_array($term)
+								? '`surname_key` IN ("' . implode('", "', db_escape($term)) . '")'
+								: '`surname_key` = "' . db_escape($term) . '"'
+							);
+						}
+						$q = '(' . $q . ' OR id IN ( ' . $select . 'person_id FROM idx_surname_keys WHERE ' . implode(' AND ', $tmp) . ' ))';
 						$strictMatch = ', `surname` LIKE "%' . db_escape($val) . '%" AS `strictMatch`';
-						$sort_by = '`strictMatch` DESC, `name` ASC, `surname_key`';
+						$sort_by = '`strictMatch` DESC, `name` ASC, `surname`';
+
+					} elseif ($key == 'place') {
+						$tmp = 'LOWER(CONCAT_WS(",", ( SELECT `region` FROM `dic_region` AS sq WHERE sq.`id` = p.`region_id` ), `place`)) RLIKE "';
+						$q = $tmp . implode('" AND ' . $tmp, db_escape(db_regex($val_a))) . '"';
 					}
-				}
-				if($key == 'place'){
-					$q = "LOWER(CONCAT_WS(',', `region`, `place`)) RLIKE '" . implode("' AND LOWER(CONCAT_WS(',', `region`, `place`)) RLIKE '", db_escape(db_regex($val_a))) . "'";
 				}
 				$cond[] = $q;
 			}
 
-		}else{
+		} else {
 			// Расширенный режим поиска **************************************
 
 			// Формируем основной поисковый запрос в БД
 			$nums = explode(' ', 'religion marital reason list_nr list_pg');	// Список полей, в которых передаются числовые данные
 			$ids = explode(' ', 'religion marital reason');	// Список полей, в которых передаются идентификаторы
 			foreach(explode(' ', self::extended_fields) as $key){
-				$val = fix_russian($this->query[$key]);
+				$val = $this->query[$key];
+				if(!is_array($val))
+					$val = fix_russian($val);
 				if(empty($val))	continue;
 
 				$is_regex = preg_match('/[?*]/uS', $val);
@@ -290,11 +307,22 @@ class ww1_database_solders extends ww1_database {
 								$val = strtr($val, array_fill_keys(array_merge(array_keys($region_short), array_values($region_short)), ''));
 							}
 							$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtolower($val), -1, PREG_SPLIT_NO_EMPTY);
-							$q = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", db_escape(db_regex($val_a))) . "'";
+							if ($key == 'region') {
+								$q = '( SELECT LOWER(`region`) RLIKE "' . implode('" AND LOWER(`region`) RLIKE "', db_escape(db_regex($val_a))) . '" FROM dic_region AS sq WHERE sq.id = p.region_id )';
+							} else {
+								$q = "LOWER(`$key`) RLIKE '" . implode("' AND LOWER(`$key`) RLIKE '", db_escape(db_regex($val_a))) . "'";
+							}
 							if($key == 'surname' && $this->surname_ext && !$is_regex){
-								$q = "($q OR `surname_key` RLIKE '" . implode("' AND `surname_key` RLIKE '", db_escape(db_regex(make_search_keys($val_a)))) . "')";
+								$tmp = array();
+								foreach (make_search_keys($val_a) as $term){
+									$tmp[] = (is_array($term)
+										? '`surname_key` IN ("' . implode('", "', db_escape($term)) . '")'
+										: '`surname_key` = "' . db_escape($term) . '"'
+									);
+								}
+								$q = '(' . $q . ' OR id IN ( ' . $select . 'person_id FROM idx_surname_keys WHERE ' . implode(' AND ', $tmp) . ' ))';
 								$strictMatch = ', `surname` LIKE "%' . db_escape($val) . '%" AS `strictMatch`';
-								$sort_by = '`strictMatch` DESC, `name` ASC, `surname_key`';
+								$sort_by = '`strictMatch` DESC, `name` ASC, `surname`';
 							}
 						}
 					}
@@ -302,13 +330,6 @@ class ww1_database_solders extends ww1_database {
 				$cond[] = $q;
 			}
 		}
-		$select = 'SELECT ' . (!defined('SQL_DEBUG_PROF') ? '' : 'SQL_NO_CACHE ');
-		$joins =
-			' LEFT JOIN dic_region ON dic_region.id = persons.region_id' .
-			' LEFT JOIN dic_religion ON dic_religion.id = persons.religion_id' .
-			' LEFT JOIN dic_marital ON dic_marital.id = persons.marital_id' .
-			' LEFT JOIN dic_reason ON dic_reason.id = persons.reason_id' .
-			' LEFT JOIN dic_source ON dic_source.id = persons.source_id';
 		$cond = implode(' AND ', $cond);
 
 		if (defined('SQL_DEBUG_PROF')) {
@@ -316,14 +337,20 @@ class ww1_database_solders extends ww1_database {
 		}
 
 		// Считаем, сколько результатов найдено
-		$query = $select . 'COUNT(*) FROM persons' . $joins . ' WHERE ' . $cond;
+		$query = $select . 'COUNT(*) FROM persons AS p WHERE ' . $cond;
 if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($query);	print "\n -->\n";	}
 		$result = db_query($query);
-		$cnt = $result->fetch_array(MYSQL_NUM);
+		$cnt = $result->fetch_row();
 		$result->free();
 		
 		// Запрашиваем текущую порцию результатов для вывода в таблицу
-		$query = $select . implode(', ', explode(' ', self::query_fields)) . $strictMatch . ' FROM persons' . $joins . ' WHERE ' . $cond . ' ORDER BY ' . $sort_by . ' ASC, region ASC, place ASC LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
+		$fields = array_map(function ($field) use ($select) {
+			$tmp = explode('.', $field);
+			if (count($tmp) == 1)
+				return $field;
+			return vsprintf('( ' . $select . '%2$s FROM dic_%1$s AS sq WHERE sq.id = p.%1$s_id ) AS %2$s', $tmp);
+		}, explode(' ', self::query_fields));
+		$query = $select . implode(', ', $fields) . $strictMatch . ' FROM persons AS p WHERE ' . $cond . ' ORDER BY ' . $sort_by . ' ASC, region ASC, place ASC LIMIT ' . (($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
 if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($query);	print "\n -->\n";	}
 		$result = db_query($query);
 		$report = new ww1_solders_set($this->page, $result, $cnt[0]);
@@ -333,7 +360,7 @@ if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($query);	print "\n --
 			$result = db_query('SHOW PROFILE');
 			$profile = 0;
 			print("\n<!-- SQL-Profile:\n");
-			while ($row = $result->fetch_array(MYSQL_NUM)) {
+			while ($row = $result->fetch_row()) {
 				printf("%20s: %7.3f sec\n", $row[0], $row[1]);
 				if ($row[0] == 'Table lock')
 					continue;

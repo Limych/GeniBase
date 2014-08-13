@@ -23,7 +23,7 @@ module.exports = function(grunt) {
 					'gb-admin/css/*.css',
 					'gb/css/*.css'
 				]
-			},
+			}
 		},
 		clean: {
 			all: [BUILD_DIR],
@@ -137,7 +137,7 @@ module.exports = function(grunt) {
 //					'gb-admin/css/{<%= cssmin.options["gb-admin"] %>}-rtl.css',
 					'gb/css/*-rtl.css'
 				]
-			},
+			}
 		},
 		cssjanus: {
 			core: {
@@ -286,7 +286,7 @@ module.exports = function(grunt) {
 			ajax: {
 				cmd: 'phpunit',
 				args: ['-c', 'phpunit.xml.dist', '--group', 'ajax']
-			},
+			}
 		},
 		uglify: {
 			core: {
