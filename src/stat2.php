@@ -10,7 +10,7 @@ html_header('Статистика');
 <?php
 
 $name_reductions = $names = $patronymic_reductions = $patronymics = array();
-$result = $db->get_table('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM `persons_raw` GROUP BY name');
+$result = gbdb()->get_table('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM `persons_raw` GROUP BY name');
 foreach($result as $row){
 	$row['name'] = array_map('mb_ucfirst', preg_split('/\s+/uS', $row['name']));
 	if(empty($row['name']))

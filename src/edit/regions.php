@@ -26,9 +26,7 @@ _regions();
 
 
 function _regions($parent_id = 0, $level = 1){
-	global $db;
-
-	$result = $db->get_table('SELECT id, title, region_comment FROM dic_region WHERE parent_id = :id ORDER BY title',
+	$result = gbdb()->get_table('SELECT id, title, region_comment FROM dic_region WHERE parent_id = :id ORDER BY title',
 			array('id' => $parent_id));
 	foreach ($result as $row){
 		print "\t<option value='" . $row['id'] . "'>" . htmlspecialchars($row['title']) .

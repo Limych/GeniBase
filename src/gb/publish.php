@@ -170,7 +170,6 @@ function prepublish_date(&$raw, &$date_norm){
  * Функция нормирования исходных данных
  */
 function prepublish($raw, &$have_trouble, &$date_norm){
-	global $db;
 	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
 
 	foreach($str_fields as $key){
@@ -205,7 +204,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	if (empty($religion_conts)) {
 		$religion_conts[''] = 18;	// Special ID for "(not set)"
 
-		$result = $db->get_table('SELECT `id`, `religion`, `contractions` FROM `dic_religion`
+		$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM `dic_religion`
 				WHERE `religion` NOT LIKE "(%"');
 		foreach ($result as $row){
 			$tmp = array_merge((array) mb_strtolower($row['religion']),
@@ -250,7 +249,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	if (empty($reason_conts)) {
 		$reason_conts[''] = 1;	// Special ID for "(not set)"
 
-		$result = $db->get_table('SELECT `reason_id`, `reason_raw` FROM `dic_reason2reason` r2r, `dic_reason` r
+		$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM `dic_reason2reason` r2r, `dic_reason` r
 				WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 		foreach ($result as $row)
 			$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
@@ -266,13 +265,13 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if(empty($raw['list_nr'])){
 			$raw['source_id'] = 0;
 		}else {
-			$res = $db->get_cell('SELECT id FROM dic_source WHERE source LIKE :title',
+			$res = gbdb()->get_cell('SELECT id FROM dic_source WHERE source LIKE :title',
 					array('title' => "Именной список №$raw[list_nr] %"));
 			if($res)
 				$raw['source_id'] = $res;
 			else {
 				$tmp = "Именной список №$raw[list_nr] убитым, раненым и без вести пропавшим " . ($raw['list_nr'] < 974 ? "нижним чинам." : "солдатам.");
-				$raw['source_id'] = $db->set_row('dic_source',
+				$raw['source_id'] = gbdb()->set_row('dic_source',
 						array('source' => $tmp), FALSE, GB_DBase::MODE_INSERT);
 			}
 		}
@@ -280,7 +279,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	
 	// Уточняем региональную привязку
 	if(!empty($raw['uyezd'])){
-		$res = $db->get_cell('SELECT id FROM dic_region WHERE parent_id = :parent_id AND title LIKE :title',
+		$res = gbdb()->get_cell('SELECT id FROM dic_region WHERE parent_id = :parent_id AND title LIKE :title',
 				array(
 					'parent_id'	=> $raw['region_id'],
 					'title'		=> $raw['uyezd'] . ' %',
@@ -288,7 +287,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if($res)
 			$raw['region_id'] = $res;
 		else {
-			$raw['region_id'] = $db->set_row('dic_region', array(
+			$raw['region_id'] = gbdb()->set_row('dic_region', array(
 				'parent_id'	=> $raw['region_id'],
 				'title'		=> $raw['uyezd'] . ' ',
 			), FALSE, GB_DBase::MODE_INSERT);

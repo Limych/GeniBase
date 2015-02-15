@@ -27,7 +27,7 @@ html_header('Статистика по запросам к базе данных
 <?php
 $even = 0;
 
-$result = $db->query("SELECT
+$result = gbdb()->query("SELECT
  CASE WHEN `Год` IS NULL 
       THEN 'Всего'
       ELSE

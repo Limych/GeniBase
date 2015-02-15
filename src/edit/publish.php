@@ -2,7 +2,7 @@
 require_once('../gb/common.php');	// Общие функции системы
 require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
  
-// define('DEBUG', 1);	// Признак режима отладки
+// define('GB_DEBUG', 1);	// Признак режима отладки
 
 
 
@@ -14,7 +14,7 @@ if($_REQUEST['mode'] == 'get_data'){
 		$cur_id = intval($_REQUEST['region_id']);
 		$html = array();
 
-		$result = $db->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
+		$result = gbdb()->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
 				array('id' => $cur_id), TRUE);
 		$tmp = array();
 		foreach ($result as $id => $title)
@@ -22,10 +22,10 @@ if($_REQUEST['mode'] == 'get_data'){
 		if($tmp)	$html[] = '<select>' . implode($tmp) . '</select>';
 
 		do{
-			$r = $db->get_column('SELECT parent_id FROM dic_region WHERE id = :id', array('id' => $cur_id));
+			$r = gbdb()->get_column('SELECT parent_id FROM dic_region WHERE id = :id', array('id' => $cur_id));
 			if(!$r)	exit;
 
-			$result = $db->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
+			$result = gbdb()->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
 					array('id' => $cur_id), TRUE);
 			$tmp = array();
 			foreach ($result as $id => $title)
@@ -45,7 +45,7 @@ if($_REQUEST['mode'] == 'get_data'){
 	}elseif(isset($_REQUEST['source_id'])){
 		if(intval($_REQUEST['source_id']) < 1)	exit;
 
-		$r = $db->get_row('SELECT source, source_url, pg_correction FROM dic_source WHERE id = :id',
+		$r = gbdb()->get_row('SELECT source, source_url, pg_correction FROM dic_source WHERE id = :id',
 				array('id' => $_REQUEST['source_id']));
 		if(!$r || empty($r['source_url']))	exit;
 
@@ -62,9 +62,9 @@ if($_REQUEST['mode'] == 'get_data'){
 
 // Делаем выборку записей для публикации
 if(isset($_REQUEST['id']))
-	$raw = $db->get_row('SELECT * FROM persons_raw WHERE id = :id', array('id' => $_REQUEST['id']));
+	$raw = gbdb()->get_row('SELECT * FROM persons_raw WHERE id = :id', array('id' => $_REQUEST['id']));
 else
-	$raw = $db->get_row('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY RAND() LIMIT 1');
+	$raw = gbdb()->get_row('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY RAND() LIMIT 1');
 
 // Для отладки
 if(defined('P_DEBUG'))	print "\n\n======================================\n";
@@ -85,7 +85,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 	case 'raw':
 		// Исправление исходных данных во всех похожих записях
 		foreach($mod as $key => $val){
-			$db->query('UPDATE `persons_raw` SET :#key = :new WHERE `status` != "Published" AND :#key = :old' .
+			gbdb()->query('UPDATE `persons_raw` SET :#key = :new WHERE `status` != "Published" AND :#key = :old' .
 					(!empty($_POST['raw_similar']) ? '' : ' AND id = :id'),
 					array('#key' => $key, 'new' => $val, 'old' => $raw[$key], 'id' => $raw['id']));
 			$raw[$key] = $val;
@@ -106,15 +106,15 @@ if(defined('P_DEBUG'))	var_export($pub);
 // Если формализация сейчас прошла успешно …
 if(!$have_trouble){
 	// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
-	$db->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
-	$db->set_row('persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
+	gbdb()->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
+	gbdb()->set_row('persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
 
 	header('Location: ' . $_SERVER['PHP_SELF'] . '?rnd=' . rand());
 	die();
 }
 
 // Считаем, сколько у нас каких записей
-$cnt = (object) $db->get_row('SELECT COUNT(*) `total`
+$cnt = (object) gbdb()->get_row('SELECT COUNT(*) `total`
 		, SUM(CASE WHEN `status` = "Draft"        THEN 1 ELSE 0 END) `draft`
 		, SUM(CASE WHEN `status` = "Published"    THEN 1 ELSE 0 END) `published`
 		, SUM(CASE WHEN `status` = "Cant publish" THEN 1 ELSE 0 END) `cant_publish`
@@ -124,13 +124,13 @@ FROM `persons_raw`');
 // Делаем выборку справочников
 $dic_source = $dic_rank = array();
 //
-$dic_religion = $db->get_column('SELECT id, religion FROM dic_religion ORDER BY religion', array(), TRUE);
-$dic_marital = $db->get_column('SELECT id, marital FROM dic_marital ORDER BY marital', array(), TRUE);
-$dic_rank = $db->get_column('SELECT id, rank FROM dic_rank ORDER BY rank', array(), TRUE);
+$dic_religion = gbdb()->get_column('SELECT id, religion FROM dic_religion ORDER BY religion', array(), TRUE);
+$dic_marital = gbdb()->get_column('SELECT id, marital FROM dic_marital ORDER BY marital', array(), TRUE);
+$dic_rank = gbdb()->get_column('SELECT id, rank FROM dic_rank ORDER BY rank', array(), TRUE);
 //
-$dic_reason = $db->get_column('SELECT id, reason FROM dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
+$dic_reason = gbdb()->get_column('SELECT id, reason FROM dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
-$result = $db->get_table('SELECT id, source, source_url, pg_correction FROM dic_source');
+$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM dic_source');
 foreach ($result as $r){
 	$dic_source        [$r['id']] = $r['source'];
 	$dic_source_url    [$r['id']] = $r['source_url'];

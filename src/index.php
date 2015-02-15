@@ -67,7 +67,7 @@ if($dbase->have_query){
 <?php
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
-$res = $db->get_table('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found`
+$res = gbdb()->get_table('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found`
 		ORDER BY datetime DESC LIMIT 12');
 foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';

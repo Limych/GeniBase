@@ -4,6 +4,7 @@
  */
 
 
+
 $config_file_path = dirname( dirname( __FILE__ ) );
 if ( ! file_exists( $config_file_path . '/gb-tests-config.php' ) ) {
 	// Support the config file from the root of the develop repository.
@@ -21,9 +22,9 @@ global $gbdb, $current_site, $current_blog, $gb_rewrite, $shortcode_tags, $wp, $
 if ( !is_readable( $config_file_path ) ) {
 	die( "ERROR: gb-tests-config.php is missing! Please use gb-tests-config-sample.php to create a config file.\n" );
 }
+define('GB_TESTING_MODE', TRUE);
 require_once $config_file_path;
 
-define( 'GB_TESTS_TABLE_PREFIX', $table_prefix );
 define( 'DIR_TESTDATA', dirname( __FILE__ ) . '/../data' );
 
 if ( ! defined( 'GB_TESTS_FORCE_KNOWN_BUGS' ) )
@@ -65,10 +66,10 @@ if(isset($GLOBALS['gb_tests_options'])) {
 }/**/
 
 // Load GeniBase
-require_once ABSPATH . '/gb-settings.php';
+require_once BASE_DIR . '/gb/common.php';
 
 // Delete any default posts & related data
-_delete_all_posts();
+// _delete_all_posts();
 
 require dirname( __FILE__ ) . '/testcase.php';
 // require dirname( __FILE__ ) . '/testcase-xmlrpc.php';

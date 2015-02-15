@@ -11,7 +11,7 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 /**
  * Флаги режимов отладки
  */
-// define('DEBUG',	TRUE);	// Общий режим отладки
+// define('GB_DEBUG',	TRUE);	// Общий режим отладки
 //
 // define('HIDDEN_DEBUG',	TRUE);	// Режим «тихой» отладки в некоторых местах
 // define('SQL_DEBUG',	TRUE);	// Режим отладки SQL-запросов
@@ -23,10 +23,11 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 /**
  * Настройки подключения к базе данных
  */
-define('DB_HOST',		'');		// URL MySQL-сервера
-define('DB_USER',		'');		// Имя пользователя
-define('DB_PASSWORD',	'');		// Пароль
-define('DB_BASE',		'');		// Имя базы данных
+define('DB_HOST',		'localhost');				// URL MySQL-сервера
+define('DB_USER',		'yourusernamehere');		// Имя пользователя
+define('DB_PASSWORD',	'yourpasswordhere');		// Пароль
+define('DB_BASE',		'youremptytestdbnamehere');	// Имя базы данных
+define('DB_PREFIX',		'gb_');	// Префикс таблиц в базе. Only numbers, letters, and underscores please!
 
 /**
  * Лимиты

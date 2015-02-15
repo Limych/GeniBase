@@ -41,21 +41,20 @@ class ww1_solders_set extends ww1_records_set{
 
 	// Создание экземпляра класса и сохранение результатов поиска
 	function __construct($page, $data, $records_cnt = NULL){
-		global $db;
 		parent::__construct($page);
 
 		$this->records = array();
 		foreach ($data as $row){
 			if($row['religion'] == '(иное)')
-				$row['religion'] = $db->get_cell('SELECT religion FROM `persons_raw` WHERE `id` = :id',
+				$row['religion'] = gbdb()->get_cell('SELECT religion FROM `persons_raw` WHERE `id` = :id',
 						array('id' => $row['id']));
 			
 			if($row['marital'] == '(иное)')
-				$row['marital'] = $db->get_cell('SELECT marital FROM `persons_raw` WHERE `id` = :id',
+				$row['marital'] = gbdb()->get_cell('SELECT marital FROM `persons_raw` WHERE `id` = :id',
 						array('id' => $row['id']));
 			
 			if($row['reason'] == '(иное)')
-				$row['reason'] = $db->get_cell('SELECT reason FROM `persons_raw` WHERE `id` = :id',
+				$row['reason'] = gbdb()->get_cell('SELECT reason FROM `persons_raw` WHERE `id` = :id',
 						array('id' => $row['id']));
 			
 			$this->records[] = $row;
@@ -68,8 +67,6 @@ class ww1_solders_set extends ww1_records_set{
 	
 	// Вывод результатов поиска в виде html-таблицы
 	function show_report($brief_fields = NULL, $detailed_fields = array()){
-		global $db;
-		
 		$max_pg = max(1, ceil($this->records_cnt / Q_LIMIT));
 		if($this->page > $max_pg)	$this->page = $max_pg;
 

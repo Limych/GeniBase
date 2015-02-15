@@ -23,21 +23,24 @@ if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5
 
 
 // Запоминаем текущий каталог, как основу для всех подключаемых файлов системы
-define('BASE_DIR',	dirname(dirname(__FILE__)));
+if(!defined('BASE_DIR'))	define('BASE_DIR',	dirname(dirname(__FILE__)));
 // Константа для быстрого обращения к каталогу с подключаемыми файлами
-define('GB_INC_DIR',	BASE_DIR . '/gb');
+if(!defined('GB_INC_DIR'))	define('GB_INC_DIR',	BASE_DIR . '/gb');
 
 // Подключаем настройки системы
-if(!file_exists(BASE_DIR . '/gb-config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
-require_once(BASE_DIR . '/gb-config.php');
+if(!defined('GB_TESTING_MODE')){	// … но не в режиме тестирования (т.к. в нём особые настройки уже загружены)
+	if(!file_exists(BASE_DIR . '/gb-config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
+	require_once(BASE_DIR . '/gb-config.php');
+}
 
 // Подключаем прочие файлы
 require_once(GB_INC_DIR . '/text.php');
+require_once(GB_INC_DIR . '/class.GB_DBase.php');
 require_once(GB_INC_DIR . '/class.ww1_database.php');
 require_once(GB_INC_DIR . '/class.ww1_records_set.php');
 
 // Включение в режиме отладки полной отладочной информации
-if(defined('DEBUG')){
+if(defined('GB_DEBUG')){
 	error_reporting(E_ALL);	// Включить показ всех ошибок
 	ini_set('display_errors', 'stdout');
 }
@@ -51,13 +54,6 @@ setlocale(LC_ALL, 'ru_RU.utf8');
 // bindtextdomain(WWI_TXTDOM, dirname(__FILE__) . '/lang');
 // textdomain(WWI_TXTDOM);
 // bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
-
-
-
-// Инициализация класса для доступа к СУБД
-require_once(GB_INC_DIR . '/class.GB_DBase.php');
-/** @var GB_DBase */
-$db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE);
 
 
 
@@ -93,10 +89,8 @@ function absint($val) {
  * @param	string	$force
  */
 function publish_cron($force = false){
-	global $db;
-	
 	if(!$force){
-		$max_date = $db->get_cell('SELECT MAX(update_datetime) FROM `persons_raw`');
+		$max_date = gbdb()->get_cell('SELECT MAX(update_datetime) FROM `persons_raw`');
 		$tmp = date_diff(date_create($max_date), date_create('now'));
 		$tmp = intval($tmp->format('%i'));
 // var_export($tmp);
@@ -106,21 +100,21 @@ function publish_cron($force = false){
 	require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
 
 	// Делаем выборку записей для публикации
-// 	$drafts = $db->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
-	$drafts = $db->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
+// 	$drafts = gbdb()->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
+	$drafts = gbdb()->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
 	
 	// Нормирование данных
 	foreach($drafts as $raw){
-if(defined('DEBUG'))	print "\n\n======================================\n";
-if(defined('DEBUG'))	var_export($row);
+if(defined('GB_DEBUG'))	print "\n\n======================================\n";
+if(defined('GB_DEBUG'))	var_export($row);
 	$pub = prepublish($raw, $have_trouble, $date_norm);
-if(defined('DEBUG'))	var_export($have_trouble);
-if(defined('DEBUG'))	var_export($pub);
+if(defined('GB_DEBUG'))	var_export($have_trouble);
+if(defined('GB_DEBUG'))	var_export($pub);
 		// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
 		if(!$have_trouble)
-			$db->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
+			gbdb()->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
 		//
-		$db->set_row('persons_raw',
+		gbdb()->set_row('persons_raw',
 				array('status' => ($have_trouble ? 'Cant publish' : 'Published')),
 				$raw['id']
 		);
@@ -133,15 +127,13 @@ if(defined('DEBUG'))	var_export($pub);
  * Periodically update calculated fields in database.
  */
 function db_update(){
-	global $db;
-	
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
-	$db->query('DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL
+	gbdb()->query('DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL
 			AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)
 			OR `banned_to_datetime` < NOW()');
 
 	// Генерируем поисковые ключи для фамилий
-	$result = $db->get_column('SELECT DISTINCT `surname` FROM `persons`
+	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM `persons`
 			WHERE NOT EXISTS (
 				SELECT 1 FROM `idx_search_keys` WHERE `persons`.`id` = `idx_search_keys`.`person_id`
 				AND (
@@ -150,32 +142,32 @@ function db_update(){
 				)
 			) ORDER BY `update_datetime` ASC LIMIT 15', array('exp' => IDX_EXPIRATION_DATE));
 	foreach ($result as $row){
-		$db->query('DELETE FROM `idx_search_keys` USING `idx_search_keys` INNER JOIN `persons`
+		gbdb()->query('DELETE FROM `idx_search_keys` USING `idx_search_keys` INNER JOIN `persons`
 				WHERE `persons`.`surname` = :surname AND `persons`.`id` = `idx_search_keys`.`person_id`',
 				array('surname' => $row[0]));
 		
 		$keys = make_search_keys($row[0], false);
 		foreach ($keys as $key)
-			$db->query('INSERT IGNORE INTO `idx_search_keys` (`person_id`, `surname_key`)
+			gbdb()->query('INSERT IGNORE INTO `idx_search_keys` (`person_id`, `surname_key`)
 					SELECT `id`, UPPER(:key) FROM `persons` WHERE `surname` = :surname',
 					array('key' => $key, 'surname' => $row[0]));
 	}
 	
 	// Обновляем списки вложенных регионов, если это необходимо
-	$result = $db->get_column('SELECT `id`, `parent_id` FROM `dic_region` WHERE `region_ids` = ""',
+	$result = gbdb()->get_column('SELECT `id`, `parent_id` FROM `dic_region` WHERE `region_ids` = ""',
 			array(), TRUE);
 	foreach ($result as $id => $parent_id){
-		$ids = $db->get_cell('SELECT GROUP_CONCAT(`region_ids`) FROM `dic_region` WHERE `parent_id` = :id',
+		$ids = gbdb()->get_cell('SELECT GROUP_CONCAT(`region_ids`) FROM `dic_region` WHERE `parent_id` = :id',
 				array('id' => $id));
 		$ids = trim(preg_replace('/,,+/uS', ',', $ids) ,',');
-		$db->set_row('dic_region', array('region_ids' => (empty($ids) ? $id : "$id,$ids")), $id);
-		$db->set_row('dic_region', array('region_ids' => ''), $parent_id);
+		gbdb()->set_row('dic_region', array('region_ids' => (empty($ids) ? $id : "$id,$ids")), $id);
+		gbdb()->set_row('dic_region', array('region_ids' => ''), $parent_id);
 	}
 	
 	// Обновляем полные наименования регионов, если это необходимо
-	$result = $db->get_table('SELECT `id`, `parent_id`, `title` FROM `dic_region` WHERE `region` = ""');
+	$result = gbdb()->get_table('SELECT `id`, `parent_id`, `title` FROM `dic_region` WHERE `region` = ""');
 	foreach ($result as $row){
-		$parent_region = $db->get_cell('SELECT `region` FROM `dic_region` WHERE `id` = :parent_id', $row);
+		$parent_region = gbdb()->get_cell('SELECT `region` FROM `dic_region` WHERE `id` = :parent_id', $row);
 		global $region_short;
 		$tmp = trim(
 				(empty($parent_region) || substr($parent_region, 0, 1) == '('
@@ -184,36 +176,36 @@ function db_update(){
 						? '' : strtr($row['title'], $region_short)),
 				', ');
 		if($tmp){
-			$db->set_row('dic_region', array('region' => $tmp), $row['id']);
-			$db->set_row('dic_region', array('region' => ''), array('parent_id' => $row['id']));
+			gbdb()->set_row('dic_region', array('region' => $tmp), $row['id']);
+			gbdb()->set_row('dic_region', array('region' => ''), array('parent_id' => $row['id']));
 		}
 	}
 	
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = $db->get_column('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 7',
+	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 7',
 			array(), TRUE);
 	foreach ($result as $id => $region_ids){
 		if(empty($region_ids))	$region_ids = $id;
 		$cnt = '';
 		if(false !== strpos($region_ids, ',')){
 			// У региона есть вложенные регионы — просуммируем их статистику и прибавим к статистике региона
-			$childs = $db->get_cell('SELECT SUM(`region_cnt`) FROM `dic_region` WHERE `parent_id` = :parent_id',
+			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM `dic_region` WHERE `parent_id` = :parent_id',
 					array('parent_id' => $id));
 			$cnt = $childs . ' + ';
 		}
-		$db->query('UPDATE LOW_PRIORITY `dic_region` SET `region_cnt` = ' . $cnt .
+		gbdb()->query('UPDATE LOW_PRIORITY `dic_region` SET `region_cnt` = ' . $cnt .
 				'( SELECT COUNT(*) FROM `persons` WHERE `region_id` = :region_ids ), `update_datetime` = NOW() WHERE `id` = :id',
 				array('id' => $id, 'region_ids' => $region_ids));
 	}
 	//
 	// … по религиям, семейным положениям, событиям
 	foreach(explode(' ', 'religion marital reason') as $key){
-		$result = $db->get_column('SELECT `id` FROM :#table ORDER BY `update_datetime` ASC LIMIT 1',
+		$result = gbdb()->get_column('SELECT `id` FROM :#table ORDER BY `update_datetime` ASC LIMIT 1',
 				array('#table' => "dic_$key"));
 		foreach($result as $row){
-			$db->get_column('UPDATE LOW_PRIORITY :#table SET :#field_cnt =
+			gbdb()->get_column('UPDATE LOW_PRIORITY :#table SET :#field_cnt =
 					( SELECT COUNT(*) FROM `persons` WHERE :#field_id = :id ),
 					`update_datetime` = NOW() WHERE `id` = :id',
 					array(
@@ -359,10 +351,8 @@ function paginator($pg, $max_pg){
  * Функция вывода общей статистики о числе записей в системе.
  */
 function show_records_stat(){
-	global $db;
-	
-	$cnt	= $db->get_cell('SELECT COUNT(*) FROM persons');
-	$cnt2	= $db->get_cell('SELECT COUNT(*) FROM persons_raw');
+	$cnt	= gbdb()->get_cell('SELECT COUNT(*) FROM persons');
+	$cnt2	= gbdb()->get_cell('SELECT COUNT(*) FROM persons_raw');
 	//
 	$txt = format_num($cnt, ' запись.', ' записи.', ' записей.');
 	if($cnt != $cnt2)
@@ -382,8 +372,6 @@ function show_records_stat(){
  * @param	integer	$records_found
  */
 function log_event($records_found = 0){
-	global $db;
-	
 	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
 		return implode('&', array_filter(preg_split('/&/uS', $matches[1]), function($val){
@@ -391,14 +379,14 @@ function log_event($records_found = 0){
 		}));
 	}, $_SERVER['REQUEST_URI']);
 
-	if($db->get_cell('SELECT 1 FROM `logs` WHERE `url` = :url AND `datetime` >= NOW() - INTERVAL 1 HOUR',
+	if(gbdb()->get_cell('SELECT 1 FROM `logs` WHERE `url` = :url AND `datetime` >= NOW() - INTERVAL 1 HOUR',
 			array('url' => $url)))
 		return;
 
 	$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
 	$squery = trim($_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)"));
 
-	$db->set_row('logs', array(
+	gbdb()->set_row('logs', array(
 		'query' => $squery,
 		'url'	=> $url,
 		'records_found'	=> $records_found,
@@ -413,9 +401,7 @@ function log_event($records_found = 0){
  * В случае выявления перенагрузки, функция не возвращает ничего, а исполнение скрипта прерывается.
  */
 function load_check(){
-	global $db;
-	
-	$row = $db->get_cell('SELECT
+	$row = gbdb()->get_cell('SELECT
 			CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW())) AS `period_in_sec`,
 			CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`,
 			`banned_to_datetime` >= NOW() AS `banned` 
@@ -424,11 +410,11 @@ function load_check(){
 // print "<!-- "; var_export($row); print " -->";
 	if(FALSE === $row){
 		// Первый заход пользователя
-		$db->set_row('load_check', array('ip' => $_SERVER["REMOTE_ADDR"]), FALSE, GB_DBase::MODE_INSERT);
+		gbdb()->set_row('load_check', array('ip' => $_SERVER["REMOTE_ADDR"]), FALSE, GB_DBase::MODE_INSERT);
 
 	}elseif($row['banned'] || (($row['speed'] < 3) && ($row['period_in_sec'] > 30))){
 		// Пользователь проштрафился
-		$db->query('UPDATE `load_check` SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, :ban, NOW())
+		gbdb()->query('UPDATE `load_check` SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, :ban, NOW())
 				WHERE `ip` = :ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
 		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
@@ -436,7 +422,7 @@ function load_check(){
 
 	}else{
 		// Очередной заход пользователя
-		$db->query('UPDATE `load_check` SET `requests_counter` = `requests_counter` + 1 WHERE `ip` = :ip',
+		gbdb()->query('UPDATE `load_check` SET `requests_counter` = `requests_counter` + 1 WHERE `ip` = :ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"]));
 	}
 }

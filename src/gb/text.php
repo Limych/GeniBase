@@ -255,8 +255,6 @@ function fix_russian($text){
  * Функция расширения поискового запроса по именам
  */
 function expand_names($names){
-	global $db;
-	
 	$names = array_map('mb_strtolower', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$have_name = false;
 	foreach($names as $key => $n){
@@ -267,7 +265,7 @@ function expand_names($names){
 			if($n != $n2)
 				$exp[] = $n2;
 
-			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` IN (:keys) AND `is_patronimic` = 1',
+			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` IN (:keys) AND `is_patronimic` = 1',
 					array('keys' => $exp));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
@@ -276,7 +274,7 @@ function expand_names($names){
 
 		}elseif(!$have_name){
 			// Это имя
-			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key AND `is_patronimic` = 0',
+			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key AND `is_patronimic` = 0',
 					array('key' => $n));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
@@ -285,7 +283,7 @@ function expand_names($names){
 			$have_name = true;
 		}else{
 			// Это непонятно что
-			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key',
+			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key',
 					array('key' => $n));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));

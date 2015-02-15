@@ -25,7 +25,7 @@ dic_stat('Распределение по&nbsp;событиям', 'Событи�
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = $db->get_table('SELECT rank, COUNT(*) AS cnt FROM persons GROUP BY rank ORDER BY rank');
+$result = gbdb()->get_table('SELECT rank, COUNT(*) AS cnt FROM persons GROUP BY rank ORDER BY rank');
 foreach ($result as $row){
 	$even = 1-$even;
 	if(empty($row['rank']))
@@ -52,9 +52,9 @@ html_footer();
 
 
 function region_stat($parent_id = 0, $level = 1){
-	global $even, $db;
+	global $even;
 
-	$result = $db->get_table('SELECT id, title, region_comment, region_cnt FROM dic_region
+	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM dic_region
 			WHERE parent_id = :parent_id ORDER BY title',
 			array(
 				'parent_id'	=> $parent_id,
@@ -72,8 +72,9 @@ function region_stat($parent_id = 0, $level = 1){
 	$result->free();
 }
 
+
+
 function dic_stat($caption, $field_title, $field){
-	global $db;
 	static	$chart_num = 0;
 	
 	$chart_num++;
@@ -84,7 +85,7 @@ function dic_stat($caption, $field_title, $field){
 		var data = google.visualization.arrayToDataTable([
 			['<?php print htmlspecialchars($field_title); ?>',  'Записей'],
 			<?php
-				$result = $db->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table WHERE cnt != 0 ORDER BY field',
+				$result = gbdb()->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table WHERE cnt != 0 ORDER BY field',
 						array(
 							'#table'	=> "dic_$field",
 							'field'		=> $field,
@@ -114,7 +115,7 @@ function dic_stat($caption, $field_title, $field){
 	<th>Записей</th>
 </tr></thead><tbody>
 <?php
-	$result = $db->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table
+	$result = gbdb()->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table
 			WHERE cnt != 0 ORDER BY field',
 			array(
 				'#table'	=> "dic_${field}",

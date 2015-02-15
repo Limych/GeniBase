@@ -23,20 +23,21 @@ if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5
 class GB_DBase	{
 	/**	@var MySQLi */
 	protected	$db;
-	protected	$host, $user, $password, $base;
+	protected	$host, $user, $password, $base, $prefix;
 	
 	
 	
 	/**
 	 * Создание экземпляра класса.
 	 */
-	function __construct($host, $user, $password, $base){
+	function __construct($host, $user, $password, $base, $prefix = ''){
 		$this->db = NULL;
 
 		$this->host = $host;
 		$this->user = $user;
 		$this->password = $password;
 		$this->base = $base;
+		$this->prefix = $prefix;
 	}
 
 
@@ -70,6 +71,21 @@ class GB_DBase	{
 	
 		$this->db->set_charset('utf8');
 	}
+	
+	
+	
+	/**
+	 * Добавление префикса к имени таблицы.
+	 * 
+	 * @param string $table	Исходное имя таблицы
+	 * @return string	Имя таблицы с префиксом
+	 */
+	function table_escape($table){
+		if(substr($table, 0, 1) == '`')	// First unescape table name if it already escaped
+			$table = strtr(trim($table, '`'), '``', '`');
+
+		return self::field_escape($this->prefix . $table);
+	}
 
 
 
@@ -79,7 +95,7 @@ class GB_DBase	{
 	 * @param mixed $value	Значение переменной
 	 * @return mixed	Экранированное значение переменной
 	 */
-	static function field_escape($value) {
+	function field_escape($value) {
 		if (is_array($value))
 			return implode(', ', array_map(__FUNCTION__, $value));
 	
@@ -96,17 +112,18 @@ class GB_DBase	{
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
 	 * @return mixed	Экранированное значение переменной
 	 */
-	static function data_escape($value, $preserve_array = FALSE) {
+	function data_escape($value, $preserve_array = FALSE) {
 		if (is_array($value)){
 			$result = array_map(__FUNCTION__, $value);
 			return ($preserve_array)
 				? $result
 				: implode(',', $result);
 	
-		}elseif (is_string($value))
+		}elseif (is_string($value)){
+			$this->connect();
 			return '"' . $this->db->real_escape_string($value) . '"';
 	
-		elseif (is_numeric($value))
+		}elseif (is_numeric($value))
 			return $value;
 	
 		elseif (is_null($value))
@@ -158,7 +175,8 @@ class GB_DBase	{
 	/**
 	 * Отправка запроса в MySQL и слежение за ошибками.
 	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля/таблицы
+	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля,
+	 * 		":@&lt;key>" — подстановка имени таблицы
 	 *
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -192,10 +210,12 @@ class GB_DBase	{
 			$query = preg_replace_callback(
 					$regexp,
 					function($matches) use ($substitutions) {
-						// Если имя ключа подстановки начинается с '#', то его значение — имя поля, а не данные
-						return (substr($matches{1}, 0, 1) == '#')
-							? GB_DBase::field_escape($substitutions[$matches{1}]);
-							: GB_DBase::data_escape($substitutions[$matches{1}]);
+						$type = substr($matches{1}, 0, 1);	// Определяем тип информации для подстановки
+						return ($type == '@')
+							? gbdb()->table_escape($substitutions[$matches{1}])	// Кодируем имя таблицы
+							: ($type == '#')
+								? gbdb()->field_escape($substitutions[$matches{1}])	// Кодируем имя поля
+								: gbdb()->data_escape($substitutions[$matches{1}]);	// Кодируем данные
 					},
 					$query
 			);
@@ -236,7 +256,7 @@ class GB_DBase	{
 	 * Получение результата запроса, который состоит из нескольких строк и одного
 	 * столбца.
 	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля/таблицы
+	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query			SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -266,7 +286,7 @@ class GB_DBase	{
 	 * Получения результата скалярного запроса (состоящего из одной строки и одной
 	 * ячейки в ней).
 	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля/таблицы
+	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -288,7 +308,7 @@ class GB_DBase	{
 	 * Получение результата табличного запроса (состоящего из нескольких строк
 	 * и нескольких столбцов).
 	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля/таблицы
+	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -317,7 +337,7 @@ class GB_DBase	{
 	/**
 	 * Получение результата запроса, который состоит из одной строки.
 	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля/таблицы
+	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -362,6 +382,7 @@ class GB_DBase	{
 	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
 	 */
 	function set_row($tablename, $data, $unique_key = FALSE, $mode = FALSE) {
+		$tablename = $this->table($tablename);
 		if (!$unique_key) { // Уникальный идентификатор не указан - INSERT
 			if (!$mode || $mode == MODE_INSERT)	$query = 'INSERT';
 			elseif($mode == MODE_IGNORE)		$query = 'INSERT IGNORE';
@@ -375,9 +396,9 @@ class GB_DBase	{
 				return FALSE;
 			}
 			
-			$query .= " INTO `$tablename` SET ";
+			$query .= " INTO $tablename SET ";
 			foreach ($data as $key => $value)
-				$query .= "`$key` = :$key, ";
+				$query .= $this->field_escape($key) . " = :$key, ";
 			$query = substr($query, 0, -2); // убираем последние запятую и пробел
 			
 			$result = $this->query($query, $data);
@@ -392,7 +413,7 @@ class GB_DBase	{
 				// В данном случае поля из второго аргумента подставляются в часть SET,
 				// а поля из третьего — в часть WHERE
 					
-				$query = "UPDATE `$tablename` SET ";
+				$query = "UPDATE $tablename SET ";
 					
 				// Чтобы одно и то же поле можно было использовать
 				// и в части SET, и в части WHERE с разными значениями, например
@@ -403,13 +424,13 @@ class GB_DBase	{
 				// без использования меток.
 					
 				foreach ($data as $key => $value)
-					$query .= "`$key` = " . GB_DBase::data_escape($value) . ', ';
+					$query .= $this->field_escape($key) . ' = ' . gbdb()->data_escape($value) . ', ';
 				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 						
 				if ($unique_key) {
 					$query .= ' WHERE ';
 					foreach ($unique_key as $key => $value)
-						$query .= " `$key` = " . mysql_escape($value) . ' AND ';
+						$query .= $this->field_escape($key) . ' = ' . mysql_escape($value) . ' AND ';
 					$query = substr($query, 0, -4);	// убираем последние AND и пробел
 				}
 					
@@ -438,15 +459,15 @@ class GB_DBase	{
 					);
 				}
 			
-				$query = "INSERT INTO `$tablename` SET ";
+				$query = "INSERT INTO $tablename SET ";
 				foreach ($all_data as $key => $value)
-					$query .= "`$key` = :$key, ";
+					$query .= $this->field_escape($key) . " = :$key, ";
 				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 
 				if ($data_to_update) {
 					$query .= ' ON DUPLICATE KEY UPDATE ';
 					foreach ($data_to_update as $key => $value)
-						$query .= " `$key` = :$key, ";
+						$query .= $this->field_escape($key) . " = :$key, ";
 					$query = substr($query, 0, -2); // убираем последние запятую и пробел
 				}
 
@@ -462,3 +483,18 @@ class GB_DBase	{
 	}	// function
 
 }	// class
+
+
+
+/**
+ * Глобальная функция доступа к экземпляру класса GB_DBase.
+ * 
+ * @return GB_DBase
+ */
+function gbdb(){
+	/** @var GB_DBase */
+	static $db = NULL;
+	
+	if ($db == NULL)	$db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE, DB_PREFIX);
+	return $db;
+}
