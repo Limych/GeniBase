@@ -1,4 +1,10 @@
 <?php
+/**
+ * Функции работы текстовыми данными и форматирования информации.
+ * 
+ * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
+ */
+
 // Запрещено непосредственное исполнение этого скрипта
 if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
@@ -34,7 +40,7 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 /**
  * Функция вычисления поисковых ключей слов.
  * 
- * @param	string|string[]	$text			Текст, для которого необходимо вычислить поисковые ключи.
+ * @param	string|string[]	$text		Текст, для которого необходимо вычислить поисковые ключи.
  * @param	boolean			$use_hierarhy	Флаг, что надо ключи для каждого вернуть в виде «слово» => массив ключей.
  * @return	string[][]|string[]		Массив вычисленных ключей.
  */
@@ -62,7 +68,8 @@ function make_search_keys($text, $use_hierarhy = true){
 			$res = array_merge($res, $word);
 	}
 
-	return $text;
+	//return $text;
+	return $res;
 }
 
 
@@ -122,7 +129,7 @@ function rus_metaphone($word, $trim_surname = false){
 	if(is_array($word)){
 		foreach($word as $key => $val)
 			$word[$key] = rus_metaphone($val, $trim_surname);
-		return array_filter($word);
+			return array_filter($word);
 	}
 
 	static $alf	= 'ОЕАИУЭЮЯПСТРКЛМНБВГДЖЗЙФХЦЧШЩЁЫ\?\*';	// алфавит кроме исключаемых букв
@@ -230,10 +237,10 @@ function fix_russian($text){
 		'Y'	=> 'У',		'y'	=> 'у',
 		'X'	=> 'Х',		'x'	=> 'х',
 	);
-
-	// Сжимаем множественные звёздочки
-	$text = preg_replace("/\*{2,}/uS", '*', $text);
 	
+		// Сжимаем множественные звёздочки
+		$text = preg_replace("/\*{2,}/uS", '*', $text);
+		
 	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	for($i = 0; $i < count($text); $i += 2){
 		if(preg_match('/[а-яА-Я]/uS', $text[$i]))
@@ -248,6 +255,8 @@ function fix_russian($text){
  * Функция расширения поискового запроса по именам
  */
 function expand_names($names){
+	global $db;
+	
 	$names = array_map('mb_strtolower', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$have_name = false;
 	foreach($names as $key => $n){
@@ -258,30 +267,28 @@ function expand_names($names){
 			if($n != $n2)
 				$exp[] = $n2;
 
-			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` IN ("' . implode('", "', array_map('db_escape', $exp)) . '") AND `is_patronimic` = 1');
-			while($tmp = $result->fetch_array(MYSQL_NUM)){
-				$exp = array_merge($exp, explode(' ', $tmp[0]));
-			}
-			$result->free();
+			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` IN (:keys) AND `is_patronimic` = 1',
+					array('keys' => $exp));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
 
 			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+
 		}elseif(!$have_name){
 			// Это имя
-			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` = "' . db_escape($n) . '" AND `is_patronimic` = 0');
-			while($tmp = $result->fetch_array(MYSQL_NUM)){
-				$exp = array_merge($exp, explode(' ', $tmp[0]));
-			}
-			$result->free();
+			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key AND `is_patronimic` = 0',
+					array('key' => $n));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
 
 			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
 			$have_name = true;
 		}else{
 			// Это непонятно что
-			$result = db_query('SELECT `expand` FROM `dic_names` WHERE `key` = "' . db_escape($n) . '"');
-			while($tmp = $result->fetch_array(MYSQL_NUM)){
-				$exp = array_merge($exp, explode(' ', $tmp[0]));
-			}
-			$result->free();
+			$result = $db->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key',
+					array('key' => $n));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
 
 			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 		}
@@ -289,63 +296,63 @@ function expand_names($names){
 // print "<!-- "; var_export($names); print " -->";
 	return $names;
 } // function expand_names
-
-
-
-/**
- * Check if only latin characters are in text.
- * 
- * @param	string	$text	Text to check for latin characters.
- * @return	boolean		Result of check.
- */
-function is_translit($text) {
-	return preg_match('/[a-z]/uiS', $text);
-}
-
-
-
-/**
- * Convert transliterated text to russian (UTF-8).
- * 
- * Function uses GOST 16876-71 transliteration table.
- * 
- * @param	string	$text	Transliterated russian text.
- * @return	string|string[]		Converted text or translation table if $text was set to NULL.
- */
-function translit2rus($text) {
-	static $tr	= array(
-		// Capital letters
-		'A'		=> 'А',		'B'		=> 'Б',		'V'		=> 'В',		'G'		=> 'Г',		'D'		=> 'Д',
-		'E'		=> 'Е',		'Jo'	=> 'Ё',		'Zh'	=> 'Ж',		'Z'		=> 'З',		'I'		=> 'И',
-		'Jj'	=> 'Й',		'K'		=> 'К',		'L'		=> 'Л',		'M'		=> 'М',		'N'		=> 'Н',
-		'O'		=> 'О',		'P'		=> 'П',		'R'		=> 'Р',		'S'		=> 'С',		'T'		=> 'Т',
-		'U'		=> 'У',		'F'		=> 'Ф',		'Kh'	=> 'Х',		'C'		=> 'Ц',		'Ch'	=> 'Ч',
-		'Sh'	=> 'Ш',		'Shh'	=> 'Щ',		'"'		=> 'Ъ',		'Y'		=> 'Ы',		'\''	=> 'Ь',
-		'Eh'	=> 'Э',		'Ju'	=> 'Ю',		'Ja'	=> 'Я',
-
-		// Lowercase letters
-		'a'		=> 'а',		'b'		=> 'б',		'v'		=> 'в',		'g'		=> 'г',		'd'		=> 'д',
-		'e'		=> 'е',		'jo'	=> 'ё',		'zh'	=> 'ж',		'z'		=> 'з',		'i'		=> 'и',
-		'jj'	=> 'й',		'k'		=> 'к',		'l'		=> 'л',		'm'		=> 'м',		'n'		=> 'н',
-		'o'		=> 'о',		'p'		=> 'п',		'r'		=> 'р',		's'		=> 'с',		't'		=> 'т',
-		'u'		=> 'у',		'f'		=> 'ф',		'kh'	=> 'х',		'c'		=> 'ц',		'ch'	=> 'ч',
-		'sh'	=> 'ш',		'shh'	=> 'щ',		'"'		=> 'ъ',		'y'		=> 'ы',		'\''	=> 'ь',
-		'eh'	=> 'э',		'ju'	=> 'ю',		'ja'	=> 'я',
-
-		// Additional (non GOST) pairs
-		'J'		=> 'Й',		'j'		=> 'й',
-		'Yo'	=> 'Ё',		'yo'	=> 'ё',
-		'X'		=> 'Кс',	'x'		=> 'кс',
-		'H'		=> 'Х',		'h'		=> 'х',
-		'Sch'	=> 'Щ',		'sch'	=> 'щ',
-		'Yu'	=> 'Ю',		'yu'	=> 'ю',
-		'Ya'	=> 'Я',		'ya'	=> 'я',
-	);
-
-	if ($text === null)
-		return $tr;
-
-	return strtr($text, $tr);
-}
+	
+	
+	
+	/**
+	 * Check if only latin characters are in text.
+	 * 
+	 * @param	string	$text	Text to check for latin characters.
+	 * @return	boolean		Result of check.
+	 */
+	function is_translit($text) {
+		return preg_match('/[a-z]/uiS', $text);
+	}
+	
+	
+	
+	/**
+	 * Convert transliterated text to russian (UTF-8).
+	 * 
+	 * Function uses GOST 16876-71 transliteration table.
+	 * 
+	 * @param	string	$text	Transliterated russian text.
+	 * @return	string|string[]		Converted text or translation table if $text was set to NULL.
+	 */
+	function translit2rus($text) {
+		static $tr	= array(
+			// Capital letters
+			'A'		=> 'А',		'B'		=> 'Б',		'V'		=> 'В',		'G'		=> 'Г',		'D'		=> 'Д',
+			'E'		=> 'Е',		'Jo'	=> 'Ё',		'Zh'	=> 'Ж',		'Z'		=> 'З',		'I'		=> 'И',
+			'Jj'	=> 'Й',		'K'		=> 'К',		'L'		=> 'Л',		'M'		=> 'М',		'N'		=> 'Н',
+			'O'		=> 'О',		'P'		=> 'П',		'R'		=> 'Р',		'S'		=> 'С',		'T'		=> 'Т',
+			'U'		=> 'У',		'F'		=> 'Ф',		'Kh'	=> 'Х',		'C'		=> 'Ц',		'Ch'	=> 'Ч',
+			'Sh'	=> 'Ш',		'Shh'	=> 'Щ',		'"'		=> 'Ъ',		'Y'		=> 'Ы',		'\''	=> 'Ь',
+			'Eh'	=> 'Э',		'Ju'	=> 'Ю',		'Ja'	=> 'Я',
+	
+			// Lowercase letters
+			'a'		=> 'а',		'b'		=> 'б',		'v'		=> 'в',		'g'		=> 'г',		'd'		=> 'д',
+			'e'		=> 'е',		'jo'	=> 'ё',		'zh'	=> 'ж',		'z'		=> 'з',		'i'		=> 'и',
+			'jj'	=> 'й',		'k'		=> 'к',		'l'		=> 'л',		'm'		=> 'м',		'n'		=> 'н',
+			'o'		=> 'о',		'p'		=> 'п',		'r'		=> 'р',		's'		=> 'с',		't'		=> 'т',
+			'u'		=> 'у',		'f'		=> 'ф',		'kh'	=> 'х',		'c'		=> 'ц',		'ch'	=> 'ч',
+			'sh'	=> 'ш',		'shh'	=> 'щ',		'"'		=> 'ъ',		'y'		=> 'ы',		'\''	=> 'ь',
+			'eh'	=> 'э',		'ju'	=> 'ю',		'ja'	=> 'я',
+	
+			// Additional (non GOST) pairs
+			'J'		=> 'Й',		'j'		=> 'й',
+			'Yo'	=> 'Ё',		'yo'	=> 'ё',
+			'X'		=> 'Кс',	'x'		=> 'кс',
+			'H'		=> 'Х',		'h'		=> 'х',
+			'Sch'	=> 'Щ',		'sch'	=> 'щ',
+			'Yu'	=> 'Ю',		'yu'	=> 'ю',
+			'Ya'	=> 'Я',		'ya'	=> 'я',
+		);
+	
+		if ($text === null)
+			return $tr;
+	
+		return strtr($text, $tr);
+	}
 
 ?>

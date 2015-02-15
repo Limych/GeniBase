@@ -1,4 +1,13 @@
 <?php
+/**
+ * Основной подключаемый файл системы.
+ * 
+ * Файл хранит некоторые основные функции, отвечает за её инициализацию и подключение всех
+ * необходимых дополнительных модулей. 
+ * 
+ * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
+ */
+
 // Запрещено непосредственное исполнение этого скрипта
 if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
@@ -16,16 +25,16 @@ if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5
 // Запоминаем текущий каталог, как основу для всех подключаемых файлов системы
 define('BASE_DIR',	dirname(dirname(__FILE__)));
 // Константа для быстрого обращения к каталогу с подключаемыми файлами
-define('INC_DIR',	BASE_DIR . '/gb');
+define('GB_INC_DIR',	BASE_DIR . '/gb');
 
 // Подключаем настройки системы
 if(!file_exists(BASE_DIR . '/gb-config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
 require_once(BASE_DIR . '/gb-config.php');
 
 // Подключаем прочие файлы
-require_once(INC_DIR . '/text.php');
-require_once(INC_DIR . '/class.ww1_database.php');
-require_once(INC_DIR . '/class.ww1_records_set.php');
+require_once(GB_INC_DIR . '/text.php');
+require_once(GB_INC_DIR . '/class.ww1_database.php');
+require_once(GB_INC_DIR . '/class.ww1_records_set.php');
 
 // Включение в режиме отладки полной отладочной информации
 if(defined('DEBUG')){
@@ -42,6 +51,14 @@ setlocale(LC_ALL, 'ru_RU.utf8');
 // bindtextdomain(WWI_TXTDOM, dirname(__FILE__) . '/lang');
 // textdomain(WWI_TXTDOM);
 // bind_textdomain_codeset(WWI_TXTDOM, 'UTF-8');
+
+
+
+// Инициализация класса для доступа к СУБД
+require_once(GB_INC_DIR . '/class.GB_DBase.php');
+/** @var GB_DBase */
+$db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE);
+
 
 
 
@@ -76,27 +93,22 @@ function absint($val) {
  * @param	string	$force
  */
 function publish_cron($force = false){
+	global $db;
+	
 	if(!$force){
-		$result = db_query('SELECT MAX(update_datetime) FROM `persons_raw`');
-		$row = $result->fetch_array(MYSQL_NUM);
-		$result->free();
-		$tmp = date_diff(date_create($row[0]), date_create('now'));
+		$max_date = $db->get_cell('SELECT MAX(update_datetime) FROM `persons_raw`');
+		$tmp = date_diff(date_create($max_date), date_create('now'));
 		$tmp = intval($tmp->format('%i'));
 // var_export($tmp);
 		if($tmp < 1)	return;
 	}
 
-	require_once(INC_DIR . '/publish.php');	// Функции формализации данных
+	require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
 
 	// Делаем выборку записей для публикации
-	$drafts = array();
-	// $result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
-	$result = db_query('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
-	while($row = $result->fetch_array(MYSQL_ASSOC)){
-		$drafts[] = $row;
-	}
-	$result->free();
-
+// 	$drafts = $db->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
+	$drafts = $db->get_table('SELECT * FROM `persons_raw` WHERE `status` = "Draft" ORDER BY RAND() LIMIT ' . P_LIMIT);
+	
 	// Нормирование данных
 	foreach($drafts as $raw){
 if(defined('DEBUG'))	print "\n\n======================================\n";
@@ -105,112 +117,14 @@ if(defined('DEBUG'))	var_export($row);
 if(defined('DEBUG'))	var_export($have_trouble);
 if(defined('DEBUG'))	var_export($pub);
 		// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
-		if(!$have_trouble){
-			db_query('REPLACE INTO `persons` (' . implode(', ', array_keys($pub)) . ') VALUES ("' . implode('", "', array_values($pub)) . '")');
-		}
-		db_query('UPDATE `persons_raw` SET `status` = "' . ($have_trouble ? 'Cant publish' : 'Published') . '" WHERE `id` = ' . $raw['id']);
+		if(!$have_trouble)
+			$db->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
+		//
+		$db->set_row('persons_raw',
+				array('status' => ($have_trouble ? 'Cant publish' : 'Published')),
+				$raw['id']
+		);
 	}
-}
-
-
-
-/**
- * Соединяемся с СУБД, выбираем базу данных
- */
-function db_open($open = true){
-	static $db = null;
-
-	if(!empty($db) || !$open)	return $db;
-
-	$db = new MySQLi(DB_HOST, DB_USER, DB_PWD, DB_BASE);
-	if ($db->connect_error) {
-		@header('HTTP/1.1 503 Service Temporarily Unavailable');
-		@header('Status: 503 Service Temporarily Unavailable');
-		@header('Retry-After: 600');	// 600 seconds
-		die('Ошибка подключения (' . $db->connect_errno . ') ' . $db->connect_error);
-	}
-
-	// Проверка версии MySQL
-	// if(version_compare($db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
-
-	$db->set_charset('utf8');
-	return $db;
-}
-
-
-
-/**
- * Экранирование специальных конструкций
- */
-function db_escape($str, $escape_reg = false){
-	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
-	if(is_array($str)){
-		foreach($str as $key => $val)
-			$str[$key] = db_escape($val, $escape_reg);
-		return $str;
-	}
-
-	$db = db_open();
-	$str = $db->escape_string($str);
-	if($escape_reg)
-		$str = preg_replace('/([.?*\\_%])/uS', '\\\1', $str);
-	return $str;
-}
-
-
-
-/**
- * Формирование из строки с метасимволами регулярного выражения для поиска в системе
- */
-function db_regex($str, $full_word = true){
-	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
-	if(is_array($str)){
-		foreach($str as $key => $val)
-			$str[$key] = db_regex($val, $full_word);
-		return $str;
-	}
-
-	$str = strtr($str, array(
-		'ё'	=> '(е|ё)',
-		'Ё'	=> '(Е|Ё)',
-	));
-	$str = preg_replace_callback('/(\?+|\*+)/uS', function ($matches){
-		$ch = substr($matches[1], 0, 1);
-		$len = strlen($matches[1]);
-		// return '[[:alpha:]]' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));
-		return '(..)' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));	// Костыли для учёта двухбайтной кодировки
-	}, $str);
-	if($full_word)
-		$str = "[[:<:]]${str}[[:>:]]";
-	return $str;
-}
-
-
-
-/**
- * Отправляем запрос в СУБД
- */
-function db_query($query){
-	$db = db_open();
-	if(false === ($result = $db->query($query))){
-		error_log('MySQL query error: ' . $db->error . ' Query: ' . $query);
-		die('Запрос не удался: ' . $db->error . (!defined('SQL_DEBUG') ? '' : '<br/>Запрос: ' . $query));
-	}
-	return $result;
-}
-
-
-
-/**
- * Закрываем соединение с СУБД
- */
-function db_close(){
-	// Раз в 30 запусков делаем апдейт обновляемых данных
-// 	if(rand(0, 30) == 0)	db_update();
-
-	// Закрываем соединение с СУБД
-	$db = db_open(false);
-	if($db)		$db->close();
 }
 
 
@@ -219,74 +133,98 @@ function db_close(){
  * Periodically update calculated fields in database.
  */
 function db_update(){
+	global $db;
+	
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
-	db_query("DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3) OR `banned_to_datetime` < NOW()");
+	$db->query('DELETE FROM `load_check` WHERE (`banned_to_datetime` IS NULL
+			AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)
+			OR `banned_to_datetime` < NOW()');
 
 	// Генерируем поисковые ключи для фамилий
-	$result = db_query('SELECT DISTINCT `surname` FROM `persons` ORDER BY `update_datetime` ASC LIMIT 7');
-	while($row = $result->fetch_array(MYSQL_NUM)){
+	$result = $db->get_column('SELECT DISTINCT `surname` FROM `persons`
+			WHERE NOT EXISTS (
+				SELECT 1 FROM `idx_search_keys` WHERE `persons`.`id` = `idx_search_keys`.`person_id`
+				AND (
+					`idx_search_keys`.`update_datetime` > :exp
+					OR `persons`.`update_datetime` < `idx_search_keys`.`update_datetime`
+				)
+			) ORDER BY `update_datetime` ASC LIMIT 15', array('exp' => IDX_EXPIRATION_DATE));
+	foreach ($result as $row){
+		$db->query('DELETE FROM `idx_search_keys` USING `idx_search_keys` INNER JOIN `persons`
+				WHERE `persons`.`surname` = :surname AND `persons`.`id` = `idx_search_keys`.`person_id`',
+				array('surname' => $row[0]));
+		
 		$keys = make_search_keys($row[0], false);
-		db_query('DELETE LOW_PRIORITY FROM `idx_surname_keys` USING `idx_surname_keys` INNER JOIN `persons` WHERE `persons`.`surname` = "' . db_escape($row[0]) . '" AND `persons`.`id` = `idx_surname_keys`.`person_id`');
-		foreach ($keys as $key) {
-			db_query('INSERT LOW_PRIORITY IGNORE INTO `idx_surname_keys` (`person_id`, `surname_key`) SELECT `id`, "' . db_escape($key) . '" FROM `persons` WHERE `surname` = "' . db_escape($row[0]) . '"');
-		}
+		foreach ($keys as $key)
+			$db->query('INSERT IGNORE INTO `idx_search_keys` (`person_id`, `surname_key`)
+					SELECT `id`, UPPER(:key) FROM `persons` WHERE `surname` = :surname',
+					array('key' => $key, 'surname' => $row[0]));
 	}
-	$result->free();
 	
 	// Обновляем списки вложенных регионов, если это необходимо
-	$result = db_query('SELECT `id`, `parent_id` FROM `dic_region` WHERE `region_ids` = ""');
-	while($region = $result->fetch_object()){
-		$result2 = db_query('SELECT GROUP_CONCAT(`region_ids`) FROM `dic_region` WHERE `parent_id` = ' . $region->id);
-		$ids = $result2->fetch_array(MYSQL_NUM);
-		$result2->free();
-		$ids = trim(preg_replace('/,,+/uS', ',', $ids[0]) ,',');
-		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_ids` = "' . $region->id . (empty($ids) ? '' : ',' . $ids) . '" WHERE `id` = ' . $region->id);
-		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_ids` = "" WHERE `id` = ' . $region->parent_id);
+	$result = $db->get_column('SELECT `id`, `parent_id` FROM `dic_region` WHERE `region_ids` = ""',
+			array(), TRUE);
+	foreach ($result as $id => $parent_id){
+		$ids = $db->get_cell('SELECT GROUP_CONCAT(`region_ids`) FROM `dic_region` WHERE `parent_id` = :id',
+				array('id' => $id));
+		$ids = trim(preg_replace('/,,+/uS', ',', $ids) ,',');
+		$db->set_row('dic_region', array('region_ids' => (empty($ids) ? $id : "$id,$ids")), $id);
+		$db->set_row('dic_region', array('region_ids' => ''), $parent_id);
 	}
-	$result->free();
 	
 	// Обновляем полные наименования регионов, если это необходимо
-	$result = db_query('SELECT `id`, `parent_id`, `title` FROM `dic_region` WHERE `region` = ""');
-	while($region = $result->fetch_object()){
-		$result2 = db_query('SELECT `region` FROM `dic_region` WHERE `id` = ' . $region->parent_id);
-		$parent = $result2->fetch_object();
-		$result2->free();
+	$result = $db->get_table('SELECT `id`, `parent_id`, `title` FROM `dic_region` WHERE `region` = ""');
+	foreach ($result as $row){
+		$parent_region = $db->get_cell('SELECT `region` FROM `dic_region` WHERE `id` = :parent_id', $row);
 		global $region_short;
-		$tmp = trim((empty($parent) || substr($parent->region, 0, 1) == '(' ? '' : $parent->region . ', ') . (substr($region->title, 0, 1) == '(' ? '' : strtr($region->title, $region_short)), ', ');
+		$tmp = trim(
+				(empty($parent_region) || substr($parent_region, 0, 1) == '('
+						? '' : "$parent_region, ") .
+				(substr($row['title'], 0, 1) == '('
+						? '' : strtr($row['title'], $region_short)),
+				', ');
 		if($tmp){
-			db_query('UPDATE LOW_PRIORITY `dic_region` SET `region` = "' . db_escape($tmp) . '" WHERE `id` = ' . $region->id);
-			db_query('UPDATE LOW_PRIORITY `dic_region` SET `region` = "" WHERE `parent_id` = ' . $region->id);
+			$db->set_row('dic_region', array('region' => $tmp), $row['id']);
+			$db->set_row('dic_region', array('region' => ''), array('parent_id' => $row['id']));
 		}
 	}
-	$result->free();
 	
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = db_query('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 7');
-	while($row = $result->fetch_object()){
-		if(empty($row->region_ids))	$row->region_ids = $row->id;
+	$result = $db->get_column('SELECT `id`, `region_ids` FROM `dic_region` ORDER BY `update_datetime` ASC LIMIT 7',
+			array(), TRUE);
+	foreach ($result as $id => $region_ids){
+		if(empty($region_ids))	$region_ids = $id;
 		$cnt = '';
-		if(false !== strpos($row->region_ids, ',')){
-			// У региона есть вложенные регионы — просуммируем их статистику и добавим к статистике региона
-			$result2 = db_query('SELECT SUM(`region_cnt`) FROM `dic_region` WHERE `parent_id` = ' . $row->id);
-			$childs = $result2->fetch_array(MYSQL_NUM);
-			$result2->free();
-			$cnt = $childs[0] . ' + ';
+		if(false !== strpos($region_ids, ',')){
+			// У региона есть вложенные регионы — просуммируем их статистику и прибавим к статистике региона
+			$childs = $db->get_cell('SELECT SUM(`region_cnt`) FROM `dic_region` WHERE `parent_id` = :parent_id',
+					array('parent_id' => $id));
+			$cnt = $childs . ' + ';
 		}
-		db_query('UPDATE LOW_PRIORITY `dic_region` SET `region_cnt` = ' . $cnt . '( SELECT COUNT(*) FROM `persons` WHERE `region_id` = ' . intval($row->region_ids) . ' ), `update_datetime` = NOW() WHERE `id` = ' . $row->id);
+		$db->query('UPDATE LOW_PRIORITY `dic_region` SET `region_cnt` = ' . $cnt .
+				'( SELECT COUNT(*) FROM `persons` WHERE `region_id` = :region_ids ), `update_datetime` = NOW() WHERE `id` = :id',
+				array('id' => $id, 'region_ids' => $region_ids));
 	}
-	$result->free();
 	//
-	// … по религиям, семейным положениям, причинам выбытия
+	// … по религиям, семейным положениям, событиям
 	foreach(explode(' ', 'religion marital reason') as $key){
-		$result = db_query("SELECT `id` FROM `dic_${key}` ORDER BY `update_datetime` ASC LIMIT 1");
-		while($row = $result->fetch_array(MYSQL_NUM)){
-			db_query("UPDATE LOW_PRIORITY `dic_${key}` SET `${key}_cnt` = ( SELECT COUNT(*) FROM `persons` WHERE `${key}_id` = ${row[0]} ), `update_datetime` = NOW() WHERE `id` = ${row[0]}");
-		}
-		$result->free();
-	}
-}
+		$result = $db->get_column('SELECT `id` FROM :#table ORDER BY `update_datetime` ASC LIMIT 1',
+				array('#table' => "dic_$key"));
+		foreach($result as $row){
+			$db->get_column('UPDATE LOW_PRIORITY :#table SET :#field_cnt =
+					( SELECT COUNT(*) FROM `persons` WHERE :#field_id = :id ),
+					`update_datetime` = NOW() WHERE `id` = :id',
+					array(
+						'#table'		=> "dic_$key",
+						'#field_cnt'	=> "{$key}_cnt",
+						'#field_id'		=> "{$key}_id",
+						'id'	=> $row['id'],
+					));
+		}	// foreach
+	}	// foreach
+}	// function db_update
 
 
 
@@ -307,7 +245,7 @@ function html_header($title){
 	// Проверка на старые метасимволы и выдача предупреждения
 	global $dbase;
 	foreach($dbase->query as $val){
-		if(preg_match('/[_%]/uS', $val)){
+		if(preg_match('/[_%]/uS', @$val)){
 			print "\t<meta name='robots' content='noindex,nofollow' />\n";
 			break;
 		}
@@ -315,7 +253,7 @@ function html_header($title){
 /*** ↑↑↑ Удалить после августа 2014 ↑↑↑ *************************************************/
 ?>
 
-	<title><?php echo $title; ?> - Первая Мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
+	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
 </head><body>
@@ -329,10 +267,23 @@ function html_header($title){
 			});
 		});
 	</script>
-	<h1>Первая Мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1>
+	<!-- <h1>Первая мировая война, 1914–1918&nbsp;гг.<br/>Алфавитные списки потерь нижних чинов</h1> -->
+	<!-- начало вставки -->
+	<table align=center width=770 border=0 cellspacing=0 cellpadding=2>
+		<tr>
+			<td width=150>
+				<a href=http://1914.svrt.ru/><img src="/img/logo03c.jpg" hspace=0 vspace=0></a>
+			</td>
+			<td align=center hspace=30 vspace=30
+				<link rel="stylesheet" type="text/css" href="/styles.css" />
+				<h2>Первая мировая война, 1914–1918 гг.<br/>Алфавитные списки потерь нижних чинов</h2>
+				<a href=http://www.svrt.ru/>Проект Союза Возрождений Родословных Традиций (СВРТ)</a>
+			</td>
+		</tr>
+	</table>
+	<!-- окончание вставки -->	
 <?php
 }
-
 
 
 /**
@@ -340,6 +291,10 @@ function html_header($title){
  */
 function html_footer(){
 ?>
+<!--
+<p style="text-align: center; margin-top: 3em;"><a href="/news.php">Новости</a> | <a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая</a>  | <a href="http://forum.svrt.ru/index.php?showforum=127" target="_blank">Форум</a> | <a href="crue.php">Команда</a></p>
+-->
+<p style="text-align: center; margin-top: 3em;"><a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая книга</a>  | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
 <p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -404,18 +359,14 @@ function paginator($pg, $max_pg){
  * Функция вывода общей статистики о числе записей в системе.
  */
 function show_records_stat(){
-	$result = db_query('SELECT COUNT(*) FROM persons');
-	$cnt = $result->fetch_array(MYSQL_NUM);
-	$result->free();
+	global $db;
+	
+	$cnt	= $db->get_cell('SELECT COUNT(*) FROM persons');
+	$cnt2	= $db->get_cell('SELECT COUNT(*) FROM persons_raw');
 	//
-	$result = db_query('SELECT COUNT(*) FROM persons_raw');
-	$cnt2 = $result->fetch_array(MYSQL_NUM);
-	$result->free();
-	//
-	$txt = format_num($cnt[0], ' запись.', ' записи.', ' записей.');
-	if($cnt[0] != $cnt2[0]){
-		$txt = format_num($cnt2[0], ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
-	}
+	$txt = format_num($cnt, ' запись.', ' записи.', ' записей.');
+	if($cnt != $cnt2)
+		$txt = format_num($cnt2, ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
 	print "<p class='aligncenter'>На данный момент в базе содержится $txt</p>\n";
 }
 
@@ -431,6 +382,8 @@ function show_records_stat(){
  * @param	integer	$records_found
  */
 function log_event($records_found = 0){
+	global $db;
+	
 	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
 		return implode('&', array_filter(preg_split('/&/uS', $matches[1]), function($val){
@@ -438,22 +391,18 @@ function log_event($records_found = 0){
 		}));
 	}, $_SERVER['REQUEST_URI']);
 
-	$db = db_open();
-	$stmt = $db->prepare('SELECT 1 FROM `logs` WHERE `url` = ? AND `datetime` >= NOW() - INTERVAL 1 HOUR');
-	$stmt->bind_param("s", $url);
-	$stmt->execute();
-	$res = $stmt->fetch();
-	$stmt->close();
-	if($res)	return;
+	if($db->get_cell('SELECT 1 FROM `logs` WHERE `url` = :url AND `datetime` >= NOW() - INTERVAL 1 HOUR',
+			array('url' => $url)))
+		return;
 
 	$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
-	$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
-	$squery = trim($squery);
+	$squery = trim($_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)"));
 
-	$stmt = $db->prepare('INSERT `logs` (`query`, `url`, `records_found`) VALUES (?, ?, ?)');
-	$stmt->bind_param("ssi", $squery, $url, $records_found);
-	$stmt->execute();
-	$stmt->close();
+	$db->set_row('logs', array(
+		'query' => $squery,
+		'url'	=> $url,
+		'records_found'	=> $records_found,
+	), FALSE, GB_DBase::MODE_INSERT);
 }
 
 
@@ -464,23 +413,30 @@ function log_event($records_found = 0){
  * В случае выявления перенагрузки, функция не возвращает ничего, а исполнение скрипта прерывается.
  */
 function load_check(){
-	$ip = '"' . db_escape($_SERVER["REMOTE_ADDR"]) . '"';
-
-	$result = db_query("SELECT CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`, `banned_to_datetime` >= NOW() AS `banned` FROM `load_check` WHERE `ip` = $ip");
-	$row = $result->fetch_object();
-	$result->free();
+	global $db;
+	
+	$row = $db->get_cell('SELECT
+			CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW())) AS `period_in_sec`,
+			CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`,
+			`banned_to_datetime` >= NOW() AS `banned` 
+			FROM `load_check` WHERE `ip` = :ip', array('ip' => $_SERVER["REMOTE_ADDR"]));
 
 // print "<!-- "; var_export($row); print " -->";
-	if(null === $row){
+	if(FALSE === $row){
 		// Первый заход пользователя
-		db_query("INSERT INTO `load_check` (`ip`) VALUES ($ip)");
-	}elseif($row->banned || $row->speed < 3){
+		$db->set_row('load_check', array('ip' => $_SERVER["REMOTE_ADDR"]), FALSE, GB_DBase::MODE_INSERT);
+
+	}elseif($row['banned'] || (($row['speed'] < 3) && ($row['period_in_sec'] > 30))){
 		// Пользователь проштрафился
-		db_query("UPDATE `load_check` SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, " . OVERLOAD_BAN_TIME . ", NOW()) WHERE `ip` = $ip");
+		$db->query('UPDATE `load_check` SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, :ban, NOW())
+				WHERE `ip` = :ip',
+				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
 		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
 		die();
+
 	}else{
 		// Очередной заход пользователя
-		db_query("UPDATE `load_check` SET `requests_counter` = `requests_counter` + 1 WHERE `ip` = $ip");
+		$db->query('UPDATE `load_check` SET `requests_counter` = `requests_counter` + 1 WHERE `ip` = :ip',
+				array('ip' => $_SERVER["REMOTE_ADDR"]));
 	}
 }

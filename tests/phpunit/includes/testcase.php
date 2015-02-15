@@ -16,7 +16,6 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 // 		global $gbdb;
 // 		$gbdb->suppress_errors = false;
 // 		$gbdb->show_errors = true;
-// 		$gbdb->db_connect();
 		ini_set('display_errors', 1);
 // 		$this->factory = new GB_UnitTest_Factory();
 		$this->clean_up_global_scope();

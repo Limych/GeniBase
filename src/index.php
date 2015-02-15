@@ -4,6 +4,9 @@ if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5
 
 require_once('gb/common.php');	// Общие функции системы
 
+//ini_set('error_reporting', E_ERROR);
+//ini_set('display_errors', 'Off');
+
 $dbase = new ww1_database_solders(Q_SIMPLE);
 
 $tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
@@ -16,15 +19,15 @@ show_records_stat();
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
 	<h2>Поиск персоны</h2>
 	<p class="small alignright"><a href="/extsearch.php">Расширенный поиск</a></p>
-	<?php $dbase->search_form(); ?>
+	<?php $dbase->search_form()	?>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>
 		<button class="clearForm" type="button">Очистить</button>
 	</div>
 	<div id="help">
-		<p class="nb">Система при поиске автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий.</p>
-		<p class="nb"><strong>Обратите внимание:</strong> во&nbsp;времена Первой Мировой Войны не&nbsp;было современных республик и&nbsp;областей&nbsp;— были губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются от&nbsp;границ современных территорий. Места жительства в&nbsp;системе указываются по&nbsp;состоянию на&nbsp;даты войны.</p>
-		<p class="nb">Для поиска частей слов используйте метасимволы: «?» (вопрос)&nbsp;— заменяет один любой символ, «*» (звёздочка)&nbsp;— заменяет один и&nbsp;более любых символов. При использовании метасимволов автоматическое расширение запроса отключается.</p>
+	<p class="nb">Система при поиске автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий.</p>
+	<p class="nb"><strong>Обратите внимание:</strong> во&nbsp;времена Первой мировой войны не&nbsp;было современных республик и&nbsp;областей&nbsp;— были губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются от&nbsp;границ современных территорий. Места жительства в&nbsp;системе указываются по&nbsp;состоянию на&nbsp;даты войны.</p>
+	<p class="nb">Для поиска частей слов используйте метасимволы: «?» (вопрос)&nbsp;— заменяет один любой символ, «*» (звёздочка)&nbsp;— заменяет один и&nbsp;более любых символов. При использовании метасимволов автоматическое расширение запроса отключается.</p>
 		<p class="nb">Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;русские буквы. <a href="/translit.php">Таблица перекодировки</a>.</p>
 	</div>
 </form>
@@ -45,30 +48,31 @@ if($dbase->have_query){
 		'rank'		=> 'Воинское звание',
 		'religion'	=> 'Вероисповедание',
 		'marital'	=> 'Семейное положение',
-		'reason'	=> 'Причина выбытия',
-		'date'		=> 'Дата выбытия',
+		'reason'	=> 'Событие',
+		'date'		=> 'Дата события',
+		'military_unit'		=> 'Место службы',
+		'place_of_event'	=> 'Место события',
+		'estate_or_title'	=> 'Титул/сословие',
+		'additional_info'	=> 'Доп. инф-ция',
+		'birthdate'	=> 'Дата рождения',
 		'source'	=> 'Источник',
 		'comments'	=> '',
 	);
 	$report->show_report($brief_fields, $detailed_fields);
 }
 ?>
-<p style="text-align: center; margin-top: 3em;"><a href="/stat.php">Статистика</a> | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
+<!--
+<p style="text-align: center; margin-top: 3em;"><a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая книга</a>  | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
+-->
 <?php
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
-$db = db_open();
-$stmt = $db->prepare('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found` ORDER BY datetime DESC LIMIT 12');
-$stmt->execute();
-$stmt->bind_result($squery, $url);
-$res = array();
-while($stmt->fetch()){
-	if(empty($squery))	$squery = '.';
-	$res[] = "<a href='$url'>" . htmlspecialchars($squery) . "</a>";
+$res = $db->get_table('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found`
+		ORDER BY datetime DESC LIMIT 12');
+foreach ($res as $key => $row){
+	if(empty($row['query']))	$row['query'] = '.';
+	$res[$key] = "<a href='$row[url]'>" . htmlspecialchars($row['query']) . "</a>";
 }
-$stmt->close();
 print "<p class='lastq aligncenter'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 
 html_footer();
-db_close();
-?>

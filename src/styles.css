@@ -25,10 +25,19 @@ form	{
 form.editor	{
 	max-width: none;
 }
+
 form h2	{
 	margin: 0 0 1em;
 	text-align: center;
 	font-size: 120%;
+}
+form h3	{
+	margin: 0 0 1em;
+	text-align: center;
+	font-size: 40%;
+	font-style: italic;
+	font-color: #FFF;
+	font-weight: normal;
 }
 form p	{
 	text-align: justify;

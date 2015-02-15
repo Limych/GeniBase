@@ -5,33 +5,10 @@ html_header('Статистика');
 ?>
 <p><a href="/">« Вернуться к поиску</a></p>
 <h1>Общая статистика по базе данных</h1>
+
 <?php
 show_records_stat();
-
-dic_stat('Распределение по&nbsp;вероисповеданию', 'Вероисповедание', 'religion');
-dic_stat('Распределение по&nbsp;семейному положению', 'Семейное положение', 'marital');
-dic_stat('Распределение по&nbsp;причине выбытия', 'Причина выбытия', 'reason');
-
 ?>
-<table class="stat">
-	<caption>Распределение по&nbsp;воинским званиям</caption>
-<thead><tr>
-	<th>Воинское звание</th>
-	<th>Записей</th>
-</tr></thead><tbody>
-<?php
-$even = 0;
-//							0		1
-$result = db_query('SELECT rank, COUNT(*) FROM persons GROUP BY rank ORDER BY rank');
-while($row = $result->fetch_array(MYSQLI_NUM)){
-	$even = 1-$even;
-	if(empty($row[0]))
-		$row[0] = '(не указано)';
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[0]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
-}
-$result->free();
-?>
-</tbody></table>
 
 <table class="stat">
 	<caption>Распределение по&nbsp;регионам Российской Империи</caption>
@@ -44,40 +21,84 @@ $even = 0;
 region_stat();
 ?>
 </tbody></table>
+
+<table class="stat">
+	<caption>Распределение по&nbsp;воинским званиям</caption>
+<thead><tr>
+	<th>Воинское звание</th>
+	<th>Записей</th>
+</tr></thead><tbody>
 <?php
-html_footer();
-db_close();
+$even = 0;
+$result = $db->get_table('SELECT rank, COUNT(*) AS cnt FROM persons GROUP BY rank ORDER BY rank');
+foreach ($result as $row){
+	$even = 1-$even;
+	if(empty($row['rank']))
+		$row['rank'] = '(не указано)';
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row['rank']) . "</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
+}
+?>
+</tbody></table>
 
-
-
-function region_stat($parent_id = 0, $level = 1){
-	global $even;
-
-	$result = db_query('SELECT id, title, region_comment, region_cnt FROM dic_region WHERE parent_id = ' . $parent_id . ' ORDER BY title');
-	while($row = $result->fetch_object()){
-		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" . $row->id . "'>" . htmlspecialchars($row->title) . (empty($row->region_comment) ? '' : ' <span class="comment">' . htmlspecialchars($row->region_comment) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row->region_cnt) . "</td>\n";
-
-		region_stat($row->id, $level + 1);
+<table class="stat">
+	<caption>Распределение по&nbsp;событиям</caption>
+<thead><tr>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Тип&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th>Название события</th>
+	<th>Записей</th>
+</tr></thead><tbody>
+<?php
+$even = 0;
+$result = $db->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt FROM dic_reason
+		GROUP BY event_type, reason ORDER BY 1,2');
+foreach ($result as $row){
+	$even = 1-$even;
+	if(empty($row['event_type']))	$row['event_type'] = '(не указано)';
+	if(empty($row['reason']))		$row['reason'] = '(не указано)';
+	if(strlen(htmlspecialchars($row['reason'])) > 100){
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
+				."<td>" .             htmlspecialchars($row['event_type']) .              "</td>\n\t"
+				."<td>" . '<small>' . htmlspecialchars($row['reason']) . '</small>' . "</td>\n\t"
+				."<td class='alignright'>" . format_num($row['cnt']) . "</td>\n"
+			."</tr>";
+	}else{
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
+				."<td>" . htmlspecialchars($row['event_type']) . "</td>\n\t"
+				."<td>" . htmlspecialchars($row['reason']) . "</td>\n\t"
+				."<td class='alignright'>" . format_num($row['cnt']) . "</td>\n"
+			."</tr>";
 	}
-	$result->free();
+}
+?>
+</tbody></table>
+
+<?php
+dic_stat('Распределение по&nbsp;вероисповеданию', 'Вероисповедание', 'religion');
+dic_stat('Распределение по&nbsp;семейному положению', 'Семейное положение', 'marital');
+?>
+
+
+<?php
+function region_stat($parent_id = 0, $level = 1){
+	global $even, $db;
+
+	$result = $db->get_table('SELECT id, title, region_comment, region_cnt FROM dic_region
+			WHERE parent_id = :parent_id ORDER BY title',
+			array('parent_id' => $parent_id));
+	foreach ($result as $row){
+		$even = 1-$even;
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
+				$row->id . "'>" . htmlspecialchars($row['title']) .
+				(empty($row['region_comment']) ? '' : ' <span class="comment">' .
+						htmlspecialchars($row['region_comment']) . '</span>') .
+				"</td>\n\t<td class='alignright'>" . format_num($row['region_cnt']) . "</td>\n";
+
+		region_stat($row['id'], $level + 1);
+	}
 }
 
-// function hierarhical_stat($field, $parent_id = 0, $level = 1, $tfield = NULL){
-	// global $even;
-
-	// if(empty($tfield))	$tfield = $field;
-	// $result = db_query("SELECT id, $tfield, ${field}_comment, ${field}_cnt FROM dic_${field} WHERE parent_id = $parent_id ORDER BY $tfield");
-	// while($row = $result->fetch_array(MYSQL_ASSOC)){
-		// $even = 1-$even;
-		// print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region region_$level id_${row[id]}'>" . htmlspecialchars($row[$tfield]) . (empty($row[$tfield.'_comment']) ? '' : ' <span class="comment">' . htmlspecialchars($row[$tfield.'_comment']) . '</span>') . "</td>\n\t<td class='alignright'>" . format_num($row[$tfield.'_cnt']) . "</td>\n";
-
-		// hierarhical_stat($field, $row->id, $level + 1, $tfield);
-	// }
-	// $result->free();
-// }
-
 function dic_stat($caption, $field_title, $field){
+	global $db;
 ?>
 
 <table class="stat">
@@ -88,16 +109,19 @@ function dic_stat($caption, $field_title, $field){
 </tr></thead><tbody>
 <?php
 $even = 0;
-//							0			1
-$result = db_query("SELECT ${field}, ${field}_cnt FROM dic_${field} WHERE ${field}_cnt != 0 ORDER BY ${field}");
-while($row = $result->fetch_array(MYSQLI_NUM)){
+$result = $db->get_table('SELECT :#field AS field, :#field_cnt AS cnt FROM :#table WHERE field != 0 ORDER BY field',
+		array(
+			'#table'		=> "dic_$field",
+			'#field'		=> $field,
+			'#field_cnt'	=> $field . '_cnt',
+		));
+foreach ($result as $row){
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[0]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row[]) . "</td>\n\t<td class='alignright'>" . format_num($row[1]) . "</td>\n</tr>";
 }
 $result->free();
 ?>
 </tbody></table>
 <?php
 }
-
-?>
+html_footer();

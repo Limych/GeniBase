@@ -1,4 +1,15 @@
 <?php
+/**
+ * Класс хранения результатов поиска в базе данных и отображения их на экране.
+ * 
+ * Класс берёт на себя функции хранения информации и правильного отображения их пользователю.
+ * Для выборки информации из базы используется парный класс ww1_database.
+ *  
+ * @see ww1_database
+ * 
+ * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
+ */
+
 // Запрещено непосредственное исполнение этого скрипта
 if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
@@ -29,37 +40,36 @@ class ww1_solders_set extends ww1_records_set{
 	public	$records_cnt;
 
 	// Создание экземпляра класса и сохранение результатов поиска
-	function __construct($page, $sql_result, $records_cnt = NULL){
+	function __construct($page, $data, $records_cnt = NULL){
+		global $db;
 		parent::__construct($page);
 
 		$this->records = array();
-		while($row = $sql_result->fetch_object()){
-			if($row->religion == '(иное)'){
-				$result = db_query('SELECT religion FROM `persons_raw` WHERE `id` = ' . $row->id);
-				$tmp = $result->fetch_array(MYSQL_NUM);
-				$result->free();
-				$row->religion = $tmp[0];
-			}
-			if($row->marital == '(иное)'){
-				$result = db_query('SELECT marital FROM `persons_raw` WHERE `id` = ' . $row->id);
-				$tmp = $result->fetch_array(MYSQL_NUM);
-				$result->free();
-				$row->marital = $tmp[0];
-			}
-			if($row->reason == '(иное)'){
-				$result = db_query('SELECT reason FROM `persons_raw` WHERE `id` = ' . $row->id);
-				$tmp = $result->fetch_array(MYSQL_NUM);
-				$result->free();
-				$row->reason = $tmp[0];
-			}
+		foreach ($data as $row){
+			if($row['religion'] == '(иное)')
+				$row['religion'] = $db->get_cell('SELECT religion FROM `persons_raw` WHERE `id` = :id',
+						array('id' => $row['id']));
+			
+			if($row['marital'] == '(иное)')
+				$row['marital'] = $db->get_cell('SELECT marital FROM `persons_raw` WHERE `id` = :id',
+						array('id' => $row['id']));
+			
+			if($row['reason'] == '(иное)')
+				$row['reason'] = $db->get_cell('SELECT reason FROM `persons_raw` WHERE `id` = :id',
+						array('id' => $row['id']));
+			
 			$this->records[] = $row;
 		}
 
 		$this->records_cnt = ($records_cnt !== NULL ? $records_cnt : count($this->records));
 	}
 
+	
+	
 	// Вывод результатов поиска в виде html-таблицы
 	function show_report($brief_fields = NULL, $detailed_fields = array()){
+		global $db;
+		
 		$max_pg = max(1, ceil($this->records_cnt / Q_LIMIT));
 		if($this->page > $max_pg)	$this->page = $max_pg;
 
@@ -110,33 +120,35 @@ class ww1_solders_set extends ww1_records_set{
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
 			$even = 1-$even;
-			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row->id . (!isset($row->strictMatch) || !empty($row->strictMatch) ? '' : ' nonstrict-match') . "'>\n";
+			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['strictMatch']) || !empty($row['strictMatch']) ? '' : ' nonstrict-match') . "'>\n";
 // if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($row);	print "\n -->\n";	}
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
-			foreach(array_keys($brief_fields) as $key){
-				print "\t\t<td>" . htmlspecialchars($row->$key) . "</td>\n";
-			}
+			foreach(array_keys($brief_fields) as $key)
+				print "\t\t<td>" . htmlspecialchars($row[$key]) . "</td>\n";
 			if($show_detailed){
 				print "\t\t<td><div class='arrow'></div></td>\n";
 ?>
 	</tr><tr class='detailed'>
 		<td></td>
-		<td class='detailed' colspan="<?php print $brief_fields_cnt+1 ?>">
+		<td class='detailed' colspan="<?php print $brief_fields_cnt+1; ?>">
 			<table>
 <?php
 				foreach($detailed_fields as $key => $val){
-					$text = htmlspecialchars($row->$key);
+					$text = htmlspecialchars($row[$key]);
 					if($key == 'source'){
-						if(!empty($row->source_url)){
-							$text = '<a href="' . str_replace('{pg}', (int) $row->list_pg + (int) $row->pg_correction, $row->source_url) . '" target="_blank">«' . $text . '»</a>, стр.' . $row->list_pg;
-						}else{
-							$text = '«' . $text . '», стр.' . $row->list_pg;
-						}
+						if(!empty($row['source_url'])){
+							if($row['list_pg'] > 0)
+								$text = '<a href="' . str_replace('{pg}', (int) $row['list_pg'] + (int) $row['pg_correction'], $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['list_pg'];
+							else
+								$text = '<a href="' . $row['source_url'] . '" target="_blank">«' . $text . '»</a>';
+						} else
+							$text = '«' . $text . '», стр.' . $row['list_pg'];
 					}
+
 					print "\t\t\t\t<tr>\n";
-					if($key == 'comments'){
-						print "\t\t\t\t\t<td colspan='2' class='comments'>" . $row->$key . "</td>\n";
-					}else{
+					if($key == 'comments')					
+						print "\t\t\t\t\t<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
+					else {
 						print "\t\t\t\t\t<th>" . htmlspecialchars($val) . ":</th>\n";
 						print "\t\t\t\t\t<td>" . $text . "</td>\n";
 					}

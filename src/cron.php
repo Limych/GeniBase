@@ -11,6 +11,3 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
 publish_cron(true);
 
 db_update();
-
-db_close();
-?>

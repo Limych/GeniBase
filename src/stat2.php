@@ -10,22 +10,23 @@ html_header('Статистика');
 <?php
 
 $name_reductions = $names = $patronymic_reductions = $patronymics = array();
-$result = db_query('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM `persons_raw` GROUP BY name');
-while($row = $result->fetch_array(MYSQL_NUM)){
-	$row[0] = array_map('mb_ucfirst', preg_split('/\s+/uS', $row[0]));
-	if(empty($row[0]))	continue;
-	$key = array_shift($row[0]);
+$result = $db->get_table('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM `persons_raw` GROUP BY name');
+foreach($result as $row){
+	$row['name'] = array_map('mb_ucfirst', preg_split('/\s+/uS', $row['name']));
+	if(empty($row['name']))
+		continue;
+	$key = array_shift($row['name']);
 	if(false !== strpos($key, '.')
 	|| false !== strpos($key, '-'))
-		$name_reductions[$key] += $row[1];
+		$name_reductions[$key] += $row['cnt'];
 	else
-		$names[$key] += $row[1];
-	foreach($row[0] as $key){
+		$names[$key] += $row['cnt'];
+	foreach($row['name'] as $key){
 		if(false !== strpos($key, '.')
 		|| false !== strpos($key, '-'))
-			$patronymic_reductions[$key] += $row[1];
+			$patronymic_reductions[$key] += $row['cnt'];
 		else
-			$patronymics[$key] += $row[1];
+			$patronymics[$key] += $row['cnt'];
 	}
 }
 $result->free();
@@ -68,7 +69,6 @@ foreach($patronymic_reductions as $key => $val){
 </tbody></table>
 <?php
 html_footer();
-db_close();
 
 
 

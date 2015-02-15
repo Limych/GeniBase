@@ -5,10 +5,7 @@ define('HIST_WIDTH',	600);
 
 
 
-$result = db_query('SELECT MAX(list_nr) FROM `persons`');
-$row = $result->fetch_array(MYSQL_NUM);
-$result->free();
-$max_list_nr = $row[0];
+$max_list_nr = $db->get_cell('SELECT MAX(list_nr) FROM `persons`');
 
 if(!isset($_REQUEST['ignore_per']))
 	$_REQUEST['ignore_per'] = 40;
@@ -27,33 +24,43 @@ html_header('Статистика');
 if($_REQUEST['list_from'] && $_REQUEST['list_to']):
 	$ignore_per = intval($_REQUEST['ignore_per']);
 	
-	$result = db_query('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`), MIN(`date_from`)) AS `days` FROM `persons` WHERE `date_from` AND `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']));
-	list($date_min, $to) = $result->fetch_array(MYSQL_NUM);
-	$result->free();
+	$result = $db->get_row('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`) FROM `persons`
+			WHERE `date_from` AND `list_nr` >= :list_from AND `list_nr` <= :list_to',
+			array(
+				'list_from'	=> $_REQUEST['list_from'],
+				'list_to'	=> $_REQUEST['list_to'],
+			));
+	list($date_min, $to) = array_values($result);
 	$date = array();
 	for($i = 0; $i < $to; $i++)
 		$date[$i] = 0;
 
+	$result = $db->get_table('SELECT DATEDIFF(`date_from`, :date_from) AS `first`,
+			DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM `persons`
+			WHERE `date_from` AND `list_nr` >= :list_from AND `list_nr` <= :list_to
+			GROUP BY `date_from`, `days` HAVING `days` <= :ignore',
+			array(
+				'date_from'	=> $date_min,
+				'list_from'	=> $_REQUEST['list_from'],
+				'list_to'	=> $_REQUEST['list_to'],
+				'ignore'	=> $ignore_per,
+			));
 	$cnt = 0;
-	$result = db_query('SELECT DATEDIFF(`date_from`, "' . $date_min . '") AS `first`, DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM `persons` WHERE `date_from` AND `list_nr` >= ' . intval($_REQUEST['list_from']) . ' AND `list_nr` <= ' . intval($_REQUEST['list_to']) . ' GROUP BY `date_from`, `days` HAVING `days` <= ' . $ignore_per);
-	while($row = $result->fetch_object()){
-		$i = intval($row->first);
-		$to = $i + intval($row->days);
-		$cnt += intval($row->cnt);
-		for(; $i <= $to; $i++){
-			$date[$i] += intval($row->cnt);
-		}
+	foreach ($result as $row){
+		$i = intval($row['first']);
+		$to = $i + intval($row['days']);
+		$cnt += intval($row['cnt']);
+		for(; $i <= $to; $i++)
+			$date[$i] += intval($row['cnt']);
 	}
-	$result->free();
 	$date_min = date_create($date_min);
 	if($ignore_per){
 		while(count($date) && !$date[0]){
 			array_shift($date);
 			$date_min->add(new DateInterval('P1D'));
 		}
-		while(count($date) && !$date[count($date)-1]){
+		while(count($date) && !$date[count($date)-1])
 			array_pop($date);
-		}
 	}
 // var_export($date);
 ?>
@@ -81,7 +88,6 @@ foreach($date as $key => $val){
 <?php
 endif;
 html_footer();
-db_close();
 
 
 

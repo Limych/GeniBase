@@ -394,7 +394,7 @@ module.exports = function(grunt) {
 					'tests/qunit/**',
 					'!tests/qunit/editor/**'
 				],
-				tasks: ['qunit', 'phpunit']
+				tasks: ['qunit']
 			}
 		}
 	});

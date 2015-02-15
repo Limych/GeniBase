@@ -19,12 +19,12 @@ define( 'GB_DEBUG', true );
 // These tests will DROP ALL TABLES in the database with the prefix named below.
 // DO NOT use a production database or one that is shared with something else.
 
-define( 'DB_NAME', 'youremptytestdbnamehere' );
-define( 'DB_USER', 'yourusernamehere' );
-define( 'DB_PASSWORD', 'yourpasswordhere' );
-define( 'DB_HOST', 'localhost' );
-define( 'DB_CHARSET', 'utf8' );
-define( 'DB_COLLATE', '' );
+define( 'DB_NAME',		'youremptytestdbnamehere' );
+define( 'DB_USER',		'yourusernamehere' );
+define( 'DB_PASSWORD',	'yourpasswordhere' );
+define( 'DB_HOST',		'localhost' );
+define( 'DB_CHARSET',	'utf8' );
+define( 'DB_COLLATE',	'' );
 
 $table_prefix  = 'gbtests_';   // Only numbers, letters, and underscores please!
 

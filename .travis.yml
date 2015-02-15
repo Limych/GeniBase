@@ -8,8 +8,6 @@ matrix:
   include:
     - php: 5.5
       env: GB_TRAVISCI=travis:js
-    - php: 5.2
-      env: GB_TRAVISCI=travis:phpunit
     - php: 5.3
       env: GB_TRAVISCI=travis:phpunit
     - php: 5.4

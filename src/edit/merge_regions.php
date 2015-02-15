@@ -6,7 +6,7 @@ require_once('../gb/common.php');	// Общие функции системы
 
 
 // Узнаём, какой у нас самый большой номер региона
-$result = db_query('SELECT MAX(id) FROM dic_region');
+$result = $db->query('SELECT MAX(id) FROM dic_region');
 $r = $result->fetch_array(MYSQL_NUM);
 $result->free();
 $max_id = $r[0];
@@ -17,18 +17,13 @@ html_header();
 
 // Применение изменений
 if($_POST['reg_from']){
-	$result = db_query('SELECT * FROM dic_region WHERE id = ' . intval($_POST['reg_from']));
-	$reg_from = $result->fetch_object();
-	$result->free();
-	
-	$result = db_query('SELECT * FROM dic_region WHERE id = ' . intval($_POST['reg_to']));
-	$reg_to = $result->fetch_object();
-	$result->free();
+	$reg_from = $db->get_row('SELECT id, parent_id, region FROM dic_region WHERE id = :id', array('id' => $_POST['reg_from']));
+	$reg_to = $db->get_row('SELECT id, region FROM dic_region WHERE id = :id', array('id' => $_POST['reg_to']));
 	
 	if($reg_from && $reg_to){
-		db_query('UPDATE `persons` SET `region_id` = ' . $reg_to->id . ' WHERE `region_id` = ' . $reg_from->id);
-		db_query('DELETE FROM `dic_region` WHERE `id` = ' . $reg_from->id);
-		db_query('UPDATE `dic_region` SET `region_ids` = "" WHERE `id` = ' . $reg_from->parent_id);
+		$db->set_row('persons', array('region_id' => $reg_to['id']), array('region_id' => $reg_from['id']));
+		$db->query('DELETE FROM `dic_region` WHERE `id` = :id', $reg_from);
+		$db->set_row('dic_region', array('region_ids' => ''), array('id' => $reg_from['id']));
 
 		print "<p>ИСПОЛНЕНО: Регион " . $reg_from->id . " (" . $reg_from->region . ") успешно удалён, а все его записи перенесены в регион " . $reg_to->id . " (" . $reg_to->region . ").</p>";
 	}
@@ -40,5 +35,3 @@ if($_POST['reg_from']){
 </form>
 <?php
 html_footer();
-db_close();
-?>

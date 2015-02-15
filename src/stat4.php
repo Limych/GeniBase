@@ -11,20 +11,19 @@ html_header('Статистика');
 
 $cnt = 0;
 $hist = array_fill(0, 5 * 12, 0);
-$result = db_query('SELECT `date_from`, `date_to`, COUNT(*) FROM `persons` GROUP BY `date_from`, `date_to`');
-while($row = $result->fetch_array(MYSQL_NUM)){
+$result = $db->get_table('SELECT `date_from`, `date_to`, COUNT(*) AS cnt FROM `persons` GROUP BY `date_from`, `date_to`');
+foreach ($result as $row){
 	$date1 = intval(preg_replace_callback('/^(\d+)-(\d+)-\d+$/uS', function($m){
 		return (intval($m[1]) - 1914) * 12 + intval($m[2]) - 1;
-	}, $row[0]));
+	}, $row['date_from']));
 	$date2 = intval(preg_replace_callback('/^(\d+)-(\d+)-\d+$/uS', function($m){
 		return (intval($m[1]) - 1914) * 12 + intval($m[2]) - 1;
-	}, $row[1]));
+	}, $row['date_to']));
 	if($date1 != $date2)	continue;
 
-	$cnt += $row[2];
-	$hist[$date1] += $row[2];
+	$cnt += $row['cnt'];
+	$hist[$date1] += $row['cnt'];
 }
-$result->free();
 // var_export($hist);
 ?>
 <p>Всего в этом подсчёте участвует <?php print format_num($cnt, ' запись.', ' записи.', ' записей.')?></p>
@@ -60,4 +59,3 @@ for($i = 6; $i <= 58; $i++){
 <div id="chart_div" style="width: 100%; height: 500px"></div>
 <?php
 html_footer();
-db_close();
