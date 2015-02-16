@@ -16,7 +16,7 @@ function select_region(){
 <form method="post">
 <select>
 <?php
-_regions();
+	_regions();
 ?>
 </select>
 </form>
@@ -26,8 +26,8 @@ _regions();
 
 
 function _regions($parent_id = 0, $level = 1){
-	$result = gbdb()->get_table('SELECT id, title, region_comment FROM dic_region WHERE parent_id = :id ORDER BY title',
-			array('id' => $parent_id));
+	$result = gbdb()->get_table('SELECT id, title, region_comment FROM ?_dic_region WHERE parent_id = ?id
+			ORDER BY title', array('id' => $parent_id));
 	foreach ($result as $row){
 		print "\t<option value='" . $row['id'] . "'>" . htmlspecialchars($row['title']) .
 				(empty($row['region_comment']) ? '' : ' <span class="comment">' .

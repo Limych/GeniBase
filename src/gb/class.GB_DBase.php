@@ -49,6 +49,47 @@ class GB_DBase	{
 		// Закрываем соединение с СУБД, если оно было
 		if($this->db)	$this->db->close();
 	}
+
+
+
+	/**
+	 * Формирование из строки с метасимволами регулярного выражения для поиска
+	 * в системе.
+	 *
+	 * Используемые метасимволы: '?' — один любой символ; '*' — один или несколько любых символов.
+	 *
+	 * @param string $str	Строка с метасимволами
+	 * @param string $full_word	FALSE, если не надо искать по этой маске только полные слова
+	 * @return string	Регулярное выражение для поиска
+	 */
+	static function make_regex($str, $full_word = TRUE){
+		debug_info($str);
+
+		// Если вместо строки передан массив, обработать каждое значение в отдельности
+		// и вернуть результат в виде массива
+		if(is_array($str)){
+			foreach($str as $key => $val)
+				$str[$key] = self::make_regex($val, $full_word);
+			return $str;
+		}
+	
+		$str = strtr($str, array(
+				'ё'	=> '(е|ё)',
+				'Ё'	=> '(Е|Ё)',
+		));
+		$str = preg_replace_callback('/(\?+|\*+)/us', function ($matches){
+			$ch = substr($matches[1], 0, 1);
+			$len = strlen($matches[1]);
+			// return '[[:alpha:]]' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));
+			return '(..)' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));	// Костыли для учёта двухбайтной кодировки
+		}, $str);
+		if($full_word)
+			$str = "[[:<:]]${str}[[:>:]]";
+
+		debug_info($str);
+
+		return $str;
+	}
 	
 	
 	
@@ -82,7 +123,7 @@ class GB_DBase	{
 	 */
 	function table_escape($table){
 		if(substr($table, 0, 1) == '`')	// First unescape table name if it already escaped
-			$table = strtr(trim($table, '`'), '``', '`');
+			$table = str_replace('``', '`', substr($table, 1, -1));
 
 		return self::field_escape($this->prefix . $table);
 	}
@@ -114,7 +155,7 @@ class GB_DBase	{
 	 */
 	function data_escape($value, $preserve_array = FALSE) {
 		if (is_array($value)){
-			$result = array_map(__FUNCTION__, $value);
+			$result = array_map(array($this, __FUNCTION__), $value);
 			return ($preserve_array)
 				? $result
 				: implode(',', $result);
@@ -133,115 +174,93 @@ class GB_DBase	{
 			return intval($value);
 	}
 	
-
-
-	/**
-	 * Формирование из строки с метасимволами регулярного выражения для поиска
-	 * в системе.
-	 * 
-	 * Используемые метасимволы: '?' — один любой символ; '*' — один или несколько
-	 * любых символов.
-	 * 
-	 * @param string $str	Строка с метасимволами
-	 * @param string $full_word	FALSE, если не надо искать по этой маске только полные слова
-	 * @return string	Регулярное выражение для поиска
-	 */
-	static function make_regex($str, $full_word = TRUE){
-		// Если вместо строки передан массив, обработать каждое значение в отдельности
-		// и вернуть результат в виде массива
-		if(is_array($str)){
-			foreach($str as $key => $val)
-				$str[$key] = GB_DBase::regex($val, $full_word);
-			return $str;
-		}
 	
-		$str = strtr($str, array(
-				'ё'	=> '(е|ё)',
-				'Ё'	=> '(Е|Ё)',
-		));
-		$str = preg_replace_callback('/(\?+|\*+)/uS', function ($matches){
-			$ch = substr($matches[1], 0, 1);
-			$len = strlen($matches[1]);
-			// return '[[:alpha:]]' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));
-			return '(..)' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));	// Костыли для учёта двухбайтной кодировки
-		}, $str);
-		if($full_word)
-			$str = "[[:<:]]${str}[[:>:]]";
-		return $str;
+	
+	/**
+	 * Подготовка SQL-запроса к исполнению. Подстановка параметров.
+	 * 
+	 * Подстановка параметров: «?key» — подстановка данных, «?#key» — подстановка имени поля,
+	 * 		«?@key» — подстановка имени таблицы, «?_tablename» — добавление префикса перед именем таблицы
+	 * 
+	 * @param string $query	SQL-запрос
+	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
+	 * @return string	SQL-запрос с подставленными параметрами
+	 */
+	function prepare_query($query, $substitutions){
+		// Чтобы следующая метка не могла затронуть содержание предыдущей,
+		// например, в случае $subst = array('id' => 5, 'title' => 'а тут ?id'),
+		// проводить их замену приходится не по очереди через простой foreach,
+		// а за один вызов заменяющий функции,
+		// для чего нужно составить регулярное выражение, охватывающее
+		// все метки. Впрочем, это несложно.
+		// О производительности здесь беспокоиться не будем,
+		// т.к. запрос - это довольно короткая строка, поэтому он
+		// будет обработан быстро в любом случае.
+	
+		$regexp = '/\?(_([0-9a-zA-Z$_]+)';
+		foreach ($substitutions as $key => $value){
+			$regexp .= '|' . preg_quote($key)
+			. (
+					substr($key, -1) != '`' // нужно учесть,
+					? '\b' // что теоретически метки могут быть
+					: ''   // не только вида ?word, но и вида ?`…`
+			);
+		}
+		$regexp .= ')/';
+
+// 		if(defined('GB_SQL_DEBUG'))	print("\n<!-- $regexp -->\n");
+			
+		$self = $this;
+		$query = preg_replace_callback(
+				$regexp,
+				function($matches) use (&$substitutions, &$self) {
+					switch (substr($matches{1}, 0, 1)){	// Определяем тип информации для подстановки
+
+						case '_':	// Подставляем префикс к имени таблицы
+							return $self->table_escape($matches{2});
+
+						case '@':	// Подставляем имя таблицы
+							return $self->table_escape($substitutions[$matches{1}]);
+
+						case '#':	// Подставляем имя поля
+							return $self->field_escape($substitutions[$matches{1}]);
+
+						default:	// Подставляем данные
+							return $self->data_escape($substitutions[$matches{1}]);
+					}
+				},
+				$query
+		);
+		return $query;
 	}
 	
 
 
 	/**
 	 * Отправка запроса в MySQL и слежение за ошибками.
-	 * 
-	 * Подстановка параметров: ":&lt;key>" — подстановка данных, ":#&lt;key>" — подстановка имени поля,
-	 * 		":@&lt;key>" — подстановка имени таблицы
+	 *
+	 * @see GB_DBase::prepare_query()
 	 *
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
 	 * @return mixed	Результат выполнения запроса
 	 */
 	function query($query, $substitutions = array()) {
-		if ($substitutions) {
-			// Чтобы следующая метка не могла затронуть содержание предыдущей,
-			// например, в случае $subst = array('id' => 5, 'title' => 'а тут :id'),
-			// проводить их замену приходится не по очереди через простой foreach,
-			// а за один вызов заменяющий функции,
-			// для чего нужно составить регулярное выражение, охватывающее
-			// все метки. Впрочем, это несложно.
-			// О производительности здесь беспокоиться не будем,
-			// т.к. запрос - это довольно короткая строка, поэтому он
-			// будет обработан быстро в любом случае.
-	
-			$regexp = '/:(';
-			foreach ($substitutions as $key => $value)
-				$regexp .= $key
-					. (
-							substr($key, -1) != '`' // нужно учесть,
-							? '\b' // что теоретически метки могут быть
-							: ''   // не только вида :word, но и вида :`...`
-					)
-					. '|';
-	
-			$regexp = substr($regexp, 0, -1); // убираем лишний '|'
-			$regexp .= ')/';
-	
-			$query = preg_replace_callback(
-					$regexp,
-					function($matches) use ($substitutions) {
-						$type = substr($matches{1}, 0, 1);	// Определяем тип информации для подстановки
-						return ($type == '@')
-							? gbdb()->table_escape($substitutions[$matches{1}])	// Кодируем имя таблицы
-							: ($type == '#')
-								? gbdb()->field_escape($substitutions[$matches{1}])	// Кодируем имя поля
-								: gbdb()->data_escape($substitutions[$matches{1}]);	// Кодируем данные
-					},
-					$query
-			);
-		}
-	
 		$this->connect();
-		$result = $this->db->query($query);
+		$query_sub = $this->prepare_query($query, $substitutions);
+		
+		debug_info($query_sub);
+		
+		$result = $this->db->query($query_sub);
 		if ($result)
 			return $result;
 	
 		// Error detected. Print backtrace and stop script
 		$trace = debug_backtrace();
-		$mysql_functions = array(
-				'GB_DBase::get_cell',
-				'GB_DBase::getrow',
-				'GB_DBase::get_column',
-				'GB_DBase::get_table',
-				'GB_DBase::write_row'
-		);
-		if (isset($trace[1]) AND in_array($trace[1]['function'], $mysql_functions))
-			$level = 1;
-		else
-			$level = 0;
-
+		$level = 0;
+		while(isset($trace[$level]) && ($trace[$level]['class'] == __CLASS__))	$level++;
+		$level--;
 		$db_error = $this->db->error;
-
 		$message = '<p><strong>MySQL error</strong> in file <strong>'.$trace[$level]['file'].'</strong>' .
 			" at line <strong>" .$trace[$level]['line']."</strong> " .
 			"(function <strong>" . $trace[$level]['function'] ."</strong>):<br/>" .
@@ -317,7 +336,7 @@ class GB_DBase	{
 	 * @return array	Результат выполнения запроса
 	 */
 	function get_table($query, $substitutions = array(), $key_col = FALSE) {
-		$result = query($query, $substitutions);
+		$result = $this->query($query, $substitutions);
 	
 		$data = array();
 		if ($key_col){
@@ -382,11 +401,10 @@ class GB_DBase	{
 	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
 	 */
 	function set_row($tablename, $data, $unique_key = FALSE, $mode = FALSE) {
-		$tablename = $this->table($tablename);
 		if (!$unique_key) { // Уникальный идентификатор не указан - INSERT
-			if (!$mode || $mode == MODE_INSERT)	$query = 'INSERT';
-			elseif($mode == MODE_IGNORE)		$query = 'INSERT IGNORE';
-			elseif($mode == MODE_REPLACE)		$query = 'REPLACE';
+			if (!$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
+			elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
+			elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
 			else {
 				$trace = reset(debug_backtrace());
 				$message = "Unknown mode \"$mode\" given to $trace[function]() " .
@@ -398,7 +416,7 @@ class GB_DBase	{
 			
 			$query .= " INTO $tablename SET ";
 			foreach ($data as $key => $value)
-				$query .= $this->field_escape($key) . " = :$key, ";
+				$query .= $this->field_escape($key) . " = ?$key, ";
 			$query = substr($query, 0, -2); // убираем последние запятую и пробел
 			
 			$result = $this->query($query, $data);
@@ -409,7 +427,7 @@ class GB_DBase	{
 			if (!is_array($unique_key))		// если указана скалярная величина —
 				$unique_key = array('id' => $unique_key);	// воспринимаем её как 'id'
 
-			if (!$mode || $mode == MODE_UPDATE) {	// обычный UPDATE
+			if (!$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
 				// В данном случае поля из второго аргумента подставляются в часть SET,
 				// а поля из третьего — в часть WHERE
 					
@@ -424,13 +442,13 @@ class GB_DBase	{
 				// без использования меток.
 					
 				foreach ($data as $key => $value)
-					$query .= $this->field_escape($key) . ' = ' . gbdb()->data_escape($value) . ', ';
+					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 						
 				if ($unique_key) {
 					$query .= ' WHERE ';
 					foreach ($unique_key as $key => $value)
-						$query .= $this->field_escape($key) . ' = ' . mysql_escape($value) . ' AND ';
+						$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
 					$query = substr($query, 0, -4);	// убираем последние AND и пробел
 				}
 					
@@ -438,7 +456,7 @@ class GB_DBase	{
 					
 				$out = $this->db->affected_rows;
 				
-			} elseif ($mode == MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
+			} elseif ($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
 				$append = is_string(key($unique_key));
 				// $append: если массив $unique_key ассоциативный,
 				// значит, в них данные для уникальных полей —
@@ -461,13 +479,13 @@ class GB_DBase	{
 			
 				$query = "INSERT INTO $tablename SET ";
 				foreach ($all_data as $key => $value)
-					$query .= $this->field_escape($key) . " = :$key, ";
+					$query .= $this->field_escape($key) . " = ?$key, ";
 				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 
 				if ($data_to_update) {
 					$query .= ' ON DUPLICATE KEY UPDATE ';
 					foreach ($data_to_update as $key => $value)
-						$query .= $this->field_escape($key) . " = :$key, ";
+						$query .= $this->field_escape($key) . " = ?$key, ";
 					$query = substr($query, 0, -2); // убираем последние запятую и пробел
 				}
 

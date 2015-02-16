@@ -1,31 +1,33 @@
 <?php
 require_once('../gb/common.php');	// Общие функции системы
- 
-// define('GB_DEBUG', 1);	// Признак режима отладки
 
 
 
 // Узнаём, какой у нас самый большой номер региона
-$result = gbdb()->query('SELECT MAX(id) FROM dic_region');
+$result = gbdb()->query('SELECT MAX(id) FROM ?_dic_region');
 $r = $result->fetch_array(MYSQL_NUM);
 $result->free();
 $max_id = $r[0];
 
 
 
-html_header();
+html_header('');
 
 // Применение изменений
-if($_POST['reg_from']){
-	$reg_from = gbdb()->get_row('SELECT id, parent_id, region FROM dic_region WHERE id = :id', array('id' => $_POST['reg_from']));
-	$reg_to = gbdb()->get_row('SELECT id, region FROM dic_region WHERE id = :id', array('id' => $_POST['reg_to']));
+if(isset($_POST['reg_from'])){
+	$reg_from = gbdb()->get_row('SELECT id, parent_id, region FROM ?_dic_region WHERE id = ?id', array('id' => $_POST['reg_from']));
+	$reg_to = gbdb()->get_row('SELECT id, region FROM ?_dic_region WHERE id = ?id', array('id' => $_POST['reg_to']));
 	
 	if($reg_from && $reg_to){
-		gbdb()->set_row('persons', array('region_id' => $reg_to['id']), array('region_id' => $reg_from['id']));
-		gbdb()->query('DELETE FROM `dic_region` WHERE `id` = :id', $reg_from);
-		gbdb()->set_row('dic_region', array('region_ids' => ''), array('id' => $reg_from['id']));
+		if(!GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
+			gbdb()->set_row('?_persons', array('region_id' => $reg_to['id']),
+					array('region_id' => $reg_from['id']));
+			gbdb()->query('DELETE FROM ?_dic_region WHERE `id` = ?id', $reg_from);
+			gbdb()->set_row('?_dic_region', array('region_ids' => ''), array('id' => $reg_from['id']));
+		}
 
-		print "<p>ИСПОЛНЕНО: Регион " . $reg_from->id . " (" . $reg_from->region . ") успешно удалён, а все его записи перенесены в регион " . $reg_to->id . " (" . $reg_to->region . ").</p>";
+		print "<p>ИСПОЛНЕНО: Регион $reg_from[id] ($reg_from[region]) успешно удалён,
+				а все его записи перенесены в регион $reg_to[id] ($reg_to[region]).</p>";
 	}
 }
 ?>

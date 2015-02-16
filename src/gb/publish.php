@@ -173,6 +173,8 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
 
 	foreach($str_fields as $key){
+		if(!isset($raw[$key]))	continue;
+
 		// Убираем концевые пробелы и сокращаем множественные пробелы
 		$raw[$key] = trim(preg_replace('/\s\s+/uS', ' ', $raw[$key]));
 
@@ -197,79 +199,83 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	}
 
 	// Расшифровываем вероисповедания
-	/** @var	int[]	Array of correspondences between contractions of religion names and their IDs in the database. */
-	static	$religion_conts = array();
-	//
-	// Fetch religion names and reductions from dbase
-	if (empty($religion_conts)) {
-		$religion_conts[''] = 18;	// Special ID for "(not set)"
-
-		$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM `dic_religion`
-				WHERE `religion` NOT LIKE "(%"');
-		foreach ($result as $row){
-			$tmp = array_merge((array) mb_strtolower($row['religion']),
-					preg_split('/\W+/uS', mb_strtolower($row['contractions']), -1, PREG_SPLIT_NO_EMPTY));
-			foreach ($tmp as $key)
-				$religion_conts[$key] = $row['id'];
+	if(isset($raw['religion'])){
+		/** @var	int[]	Array of correspondences between contractions of religion names and their IDs in the database. */
+		static	$religion_conts = array();
+		//
+		// Fetch religion names and reductions from dbase
+		if (empty($religion_conts)) {
+			$religion_conts[''] = 18;	// Special ID for "(not set)"
+	
+			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religion
+					WHERE `religion` NOT LIKE "(%"');
+			foreach ($result as $row){
+				$tmp = array_merge((array) mb_strtolower($row['religion']),
+						preg_split('/\W+/uS', mb_strtolower($row['contractions']), -1, PREG_SPLIT_NO_EMPTY));
+				foreach ($tmp as $key)
+					$religion_conts[$key] = $row['id'];
+			}
 		}
+	 	//
+		$tmp = trim(preg_replace('/\W+/uS', '-', mb_strtolower($raw['religion'])), '-');
+		if(isset($religion_conts[$tmp]))
+			$raw['religion_id'] = $religion_conts[$tmp];
 	}
- 	//
-	$tmp = trim(preg_replace('/\W+/uS', '-', mb_strtolower($raw['religion'])), '-');
-// if(defined('P_DEBUG'))	var_export($tmp);
-	if(isset($religion_conts[$tmp]))
-		$raw['religion_id'] = $religion_conts[$tmp];
 
 	// Расшифровываем семейные положения
-	static $maritals = array(
-		''		=> 4,
-		// Женатые
-		'ж'	=> 1,
-		'жен'	=> 1,
-		'женат'	=> 1,
-		// Холостые
-		'х'	=> 2,
-		'хол'	=> 2,
-		'холост'	=> 2,
-		// Вдовые
-		'вд'	=> 3,
-		'вдв'	=> 3,
-		'вдов'	=> 3,
-		'вдовец'	=> 3,
-	);
-	$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['marital'])));
-// if(defined('P_DEBUG'))	var_export($tmp);
-	if(isset($maritals[$tmp]))
-		$raw['marital_id'] = $maritals[$tmp];
+	if(isset($raw['marital'])){
+		static $maritals = array(
+			''		=> 4,
+			// Женатые
+			'ж'	=> 1,
+			'жен'	=> 1,
+			'женат'	=> 1,
+			// Холостые
+			'х'	=> 2,
+			'хол'	=> 2,
+			'холост'	=> 2,
+			// Вдовые
+			'вд'	=> 3,
+			'вдв'	=> 3,
+			'вдов'	=> 3,
+			'вдовец'	=> 3,
+		);
+		$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['marital'])));
+		if(isset($maritals[$tmp]))
+			$raw['marital_id'] = $maritals[$tmp];
+	}
 
 	// Формализуем события
-	/** @var	int[]	Array of correspondences between contractions of events names and their IDs in the database. */
-	static	$reason_conts = array();
-	//
-	// Fetch events/reasons names and reductions from dbase
-	if (empty($reason_conts)) {
-		$reason_conts[''] = 1;	// Special ID for "(not set)"
-
-		$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM `dic_reason2reason` r2r, `dic_reason` r
-				WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
-		foreach ($result as $row)
-			$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
+	if(isset($raw['reason'])){
+		/** @var	int[]	Array of correspondences between contractions of events names and their IDs in the database. */
+		static	$reason_conts = array();
+		//
+		// Fetch events/reasons names and reductions from dbase
+		if (empty($reason_conts)) {
+			$reason_conts[''] = 1;	// Special ID for "(not set)"
+	
+			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2reason AS r2r,
+					?_dic_reason AS r WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
+			foreach ($result as $row)
+				$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
+		}
+	 	//
+		$tmp = trim(mb_strtolower($raw['reason']));
+		// if(defined('P_DEBUG'))	var_export($tmp);
+		if(isset($reason_conts[$tmp]))
+			$raw['reason_id'] = $reason_conts[$tmp];
 	}
- 	//
-	$tmp = trim(mb_strtolower($raw['reason']));
-	// if(defined('P_DEBUG'))	var_export($tmp);
-	if(isset($reason_conts[$tmp]))
-		$raw['reason_id'] = $reason_conts[$tmp];
 		
 	// Расшифровываем источники
-	if((empty($raw['source_id']))||($raw['source_id']==0)){
+	if(empty($raw['source_id']) || $raw['source_id'] == 0){
 		if(empty($raw['list_nr'])){
 			$raw['source_id'] = 0;
-		}else {
-			$res = gbdb()->get_cell('SELECT id FROM dic_source WHERE source LIKE :title',
+		}else{
+			$res = gbdb()->get_cell('SELECT id FROM ?_dic_source WHERE source LIKE ?title',
 					array('title' => "Именной список №$raw[list_nr] %"));
 			if($res)
 				$raw['source_id'] = $res;
-			else {
+			else{
 				$tmp = "Именной список №$raw[list_nr] убитым, раненым и без вести пропавшим " . ($raw['list_nr'] < 974 ? "нижним чинам." : "солдатам.");
 				$raw['source_id'] = gbdb()->set_row('dic_source',
 						array('source' => $tmp), FALSE, GB_DBase::MODE_INSERT);
@@ -279,7 +285,8 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	
 	// Уточняем региональную привязку
 	if(!empty($raw['uyezd'])){
-		$res = gbdb()->get_cell('SELECT id FROM dic_region WHERE parent_id = :parent_id AND title LIKE :title',
+		$res = gbdb()->get_cell('SELECT id FROM ?_dic_region WHERE parent_id = ?parent_id
+				AND title LIKE ?title',
 				array(
 					'parent_id'	=> $raw['region_id'],
 					'title'		=> $raw['uyezd'] . ' %',
@@ -287,7 +294,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if($res)
 			$raw['region_id'] = $res;
 		else {
-			$raw['region_id'] = gbdb()->set_row('dic_region', array(
+			$raw['region_id'] = gbdb()->set_row('?_dic_region', array(
 				'parent_id'	=> $raw['region_id'],
 				'title'		=> $raw['uyezd'] . ' ',
 			), FALSE, GB_DBase::MODE_INSERT);

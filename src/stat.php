@@ -30,7 +30,7 @@ region_stat();
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = gbdb()->get_table('SELECT rank, COUNT(*) AS cnt FROM persons GROUP BY rank ORDER BY rank');
+$result = gbdb()->get_table('SELECT rank, COUNT(*) AS cnt FROM ?_persons GROUP BY rank ORDER BY rank');
 foreach ($result as $row){
 	$even = 1-$even;
 	if(empty($row['rank']))
@@ -49,7 +49,7 @@ foreach ($result as $row){
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = gbdb()->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt FROM dic_reason
+$result = gbdb()->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt FROM ?_dic_reason
 		GROUP BY event_type, reason ORDER BY 1,2');
 foreach ($result as $row){
 	$even = 1-$even;
@@ -82,13 +82,12 @@ dic_stat('Распределение по&nbsp;семейному положен
 function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
-	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM dic_region
-			WHERE parent_id = :parent_id ORDER BY title',
-			array('parent_id' => $parent_id));
+	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_region
+			WHERE parent_id = ?parent_id ORDER BY title', array('parent_id' => $parent_id));
 	foreach ($result as $row){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
-				$row->id . "'>" . htmlspecialchars($row['title']) .
+				$row['id'] . "'>" . htmlspecialchars($row['title']) .
 				(empty($row['region_comment']) ? '' : ' <span class="comment">' .
 						htmlspecialchars($row['region_comment']) . '</span>') .
 				"</td>\n\t<td class='alignright'>" . format_num($row['region_cnt']) . "</td>\n";
@@ -107,18 +106,18 @@ function dic_stat($caption, $field_title, $field){
 	<th>Записей</th>
 </tr></thead><tbody>
 <?php
-	$even = 0;
-	$result = gbdb()->get_table('SELECT :#field AS field, :#field_cnt AS cnt FROM :#table
-			WHERE field != 0 ORDER BY field',
+	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table
+			WHERE ?#field_cnt != 0 ORDER BY ?#field',
 			array(
-				'#table'		=> "dic_$field",
+				'@table'		=> "dic_$field",
 				'#field'		=> $field,
-				'#field_cnt'	=> $field . '_cnt',
-			));
-	foreach ($result as $row){
+				'#field_cnt'	=> "{$field}_cnt",
+			), TRUE);
+	$even = 0;
+	foreach ($result as $field => $cnt){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row['field']) .
-				"</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+				"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 	}
 ?>
 </tbody></table>

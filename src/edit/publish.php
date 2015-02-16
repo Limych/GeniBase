@@ -1,38 +1,37 @@
 <?php
 require_once('../gb/common.php');	// Общие функции системы
 require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
- 
-// define('GB_DEBUG', 1);	// Признак режима отладки
 
 
 
 // Поддержка запросов данных через AJAX
-if($_REQUEST['mode'] == 'get_data'){
+if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 	if(isset($_REQUEST['region_id'])){
 		if(intval($_REQUEST['region_id']) < 1)	exit;
 
 		$cur_id = intval($_REQUEST['region_id']);
 		$html = array();
 
-		$result = gbdb()->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
-				array('id' => $cur_id), TRUE);
+		$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id
+				ORDER BY title', array('id' => $cur_id), TRUE);
 		$tmp = array();
 		foreach ($result as $id => $title)
 			$tmp[] = "<option value='$id'>$title</option>";
 		if($tmp)	$html[] = '<select>' . implode($tmp) . '</select>';
 
 		do{
-			$r = gbdb()->get_column('SELECT parent_id FROM dic_region WHERE id = :id', array('id' => $cur_id));
+			$r = gbdb()->get_cell('SELECT parent_id FROM ?_dic_region WHERE id = ?id',
+					array('id' => $cur_id));
 			if(!$r)	exit;
 
-			$result = gbdb()->get_column('SELECT id, title FROM dic_region WHERE parent_id = :id ORDER BY title',
-					array('id' => $cur_id), TRUE);
+			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id
+					ORDER BY title', array('id' => $cur_id), TRUE);
 			$tmp = array();
 			foreach ($result as $id => $title)
 				$tmp[] = "<option value='$id'" . ($id != $cur_id ? "" : " selected='selected'") . ">$title</option>";
 
 			array_unshift($html, '<select>' . implode($tmp) . '</select>');
-			$cur_id = $r['parent_id'];
+			$cur_id = $r;
 		} while($cur_id);
 
 		$level = 0;
@@ -45,7 +44,7 @@ if($_REQUEST['mode'] == 'get_data'){
 	}elseif(isset($_REQUEST['source_id'])){
 		if(intval($_REQUEST['source_id']) < 1)	exit;
 
-		$r = gbdb()->get_row('SELECT source, source_url, pg_correction FROM dic_source WHERE id = :id',
+		$r = gbdb()->get_row('SELECT source, source_url, pg_correction FROM ?_dic_source WHERE id = ?id',
 				array('id' => $_REQUEST['source_id']));
 		if(!$r || empty($r['source_url']))	exit;
 
@@ -62,9 +61,10 @@ if($_REQUEST['mode'] == 'get_data'){
 
 // Делаем выборку записей для публикации
 if(isset($_REQUEST['id']))
-	$raw = gbdb()->get_row('SELECT * FROM persons_raw WHERE id = :id', array('id' => $_REQUEST['id']));
+	$raw = gbdb()->get_row('SELECT * FROM ?_persons_raw WHERE id = ?id', array('id' => $_REQUEST['id']));
 else
-	$raw = gbdb()->get_row('SELECT * FROM persons_raw WHERE status = "Cant publish" ORDER BY RAND() LIMIT 1');
+	$raw = gbdb()->get_row('SELECT * FROM ?_persons_raw WHERE status = "Cant publish" ORDER BY RAND()
+			LIMIT 1');
 
 // Для отладки
 if(defined('P_DEBUG'))	print "\n\n======================================\n";
@@ -85,8 +85,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 	case 'raw':
 		// Исправление исходных данных во всех похожих записях
 		foreach($mod as $key => $val){
-			gbdb()->query('UPDATE `persons_raw` SET :#key = :new WHERE `status` != "Published" AND :#key = :old' .
-					(!empty($_POST['raw_similar']) ? '' : ' AND id = :id'),
+			gbdb()->query('UPDATE ?_persons_raw SET ?#key = ?new WHERE `status` != "Published"
+					AND ?#key = ?old' . (!empty($_POST['raw_similar']) ? '' : ' AND id = ?id'),
 					array('#key' => $key, 'new' => $val, 'old' => $raw[$key], 'id' => $raw['id']));
 			$raw[$key] = $val;
 		}
@@ -104,10 +104,12 @@ if(defined('P_DEBUG'))	var_export($pub);
 }
 
 // Если формализация сейчас прошла успешно …
-if(!$have_trouble){
+if(!isset($_REQUEST['id']) && !$have_trouble){
 	// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
-	gbdb()->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
-	gbdb()->set_row('persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
+	if(!GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
+		gbdb()->set_row('?_persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
+		gbdb()->set_row('?_persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
+	}
 
 	header('Location: ' . $_SERVER['PHP_SELF'] . '?rnd=' . rand());
 	die();
@@ -119,18 +121,18 @@ $cnt = (object) gbdb()->get_row('SELECT COUNT(*) `total`
 		, SUM(CASE WHEN `status` = "Published"    THEN 1 ELSE 0 END) `published`
 		, SUM(CASE WHEN `status` = "Cant publish" THEN 1 ELSE 0 END) `cant_publish`
 		, SUM(CASE WHEN `status` = "Require edit" THEN 1 ELSE 0 END) `require_edit`
-FROM `persons_raw`');
+		FROM ?_persons_raw');
 
 // Делаем выборку справочников
 $dic_source = $dic_rank = array();
 //
-$dic_religion = gbdb()->get_column('SELECT id, religion FROM dic_religion ORDER BY religion', array(), TRUE);
-$dic_marital = gbdb()->get_column('SELECT id, marital FROM dic_marital ORDER BY marital', array(), TRUE);
-$dic_rank = gbdb()->get_column('SELECT id, rank FROM dic_rank ORDER BY rank', array(), TRUE);
+$dic_religion = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion ORDER BY religion', array(), TRUE);
+$dic_marital = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital ORDER BY marital', array(), TRUE);
+$dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_rank ORDER BY rank', array(), TRUE);
 //
-$dic_reason = gbdb()->get_column('SELECT id, reason FROM dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
+$dic_reason = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
-$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM dic_source');
+$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM ?_dic_source');
 foreach ($result as $r){
 	$dic_source        [$r['id']] = $r['source'];
 	$dic_source_url    [$r['id']] = $r['source_url'];
@@ -147,7 +149,7 @@ uasort($dic_source, function($a, $b){
 
 
 
-html_header();
+html_header('');
 
 print "<p class='aligncenter'>"
 							."Опубликовано "        . format_num(   intval($cnt->published)+intval($cnt->require_edit),      ' запись', ' записи', ' записей')
@@ -233,10 +235,10 @@ console.log($('#region_id').val());
 	<select name="row_type">
 		<option selected="selected" value="">Выводить неформализовавшиеся записи</option>
 		<option                     value="">Выводить записи, требующие правки</option>
-		</select>
+	</select>
 </div>
 <div class="aligncenter"><button>Пропустить эту запись</button></div>
-<input type='hidden' name='id' value='<?php print $raw['id']?>' />
+<input type='hidden' name='id' value='<?php print isset($raw['id']) ? $raw['id'] : ''; ?>' />
 <table class="report"><tr>
 	<td></td>
 	<th>Исходные данные</th>
@@ -254,18 +256,20 @@ foreach($fields as $key => $def){
 	else{
 		print "\t<td>";
 		if($key == 'source_id'){
-			print "<input type='text' size=60 name='raw[$key]' value='" . htmlspecialchars($dic_source[$raw[$key]]) . "' />";
+			$have_link = isset($raw[$key]) && !empty($dic_source_url[$raw[$key]]);
+			print "<input type='text' size=60 name='raw[$key]' value='" .
+					($have_link ? htmlspecialchars($dic_source[$raw[$key]]) : '') . "' />";
 			print "<br />";
-			if (!empty($dic_source_url[$raw[$key]])){
+			if($have_link){
 				$pg_raw = htmlspecialchars($raw[list_pg]); //list_pg
 				$url_raw = str_replace('{pg}', $pg_raw + $dic_source_pg_corr[$raw[$key]] , $dic_source_url[$raw[$key]]);
 				$text_raw = trim_text($dic_source[$raw[$key]], 40);
 				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр.$pg_raw</small>";
-			}
-			else
+			}else
 				print "<small>Ссылка на источник не указана</small>";
 		}else{
-			print "<input type='text' size=60 name='raw[$key]' value='" . htmlspecialchars($raw[$key]) . "' />";
+			print "<input type='text' size=60 name='raw[$key]' value='" .
+					(isset($raw[$key]) ? htmlspecialchars($raw[$key]) : '') . "' />";
 		}
 		print "</td>\n";
 	}
@@ -277,45 +281,59 @@ foreach($fields as $key => $def){
 		print "\t<td" . ($key == 'comments' || isset($pub[$key]) ? '' : ' class="trouble"') . ">";
 		if($key == 'rank'){
 			print "<select id='$key' name='pub[$key]'>\n";
+			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_rank as $k => $d){
-				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
+						htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'religion_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
+			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_religion as $k => $d){
-				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
+						htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'marital_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
+			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_marital as $k => $d){
-				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
+						htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'source_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
+			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_source as $k => $d){
-				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
+						htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select><div id='source_link'></div>";
 		}elseif($key == 'reason_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
+			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_reason as $k => $d){
-				print "\t\t<option value='$k'" . ($k != $pub[$key] ? "" : " selected='selected'") . ">" . htmlspecialchars(trim_text($d)) . "</option>\n";
+				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
+						htmlspecialchars(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'date_from' || $key == 'date_to'){
-			print "<input id='$key' type='date' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) . "' min='1914-07-28' max='1918-11-11'>";
+			print "<input id='$key' type='date' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) .
+					"' min='1914-07-28' max='1918-11-11'>";
 		}elseif($key == 'comments'){
-			print "<textarea id='$key' name='pub[$key]' rows='7' cols='30'>" . htmlspecialchars($pub[$key]) . "</textarea>";
+			print "<textarea id='$key' name='pub[$key]' rows='7' cols='30'>" .
+					(isset($pub[$key]) ? htmlspecialchars($pub[$key]) : '') . "</textarea>";
 		}else{
 			if($key == 'date'){
-				print "<input id='$key' type='text' name='pub[$key]' value='" . htmlspecialchars($pub[$key], ENT_QUOTES) . "' />";
+				print "<input id='$key' type='text' name='pub[$key]' value='" .
+						(isset($pub[$key]) ? htmlspecialchars($pub[$key], ENT_QUOTES) : '') . "' />";
 				print " <small>Машина это видит как «${date_norm}»</small>";
+			}else{
+				print "<input id='$key' type='text' size=60 name='pub[$key]' value='" .
+						(isset($pub[$key]) ? htmlspecialchars($pub[$key], ENT_QUOTES) : '') . "' />";
 			}
-			else
-				print "<input id='$key' type='text' size=60 name='pub[$key]' value='" . htmlspecialchars($pub[$key], ENT_QUOTES) . "' />";
 		}
 		print "</td>\n";
 	}

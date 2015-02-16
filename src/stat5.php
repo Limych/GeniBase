@@ -25,12 +25,14 @@ dic_stat('Распределение по&nbsp;событиям', 'Событи�
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = gbdb()->get_table('SELECT rank, COUNT(*) AS cnt FROM persons GROUP BY rank ORDER BY rank');
-foreach ($result as $row){
+$result = gbdb()->get_column('SELECT rank, COUNT(*) FROM ?_persons GROUP BY rank ORDER BY rank',
+		array(), TRUE);
+foreach ($result as $field => $cnt){
 	$even = 1-$even;
-	if(empty($row['rank']))
-		$row['rank'] = '(не указано)';
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row['rank']) . "</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
+	if(empty($field))
+		$field = '(не указано)';
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+			"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 }
 ?>
 </tbody></table>
@@ -54,11 +56,8 @@ html_footer();
 function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
-	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM dic_region
-			WHERE parent_id = :parent_id ORDER BY title',
-			array(
-				'parent_id'	=> $parent_id,
-			));
+	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_region
+			WHERE parent_id = ?parent_id ORDER BY title', array('parent_id'	=> $parent_id));
 	foreach ($result as $row){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
@@ -69,7 +68,6 @@ function region_stat($parent_id = 0, $level = 1){
 
 		region_stat($row['id'], $level + 1);
 	}
-	$result->free();
 }
 
 
@@ -84,16 +82,17 @@ function dic_stat($caption, $field_title, $field){
 	$(document).ready(function(){
 		var data = google.visualization.arrayToDataTable([
 			['<?php print htmlspecialchars($field_title); ?>',  'Записей'],
-			<?php
-				$result = gbdb()->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table WHERE cnt != 0 ORDER BY field',
+<?php
+				$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table
+						WHERE ?#field_cnt != 0 ORDER BY ?#field',
 						array(
-							'#table'	=> "dic_$field",
-							'field'		=> $field,
-							'field_cnt'	=> "{$field}_cnt",
-						));
-				foreach ($result as $row)
-					print "\t\t\t['" . htmlspecialchars($row['field']) . "',  " . $row['cnt'] . "],\n";
-			?>
+							'@table'		=> "dic_{$field}",
+							'#field'		=> $field,
+							'#field_cnt'	=> "{$field}_cnt",
+						), TRUE);
+				foreach ($result as $fld => $cnt)
+					print "\t\t\t['" . htmlspecialchars($fld) . "',  " . intval($cnt) . "],\n";
+?>
 		]);
 		
 		var options = {
@@ -115,18 +114,18 @@ function dic_stat($caption, $field_title, $field){
 	<th>Записей</th>
 </tr></thead><tbody>
 <?php
-	$result = gbdb()->get_table('SELECT :field AS field, :field_cnt AS cnt FROM :#table
-			WHERE cnt != 0 ORDER BY field',
+	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table
+			WHERE ?#field_cnt != 0 ORDER BY ?#field',
 			array(
-				'#table'	=> "dic_${field}",
-				'field'		=> $field,
-				'field_cnt'	=> "{$field}_cnt",
-			));
+				'@table'		=> "dic_${field}",
+				'#field'		=> $field,
+				'#field_cnt'	=> "{$field}_cnt",
+			), TRUE);
 	$even = 0;
-	foreach($result as $row){
+	foreach($result as $field => $cnt){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row['field']) .
-				"</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+				"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 	}
 ?>
 </tbody></table>

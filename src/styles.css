@@ -2,6 +2,9 @@ body	{
 	font-family: sans-serif;
 	padding: 1em 1.5em;
 }
+footer	{
+	clear: both;
+}
 h1	{
 	margin: 0 3em;
 	text-align: center;

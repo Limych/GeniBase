@@ -46,15 +46,15 @@ class ww1_solders_set extends ww1_records_set{
 		$this->records = array();
 		foreach ($data as $row){
 			if($row['religion'] == '(иное)')
-				$row['religion'] = gbdb()->get_cell('SELECT religion FROM `persons_raw` WHERE `id` = :id',
+				$row['religion'] = gbdb()->get_cell('SELECT religion FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
 			if($row['marital'] == '(иное)')
-				$row['marital'] = gbdb()->get_cell('SELECT marital FROM `persons_raw` WHERE `id` = :id',
+				$row['marital'] = gbdb()->get_cell('SELECT marital FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
 			if($row['reason'] == '(иное)')
-				$row['reason'] = gbdb()->get_cell('SELECT reason FROM `persons_raw` WHERE `id` = :id',
+				$row['reason'] = gbdb()->get_cell('SELECT reason FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
 			$this->records[] = $row;
@@ -118,7 +118,6 @@ class ww1_solders_set extends ww1_records_set{
 		foreach($this->records as $row){
 			$even = 1-$even;
 			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['strictMatch']) || !empty($row['strictMatch']) ? '' : ' nonstrict-match') . "'>\n";
-// if(defined('HIDDEN_DEBUG')){	print "\n<!-- \n";	var_export($row);	print "\n -->\n";	}
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
 			foreach(array_keys($brief_fields) as $key)
 				print "\t\t<td>" . htmlspecialchars($row[$key]) . "</td>\n";
@@ -131,6 +130,7 @@ class ww1_solders_set extends ww1_records_set{
 			<table>
 <?php
 				foreach($detailed_fields as $key => $val){
+					if(!isset($row[$key]))	continue;
 					$text = htmlspecialchars($row[$key]);
 					if($key == 'source'){
 						if(!empty($row['source_url'])){

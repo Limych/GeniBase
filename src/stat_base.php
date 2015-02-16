@@ -82,7 +82,7 @@ SELECT
  ,SUM(CASE WHEN (INSTR(url,'date_from='     ) >0)
             AND (INSTR(url,'date_to='       ) >0) THEN 1 ELSE 0 END) `Поиск по периоду` 
 FROM
- z77591_1914.`logs`
+ ?_logs
 GROUP BY
   DATE_FORMAT(datetime,'%Y'),DATE_FORMAT(datetime,'%m-%Y'),DATE_FORMAT(datetime,'%d/%m/%Y') WITH rollup
 ) xx

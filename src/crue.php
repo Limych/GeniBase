@@ -68,7 +68,6 @@ html_header('Команда проекта');
 <span class="name">Щенников Алексей,</span>
 <span class="name">Яковлев Игорь</span>
 <p class="crue"><strong>Программирование:</strong>
-<span class="name">Хроленок Андрей</span></p>
+<span class="name">Андрей Хроленок</span></p>
 <?php
 html_footer();
-?>

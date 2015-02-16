@@ -9,8 +9,8 @@ require_once('gb/common.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_SIMPLE);
 
-$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
-$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
+$tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
+$squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
 html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
@@ -28,7 +28,7 @@ show_records_stat();
 	<p class="nb">Система при поиске автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий.</p>
 	<p class="nb"><strong>Обратите внимание:</strong> во&nbsp;времена Первой мировой войны не&nbsp;было современных республик и&nbsp;областей&nbsp;— были губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются от&nbsp;границ современных территорий. Места жительства в&nbsp;системе указываются по&nbsp;состоянию на&nbsp;даты войны.</p>
 	<p class="nb">Для поиска частей слов используйте метасимволы: «?» (вопрос)&nbsp;— заменяет один любой символ, «*» (звёздочка)&nbsp;— заменяет один и&nbsp;более любых символов. При использовании метасимволов автоматическое расширение запроса отключается.</p>
-		<p class="nb">Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;русские буквы. <a href="/translit.php">Таблица перекодировки</a>.</p>
+	<p class="nb">Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;русские буквы. <a href="/translit.php">Таблица перекодировки</a>.</p>
 	</div>
 </form>
 <?php
@@ -67,7 +67,7 @@ if($dbase->have_query){
 <?php
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
-$res = gbdb()->get_table('SELECT `query`, `url` FROM `logs` WHERE `query` != "" AND `records_found`
+$res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" AND `records_found`
 		ORDER BY datetime DESC LIMIT 12');
 foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';

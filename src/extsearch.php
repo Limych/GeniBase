@@ -3,8 +3,8 @@ require_once('gb/common.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_EXTENDED);
 
-$tmp = trim($_REQUEST['region'] . ' ' . $_REQUEST['place']);
-$squery = $_REQUEST['surname'] . ' ' . $_REQUEST['name'] . (empty($tmp) ? '' : " ($tmp)");
+$tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
+$squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
 html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));

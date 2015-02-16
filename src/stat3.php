@@ -5,7 +5,7 @@ define('HIST_WIDTH',	600);
 
 
 
-$max_list_nr = gbdb()->get_cell('SELECT MAX(list_nr) FROM `persons`');
+$max_list_nr = gbdb()->get_cell('SELECT MAX(list_nr) FROM ?_persons');
 
 if(!isset($_REQUEST['ignore_per']))
 	$_REQUEST['ignore_per'] = 40;
@@ -21,29 +21,29 @@ html_header('Статистика');
 </form>
 <?php
 
-if($_REQUEST['list_from'] && $_REQUEST['list_to']):
-	$ignore_per = intval($_REQUEST['ignore_per']);
+if(get_request_attr('list_from') && get_request_attr('list_to')):
+	$ignore_per = intval(get_request_attr('ignore_per', 0));
 	
-	$result = gbdb()->get_row('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`) FROM `persons`
-			WHERE `date_from` AND `list_nr` >= :list_from AND `list_nr` <= :list_to',
+	$result = gbdb()->get_row('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`), MIN(`date_from`)) AS `days`
+			FROM ?_persons WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to',
 			array(
-				'list_from'	=> $_REQUEST['list_from'],
-				'list_to'	=> $_REQUEST['list_to'],
+				'list_from'	=> intval(get_request_attr('list_from')),
+				'list_to'	=> intval(get_request_attr('list_to')),
 			));
 	list($date_min, $to) = array_values($result);
 	$date = array();
 	for($i = 0; $i < $to; $i++)
 		$date[$i] = 0;
 
-	$result = gbdb()->get_table('SELECT DATEDIFF(`date_from`, :date_from) AS `first`,
-			DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM `persons`
-			WHERE `date_from` AND `list_nr` >= :list_from AND `list_nr` <= :list_to
-			GROUP BY `date_from`, `days` HAVING `days` <= :ignore',
+	$result = gbdb()->get_table('SELECT DATEDIFF(`date_from`, ?date_from) AS `first`,
+			DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM ?_persons
+			WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to
+			GROUP BY `date_from`, `days` HAVING `days` <= ?days_ignore',
 			array(
-				'date_from'	=> $date_min,
-				'list_from'	=> $_REQUEST['list_from'],
-				'list_to'	=> $_REQUEST['list_to'],
-				'ignore'	=> $ignore_per,
+				'date_from'		=> $date_min,
+				'list_from'		=> $_REQUEST['list_from'],
+				'list_to'		=> $_REQUEST['list_to'],
+				'days_ignore'	=> $ignore_per,
 			));
 	$cnt = 0;
 	foreach ($result as $row){

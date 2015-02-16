@@ -265,8 +265,8 @@ function expand_names($names){
 			if($n != $n2)
 				$exp[] = $n2;
 
-			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` IN (:keys) AND `is_patronimic` = 1',
-					array('keys' => $exp));
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` IN (?keys)
+					AND `is_patronimic` = 1', array('keys' => $exp));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
@@ -274,8 +274,8 @@ function expand_names($names){
 
 		}elseif(!$have_name){
 			// Это имя
-			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key AND `is_patronimic` = 0',
-					array('key' => $n));
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key
+					AND `is_patronimic` = 0', array('key' => $n));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
@@ -283,7 +283,7 @@ function expand_names($names){
 			$have_name = true;
 		}else{
 			// Это непонятно что
-			$result = gbdb()->get_column('SELECT `expand` FROM `dic_names` WHERE `key` = :key',
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key',
 					array('key' => $n));
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
@@ -304,7 +304,7 @@ function expand_names($names){
 	 * @return	boolean		Result of check.
 	 */
 	function is_translit($text) {
-		return preg_match('/[a-z]/uiS', $text);
+		return is_string($text) && preg_match('/[a-z]/uiS', $text);
 	}
 	
 	

@@ -11,7 +11,8 @@ html_header('Статистика');
 
 $cnt = 0;
 $hist = array_fill(0, 5 * 12, 0);
-$result = gbdb()->get_table('SELECT `date_from`, `date_to`, COUNT(*) AS cnt FROM `persons` GROUP BY `date_from`, `date_to`');
+$result = gbdb()->get_table('SELECT `date_from`, `date_to`, COUNT(*) AS cnt FROM ?_persons
+		GROUP BY `date_from`, `date_to`');
 foreach ($result as $row){
 	$date1 = intval(preg_replace_callback('/^(\d+)-(\d+)-\d+$/uS', function($m){
 		return (intval($m[1]) - 1914) * 12 + intval($m[2]) - 1;

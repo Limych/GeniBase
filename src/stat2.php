@@ -10,23 +10,29 @@ html_header('Статистика');
 <?php
 
 $name_reductions = $names = $patronymic_reductions = $patronymics = array();
-$result = gbdb()->get_table('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM `persons_raw` GROUP BY name');
+$result = gbdb()->get_table('SELECT LOWER(name) AS name, COUNT(*) AS cnt FROM ?_persons_raw GROUP BY name');
 foreach($result as $row){
 	$row['name'] = array_map('mb_ucfirst', preg_split('/\s+/uS', $row['name']));
 	if(empty($row['name']))
 		continue;
 	$key = array_shift($row['name']);
 	if(false !== strpos($key, '.')
-	|| false !== strpos($key, '-'))
+	|| false !== strpos($key, '-')){
+		if(!isset($name_reductions[$key]))	$name_reductions[$key] = 0;
 		$name_reductions[$key] += $row['cnt'];
-	else
+	}else{
+		if(!isset($names[$key]))	$names[$key] = 0;
 		$names[$key] += $row['cnt'];
+	}
 	foreach($row['name'] as $key){
 		if(false !== strpos($key, '.')
-		|| false !== strpos($key, '-'))
+		|| false !== strpos($key, '-')){
+			if(!isset($patronymic_reductions[$key]))	$patronymic_reductions[$key] = 0;
 			$patronymic_reductions[$key] += $row['cnt'];
-		else
+		}else{
+			if(!isset($patronymics[$key]))	$patronymics[$key] = 0;
 			$patronymics[$key] += $row['cnt'];
+		}
 	}
 }
 $result->free();
