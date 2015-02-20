@@ -6,7 +6,9 @@
  */
 
 // Запрещено непосредственное исполнение этого скрипта
-if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
 
 /***************************************************************************
  * Функции работы с текстовыми данными

@@ -10,10 +10,10 @@
  */
 
 // Запрещено непосредственное исполнение этого скрипта
-if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
-// Проверка версии PHP
-if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5.3+ needed!');
+// Инициализация режима отладки значением по умолчанию
+if(!defined('GB_SQL_DEBUG'))	define('GB_SQL_DEBUG', FALSE);
 
 
 
@@ -108,7 +108,7 @@ class GB_DBase	{
 		}
 	
 		// Проверка версии MySQL
-		if(version_compare($this->db->server_info, "5.0.0", "<"))	die('<b>ERROR:</b> MySQL version 5.0+ needed!');
+		if(version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<"))	die('<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!');
 	
 		$this->db->set_charset('utf8');
 	}
@@ -208,7 +208,7 @@ class GB_DBase	{
 		}
 		$regexp .= ')/';
 
-// 		if(defined('GB_SQL_DEBUG'))	print("\n<!-- $regexp -->\n");
+// 		if(GB_SQL_DEBUG)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
 		$query = preg_replace_callback(
@@ -249,7 +249,7 @@ class GB_DBase	{
 		$this->connect();
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		debug_info($query_sub);
+		if(GB_SQL_DEBUG)	debug_info($query_sub, __CLASS__);
 		
 		$result = $this->db->query($query_sub);
 		if ($result)

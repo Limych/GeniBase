@@ -1,11 +1,5 @@
 <?php
-// Проверка версии PHP
-if(version_compare(phpversion(), "5.3.0", "<"))	die('<b>ERROR:</b> PHP version 5.3+ needed!');
-
-require_once('gb/common.php');	// Общие функции системы
-
-//ini_set('error_reporting', E_ERROR);
-//ini_set('display_errors', 'Off');
+require_once('gb/gb.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_SIMPLE);
 
@@ -60,11 +54,6 @@ if($dbase->have_query){
 	);
 	$report->show_report($brief_fields, $detailed_fields);
 }
-?>
-<!--
-<p style="text-align: center; margin-top: 3em;"><a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая книга</a>  | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
--->
-<?php
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
 $res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" AND `records_found`

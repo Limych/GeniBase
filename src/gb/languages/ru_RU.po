@@ -1,0 +1,272 @@
+# Translation of GeniBase in Russian
+# This file is distributed under the same license as the GeniBase package.
+msgid ""
+msgstr ""
+"Project-Id-Version: GeniBase\n"
+"POT-Creation-Date: 2015-02-20 14:17+0300\n"
+"PO-Revision-Date: 2015-02-20 14:25+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.7.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
+"esc_attr__\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../gb/load.php:155 ../gb/load.php:168
+msgid "Maintenance"
+msgstr "Техническое обслуживание"
+
+#: ../gb/load.php:169
+msgid ""
+"This website is currently under going maintenance and will be back online "
+"shortly. Thank you for your patience."
+msgstr ""
+"Этот сайт сейчас находится на техническом обслуживании и будет доступен "
+"через некоторое время. Спасибо за Ваше терпение."
+
+#: ../gb/load.php:196
+#, php-format
+msgid ""
+"Your server is running PHP version %1$s but GeniBase %2$s requires at least "
+"%3$s."
+msgstr ""
+"На сервере установлен PHP версии %1$s, однако для GeniBase %2$s требуется "
+"хотя бы %3$s."
+
+#: ../gb/load.php:202
+msgid ""
+"Your PHP installation appears to be missing the MySQL extension which is "
+"required by GeniBase."
+msgstr ""
+"Похоже, в вашей конфигурации PHP отсутствует расширение MySQL, необходимое "
+"для работы GeniBase."
+
+#: ../gb/locale.php:104 ../gb/locale.php:114 ../gb/locale.php:127
+msgid "Sunday"
+msgstr "Воскресенье"
+
+#: ../gb/locale.php:105 ../gb/locale.php:115 ../gb/locale.php:128
+msgid "Monday"
+msgstr "Понедельник"
+
+#: ../gb/locale.php:106 ../gb/locale.php:116 ../gb/locale.php:129
+msgid "Tuesday"
+msgstr "Вторник"
+
+#: ../gb/locale.php:107 ../gb/locale.php:117 ../gb/locale.php:130
+msgid "Wednesday"
+msgstr "Среда"
+
+#: ../gb/locale.php:108 ../gb/locale.php:118 ../gb/locale.php:131
+msgid "Thursday"
+msgstr "Четверг"
+
+#: ../gb/locale.php:109 ../gb/locale.php:119 ../gb/locale.php:132
+msgid "Friday"
+msgstr "Пятница"
+
+#: ../gb/locale.php:110 ../gb/locale.php:120 ../gb/locale.php:133
+msgid "Saturday"
+msgstr "Суббота"
+
+#: ../gb/locale.php:114
+msgid "S_Sunday_initial"
+msgstr "Вс"
+
+#: ../gb/locale.php:115
+msgid "M_Monday_initial"
+msgstr "Пн"
+
+#: ../gb/locale.php:116
+msgid "T_Tuesday_initial"
+msgstr "Вт"
+
+#: ../gb/locale.php:117
+msgid "W_Wednesday_initial"
+msgstr "Ср"
+
+#: ../gb/locale.php:118
+msgid "T_Thursday_initial"
+msgstr "Чт"
+
+#: ../gb/locale.php:119
+msgid "F_Friday_initial"
+msgstr "Пт"
+
+#: ../gb/locale.php:120
+msgid "S_Saturday_initial"
+msgstr "Сб"
+
+#: ../gb/locale.php:127
+msgid "Sun"
+msgstr "Вс"
+
+#: ../gb/locale.php:128
+msgid "Mon"
+msgstr "Пн"
+
+#: ../gb/locale.php:129
+msgid "Tue"
+msgstr "Вт"
+
+#: ../gb/locale.php:130
+msgid "Wed"
+msgstr "Ср"
+
+#: ../gb/locale.php:131
+msgid "Thu"
+msgstr "Чт"
+
+#: ../gb/locale.php:132
+msgid "Fri"
+msgstr "Пт"
+
+#: ../gb/locale.php:133
+msgid "Sat"
+msgstr "Сб"
+
+#: ../gb/locale.php:136 ../gb/locale.php:151
+msgid "January"
+msgstr "Январь"
+
+#: ../gb/locale.php:137 ../gb/locale.php:152
+msgid "February"
+msgstr "Февраль"
+
+#: ../gb/locale.php:138 ../gb/locale.php:153
+msgid "March"
+msgstr "Март"
+
+#: ../gb/locale.php:139 ../gb/locale.php:154
+msgid "April"
+msgstr "Апрель"
+
+#: ../gb/locale.php:140 ../gb/locale.php:155
+msgid "May"
+msgstr "Май"
+
+#: ../gb/locale.php:141 ../gb/locale.php:156
+msgid "June"
+msgstr "Июнь"
+
+#: ../gb/locale.php:142 ../gb/locale.php:157
+msgid "July"
+msgstr "Июль"
+
+#: ../gb/locale.php:143 ../gb/locale.php:158
+msgid "August"
+msgstr "Август"
+
+#: ../gb/locale.php:144 ../gb/locale.php:159
+msgid "September"
+msgstr "Сентябрь"
+
+#: ../gb/locale.php:145 ../gb/locale.php:160
+msgid "October"
+msgstr "Октябрь"
+
+#: ../gb/locale.php:146 ../gb/locale.php:161
+msgid "November"
+msgstr "Ноябрь"
+
+#: ../gb/locale.php:147 ../gb/locale.php:162
+msgid "December"
+msgstr "Декабрь"
+
+#: ../gb/locale.php:151
+msgid "Jan_January_abbreviation"
+msgstr "Янв"
+
+#: ../gb/locale.php:152
+msgid "Feb_February_abbreviation"
+msgstr "Фев"
+
+#: ../gb/locale.php:153
+msgid "Mar_March_abbreviation"
+msgstr "Мар"
+
+#: ../gb/locale.php:154
+msgid "Apr_April_abbreviation"
+msgstr "Апр"
+
+#: ../gb/locale.php:155
+msgid "May_May_abbreviation"
+msgstr "Май"
+
+#: ../gb/locale.php:156
+msgid "Jun_June_abbreviation"
+msgstr "Июн"
+
+#: ../gb/locale.php:157
+msgid "Jul_July_abbreviation"
+msgstr "Июл"
+
+#: ../gb/locale.php:158
+msgid "Aug_August_abbreviation"
+msgstr "Авг"
+
+#: ../gb/locale.php:159
+msgid "Sep_September_abbreviation"
+msgstr "Сен"
+
+#: ../gb/locale.php:160
+msgid "Oct_October_abbreviation"
+msgstr "Окт"
+
+#: ../gb/locale.php:161
+msgid "Nov_November_abbreviation"
+msgstr "Ноя"
+
+#: ../gb/locale.php:162
+msgid "Dec_December_abbreviation"
+msgstr "Дек"
+
+#: ../gb/locale.php:169
+msgid "am"
+msgstr "дп"
+
+#: ../gb/locale.php:170
+msgid "pm"
+msgstr "пп"
+
+#: ../gb/locale.php:171
+msgid "AM"
+msgstr "ДП"
+
+#: ../gb/locale.php:172
+msgid "PM"
+msgstr "ПП"
+
+#: ../gb/locale.php:178
+msgid "number_format_thousands_sep"
+msgstr " "
+
+#: ../gb/locale.php:182
+msgid "number_format_decimal_point"
+msgstr ","
+
+#: ../gb/locale.php:189
+msgctxt "text direction"
+msgid "ltr"
+msgstr "ltr"
+
+#: ../gb/locale.php:356
+msgid "F j, Y"
+msgstr "d.m.Y"
+
+#: ../gb/locale.php:358
+msgid "g:i a"
+msgstr "H:i"
+
+#: ../gb/locale.php:360
+msgid "F j, Y g:i a"
+msgstr "d.m.Y H:i"
