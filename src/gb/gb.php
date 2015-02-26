@@ -89,6 +89,7 @@ static $region_short = array(
 );
 
 // Load most of GeniBase.
+require_once(GB_INC_DIR . '/kses.php');
 require_once(GB_INC_DIR . '/formatting.php');
 require_once(GB_INC_DIR . '/text.php');
 require_once(GB_INC_DIR . '/class.ww1_database.php');
@@ -160,27 +161,49 @@ if(GB_DEBUG)	var_export($pub);
  * Periodically update calculated fields in database.
  */
 function db_update(){
+	// Skip updation for debug mode but not for testing mode
+// 	if(GB_DEBUG && !defined('GB_TESTING_MODE'))	return;
+
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
 	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL
 			AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)
 			OR `banned_to_datetime` < NOW()');
 
 	// Генерируем поисковые ключи для фамилий
+	static $search_key_types = array(
+			''				=> 1,
+			'metaphone'		=> 101,
+			'metascript'	=> 102,
+	);
 	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p
 			WHERE NOT EXISTS (
 				SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`
-				AND ( sk.`update_datetime` > ?exp OR p.`update_datetime` < sk.`update_datetime` )
+				AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`
+				AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")
 			) ORDER BY `update_datetime` ASC LIMIT 15', array('exp' => IDX_EXPIRATION_DATE));
-	foreach ($result as $row){
+	foreach ($result as $surname){
 		gbdb()->query('DELETE FROM ?_idx_search_keys USING ?_idx_search_keys AS sk
 				INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
-				array('surname' => $row[0]));
+				array('surname' => $surname));
 		
-		$keys = make_search_keys($row[0], false);
-		foreach ($keys as $key)
-			gbdb()->query('INSERT IGNORE INTO ?_idx_search_keys (`person_id`, `surname_key`)
-					SELECT `id`, UPPER(?key) FROM ?_persons WHERE `surname` = ?surname',
-					array('key' => $key, 'surname' => $row[0]));
+		$keys = make_search_keys_assoc($surname);
+		foreach ($keys as $key){
+			foreach ($key as $type => $vals){
+				foreach((array) $vals as $v){
+					$v = mb_strtoupper($v);
+					$mask = !preg_match('/[?*]/uSs', $v) ? '' : GB_DBase::make_condition($v);
+					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,
+							`surname_key_type`, `surname_mask`) SELECT `id`, ?key, ?type,
+							?mask FROM ?_persons WHERE `surname` = ?surname',
+							array(
+									'surname'	=> $surname,
+									'key'		=> $v,
+									'type'		=> $search_key_types[$type],
+									'mask'		=> $mask,
+							));
+				}
+			}
+		}
 	}
 	
 	// Обновляем списки вложенных регионов, если это необходимо
@@ -236,7 +259,7 @@ function db_update(){
 		$result = gbdb()->get_column('SELECT `id` FROM ?@table ORDER BY `update_datetime` ASC LIMIT 1',
 				array('@table' => "dic_$key"));
 		foreach($result as $row){
-			gbdb()->get_column('UPDATE LOW_PRIORITY ?@table SET ?#field_cnt =
+			gbdb()->query('UPDATE LOW_PRIORITY ?@table SET ?#field_cnt =
 					( SELECT COUNT(*) FROM ?_persons WHERE ?#field_id = ?id ),
 					`update_datetime` = NOW() WHERE `id` = ?id',
 					array(

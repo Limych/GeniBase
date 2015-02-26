@@ -149,7 +149,7 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 		$string = gb_specialchars_decode($string, $_quote_style);
 
 		// Guarantee every &entity; is valid or re-encode the &
-// 		$string = gb_kses_normalize_entities($string);
+		$string = gb_kses_normalize_entities($string);
 
 		// Now re-encode everything except &entity;
 		$string = preg_split('/(&#?x?[0-9a-z]+;)/i', $string, -1, PREG_SPLIT_DELIM_CAPTURE);

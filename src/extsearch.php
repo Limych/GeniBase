@@ -10,7 +10,6 @@ $squery = trim($squery);
 html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
 show_records_stat();
 ?>
-<p>!!! ВРЕМЕННО НЕ РАБОТАЕТ !!!</p>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
 	<h2>Форма расширенного поиска</h2>
 	<p class="small alignright"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>

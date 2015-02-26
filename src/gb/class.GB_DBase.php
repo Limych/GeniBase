@@ -32,26 +32,29 @@ class GB_DBase	{
 	 * Default behavior is to show errors if both GB_DEBUG, GB_SQL_DEBUG and GB_DEBUG_DISPLAY
 	 * evaluated to true.
 	 *
-	 * @since 2.0.0
-	 * @var bool
+	 * @since	2.0.0
+	 * @access	private
+	 * @var	bool
 	 */
-	private $show_errors = false;
+	var $show_errors = false;
 	
 	/**
 	 * Whether to suppress errors during the DB bootstrapping.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
+	 * @access	private
 	 * @var bool
 	 */
-	private $suppress_errors = false;
+	var $suppress_errors = false;
 
 	/**
-	 * Last query made
+	 * Last query made.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
+	 * @access	private
 	 * @var array
 	 */
-	private $last_query;
+	var $last_query;
 	
 
 
@@ -189,6 +192,8 @@ class GB_DBase	{
 					: implode(', ', $result);
 
 		}else{
+			$table = (string) $table;
+
 			// First unescape table name if it already escaped
 			if(substr($table, 0, 1) == '`')
 				$table = $this->table_unescape($table);
@@ -240,6 +245,8 @@ class GB_DBase	{
 	function field_unescape($field) {
 		if(is_array($field))
 			return array_map(array($this, __FUNCTION__), $field);
+
+		$field = (string) $field;
 
 		// First remove quotes if it have
 		if(substr($field, 0, 1) == '`')
@@ -598,12 +605,12 @@ class GB_DBase	{
 	const MODE_REPLACE		= 'REPLACE';
 	const MODE_UPDATE		= 'UPDATE';
 	const MODE_DUPLICATE	= 'DUPLICATE';
-	
+
 	/**
 	 * Вставка в таблицу новых данных или обновление существующих.
-	 * 
+	 *
 	 * @since 2.0.0
-	 * 
+	 *
 	 * @param string $tablename	Имя обновляемой таблицы
 	 * @param array $data		Массив с данными для добавления
 	 * @param mixed $unique_key	Ключ, по которому определяется обновляемая строка таблицы.
@@ -618,103 +625,179 @@ class GB_DBase	{
 	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
 	 */
 	function set_row($tablename, $data, $unique_key = FALSE, $mode = FALSE) {
-		if (!$unique_key) { // Уникальный идентификатор не указан - INSERT
-			if (!$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
-			elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
-			elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
-			else {
+		if (!$unique_key) {
+			// INSERT or REPLACE
+			$q = $this->_set_row_insert($tablename, $data, $mode);
+		}else{
+			// UPDATE or INSERT … ON DUPLICATE KEY UPDATE
+			$q = $this->_set_row_update($tablename, $data, $unique_key, $mode);
+		}
+		if(FALSE === $q)	return FALSE;
+		
+		$result = $this->query($q['query'], $q['data']);
+		if(FALSE === $result)	return FALSE;
+		
+		switch ($q['result']){
+			case 'insert_id':
+				return $this->db->insert_id;
+			case 'affected_rows':
+				return $this->db->affected_rows;
+			default:
+				// TODO: Make correct error reporting trougth print_error()
 				$trace = reset(debug_backtrace());
-				$message = "Unknown mode \"$mode\" given to $trace[function]() " .
+				$message = "Unknown result mode \"$mode\" given to $trace[function]() " .
 					"in file $trace[file] at line $trace[line].<br />" .
 					"Terminating function run.";
 				trigger_error($message, E_USER_WARNING);
 				return FALSE;
-			}
-			
-			$query .= " INTO $tablename SET ";
-			foreach ($data as $key => $value)
-				$query .= $this->field_escape($key) . " = ?$key, ";
-			$query = substr($query, 0, -2); // убираем последние запятую и пробел
-			
-			$result = $this->query($query, $data);
-			
-			$out = $this->db->insert_id;
-			
-		} else { // UPDATE или INSERT … ON DUPLICATE KEY UPDATE
-			if (!is_array($unique_key))		// если указана скалярная величина —
-				$unique_key = array('id' => $unique_key);	// воспринимаем её как 'id'
+		}
+	}
+	
+	/**
+	 * Making query for inserting new data.
+	 * 
+	 * @since	2.0.0
+	 * @access	private
+	 * 
+	 * @param string $tablename	Имя обновляемой таблицы
+	 * @param array $data		Массив с данными для добавления
+	 * @param string $mode		Режим добавление данных: MODE_INSERT, MODE_IGNORE («INSERT IGNORE …»), MODE_REPLACE.
+	 * 							Default MODE_INSERT.
+	 * @return array	Associative array with data for {@see GB_DBase::set_row()} or FALSE on error.
+	 */
+	function _set_row_insert($tablename, $data, $mode) {
+		if (!$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
+		elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
+		elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
+		else {
+			// TODO: Make correct error reporting trougth print_error()
+			$trace = reset(debug_backtrace());
+			$message = "Unknown mode \"$mode\" given to $trace[function]() " .
+				"in file $trace[file] at line $trace[line].<br />" .
+				"Terminating function run.";
+			trigger_error($message, E_USER_WARNING);
+			return FALSE;
+		}
+		
+		$first_el = reset($data);
+		if(!is_array($first_el)){
+			// Insert single row — convert data array to array of arrays with single element.
+			$first_el = $data;
+			$data = array($data);
+		}
+		$self = $this;
+		$data = array_map(function($vals) use ($self){
+			return '(' . implode(', ', array_map(array($self, 'data_escape'), $vals)) . ')';
+		}, $data);
+		$query .= " INTO $tablename (" .
+		implode(', ', array_map(array($this, 'field_escape'), array_keys($first_el))) .
+		") VALUES " . implode(', ', $data);
+		$data = array();
 
-			if (!$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
-				// В данном случае поля из второго аргумента подставляются в часть SET,
-				// а поля из третьего — в часть WHERE
-					
-				$query = "UPDATE $tablename SET ";
-					
-				// Чтобы одно и то же поле можно было использовать
-				// и в части SET, и в части WHERE с разными значениями, например
-				//		UPDATE table
-				// 		SET col1 = 'A', col2 = 'B'
-				// 		WHERE col1 = 'C'
-				// подстановку значений в запрос проводим "вручную" —
-				// без использования меток.
-					
-				foreach ($data as $key => $value)
-					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
-				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
-						
-				if ($unique_key) {
-					$query .= ' WHERE ';
-					foreach ($unique_key as $key => $value)
-						$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
-					$query = substr($query, 0, -4);	// убираем последние AND и пробел
-				}
-					
-				$result = $this->query($query);
-					
-				$out = $this->db->affected_rows;
+		return array(
+				'query'		=> $query,
+				'data'		=> $data,
+				'result'	=> 'insert_id',
+		);
+	}	// function
+
+	/**
+	 * Making query for updating data
+	 *
+	 * @since	2.0.0
+	 * @access	private
+	 *
+	 * @param string $tablename	Имя обновляемой таблицы
+	 * @param array $data		Массив с данными для добавления
+	 * @param mixed $unique_key	Ключ, по которому определяется обновляемая строка таблицы.
+	 * 							Либо массив вида 'ключ' => 'значение',
+	 * 							либо массив имён ключей из $data,
+	 * 							либо скалярное значение, тогда ключём будет "id".
+	 * @param string $mode		Режим обновление данных: MODE_UPDATE, MODE_DUPLICATE («INSERT … ON DUPLICATE KEY UPDATE»).
+	 * @return array	Associative array with data for {@see GB_DBase::set_row()} or FALSE on error.
+	 */
+	function _set_row_update($tablename, $data, $unique_key, $mode) {
+		if (!is_array($unique_key))		// если указана скалярная величина —
+			$unique_key = array('id' => $unique_key);	// воспринимаем её как 'id'
+
+		if (!$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
+			// В данном случае поля из второго аргумента подставляются в часть SET,
+			// а поля из третьего — в часть WHERE
 				
-			} elseif ($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
-				$append = is_string(key($unique_key));
-				// $append: если массив $unique_key ассоциативный,
-				// значит, в них данные для уникальных полей —
-				// включаем их в INSERT и в подставновку в query()
-				// Если же массив числовой, значит
-				// все необходимые данные переданы во втором аргументе,
-				// а $unique_key содержит только имена полей,
-				// которые следует исключить из ON DUPLICATE KEY
-
-				if ($append) {
-					$all_data = $data + $unique_key;	// Все данные для ON DUPLICATE KEY UPDATE
-					$data_to_update = $data;			// есть в $data
-				} else {
-					$all_data = $data;
-					$data_to_update = array_diff_key(		// В $unique_key переданы имена полей,
-						$data,								// которые необходимо исключить
-						array_fill_keys($unique_key, TRUE)	// из части ON DUPLICATE KEY UPDATE
-					);
-				}
+			$query = "UPDATE $tablename SET ";
+				
+			// Чтобы одно и то же поле можно было использовать
+			// и в части SET, и в части WHERE с разными значениями, например
+			//		UPDATE table
+			// 		SET col1 = 'A', col2 = 'B'
+			// 		WHERE col1 = 'C'
+			// подстановку значений в запрос проводим "вручную" —
+			// без использования меток.
+				
+			foreach ($data as $key => $value)
+				$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
+			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
+					
+			if ($unique_key) {
+				$query .= ' WHERE ';
+				foreach ($unique_key as $key => $value)
+					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
+				$query = substr($query, 0, -4);	// убираем последние AND и пробел
+			}
+			return array(
+					'query'		=> $query,
+					'data'		=> array(),
+					'result'	=> 'affected_rows',
+			);
 			
-				$query = "INSERT INTO $tablename SET ";
-				foreach ($all_data as $key => $value)
+		} elseif ($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
+			$append = is_string(key($unique_key));
+			// $append: если массив $unique_key ассоциативный,
+			// значит, в них данные для уникальных полей —
+			// включаем их в INSERT и в подставновку в query()
+			// Если же массив числовой, значит
+			// все необходимые данные переданы во втором аргументе,
+			// а $unique_key содержит только имена полей,
+			// которые следует исключить из ON DUPLICATE KEY
+
+			if ($append) {
+				// Все данные для ON DUPLICATE KEY UPDATE есть в $data
+				$all_data = array_merge($data, $unique_key);
+				$data_to_update = $data;
+			} else {
+				$all_data = $data;
+				$data_to_update = array_diff_key(		// В $unique_key переданы имена полей,
+					$data,								// которые необходимо исключить
+					array_fill_keys($unique_key, TRUE)	// из части ON DUPLICATE KEY UPDATE
+				);
+			}
+		
+			$query = "INSERT INTO $tablename SET ";
+			foreach ($all_data as $key => $value)
+				$query .= $this->field_escape($key) . " = ?$key, ";
+			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
+
+			if ($data_to_update) {
+				$query .= ' ON DUPLICATE KEY UPDATE ';
+				foreach ($data_to_update as $key => $value)
 					$query .= $this->field_escape($key) . " = ?$key, ";
-				$query = substr($query, 0, -2);	// убираем последние запятую и пробел
+				$query = substr($query, 0, -2); // убираем последние запятую и пробел
+			}
+			return array(
+					'query'		=> $query,
+					'data'		=> $all_data,
+					'result'	=> 'insert_id',	// Т.к. запрос INSERT - возвращает LAST_INSERT_ID()
+			);
 
-				if ($data_to_update) {
-					$query .= ' ON DUPLICATE KEY UPDATE ';
-					foreach ($data_to_update as $key => $value)
-						$query .= $this->field_escape($key) . " = ?$key, ";
-					$query = substr($query, 0, -2); // убираем последние запятую и пробел
-				}
-
-				$result = query($query, $all_data);
-			
-				// Т.к. запрос INSERT - возвращает LAST_INSERT_ID()
-				$out = $this->db->insert_id;
-
-			}	// if
+		}else{
+			// TODO: Make correct error reporting trougth print_error()
+			$trace = reset(debug_backtrace());
+			$message = "Unknown mode \"$mode\" given to $trace[function]() " .
+			"in file $trace[file] at line $trace[line].<br />" .
+			"Terminating function run.";
+			trigger_error($message, E_USER_WARNING);
+			return FALSE;
 		}	// if
-
-		return $out;
 	}	// function
 
 	/**

@@ -36,48 +36,54 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 
 	return $formatted;
 }	// function format_num
-
-
-
+ 
 /**
  * Функция вычисления поисковых ключей слов.
  * 
+ * @since	2.0.0	Added associative array if $use_hierarhy = TRUE
  * @since	1.0.0
  * 
- * @param	string|string[]	$text		Текст, для которого необходимо вычислить поисковые ключи.
- * @param	boolean			$use_hierarhy	Флаг, что надо ключи для каждого вернуть в виде «слово» => массив ключей.
- * @return	string[][]|string[]		Массив вычисленных ключей.
+ * @param	string|array	$text		Текст, для которого необходимо вычислить поисковые ключи.
+ * @param	boolean			$use_hierarhy	TRUE, если надо для каждого слова вернуть массив соответствующих ключей.
+ * @return	array		Массив вычисленных ключей.
  */
-function make_search_keys($text, $use_hierarhy = true){
+function make_search_keys($text, $use_hierarhy = false){
 	if(!is_array($text))
 		$text = preg_split('/[^\w\?\*]+/uS', $text, -1, PREG_SPLIT_NO_EMPTY);
 
 	$res = array();
 	foreach($text as $key => $word){
-		$keys = array_merge(
-			(array) rus_metaphone($word, true),
-			(array) rus_metascript(mb_ucfirst($word))
-		);
-// print "<!-- "; var_export($keys); print " -->";
-		$keys = array_filter(
-			$keys,
-			function ($val){
-				return mb_strlen($val) >= 2;
-			}
-		);
-		array_unshift($keys, $word);
-// print "<!-- "; var_export($keys); print " -->";
-		if($use_hierarhy)
-			$res[$key] = $keys;
+		$key_metaphone	= (array) rus_metaphone($word, true);
+		$key_metascript	= (array) rus_metascript(mb_ucfirst($word));
+
+		$key_metaphone	= array_filter($key_metaphone, function ($val){ return mb_strlen($val) >= 2; });
+		$key_metascript	= array_filter($key_metascript, function ($val){ return mb_strlen($val) >= 2; });
+
+		if(!$use_hierarhy)
+			$res = array_merge($res, array($word), $key_metaphone, $key_metascript);
 		else
-			$res = array_merge($res, $keys);
+			$res[$key] = array(
+					''				=> $word,
+					'metaphone'		=> $key_metaphone,
+					'metascript'	=> $key_metascript,
+			);
 	}
 
-	//return $text;
 	return $res;
 }
 
-
+/**
+ * Return associative array with keys for each word.
+ * 
+ * @since	2.0.0
+ * @see	make_search_keys()
+ * 
+ * @param	string|array	$text	Text for which we make search keys.
+ * @return	array	Array of associative arrays with search keys.
+ */
+function make_search_keys_assoc($text){
+	return make_search_keys($text, true);
+}
 
 /**
  * Функция вычисления письменного ключа русского слова.
@@ -260,6 +266,8 @@ function fix_russian($text){
  * Функция расширения поискового запроса по именам
  */
 function expand_names($names){
+	// TODO: Заменить указанные ниже строки, когда словарь имён в базе будет переведён в верхний регистр
+// 	$names = array_map('mb_strtoupper', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$names = array_map('mb_strtolower', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$have_name = false;
 	foreach($names as $key => $n){
@@ -275,7 +283,8 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+// 			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+			$names[$key] = '[[:blank:]](' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
 
 		}elseif(!$have_name){
 			// Это имя
@@ -284,7 +293,8 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
+// 			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
+			$names[$key] = '^(' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
 			$have_name = true;
 		}else{
 			// Это непонятно что
@@ -293,7 +303,8 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+// 			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+			$names[$key] = '[[:<:]](' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
 		}
 	}
 // print "<!-- "; var_export($names); print " -->";

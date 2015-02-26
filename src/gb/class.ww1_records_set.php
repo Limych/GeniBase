@@ -117,7 +117,7 @@ class ww1_solders_set extends ww1_records_set{
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
 			$even = 1-$even;
-			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['is_strict_match']) || !empty($row['is_strict_match']) ? '' : ' nonstrict-match') . "'>\n";
+			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
 			foreach(array_keys($brief_fields) as $key)
 				print "\t\t<td>" . htmlspecialchars($row[$key]) . "</td>\n";

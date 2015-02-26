@@ -1,13 +1,9 @@
 <?php
 
 /**
- * @group	general-template.php
+ * @group	common.php
  */
-class Tests_general_template extends GB_UnitTestCase {
-	function test_siteinfo(){
-		$this->assertEquals(GB_VERSION, get_siteinfo('version'));
-	}
-
+class Tests_Common extends GB_UnitTestCase {
 	function test_paginator() {
 		$url = '/index.php?surname=surname_val_' . rand(100, 999);
 		$_SERVER['REQUEST_URI'] = $url . '&pg=9' . rand(100, 999);
