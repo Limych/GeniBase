@@ -6,7 +6,7 @@
  * @subpackage Template
  *
  * @copyright	Copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
- * @copyright	Partially copyright © GeniBase
+ * @copyright	Partially copyright © WordPress
  */
 
 // Direct execution forbidden for this script
@@ -18,7 +18,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * Display information about the site.
  *
  * @see siteinfo() For possible values for the parameter.
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $show What to display.
  */
@@ -35,7 +35,7 @@ function siteinfo($show = ''){
  * 2. gburl - Site URI path to GeniBase.
  * 3. description - Secondary title
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $show Blog info to retrieve.
  * @param string $filter How to filter what is retrieved.
@@ -47,7 +47,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 		case 'url' :
 			$output = home_url();
 			break;
-		case 'wpurl' :
+		case 'gburl' :
 			$output = site_url();
 			break;
 		case 'description':
@@ -92,7 +92,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			/**
 			 * Filter the URL returned by get_siteinfo().
 			 *
-			 * @since 1.1.0
+			 * @since 2.0.0
 			 *
 			 * @param mixed $output The URL returned by siteinfo().
 			 * @param mixed $show   Type of information requested.
@@ -102,7 +102,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			/**
 			 * Filter the site information returned by get_siteinfo().
 			 *
-			 * @since 1.1.0
+			 * @since 2.0.0
 			 *
 			 * @param mixed $output The requested non-URL site information.
 			 * @param mixed $show   Type of information requested.
@@ -120,7 +120,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
  * Builds up a set of html attributes containing the text direction and language
  * information for the page.
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $doctype The type of html document (xhtml|html).
  */
@@ -143,7 +143,7 @@ function language_attributes($doctype = 'html') {
 	/**
 	 * Filter the language attributes for display in the html tag.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 *
 	 * @param string $output A space-separated list of language attributes.
 	*/
@@ -166,6 +166,8 @@ function html_header($title){
 	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 
 	<link rel="stylesheet" type="text/css" href="/styles.css" />
+	<link rel="icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
+	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
 </head><body>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
 	<script type="text/javascript">
@@ -198,6 +200,13 @@ function html_footer(){
 <footer>
 	<p style="text-align: center; margin-top: 3em;"><a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая книга</a>  | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
+<?php if(GB_DEBUG): ?>
+	<p><small>Statistic: <?php
+		print(timer_stop(0, 3) . 's');
+		if(function_exists('memory_get_usage'))
+			print(' / ' . round(memory_get_usage()/1024/1024, 2) . 'mb ');
+	?></small></p>
+<?php endif; ?>
 </footer>
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

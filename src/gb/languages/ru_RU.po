@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-02-20 14:17+0300\n"
-"PO-Revision-Date: 2015-02-20 14:25+0300\n"
+"POT-Creation-Date: 2015-02-24 00:22+0300\n"
+"PO-Revision-Date: 2015-02-24 00:22+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru_RU\n"
@@ -20,6 +20,18 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
 "esc_attr__\n"
 "X-Poedit-SearchPath-0: ..\n"
+
+#: ../gb/class.GB_DBase.php:356
+#, php-format
+msgid "GeniBase database error %1$s for query %2$s made by %3$s"
+msgstr ""
+"База данных GeniBase вернула ошибку %1$s в ответ на запрос %2$s, "
+"выполненный %3$s"
+
+#: ../gb/class.GB_DBase.php:358
+#, php-format
+msgid "GeniBase database error %1$s for query %2$s"
+msgstr "База данных GeniBase вернула ошибку %1$s в ответ на запрос %2$s"
 
 #: ../gb/load.php:155 ../gb/load.php:168
 msgid "Maintenance"

@@ -35,13 +35,6 @@ if(!defined('GB_TESTING_MODE')){	// … но не в режиме тестиро
 	require_once(BASE_DIR . '/gb-config.php');
 }
 
-// Включение в режиме отладки полной отладочной информации
-if(!defined('GB_DEBUG'))	define('GB_DEBUG', FALSE);
-if(GB_DEBUG){
-	error_reporting(E_ALL);	// Включить показ всех ошибок
-	ini_set('display_errors', 'stdout');
-}
-
 // Базовые настройки системы
 mb_internal_encoding('UTF-8');
 setlocale(LC_ALL, array('ru_RU.utf8', 'ru_RU.UTF-8'));
@@ -49,15 +42,31 @@ setlocale(LC_ALL, array('ru_RU.utf8', 'ru_RU.UTF-8'));
 // Include files required for initialization.
 require_once(GB_INC_DIR . '/version.php');
 require_once(GB_INC_DIR . '/load.php');
+require_once(GB_INC_DIR . '/default-constants.php');
+
+// Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
+gb_initial_constants();
 
 // Check for the required PHP version and for the MySQL extension or a database drop-in.
 gb_check_php_mysql_versions();
+
+// Turn register_globals off.
+gb_unregister_GLOBALS();
+
+// Standardize $_SERVER variables across setups.
+gb_fix_server_vars();
 
 // Check if we have received a request due to missing favicon.ico
 gb_favicon_request();
 
 // Check if we're in maintenance mode.
 gb_maintenance();
+
+// Start loading timer.
+timer_start();
+
+// Check if we're in GB_DEBUG mode.
+gb_debug_mode();
 
 // Load early GeniBase files.
 require_once(GB_INC_DIR . '/pomo/mo.php');
@@ -100,7 +109,7 @@ require_once(GB_INC_DIR . '/locale.php');
 /**
  * GeniBase Locale object for loading locale domain date and various strings.
  * @global object $gb_locale
- * @since 1.1.0
+ * @since 2.0.0
 */
 $GLOBALS['gb_locale'] = new GB_Locale();
 
@@ -273,6 +282,9 @@ function show_records_stat(){
  * @param	integer	$records_found
  */
 function log_event($records_found = 0){
+	// Skip logging if debug mode
+	if(GB_DEBUG)	return;
+
 	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
 		return implode('&', array_filter(preg_split('/&/uS', $matches[1]), function($val){
@@ -291,6 +303,7 @@ function log_event($records_found = 0){
 		'query' => $squery,
 		'url'	=> $url,
 		'records_found'	=> $records_found,
+		'duration'	=> timer_stop(),
 	), FALSE, GB_DBase::MODE_INSERT);
 }
 

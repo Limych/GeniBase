@@ -9,13 +9,13 @@
 /**
  * Class that loads the calendar locale.
  *
- * @since 1.1.0
+ * @since 2.0.0
  */
 class GB_Locale {
 	/**
 	 * Stores the translated strings for the full weekday names.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -29,7 +29,7 @@ class GB_Locale {
 	 *
 	 * @see GB_Locale::init() for how to handle the hack.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -38,7 +38,7 @@ class GB_Locale {
 	/**
 	 * Stores the translated strings for the abbreviated weekday names.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -47,7 +47,7 @@ class GB_Locale {
 	/**
 	 * Stores the translated strings for the full month names.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -56,7 +56,7 @@ class GB_Locale {
 	/**
 	 * Stores the translated strings for the abbreviated month names.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -67,7 +67,7 @@ class GB_Locale {
 	 *
 	 * Also the capitalized versions.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var array
 	 * @access private
 	 */
@@ -78,7 +78,7 @@ class GB_Locale {
 	 *
 	 * Default is left to right 'ltr'.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @var string
 	 * @access private
 	 */
@@ -96,7 +96,7 @@ class GB_Locale {
 	 * calendar elements. Which allows for specifying locale
 	 * specific calendar names and text direction.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access private
 	 */
 	function init() {
@@ -206,7 +206,7 @@ class GB_Locale {
 	 * by using 0 (zero). So the week starts with 0 (zero)
 	 * and ends on Saturday with is fetched by using 6 (six).
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param int $weekday_number 0 for Sunday through 6 Saturday
@@ -224,7 +224,7 @@ class GB_Locale {
 	 * pay attention to make sure that the starting letter does
 	 * not conflict.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $weekday_name
@@ -240,7 +240,7 @@ class GB_Locale {
 	 * The weekday abbreviation is retrieved by the translated
 	 * full weekday word.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $weekday_name Full translated weekday word
@@ -261,7 +261,7 @@ class GB_Locale {
 	 * You can use an integer instead and it will add the
 	 * '0' before the numbers less than 10 for you.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string|int $month_number '01' through '12'
@@ -277,7 +277,7 @@ class GB_Locale {
 	 * The $month_name parameter is expected to be the translated or
 	 * translatable version of the month.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $month_name Translated month to get abbreviated version
@@ -292,7 +292,7 @@ class GB_Locale {
 	 *
 	 * The $meridiem parameter is expected to not be translated.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $meridiem Either 'am', 'pm', 'AM', or 'PM'. Not translated version.
@@ -308,7 +308,7 @@ class GB_Locale {
 	 * @deprecated For backwards compatibility only.
 	 * @access private
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 */
 	function register_globals() {
 		$GLOBALS['weekday']         = $this->weekday;
@@ -323,7 +323,7 @@ class GB_Locale {
 	 *
 	 * @uses GB_Locale::init()
 	 * @uses GB_Locale::register_globals()
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 *
 	 * @return GB_Locale
 	 */
@@ -335,7 +335,7 @@ class GB_Locale {
 	/**
 	 * Checks if current locale is RTL.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 * @return bool Whether locale is RTL.
 	 */
 	function is_rtl() {
@@ -349,7 +349,7 @@ class GB_Locale {
 	 * on wp-admin/options-general.php to the general POT that would
 	 * otherwise be added to the admin POT.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 */
 	function _strings_for_pot() {
 		/* translators: localized date format, see http://php.net/date */
@@ -364,7 +364,7 @@ class GB_Locale {
 /**
  * Checks if current locale is RTL.
  *
- * @since 1.1.0
+ * @since 2.0.0
  * @return bool Whether locale is RTL.
  */
 function is_rtl() {

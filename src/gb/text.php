@@ -42,6 +42,8 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 /**
  * Функция вычисления поисковых ключей слов.
  * 
+ * @since	1.0.0
+ * 
  * @param	string|string[]	$text		Текст, для которого необходимо вычислить поисковые ключи.
  * @param	boolean			$use_hierarhy	Флаг, что надо ключи для каждого вернуть в виде «слово» => массив ключей.
  * @return	string[][]|string[]		Массив вычисленных ключей.
@@ -52,22 +54,23 @@ function make_search_keys($text, $use_hierarhy = true){
 
 	$res = array();
 	foreach($text as $key => $word){
-		$word = array_merge(
+		$keys = array_merge(
 			(array) rus_metaphone($word, true),
 			(array) rus_metascript(mb_ucfirst($word))
 		);
-// print "<!-- "; var_export($word); print " -->";
-		$word = array_filter(
-			$word,
+// print "<!-- "; var_export($keys); print " -->";
+		$keys = array_filter(
+			$keys,
 			function ($val){
 				return mb_strlen($val) >= 2;
 			}
 		);
-// print "<!-- "; var_export($word); print " -->";
-		if ($use_hierarhy)
-			$res[$key] = $word;
+		array_unshift($keys, $word);
+// print "<!-- "; var_export($keys); print " -->";
+		if($use_hierarhy)
+			$res[$key] = $keys;
 		else
-			$res = array_merge($res, $word);
+			$res = array_merge($res, $keys);
 	}
 
 	//return $text;
@@ -296,63 +299,61 @@ function expand_names($names){
 // print "<!-- "; var_export($names); print " -->";
 	return $names;
 } // function expand_names
-	
-	
-	
-	/**
-	 * Check if only latin characters are in text.
-	 * 
-	 * @param	string	$text	Text to check for latin characters.
-	 * @return	boolean		Result of check.
-	 */
-	function is_translit($text) {
-		return is_string($text) && preg_match('/[a-z]/uiS', $text);
-	}
-	
-	
-	
-	/**
-	 * Convert transliterated text to russian (UTF-8).
-	 * 
-	 * Function uses GOST 16876-71 transliteration table.
-	 * 
-	 * @param	string	$text	Transliterated russian text.
-	 * @return	string|string[]		Converted text or translation table if $text was set to NULL.
-	 */
-	function translit2rus($text) {
-		static $tr	= array(
-			// Capital letters
-			'A'		=> 'А',		'B'		=> 'Б',		'V'		=> 'В',		'G'		=> 'Г',		'D'		=> 'Д',
-			'E'		=> 'Е',		'Jo'	=> 'Ё',		'Zh'	=> 'Ж',		'Z'		=> 'З',		'I'		=> 'И',
-			'Jj'	=> 'Й',		'K'		=> 'К',		'L'		=> 'Л',		'M'		=> 'М',		'N'		=> 'Н',
-			'O'		=> 'О',		'P'		=> 'П',		'R'		=> 'Р',		'S'		=> 'С',		'T'		=> 'Т',
-			'U'		=> 'У',		'F'		=> 'Ф',		'Kh'	=> 'Х',		'C'		=> 'Ц',		'Ch'	=> 'Ч',
-			'Sh'	=> 'Ш',		'Shh'	=> 'Щ',		'"'		=> 'Ъ',		'Y'		=> 'Ы',		'\''	=> 'Ь',
-			'Eh'	=> 'Э',		'Ju'	=> 'Ю',		'Ja'	=> 'Я',
-	
-			// Lowercase letters
-			'a'		=> 'а',		'b'		=> 'б',		'v'		=> 'в',		'g'		=> 'г',		'd'		=> 'д',
-			'e'		=> 'е',		'jo'	=> 'ё',		'zh'	=> 'ж',		'z'		=> 'з',		'i'		=> 'и',
-			'jj'	=> 'й',		'k'		=> 'к',		'l'		=> 'л',		'm'		=> 'м',		'n'		=> 'н',
-			'o'		=> 'о',		'p'		=> 'п',		'r'		=> 'р',		's'		=> 'с',		't'		=> 'т',
-			'u'		=> 'у',		'f'		=> 'ф',		'kh'	=> 'х',		'c'		=> 'ц',		'ch'	=> 'ч',
-			'sh'	=> 'ш',		'shh'	=> 'щ',		'"'		=> 'ъ',		'y'		=> 'ы',		'\''	=> 'ь',
-			'eh'	=> 'э',		'ju'	=> 'ю',		'ja'	=> 'я',
-	
-			// Additional (non GOST) pairs
-			'J'		=> 'Й',		'j'		=> 'й',
-			'Yo'	=> 'Ё',		'yo'	=> 'ё',
-			'X'		=> 'Кс',	'x'		=> 'кс',
-			'H'		=> 'Х',		'h'		=> 'х',
-			'Sch'	=> 'Щ',		'sch'	=> 'щ',
-			'Yu'	=> 'Ю',		'yu'	=> 'ю',
-			'Ya'	=> 'Я',		'ya'	=> 'я',
-		);
-	
-		if ($text === null)
-			return $tr;
-	
-		return strtr($text, $tr);
-	}
 
-?>
+
+
+/**
+ * Check if only latin characters are in text.
+ * 
+ * @param	string	$text	Text to check for latin characters.
+ * @return	boolean		Result of check.
+ */
+function is_translit($text) {
+	return is_string($text) && preg_match('/[a-z]/uiS', $text);
+}
+
+
+
+/**
+ * Convert transliterated text to russian (UTF-8).
+ * 
+ * Function uses GOST 16876-71 transliteration table.
+ * 
+ * @param	string	$text	Transliterated russian text.
+ * @return	string|string[]		Converted text or translation table if $text was set to NULL.
+ */
+function translit2rus($text) {
+	static $tr	= array(
+		// Capital letters
+		'A'		=> 'А',		'B'		=> 'Б',		'V'		=> 'В',		'G'		=> 'Г',		'D'		=> 'Д',
+		'E'		=> 'Е',		'Jo'	=> 'Ё',		'Zh'	=> 'Ж',		'Z'		=> 'З',		'I'		=> 'И',
+		'Jj'	=> 'Й',		'K'		=> 'К',		'L'		=> 'Л',		'M'		=> 'М',		'N'		=> 'Н',
+		'O'		=> 'О',		'P'		=> 'П',		'R'		=> 'Р',		'S'		=> 'С',		'T'		=> 'Т',
+		'U'		=> 'У',		'F'		=> 'Ф',		'Kh'	=> 'Х',		'C'		=> 'Ц',		'Ch'	=> 'Ч',
+		'Sh'	=> 'Ш',		'Shh'	=> 'Щ',		'"'		=> 'Ъ',		'Y'		=> 'Ы',		'\''	=> 'Ь',
+		'Eh'	=> 'Э',		'Ju'	=> 'Ю',		'Ja'	=> 'Я',
+
+		// Lowercase letters
+		'a'		=> 'а',		'b'		=> 'б',		'v'		=> 'в',		'g'		=> 'г',		'd'		=> 'д',
+		'e'		=> 'е',		'jo'	=> 'ё',		'zh'	=> 'ж',		'z'		=> 'з',		'i'		=> 'и',
+		'jj'	=> 'й',		'k'		=> 'к',		'l'		=> 'л',		'm'		=> 'м',		'n'		=> 'н',
+		'o'		=> 'о',		'p'		=> 'п',		'r'		=> 'р',		's'		=> 'с',		't'		=> 'т',
+		'u'		=> 'у',		'f'		=> 'ф',		'kh'	=> 'х',		'c'		=> 'ц',		'ch'	=> 'ч',
+		'sh'	=> 'ш',		'shh'	=> 'щ',		'"'		=> 'ъ',		'y'		=> 'ы',		'\''	=> 'ь',
+		'eh'	=> 'э',		'ju'	=> 'ю',		'ja'	=> 'я',
+
+		// Additional (non GOST) pairs
+		'J'		=> 'Й',		'j'		=> 'й',
+		'Yo'	=> 'Ё',		'yo'	=> 'ё',
+		'X'		=> 'Кс',	'x'		=> 'кс',
+		'H'		=> 'Х',		'h'		=> 'х',
+		'Sch'	=> 'Щ',		'sch'	=> 'щ',
+		'Yu'	=> 'Ю',		'yu'	=> 'ю',
+		'Ya'	=> 'Я',		'ya'	=> 'я',
+	);
+
+	if ($text === null)
+		return $tr;
+
+	return strtr($text, $tr);
+} // function

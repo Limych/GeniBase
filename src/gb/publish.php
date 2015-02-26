@@ -332,5 +332,3 @@ function prepublish_make_data($raw_norm, &$have_trouble){
 	}
 	return $pub;
 }
-
-?>

@@ -1,5 +1,5 @@
 <?php
-require_once('gb/common.php');	// Общие функции системы
+require_once('gb/gb.php');	// Общие функции системы
 
 $dbase = new ww1_database_solders(Q_EXTENDED);
 
@@ -10,6 +10,7 @@ $squery = trim($squery);
 html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
 show_records_stat();
 ?>
+<p>!!! ВРЕМЕННО НЕ РАБОТАЕТ !!!</p>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
 	<h2>Форма расширенного поиска</h2>
 	<p class="small alignright"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>

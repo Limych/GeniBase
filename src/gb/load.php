@@ -7,7 +7,7 @@
  * @package GeniBase
  * 
  * @copyright	Copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
- * @copyright	Partially copyright © GeniBase
+ * @copyright	Partially copyright © WordPress
  */
 
 // Direct execution forbidden for this script
@@ -16,11 +16,99 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 
 
 /**
+ * Turn register globals off.
+ *
+ * @since 2.0.0
+ * @access private
+ *
+ * @return null Will return null if register_globals PHP directive was disabled.
+ */
+function gb_unregister_GLOBALS() {
+	if ( !ini_get( 'register_globals' ) )
+		return;
+
+	if ( isset( $_REQUEST['GLOBALS'] ) )
+		die( 'GLOBALS overwrite attempt detected' );
+
+	// Variables that shouldn't be unset
+	$no_unset = array( 'GLOBALS', '_GET', '_POST', '_COOKIE', '_REQUEST', '_SERVER', '_ENV', '_FILES', 'table_prefix' );
+
+	$input = array_merge( $_GET, $_POST, $_COOKIE, $_SERVER, $_ENV, $_FILES, isset( $_SESSION ) && is_array( $_SESSION ) ? $_SESSION : array() );
+	foreach ( $input as $k => $v )
+		if ( !in_array( $k, $no_unset ) && isset( $GLOBALS[$k] ) ) {
+			unset( $GLOBALS[$k] );
+		}
+}
+
+/**
+ * Fix `$_SERVER` variables for various setups.
+ *
+ * @since 2.0.0
+ * @access private
+ *
+ * @global string $PHP_SELF The filename of the currently executing script,
+ *                          relative to the document root.
+ */
+function gb_fix_server_vars() {
+	global $PHP_SELF;
+
+	$default_server_values = array(
+			'SERVER_SOFTWARE' => '',
+			'REQUEST_URI' => '',
+	);
+
+	$_SERVER = array_merge( $default_server_values, $_SERVER );
+
+	// Fix for IIS when running with PHP ISAPI
+	if ( empty( $_SERVER['REQUEST_URI'] ) || ( php_sapi_name() != 'cgi-fcgi' && preg_match( '/^Microsoft-IIS\//', $_SERVER['SERVER_SOFTWARE'] ) ) ) {
+
+		// IIS Mod-Rewrite
+		if ( isset( $_SERVER['HTTP_X_ORIGINAL_URL'] ) ) {
+			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_ORIGINAL_URL'];
+		}
+		// IIS Isapi_Rewrite
+		else if ( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
+			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
+		} else {
+			// Use ORIG_PATH_INFO if there is no PATH_INFO
+			if ( !isset( $_SERVER['PATH_INFO'] ) && isset( $_SERVER['ORIG_PATH_INFO'] ) )
+				$_SERVER['PATH_INFO'] = $_SERVER['ORIG_PATH_INFO'];
+
+			// Some IIS + PHP configurations puts the script-name in the path-info (No need to append it twice)
+			if ( isset( $_SERVER['PATH_INFO'] ) ) {
+				if ( $_SERVER['PATH_INFO'] == $_SERVER['SCRIPT_NAME'] )
+					$_SERVER['REQUEST_URI'] = $_SERVER['PATH_INFO'];
+				else
+					$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] . $_SERVER['PATH_INFO'];
+			}
+
+			// Append the query string if it exists and isn't null
+			if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+				$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
+			}
+		}
+	}
+
+	// Fix for PHP as CGI hosts that set SCRIPT_FILENAME to something ending in php.cgi for all requests
+	if ( isset( $_SERVER['SCRIPT_FILENAME'] ) && ( strpos( $_SERVER['SCRIPT_FILENAME'], 'php.cgi' ) == strlen( $_SERVER['SCRIPT_FILENAME'] ) - 7 ) )
+		$_SERVER['SCRIPT_FILENAME'] = $_SERVER['PATH_TRANSLATED'];
+
+	// Fix for Dreamhost and other PHP as CGI hosts
+	if ( strpos( $_SERVER['SCRIPT_NAME'], 'php.cgi' ) !== false )
+		unset( $_SERVER['PATH_INFO'] );
+
+	// Fix empty PHP_SELF
+	$PHP_SELF = $_SERVER['PHP_SELF'];
+	if ( empty( $PHP_SELF ) )
+		$_SERVER['PHP_SELF'] = $PHP_SELF = preg_replace( '/(\?.*)?$/', '', $_SERVER["REQUEST_URI"] );
+}
+
+/**
  * Don't load all of system when handling a favicon.ico request.
  *
  * Instead, send the headers for a zero-length favicon and bail.
  *
- * @since 1.1.0
+ * @since 2.0.0
  */
 function gb_favicon_request(){
 	if ( '/favicon.ico' == $_SERVER['REQUEST_URI'] ) {
@@ -40,7 +128,7 @@ function gb_favicon_request(){
  * the script will then terminate with an error, otherwise there is a risk
  * that a file can be double-included.
  *
- * @since 1.1.0
+ * @since 2.0.0
  * @access private
  *
  * @global $gb_locale The GeniBase date and time locale object.
@@ -119,7 +207,7 @@ function gb_load_translations_early() {
  * The default message can be replaced by using a drop-in (maintenance_stub.php in
  * the GeniBase root directory).
  *
- * @since 1.1.0
+ * @since 2.0.0
  * @access private
  */
 function gb_maintenance() {
@@ -185,7 +273,7 @@ function gb_maintenance() {
  *
  * Dies if requirements are not met.
  *
- * @since 1.1.0
+ * @since 2.0.0
  * @access private
  */
 function gb_check_php_mysql_versions() {
@@ -204,14 +292,105 @@ function gb_check_php_mysql_versions() {
 }
 
 /**
+ * Start the GeniBase micro-timer.
+ *
+ * @since 2.0.0
+ * @access private
+ *
+ * @global float $gb_timer['start'] Unix timestamp set at the beginning of the page load.
+ * @see timer_stop()
+ */
+function timer_start() {
+	global $gb_timer;
+	$gb_timer['start'] = microtime(true);
+}
+
+/**
+ * Retrieve or display the time from the page start to when function is called.
+ *
+ * @since 2.0.0
+ *
+ * @global float $gb_timer['start'] Seconds from when timer_start() is called.
+ * @global float $gb_timer['end']   Seconds from when function is called.
+ *
+ * @param int $display   Whether to echo or return the results. Accepts 0|false for return,
+ *                       1|true for echo. Default 0|false.
+ * @param int $precision The number of digits from the right of the decimal to display.
+ *                       Default 3.
+ * @return string The "second.microsecond" finished time calculation. The number is formatted
+ *                for human consumption, both localized and rounded.
+ */
+function timer_stop($display = false, $precision = 3){
+	global $gb_timer;
+	$gb_timer['end'] = microtime(true);
+	$timetotal = $gb_timer['end'] - $gb_timer['start'];
+	$r = (function_exists('number_format_i18n'))
+			? number_format_i18n($timetotal, $precision)
+			: number_format($timetotal, $precision);
+	if($display)
+		echo $r;
+	return $r;
+}
+
+/**
+ * Set PHP error reporting based on GeniBase debug settings.
+ *
+ * Uses three constants: `GB_DEBUG`, `GB_DEBUG_DISPLAY`, and `GB_DEBUG_LOG`.
+ * All three can be defined in wp-config.php, and by default are set to false.
+ *
+ * When `GB_DEBUG` is true, all PHP notices are reported. GeniBase will also
+ * display internal notices: when a deprecated GeniBase function, function
+ * argument, or file is used. Deprecated code may be removed from a later
+ * version.
+ *
+ * It is strongly recommended that plugin and theme developers use `GB_DEBUG`
+ * in their development environments.
+ *
+ * `GB_DEBUG_DISPLAY` and `GB_DEBUG_LOG` perform no function unless `GB_DEBUG`
+ * is true.
+ *
+ * When `GB_DEBUG_DISPLAY` is true, GeniBase will force errors to be displayed.
+ * `GB_DEBUG_DISPLAY` defaults to true. Defining it as null prevents GeniBase
+ * from changing the global configuration setting. Defining `GB_DEBUG_DISPLAY`
+ * as false will force errors to be hidden.
+ *
+ * When `GB_DEBUG_LOG` is true, errors will be logged to debug.log in the content
+ * directory.
+ *
+ * Errors are never displayed for XML-RPC requests.
+ *
+ * @since 2.0.0
+ * @access private
+ */
+function gb_debug_mode() {
+	if ( GB_DEBUG ) {
+		error_reporting( E_ALL );
+
+		if ( GB_DEBUG_DISPLAY )
+			ini_set( 'display_errors', 1 );
+		elseif ( null !== GB_DEBUG_DISPLAY )
+			ini_set( 'display_errors', 0 );
+
+		if ( GB_DEBUG_LOG ) {
+			ini_set( 'log_errors', 1 );
+			ini_set( 'error_log', BASE_DIR . '/debug.log' );
+		}
+	} else {
+		error_reporting( E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR );
+	}
+	if ( defined( 'XMLRPC_REQUEST' ) )
+		ini_set( 'display_errors', 0 );
+}
+
+/**
  * In debug mode display hidden debug reports.
- * 
- * @since 1.1.0
- * 
+ *
+ * @since 2.0.0
+ *
  * @param mixed	$var	Variable to be displayed
  * @param mixed	$ignore	Class name or backtrace levels count to be ignored in report
  */
-function debug_info($var, $ignore = 0){
+function gb_debug_info($var, $ignore = 0){
 	if(!GB_DEBUG)	return;
 
 	$trace = debug_backtrace();
@@ -224,9 +403,9 @@ function debug_info($var, $ignore = 0){
 			while(isset($trace[$level]) && isset($trace[$level]['class']) && $trace[$level]['class'] == $ignore)	$level++;
 			$level--;
 		}
-		
+
 		$place = substr($trace[$level]['file'], strlen(BASE_DIR)) .
-				' #' . $trace[$level]['line'] . ' (' . $place . ')';
+		' #' . $trace[$level]['line'] . ' (' . $place . ')';
 	}
 	print("\n<!-- " . $place . ': ' . var_export($var, TRUE) . " -->\n");
 }

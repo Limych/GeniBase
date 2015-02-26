@@ -66,7 +66,7 @@ if(isset($GLOBALS['gb_tests_options'])) {
 }/**/
 
 // Load GeniBase
-require_once BASE_DIR . '/gb/common.php';
+require_once BASE_DIR . '/gb/gb.php';
 
 // Delete any default posts & related data
 // _delete_all_posts();

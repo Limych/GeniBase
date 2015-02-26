@@ -7,7 +7,7 @@
  * @package GeniBase
  * 
  * @copyright	Copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
- * @copyright	Partially copyright © GeniBase
+ * @copyright	Partially copyright © WordPress
  */
 
 // Direct execution forbidden for this script
@@ -18,7 +18,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 /**
  * Checks for invalid UTF8 in a string.
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $string The text which is to be checked.
  * @param boolean $strip Optional. Whether to attempt to strip out invalid UTF8. Default is false.
@@ -52,7 +52,7 @@ function gb_check_invalid_utf8($string, $strip = false){
  * $quote_style can be set to ENT_COMPAT to decode " entities,
  * or ENT_QUOTES to do both " and '. Default is ENT_NOQUOTES where no quotes are decoded.
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $string The text which is to be decoded.
  * @param mixed $quote_style Optional. Converts double quotes if set to ENT_COMPAT, both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES. Also compatible with old _gb_specialchars() values; converting single quotes if set to 'single', double if set to 'double' or both if otherwise set. Default is ENT_NOQUOTES.
@@ -109,7 +109,7 @@ function gb_specialchars_decode($string, $quote_style = ENT_NOQUOTES){
  * $quote_style can be set to ENT_COMPAT to encode " to
  * &quot;, or ENT_QUOTES to do both. Default is ENT_NOQUOTES where no quotes are encoded.
  *
- * @since 1.1.0
+ * @since 2.0.0
  * @access private
  *
  * @param string $string The text which is to be encoded.
@@ -170,7 +170,7 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 /**
  * Escaping for HTML attributes.
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $text
  * @return string
@@ -184,7 +184,7 @@ function esc_attr($text) {
 	 * Text passed to esc_attr() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
@@ -196,7 +196,7 @@ function esc_attr($text) {
 /**
  * Escaping for HTML blocks.
  *
- * @since 1.1.0
+ * @since 2.0.0
  *
  * @param string $text
  * @return string
@@ -210,7 +210,7 @@ function esc_html($text){
 	 * Text passed to esc_html() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 1.1.0
+	 * @since 2.0.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.

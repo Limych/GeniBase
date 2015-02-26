@@ -7,6 +7,7 @@
  * 
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  * @copyright	Partially copyright © 2010, Michail Serov
+ * @copyright	Partially copyright © WordPress
  */
 
 // Запрещено непосредственное исполнение этого скрипта
@@ -24,9 +25,36 @@ class GB_DBase	{
 	/**	@var MySQLi */
 	protected	$db;
 	protected	$host, $user, $password, $base, $prefix;
+
+	/**
+	 * Whether to show SQL/DB errors.
+	 *
+	 * Default behavior is to show errors if both GB_DEBUG, GB_SQL_DEBUG and GB_DEBUG_DISPLAY
+	 * evaluated to true.
+	 *
+	 * @since 2.0.0
+	 * @var bool
+	 */
+	private $show_errors = false;
 	
+	/**
+	 * Whether to suppress errors during the DB bootstrapping.
+	 *
+	 * @since 2.0.0
+	 * @var bool
+	 */
+	private $suppress_errors = false;
+
+	/**
+	 * Last query made
+	 *
+	 * @since 2.0.0
+	 * @var array
+	 */
+	private $last_query;
 	
-	
+
+
 	/**
 	 * Создание экземпляра класса.
 	 */
@@ -50,21 +78,21 @@ class GB_DBase	{
 		if($this->db)	$this->db->close();
 	}
 
-
-
 	/**
 	 * Формирование из строки с метасимволами регулярного выражения для поиска
-	 * в системе.
+	 * через оператор RLIKE.
 	 *
-	 * Используемые метасимволы: '?' — один любой символ; '*' — один или несколько любых символов.
+	 * Используемые на входе метасимволы:
+	 * 		'?' — один любой символ;
+	 * 		'*' — один или несколько любых символов.
+	 * 
+	 * @since 2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
-	 * @param string $full_word	FALSE, если не надо искать по этой маске только полные слова
-	 * @return string	Регулярное выражение для поиска
+	 * @param string $full_word	False, если надо искать по этой маске части слов
+	 * @return string	Регулярное выражение для поиска через RLIKE
 	 */
-	static function make_regex($str, $full_word = TRUE){
-		debug_info($str);
-
+	static function make_regex($str, $full_word = true){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
 		if(is_array($str)){
@@ -72,10 +100,13 @@ class GB_DBase	{
 				$str[$key] = self::make_regex($val, $full_word);
 			return $str;
 		}
-	
-		$str = strtr($str, array(
-				'ё'	=> '(е|ё)',
-				'Ё'	=> '(Е|Ё)',
+
+		$str = strtr(preg_quote($str), array(
+				'\\?' => '?',
+				'\\*' => '*',
+				'\\' => '\\\\',
+				'ё' => '(е|ё)',
+				'Ё' => '(Е|Ё)',
 		));
 		$str = preg_replace_callback('/(\?+|\*+)/us', function ($matches){
 			$ch = substr($matches[1], 0, 1);
@@ -86,15 +117,43 @@ class GB_DBase	{
 		if($full_word)
 			$str = "[[:<:]]${str}[[:>:]]";
 
-		debug_info($str);
+		return $str;
+	}
+
+	/**
+	 * Формирование из строки с метасимволами условного выражения для поиска
+	 * через оператор LIKE.
+	 *
+	 * Используемые на входе метасимволы:
+	 * 		'?' — один любой символ;
+	 * 		'*' — один или несколько любых символов.
+	 * 
+	 * @since 2.0.0
+	 *
+	 * @param string $str	Строка с метасимволами
+	 * @param string $full_text	False, если надо искать по этой маске части данных
+	 * @return string	Условное выражение для поиска через LIKE
+	 */
+	static function make_condition($str, $full_text = true){
+		// Если вместо строки передан массив, обработать каждое значение в отдельности
+		// и вернуть результат в виде массива
+		if(is_array($str)){
+			foreach($str as $key => $val)
+				$str[$key] = self::make_condition($val, $full_text);
+			return $str;
+		}
+
+		$str = strtr($str, array('_' => '\\_', '%' => '\\%'));
+		$str = strtr($str, array('?' => '_', '*' => '_%'));
+		if(!$full_text)	$str = '%' . $str . '%';
 
 		return $str;
 	}
-	
-	
-	
+
 	/**
 	 * Соединяемся с СУБД, выбираем базу данных.
+	 * 
+	 * @since 2.0.0
 	 */
 	protected function connect(){
 		if($this->db)	return;
@@ -112,42 +171,89 @@ class GB_DBase	{
 	
 		$this->db->set_charset('utf8');
 	}
-	
-	
-	
+
 	/**
 	 * Добавление префикса к имени таблицы.
 	 * 
-	 * @param string $table	Исходное имя таблицы
-	 * @return string	Имя таблицы с префиксом
+	 * @since 2.0.0
+	 * 
+	 * @param string|array $table	Исходное имя таблицы
+	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
+	 * @return string|array	Имя таблицы с префиксом
 	 */
-	function table_escape($table){
-		if(substr($table, 0, 1) == '`')	// First unescape table name if it already escaped
-			$table = str_replace('``', '`', substr($table, 1, -1));
+	function table_escape($table, $preserve_array = FALSE){
+		if(is_array($table)){
+			$result = array_map(array($this, __FUNCTION__), $table);
+			return ($preserve_array)
+					? $result
+					: implode(', ', $result);
 
-		return self::field_escape($this->prefix . $table);
-	}
-
-
-
-	/**
-	 * Экранирование значения переменной, учитывая его тип.
-	 *
-	 * @param mixed $value	Значение переменной
-	 * @return mixed	Экранированное значение переменной
-	 */
-	function field_escape($value) {
-		if (is_array($value))
-			return implode(', ', array_map(__FUNCTION__, $value));
+		}else{
+			// First unescape table name if it already escaped
+			if(substr($table, 0, 1) == '`')
+				$table = $this->table_unescape($table);
 	
-		else
-			return '`' . str_replace('`', '``', $value) . '`';
+			return $this->field_escape($this->prefix . $table);
+		}
+	}
+	
+	/**
+	 * Unescape table name.
+	 * 
+	 * @since 2.0.0
+	 * 
+	 * @param string $table	Escaped table name.
+	 * @return string	Unescaped table name.
+	 */
+	function table_unescape($table){
+		return $this->field_unescape($table);
+	}
+
+	/**
+	 * Экранирование имя поля.
+	 * 
+	 * @since 2.0.0
+	 *
+	 * @param string|array $field	Имя поля.
+	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
+	 * @return string|array	Экранированное имя поля.
+	 */
+	function field_escape($field, $preserve_array = FALSE) {
+		if(is_array($field)){
+			$result = array_map(array($this, __FUNCTION__), $field);
+			return ($preserve_array)
+					? $result
+					: implode(', ', $result);
+
+		}else
+			return '`' . str_replace('`', '``', $field) . '`';
+	}
+
+	/**
+	 * Unescape fields names.
+	 * 
+	 * @since 2.0.0
+	 *
+	 * @param string|array $field	Escaped field name. Array of escaped fields names.
+	 * @return string|array	Unescaped field name. Array of unescaped fields names.
+	 */
+	function field_unescape($field) {
+		if(is_array($field))
+			return array_map(array($this, __FUNCTION__), $field);
+
+		// First remove quotes if it have
+		if(substr($field, 0, 1) == '`')
+			$field = substr($field, 1, -1);
+
+		return str_replace('``', '`', $field);
 	}
 
 
 
 	/**
 	 * Экранирование значения переменной, учитывая его тип.
+	 * 
+	 * @since 2.0.0
 	 *
 	 * @param mixed $value	Значение переменной
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
@@ -158,7 +264,7 @@ class GB_DBase	{
 			$result = array_map(array($this, __FUNCTION__), $value);
 			return ($preserve_array)
 				? $result
-				: implode(',', $result);
+				: implode(', ', $result);
 	
 		}elseif (is_string($value)){
 			$this->connect();
@@ -182,11 +288,13 @@ class GB_DBase	{
 	 * Подстановка параметров: «?key» — подстановка данных, «?#key» — подстановка имени поля,
 	 * 		«?@key» — подстановка имени таблицы, «?_tablename» — добавление префикса перед именем таблицы
 	 * 
+	 * @since 2.0.0
+	 * 
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
 	 * @return string	SQL-запрос с подставленными параметрами
 	 */
-	function prepare_query($query, $substitutions){
+	function prepare_query($query, $substitutions = array()){
 		// Чтобы следующая метка не могла затронуть содержание предыдущей,
 		// например, в случае $subst = array('id' => 5, 'title' => 'а тут ?id'),
 		// проводить их замену приходится не по очереди через простой foreach,
@@ -233,12 +341,120 @@ class GB_DBase	{
 		);
 		return $query;
 	}
-	
 
+	/**
+	 * Enables showing of database errors.
+	 *
+	 * This function should be used only to enable showing of errors.
+	 * GB_DBase::hide_errors() should be used instead for hiding of errors. However,
+	 * this function can be used to enable and disable showing of database
+	 * errors.
+	 *
+	 * @since 2.0.0
+	 * @see GB_DBase::hide_errors()
+	 *
+	 * @param bool $show Whether to show or hide errors
+	 * @return bool Old value for showing errors.
+	 */
+	public function show_errors( $show = true ) {
+		$errors = $this->show_errors;
+		$this->show_errors = $show;
+		return $errors;
+	}
+	
+	/**
+	 * Disables showing of database errors.
+	 *
+	 * By default database errors are not shown.
+	 *
+	 * @since 2.0.0
+	 * @see GB_DBase::show_errors()
+	 *
+	 * @return bool Whether showing of errors was active
+	 */
+	public function hide_errors() {
+		$show = $this->show_errors;
+		$this->show_errors = false;
+		return $show;
+	}
+
+	/**
+	 * Whether to suppress database errors.
+	 *
+	 * By default database errors are suppressed, with a simple
+	 * call to this function they can be enabled.
+	 *
+	 * @since 2.0.0
+	 * @see GB_DBase::hide_errors()
+	 * 
+	 * @param bool $suppress Optional. New value. Defaults to true.
+	 * @return bool Old value
+	 */
+	public function suppress_errors( $suppress = true ) {
+		$errors = $this->suppress_errors;
+		$this->suppress_errors = (bool) $suppress;
+		return $errors;
+	}
+
+	/**
+	 * Retrieve the name of the function that called this class.
+	 *
+	 * Searches up the list of functions until it reaches
+	 * the one that would most logically had called this method.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return string The name of the calling function
+	 */
+	public function get_caller() {
+		return gb_debug_backtrace_summary(__CLASS__);
+	}
+	
+	/**
+	 * Print SQL/DB error.
+	 *
+	 * @since 2.0.0
+	 * @global array $GB_SQL_ERROR Stores error information of query and error string
+	 *
+	 * @param string $error The error to display
+	 */
+	public function print_error($error = ''){
+		global $GB_SQL_ERROR;
+	
+		if(!$error)
+			$error = $this->db->error;
+		$GB_SQL_ERROR[] = array('query' => $this->last_query, 'error_str' => $error);
+	
+		if ( $this->suppress_errors )
+			return;
+	
+		gb_load_translations_early();
+	
+		if ( $caller = $this->get_caller() )
+			$error_str = sprintf( __( 'GeniBase database error %1$s for query %2$s made by %3$s' ), $error, $this->last_query, $caller );
+		else
+			$error_str = sprintf( __( 'GeniBase database error %1$s for query %2$s' ), $error, $this->last_query );
+	
+		error_log( $error_str );
+	
+		// Are we showing errors?
+		if(!$this->show_errors)
+			return;
+	
+		// If there is an error then take note of it
+		$str   = htmlspecialchars( $error, ENT_QUOTES );
+		$query = htmlspecialchars( $this->last_query, ENT_QUOTES );
+
+		print "<div id='error'>
+		<p class='dberror'><strong>GeniBase database error:</strong> [$str]<br />
+		<code>$query</code></p>
+		</div>";
+	}
 
 	/**
 	 * Отправка запроса в MySQL и слежение за ошибками.
-	 *
+	 * 
+	 * @since 2.0.0
 	 * @see GB_DBase::prepare_query()
 	 *
 	 * @param string $query	SQL-запрос
@@ -249,24 +465,13 @@ class GB_DBase	{
 		$this->connect();
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if(GB_SQL_DEBUG)	debug_info($query_sub, __CLASS__);
+		if(GB_SQL_DEBUG)	gb_debug_info($query_sub, __CLASS__);
 		
+		$this->last_query = $query;
 		$result = $this->db->query($query_sub);
-		if ($result)
-			return $result;
-	
-		// Error detected. Print backtrace and stop script
-		$trace = debug_backtrace();
-		$level = 0;
-		while(isset($trace[$level]) && ($trace[$level]['class'] == __CLASS__))	$level++;
-		$level--;
-		$db_error = $this->db->error;
-		$message = '<p><strong>MySQL error</strong> in file <strong>'.$trace[$level]['file'].'</strong>' .
-			" at line <strong>" .$trace[$level]['line']."</strong> " .
-			"(function <strong>" . $trace[$level]['function'] ."</strong>):<br/>" .
-			"\n<span style='color:blue'>$db_error</span>\n\n<pre>$query</pre></p>";
-		trigger_error($message, E_USER_ERROR);
-		die();
+		if(!$result)
+			$this->print_error();
+		return $result;
 	}
 
 	
@@ -275,16 +480,19 @@ class GB_DBase	{
 	 * Получение результата запроса, который состоит из нескольких строк и одного
 	 * столбца.
 	 * 
+	 * @since 2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query			SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
 	 * @param boolean $get_assoc	TRUE для превращения первого столбца результата
 	 * 								в ключи массива, а второго — в значения.
-	 * @return array	Результат выполнения запроса
+	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
-	function get_column($query, $substitutions = array(), $get_assoc = FALSE) {
+	function get_column($query, $substitutions = array(), $get_assoc = false) {
 		$result = $this->query($query, $substitutions);
+		if(false === $result)
+			return false;
 	
 		$data = array();
 		if ($get_assoc) {
@@ -305,20 +513,21 @@ class GB_DBase	{
 	 * Получения результата скалярного запроса (состоящего из одной строки и одной
 	 * ячейки в ней).
 	 * 
+	 * @since 2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return mixed	Результат выполнения запроса
+	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
 	function get_cell($query, $substitutions = array()) {
-	    $tmp = $this->get_column($query, $substitutions, FALSE);
-	    
-	    $cell = ($tmp)
-	          ? reset($tmp)
-	          : FALSE ;
-	    
-	    return $cell;
+	    $result = $this->get_column($query, $substitutions, false);
+		if(false === $result)
+			return false;
+		
+	    return ($result)
+	          ? reset($result)
+	          : null;
 	}
 	
 	
@@ -327,17 +536,20 @@ class GB_DBase	{
 	 * Получение результата табличного запроса (состоящего из нескольких строк
 	 * и нескольких столбцов).
 	 * 
+	 * @since 2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
 	 * @param string $key_col	FALSE или имя столбца, значения которого превратить
 	 * 							в ключи массива
-	 * @return array	Результат выполнения запроса
+	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
-	function get_table($query, $substitutions = array(), $key_col = FALSE) {
+	function get_table($query, $substitutions = array(), $key_col = false) {
 		$result = $this->query($query, $substitutions);
-	
+		if(false === $result)
+			return false;
+		
 		$data = array();
 		if ($key_col){
 			while ($row = $result->fetch_assoc())
@@ -356,26 +568,29 @@ class GB_DBase	{
 	/**
 	 * Получение результата запроса, который состоит из одной строки.
 	 * 
+	 * @since 2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return array	Результат выполнения запроса
+	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
 	function get_row($query, $substitutions = array()) {
-		$tmp = $this->get_table($query, $substitutions, FALSE);
-	
-		$row = ($tmp)
-			? reset($tmp)
+		$result = $this->get_table($query, $substitutions, false);
+		if(false === $result)
+			return false;
+		
+		return ($result)
+			? reset($result)
 			: array();
-	
-		return $row;
 	}
 
 	
 	
 	/**
 	 * Константы режимов работы метода set_row.
+	 * 
+	 * @since 2.0.0
 	 * @see	GB_DBase::set_row()
 	 */
 	const MODE_INSERT		= 'INSERT';
@@ -386,6 +601,8 @@ class GB_DBase	{
 	
 	/**
 	 * Вставка в таблицу новых данных или обновление существующих.
+	 * 
+	 * @since 2.0.0
 	 * 
 	 * @param string $tablename	Имя обновляемой таблицы
 	 * @param array $data		Массив с данными для добавления
@@ -500,12 +717,206 @@ class GB_DBase	{
 		return $out;
 	}	// function
 
+	/**
+	 * Separate individual queries into an array.
+	 *
+	 * {@internal Missing Long Description}}
+	 *
+	 * @since 2.0.0
+	 * 
+	 * @param string $queries
+	 * @return array
+	 */
+	function split_queries($queries){
+		return preg_split(
+				'~\\(((?>[^()]+)|(?R))*\\)(*SKIP)(*FAIL)|"(?:[^"\\\\]+|\\\\.)*"(*SKIP)(*FAIL)|\'(?:[^\'\\\\]+|\\\\.)*\'(*SKIP)(*FAIL)|`(?:``|[^`]+)*`(*SKIP)(*FAIL)|;~uSis',
+				$queries, -1, PREG_SPLIT_NO_EMPTY);
+	}
+
+	/**
+	 * {@internal Missing Short Description}}
+	 *
+	 * {@internal Missing Long Description}}
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $query
+	 * @param bool	 $allow_deletions
+	 * @return array
+	 */
+	function create_table_patch($query, $allow_deletions = false){
+		// Run function only for CREATE TABLE queries
+		if(!preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches))
+			return false;
+
+		$table = $matches[1];
+
+		// Fetch the table column structure from the database
+		$suppress = gbdb()->suppress_errors();
+		$tablefields = $this->get_table("DESCRIBE {$table}");
+		$this->suppress_errors($suppress);
+
+		if(!$tablefields)
+			return array($query);
+
+		// Clear the field and index arrays.
+		$cqueries = $cfields = $indices = array();
+
+		// Get all of the field names in the query from between the parentheses.
+		preg_match('/\((.*)\)/uSms', $query, $match2);
+		$qryline = trim($match2[1]);
+
+		// Separate field lines into an array.
+		$flds = array_filter(preg_split(
+				'~"(?:[^"\\\\]+|\\\\.)*"(*SKIP)(*FAIL)|\'(?:[^\'\\\\]+|\\\\.)*\'(*SKIP)(*FAIL)|`(?:``|[^`]+)*`(*SKIP)(*FAIL)|,~uSis',
+				$qryline));
+
+		// For every field line specified in the query.
+		foreach ($flds as $fld) {
+			$fld = trim($fld);
+				
+			// Extract the field name.
+			preg_match('/^(\S+)\s+(.*)$/uS', $fld, $fvals);
+
+			// Verify the found field name.
+			$validfield = true;
+			switch (strtoupper($fvals[1])) {
+				case 'PRIMARY':
+				case 'INDEX':
+				case 'FULLTEXT':
+				case 'UNIQUE':
+				case 'KEY':
+					$validfield = false;
+					$indices[] = trim($fld, ", \n");
+					break;
+			}
+
+			// If it's a valid field, add it to the field array.
+			if ($validfield)
+				$cfields[strtolower($this->field_unescape($fvals[1]))] = trim($fvals[2], ", \n");
+		}
+
+		// For every field in the table.
+		foreach ($tablefields as $tablefield) {
+			$fld = strtolower($tablefield['Field']);
+				
+			// If the table field exists in the field array ...
+			if (array_key_exists($fld, $cfields)) {
+
+				// Get the field type from the query.
+				preg_match('/(\S+( unsigned)?)/uSi', $cfields[$fld], $matches);
+				$fieldtype = $matches[1];
+
+				// Is actual field type different from the field type in query?
+				if(0 != strcasecmp($tablefield['Type'], $fieldtype)){
+					// Add a query to change the column type
+					$cqueries[] = "ALTER TABLE {$table} CHANGE COLUMN `{$tablefield[Field]}` `{$tablefield[Field]}` $cfields[$fld]";
+// 					$for_update[$table.'.'.$tablefield['Field']] = "Changed type of {$table}.{$tablefield['Field']} from {$tablefield['Type']} to {$fieldtype}";
+				}
+
+				// Get the default value from the array
+				// TODO: Remove this?
+// 				echo "{$cfields[$fld]}<br>";
+				if(preg_match('/\bDEFAULT\s+(?:"([^"\\\\]+|\\\\.)*"|\'([^\'\\\\]+|\\\\.)*\'|(\S+))/uSi', $cfields[$fld], $matches)) {
+					$default_value = !empty($matches[1]) ? $matches[1]
+							: !empty($matches[2]) ? $matches[2]
+								: $matches[3];
+					if ($tablefield['Default'] != $default_value) {
+						// Add a query to change the column's default value
+						$cqueries[] = "ALTER TABLE {$table} ALTER COLUMN `{$tablefield['Field']}` SET DEFAULT '{$default_value}'";
+// 						$for_update[$table.'.'.$tablefield['Field']] = "Changed default value of {$table}.{$tablefield['Field']} from {$tablefield->Default} to {$default_value}";
+					}
+				}
+
+				// Remove the field from the array (so it's not added).
+				unset($cfields[$fld]);
+
+			// This field exists in the table, but not in the creation queries?
+			}elseif($allow_deletions){
+				// Add a query to delete unused column
+				$cqueries[] = "ALTER TABLE {$table} DROP COLUMN `{$tablefield[Field]}`";
+			}
+		}
+
+		// For every remaining field specified for the table.
+		foreach ($cfields as $fieldname => $fielddef) {
+			// Push a query line into $cqueries that adds the field to that table.
+			$cqueries[] = "ALTER TABLE {$table} ADD COLUMN `$fieldname` $fielddef";
+// 			$for_update[$table.'.'.$fieldname] = 'Added column '.$table.'.'.$fieldname;
+		}
+
+		// Index stuff goes here. Fetch the table index structure from the database.
+		$tableindices = $this->get_table("SHOW INDEX FROM {$table}");
+
+		if ($tableindices) {
+			// Clear the index array.
+			unset($index_ary);
+
+			// For every index in the table.
+			foreach ($tableindices as $tableindex) {
+
+				// Add the index to the index data array.
+				$keyname = $tableindex['Key_name'];
+				$index_ary[$keyname]['columns'][] =
+					array('fieldname' => $tableindex['Column_name'],
+							'subpart' => $tableindex['Sub_part']);
+				$index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0)?true:false;
+			}
+
+			// For each actual index in the index array.
+			foreach ($index_ary as $index_name => $index_data) {
+
+				// Build a create string to compare to the query.
+				$index_string = '';
+				if($index_name == 'PRIMARY')
+					$index_string .= 'PRIMARY ';
+				elseif($index_data['unique'])
+					$index_string .= 'UNIQUE ';
+				$index_string .= 'KEY ';
+				if($index_name != 'PRIMARY')
+					$index_string .= $index_name;
+				$index_columns = '';
+
+				// For each column in the index.
+				foreach ($index_data['columns'] as $column_data) {
+					if($index_columns != '')	$index_columns .= ',';
+
+					// Add the field to the column list string.
+					$index_columns .= $column_data['fieldname'];
+					if ($column_data['subpart'] != '')
+						$index_columns .= '('.$column_data['subpart'].')';
+				}
+				// Add the column list to the index create string.
+				$index_string .= ' ('.$index_columns.')';
+
+				if (!(($aindex = array_search($index_string, $indices)) === false)) {
+					unset($indices[$aindex]);
+					// TODO: Remove this?
+// 					echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br />Found index:".$index_string."</pre>\n";
+				}
+				// TODO: Remove this?
+// 				else echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br /><b>Did not find index:</b>".$index_string."<br />".print_r($indices, true)."</pre>\n";
+			}
+		}
+
+		// For every remaining index specified for the table.
+		foreach ( (array) $indices as $index ) {
+			// Push a query line into $cqueries that adds the index to that table.
+			$cqueries[] = "ALTER TABLE {$table} ADD $index";
+// 			$for_update[] = 'Added index ' . $table . ' ' . $index;
+		}
+	
+		return $cqueries;
+	}
+	
 }	// class
 
 
 
 /**
  * Глобальная функция доступа к экземпляру класса GB_DBase.
+ * 
+ * @since 2.0.0
  * 
  * @return GB_DBase
  */

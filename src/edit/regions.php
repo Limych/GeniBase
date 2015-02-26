@@ -1,5 +1,5 @@
 <?php
-require_once('../gb/common.php');	// Common functions
+require_once('../gb/gb.php');	// Common functions
 // require_once(GB_INC_DIR . '/publish.php');	// Function for data formalizing
 
 html_header('Редактирование регионов');

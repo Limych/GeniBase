@@ -197,8 +197,10 @@ class ww1_database_solders extends ww1_database {
 	function do_search(){
 		$sort_by = '`surname` ASC, `name`';
 		$strictMatch = '';
-		$cond = array();
-			$select = 'SELECT ' . (!defined('SQL_DEBUG_PROF') ? '' : 'SQL_NO_CACHE ');
+
+		$from = $where = $order = array();
+		$from[] = gbdb()->prepare_query('?_v_persons AS p');
+		$q_is_strict_match = '';
 		
 		if($this->query_mode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
@@ -207,40 +209,54 @@ class ww1_database_solders extends ww1_database {
 			foreach(explode(' ', self::simple_fields) as $key){
 				$val = fix_russian($this->query[$key]);
 				if(empty($val))	continue;
+				
+				if($key == 'place'){
+					// Удаляем слова типа «губерния», «уезд» и т.п.
+					global $region_short;
+					$val = strtr($val, array_fill_keys(array_merge(array_keys($region_short), array_values($region_short)), ''));
+				}
 
 				$is_regex = preg_match('/[?*]/uS', $val);
-				$q = '';
-				if($key == 'name' && !$is_regex)
-						$q = 'LOWER(`name`) RLIKE ' . implode(' AND LOWER(`name`) RLIKE ',
-								gbdb()->data_escape(expand_names($val), TRUE));
-				else{
-					if($key == 'place'){
-						// Удаляем слова типа «губерния», «уезд» и т.п.
-						global $region_short;
-						$val = strtr($val, array_fill_keys(array_merge(array_keys($region_short), array_values($region_short)), ''));
-					}
-					$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtolower($val), -1, PREG_SPLIT_NO_EMPTY);
-					$q = "LOWER(`$key`) RLIKE " . implode(" AND LOWER(`$key`) RLIKE ",
-							gbdb()->data_escape(GB_DBase::make_regex($val_a), TRUE));
-					if($key == 'surname' && !$is_regex){
-//Отключение фонетического поиска
-// 						$tmp = array();
-// 						foreach (make_search_keys($val_a) as $term)
-// 							$tmp[] = '`surname_key` IN (' . gbdb()->data_escape($term) . ')';
-// 						$q = '(' . $q . ' OR id IN ( ' . $select . 'person_id FROM ?_idx_search_keys WHERE ' . implode(' AND ', $tmp) . ' ))';
-						$strictMatch = ', `surname` LIKE ' . gbdb()->data_escape("%$val%") .
-								' AS `strictMatch`';
-						$sort_by = '`strictMatch` DESC, `name` ASC, `surname`';
+				$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtoupper($val), -1, PREG_SPLIT_NO_EMPTY);
+				$q_is_strict_match = '1';
+				switch($key){
+					case 'surname':
+						if($is_regex){
+							$from[] = gbdb()->prepare_query('( SELECT DISTINCT k.person_id
+									FROM ?_idx_search_keys AS k WHERE (k.surname_key
+									LIKE ') .
+									implode(' OR k.surname_key LIKE ',
+											gbdb()->data_escape(GB_DBase::make_condition($val_a),
+													TRUE)) .
+									') AND k.surname_key_type = 1 ) AS isk';
+						}else{
+							$from[] = gbdb()->prepare_query('( SELECT DISTINCT k.person_id
+									FROM ?_idx_search_keys AS k WHERE k.surname_key
+									IN (?keys) ) AS isk',
+									array('keys' => make_search_keys($val_a)));
+							$q_is_strict_match = '(p.surname LIKE ' .
+									implode(' AND p.surname LIKE ',
+											gbdb()->data_escape(array_map(function ($text) {
+												return "%$text%";
+											}, $val_a), TRUE)) . ')';
+							$order[] = $q_is_strict_match . ' DESC';
+						}
+						$where[] = 'p.id = isk.person_id';
+						break;
 
-					} elseif ($key == 'place') {
-						$tmp = 'LOWER(CONCAT_WS(",", ( SELECT `region` FROM ?_dic_region AS sq
-								WHERE sq.`id` = p.`region_id` ), `place`)) RLIKE ';
-						$q = $tmp . implode(' AND ' . $tmp,
-								gbdb()->data_escape(GB_DBase::make_regex($val_a), TRUE));
-					}
-				}
-				$cond[] = $q;
-			}
+					case 'name':
+						$tmp = $is_regex ? GB_DBase::make_regex($val_a) : expand_names($val);
+						$where[] = 'UPPER(p.name) RLIKE ' . implode(' AND UPPER(p.name) RLIKE ',
+								gbdb()->data_escape(array_map('mb_strtoupper', $tmp), TRUE));
+						break;
+
+					case 'place':
+						$where[] = implode(' AND ', array_map(function ($v){
+									return "(p.region_idx LIKE $v OR UPPER(p.place) LIKE $v)";
+								}, gbdb()->data_escape(GB_DBase::make_condition($val_a, false), TRUE)));
+						break;
+				} // switch
+			} // foreach
 
 		}else{
 			// Расширенный режим поиска **************************************
@@ -314,40 +330,51 @@ class ww1_database_solders extends ww1_database {
 						}
 					}
 				}
-				$cond[] = $q;
+				$where[] = $q;
 			}
-		}
-		$cond = implode(' AND ', $cond);
+		} // if
 
+		$order[] = 'p.surname, p.name, p.region, p.place, p.`rank`, p.source, p.list_pg';
+
+		$from	= implode(', ', $from);
+		$where	= implode(' AND ', $where);
+		$order	= implode(', ', $order);
+
+		$query = 'SELECT' . (!defined('SQL_DEBUG_PROF') ? '' : ' SQL_NO_CACHE') . ' p.id FROM ' .
+				$from . ' WHERE ' . $where . ' ORDER BY ' . $order;
+		
 		if (defined('SQL_DEBUG_PROF'))
 			gbdb()->query('SET PROFILING=1');
 
-		// Считаем, сколько результатов найдено
-		$query = $select . 'COUNT(*) FROM ?_persons AS p WHERE ' . $cond;
-		$cnt = gbdb()->get_cell($query);
-		
-		// Запрашиваем текущую порцию результатов для вывода в таблицу
-		$fields = array_map(function ($field) use ($select) {
-			$tmp = explode('.', $field);
-			if (count($tmp) == 1)
-				return $field;
-			return vsprintf('( ' . $select . '%2$s FROM ?_dic_%1$s AS sq WHERE sq.id = p.%1$s_id )
-					AS %2$s', $tmp);
-		}, explode(' ', self::query_fields));
-		$query = $select . implode(', ', $fields) . $strictMatch . ' ,p.id FROM ?_persons AS p WHERE ' .
-				$cond . ' ORDER BY ' . $sort_by . ' ASC, region ASC, place ASC LIMIT ' .
-				(($this->page - 1) * Q_LIMIT) . ', ' . Q_LIMIT;
-		$data = gbdb()->get_table($query, array(), 'id');
-		//
-		// Дополняем данные новыми (неформализуемыми) полями
-		if(!empty($data)){
-			$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,
-					additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
-					array('ids' => array_keys($data)));
-			if(is_array($add_fields))	array_merge($data, array_filter($add_fields));
+		$ids = false;
+		// TODO: Добавить получение результатов поиска из кэша
+		if(false === $ids){
+			// Получаем результаты поиска
+			$ids = gbdb()->get_column($query);
+			if($ids)	$ids = array_map('intval', $ids);
+			
+			// TODO: Добавить добавление результатов поиска в кэш
 		}
-		//
-		$report = new ww1_solders_set($this->page, $data, $cnt);
+
+		$data = array();
+		if(!empty($ids)){
+			$ids_part = array_slice($ids, ($this->page - 1) * Q_LIMIT, Q_LIMIT);
+
+			// Получаем текущую порцию результатов для вывода в таблицу
+			$data = gbdb()->get_table('SELECT p.*, ' . $q_is_strict_match . ' AS is_strict_match
+					FROM ?_v_persons AS p WHERE p.id IN (?ids) ORDER BY is_strict_match DESC,
+					p.surname, p.name, p.region, p.place, p.rank, p.source, p.list_pg',
+					array('ids' => $ids_part), 'id');
+			//
+			// Дополняем данные новыми (неформализуемыми) полями
+			if(!empty($data)){
+				$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,
+						additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
+						array('ids' => $ids_part));
+				if(is_array($add_fields))	array_merge($data, array_filter($add_fields));
+			}
+		}
+		$report = new ww1_solders_set($this->page, $data, count($ids));
 
 		if (defined('SQL_DEBUG_PROF')) {
 			print("\n<!-- SQL-Profile:\n");
