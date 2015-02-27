@@ -13,9 +13,8 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	function setUp() {
 		set_time_limit(0);
 		
-// 		global $gbdb;
-// 		$gbdb->suppress_errors = false;
-// 		$gbdb->show_errors = true;
+		gbdb()->suppress_errors = false;
+		gbdb()->show_errors = true;
 		ini_set('display_errors', 1);
 // 		$this->factory = new GB_UnitTest_Factory();
 		$this->clean_up_global_scope();
@@ -24,8 +23,7 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 
 	function tearDown() {
-// 		global $gbdb;
-// 		$gbdb->query('ROLLBACK');
+// 		gbdb()->query('ROLLBACK');
 // 		remove_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
 // 		remove_filter('query', array($this, '_drop_temporary_tables'));
 // 		remove_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
@@ -36,9 +34,8 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 	
 	function start_transaction() {
-// 		global $gbdb;
-// 		$gbdb->query('SET autocommit = 0');
-// 		$gbdb->query('START TRANSACTION');
+// 		gbdb()->query('SET autocommit = 0');
+// 		gbdb()->query('START TRANSACTION');
 // 		add_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
 // 		add_filter('query', array($this, '_drop_temporary_tables'));
 	}

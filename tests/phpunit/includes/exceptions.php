@@ -15,7 +15,7 @@ class GBDieException extends Exception {}
  *
  * @package    GeniBase
  * @subpackage Unit Tests
- * @since      0.0.1
+ * @since 2.0.0
  */
 class GBAjaxDieStopException extends GBDieException {}
 
@@ -28,6 +28,6 @@ class GBAjaxDieStopException extends GBDieException {}
  *
  * @package    GeniBase
  * @subpackage Unit Tests
- * @since      0.0.1
+ * @since 2.0.0
  */
 class GBAjaxDieContinueException extends GBDieException {}

@@ -597,7 +597,7 @@ function get_available_languages( $dir = null ) {
 /**
  * Get installed translations.
  *
- * Looks in the gb-content/languages directory for translations of
+ * Looks in the wp-content/languages directory for translations of
  * plugins or themes.
  *
  * @since 2.0.0
