@@ -1,6 +1,6 @@
 <?php
 /**
- * Defines constants and global variables that can be overridden, generally in wp-config.php.
+ * Defines constants and global variables that can be overridden, generally in gb-config.php.
  *
  * @package GeniBase
  * 

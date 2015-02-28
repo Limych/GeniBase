@@ -169,8 +169,8 @@ function gb_load_translations_early() {
 // 		if ( defined( 'GB_CONTENT_DIR' ) && @is_dir( GB_CONTENT_DIR . '/languages' ) )
 // 			$locations[] = GB_CONTENT_DIR . '/languages';
 
-// 		if ( @is_dir( ABSPATH . 'wp-content/languages' ) )
-// 			$locations[] = ABSPATH . 'wp-content/languages';
+// 		if ( @is_dir( ABSPATH . 'gb-content/languages' ) )
+// 			$locations[] = ABSPATH . 'gb-content/languages';
 
 		if ( @is_dir( GB_INC_DIR . '/languages' ) )
 			$locations[] = GB_INC_DIR . '/languages';
@@ -336,7 +336,7 @@ function timer_stop($display = false, $precision = 3){
  * Set PHP error reporting based on GeniBase debug settings.
  *
  * Uses three constants: `GB_DEBUG`, `GB_DEBUG_DISPLAY`, and `GB_DEBUG_LOG`.
- * All three can be defined in wp-config.php, and by default are set to false.
+ * All three can be defined in gb-config.php, and by default are set to false.
  *
  * When `GB_DEBUG` is true, all PHP notices are reported. GeniBase will also
  * display internal notices: when a deprecated GeniBase function, function

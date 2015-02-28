@@ -4,24 +4,63 @@
  * @group	text.php
  */
 class Tests_text extends GB_UnitTestCase {
-	function test_text(){
-		// format_num()
-// 		$this->assertEquals(1, absint(1));
+	function test_format_num(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
 
-		// make_search_keys()
-		
-		// rus_metascript()
-		
-		// rus_metaphone()
-		
-		// mb_ucfirst()
-		
-		// fix_russian()
-		
-		// expand_names() (need MySQL)
-		
-		// is_translit()
-		
-		// translit2rus()
+	function test_rus_metascript(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+
+	function test_rus_metaphone(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+
+	function test_make_search_keys(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+	
+	function test_mb_ucfirst(){
+		$data = array(
+				'СоВсем'	=> 'СоВсем',
+				'простой'	=> 'Простой',
+				'ТЕКСТ'		=> 'ТЕКСТ',
+				'lorem'		=> 'Lorem',
+				'IPSUM'		=> 'IPSUM',
+		);
+		foreach ($data as $src => $res)
+			$this->assertEquals($res, mb_ucfirst($src));
+	}
+
+	function test_fix_russian(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+
+	function test_expand_names(){	// !!! NEED MySQL
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+
+	function test_is_translit(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
+	}
+
+	function test_translit2rus(){
+// 		$src = ;
+// 		$res = ;
+// 		$this->assertEquals($res, absint($src));
 	}
 }

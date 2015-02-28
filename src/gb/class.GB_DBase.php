@@ -14,7 +14,7 @@
 if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 // Инициализация режима отладки значением по умолчанию
-if(!defined('GB_SQL_DEBUG'))	define('GB_SQL_DEBUG', FALSE);
+if(!defined('GB_DEBUG_SQL_PROF'))	define('GB_DEBUG_SQL_PROF', FALSE);
 
 
 
@@ -29,7 +29,7 @@ class GB_DBase	{
 	/**
 	 * Whether to show SQL/DB errors.
 	 *
-	 * Default behavior is to show errors if both GB_DEBUG, GB_SQL_DEBUG and GB_DEBUG_DISPLAY
+	 * Default behavior is to show errors if both GB_DEBUG, GB_DEBUG_SQL_PROF and GB_DEBUG_DISPLAY
 	 * evaluated to true.
 	 *
 	 * @since	2.0.0
@@ -95,7 +95,7 @@ class GB_DBase	{
 	 * @param string $full_word	False, если надо искать по этой маске части слов
 	 * @return string	Регулярное выражение для поиска через RLIKE
 	 */
-	static function make_regex($str, $full_word = true){
+	static function make_regex($str, $full_word = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
 		if(is_array($str)){
@@ -323,7 +323,7 @@ class GB_DBase	{
 		}
 		$regexp .= ')/';
 
-// 		if(GB_SQL_DEBUG)	print("\n<!-- $regexp -->\n");
+// 		if(GB_DEBUG_SQL_PROF)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
 		$query = preg_replace_callback(
@@ -472,7 +472,7 @@ class GB_DBase	{
 		$this->connect();
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if(GB_SQL_DEBUG)	gb_debug_info($query_sub, __CLASS__);
+		if(GB_DEBUG_SQL_PROF)	gb_debug_info($query_sub, __CLASS__);
 		
 		$this->last_query = $query;
 		$result = $this->db->query($query_sub);
@@ -692,11 +692,9 @@ class GB_DBase	{
 		$query .= " INTO $tablename (" .
 		implode(', ', array_map(array($this, 'field_escape'), array_keys($first_el))) .
 		") VALUES " . implode(', ', $data);
-		$data = array();
 
 		return array(
 				'query'		=> $query,
-				'data'		=> $data,
 				'result'	=> 'insert_id',
 		);
 	}	// function
@@ -742,11 +740,10 @@ class GB_DBase	{
 				$query .= ' WHERE ';
 				foreach ($unique_key as $key => $value)
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
-				$query = substr($query, 0, -4);	// убираем последние AND и пробел
+				$query = substr($query, 0, -5);	// убираем последние AND и пробелы
 			}
 			return array(
 					'query'		=> $query,
-					'data'		=> array(),
 					'result'	=> 'affected_rows',
 			);
 			
@@ -774,18 +771,17 @@ class GB_DBase	{
 		
 			$query = "INSERT INTO $tablename SET ";
 			foreach ($all_data as $key => $value)
-				$query .= $this->field_escape($key) . " = ?$key, ";
+				$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 
 			if ($data_to_update) {
 				$query .= ' ON DUPLICATE KEY UPDATE ';
 				foreach ($data_to_update as $key => $value)
-					$query .= $this->field_escape($key) . " = ?$key, ";
+					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 				$query = substr($query, 0, -2); // убираем последние запятую и пробел
 			}
 			return array(
 					'query'		=> $query,
-					'data'		=> $all_data,
 					'result'	=> 'insert_id',	// Т.к. запрос INSERT - возвращает LAST_INSERT_ID()
 			);
 
@@ -811,9 +807,27 @@ class GB_DBase	{
 	 * @return array
 	 */
 	function split_queries($queries){
-		return preg_split(
-				'~\\(((?>[^()]+)|(?R))*\\)(*SKIP)(*FAIL)|"(?:[^"\\\\]+|\\\\.)*"(*SKIP)(*FAIL)|\'(?:[^\'\\\\]+|\\\\.)*\'(*SKIP)(*FAIL)|`(?:``|[^`]+)*`(*SKIP)(*FAIL)|;~uSis',
+		return preg_split("~" .
+				"/\*.*?\*/(*SKIP)(*FAIL)|" .					// Skip comments /*…*/
+				"-- [^\n]*\n(*SKIP)(*FAIL)|" .					// Skip comments -- …
+				"#[^\n]*\n(*SKIP)(*FAIL)|" .					// Skip comments #…
+				"\\(((?>[^()]+)|(?R))*\\)(*SKIP)(*FAIL)|" .		// Skip code in brackets
+				"\"(?:[^\"\\\\]+|\\\\.)*\"(*SKIP)(*FAIL)|" .	// Skip double quoted strings
+				"'(?:[^'\\\\]+|\\\\.)*'(*SKIP)(*FAIL)|" .		// Skip single quoted strings
+				"`(?:``|[^`]+)*`(*SKIP)(*FAIL)|" .				// Skip quoted names
+				";~uSis",	// Split by semicolon
 				$queries, -1, PREG_SPLIT_NO_EMPTY);
+	}
+
+	function remove_comments($query){
+		return preg_replace("~" .
+				"\"(?:[^\"\\\\]+|\\\\.)*\"(*SKIP)(*FAIL)|" .	// Skip double quoted strings
+				"'(?:[^'\\\\]+|\\\\.)*'(*SKIP)(*FAIL)|" .		// Skip single quoted strings
+				"`(?:``|[^`]+)*`(*SKIP)(*FAIL)|" .				// Skip quoted names
+				"/\*.*?\*/|" .		// Remove comments /*…*/
+				"-- [^\n]*\n|" .	// Remove comments -- …
+				"#[^\n]*\n" .		// Remove comments #…
+				"~uSis", ' ', $query);
 	}
 
 	/**

@@ -25,7 +25,7 @@ define('DB_PASSWORD',	'yourpasswordhere');		// Пароль
 define('DB_BASE',		'youremptytestdbnamehere');	// Имя базы данных
 define('DB_PREFIX',		'gbtests_');	// Префикс таблиц в базе. Only numbers, letters, and underscores please!
 
-define('GB_GITHUB_REPOS', 'Limych/GeniBase');
+define('GB_GITHUB_REPOS',	'Limych/GeniBase');
 
 define('GB_TESTS_DOMAIN',	'example.org');
 define('GB_TESTS_EMAIL',	'admin@example.org');
