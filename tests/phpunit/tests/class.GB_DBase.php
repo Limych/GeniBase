@@ -113,17 +113,11 @@ class Tests_GB_DBase extends GB_UnitTestCase {
 				),
 		);
 		foreach ($modes as $mode => $q_start){
-			$res = array(
-					'query'		=> $q_start . ' INTO ?_table (`field1`, `field``2`) VALUES (NULL, 123)',
-					'result'	=> 'insert_id',
-			);
+			$res = $q_start . ' INTO ?_table (`field1`, `field``2`) VALUES (NULL, 123)';
 			$this->assertEquals($res, gbdb()->_set_row_insert('?_table', $data[0], $mode));
 		}
 		foreach ($modes as $mode => $q_start){
-			$res = array(
-					'query'		=> $q_start . ' INTO ?_table (`field1`, `field``2`) VALUES (NULL, 123), ("data", 12.3)',
-					'result'	=> 'insert_id',
-			);
+			$res = $q_start . ' INTO ?_table (`field1`, `field``2`) VALUES (NULL, 123), ("data", 12.3)';
 			$this->assertEquals($res, gbdb()->_set_row_insert('?_table', $data, $mode));
 		}
 	}
@@ -141,29 +135,25 @@ class Tests_GB_DBase extends GB_UnitTestCase {
 		$key5 = array('id');
 
 		// UPDATE mode
-		$res = array(
-				'query'		=> 'UPDATE ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" WHERE `id` = "unique_key"',
-				'result'	=> 'affected_rows',
-		);
+		$res = 'UPDATE ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" WHERE `id` = "unique_key"';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, 'unique_key', GB_DBase::MODE_UPDATE));
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key, GB_DBase::MODE_UPDATE));
-		$res['query'] .= ' AND `key2` = 456';
+		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, 'unique_key', FALSE));
+		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key, FALSE));
+		$res .= ' AND `key2` = 456';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key2, GB_DBase::MODE_UPDATE));
 
 		// DUPLICATE mode
-		$res = array(
-				'query'		=> 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data", `id` = "unique_key" ON DUPLICATE KEY UPDATE `field1` = NULL, `field``2` = 123, ```field3``` = "data"',
-				'result'	=> 'insert_id',
-		);
+		$res = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data", `id` = "unique_key" ON DUPLICATE KEY UPDATE `field1` = NULL, `field``2` = 123, ```field3``` = "data"';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, 'unique_key', GB_DBase::MODE_DUPLICATE));
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key, GB_DBase::MODE_DUPLICATE));
-		$res['query'] = 'INSERT INTO ?_table SET `id` = "unique_key", `key2` = 456';
+		$res = 'INSERT INTO ?_table SET `id` = "unique_key", `key2` = 456';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', array(), $key2, GB_DBase::MODE_DUPLICATE));
-		$res['query'] = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE `field1` = NULL, ```field3``` = "data"';
+		$res = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE `field1` = NULL, ```field3``` = "data"';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key3, GB_DBase::MODE_DUPLICATE));
-		$res['query'] = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE ```field3``` = "data"';
+		$res = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE ```field3``` = "data"';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key4, GB_DBase::MODE_DUPLICATE));
-		$res['query'] = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE `field1` = NULL, `field``2` = 123, ```field3``` = "data"';
+		$res = 'INSERT INTO ?_table SET `field1` = NULL, `field``2` = 123, ```field3``` = "data" ON DUPLICATE KEY UPDATE `field1` = NULL, `field``2` = 123, ```field3``` = "data"';
 		$this->assertEquals($res, gbdb()->_set_row_update('?_table', $data, $key5, GB_DBase::MODE_DUPLICATE));
 	}
 
@@ -173,12 +163,23 @@ class Tests_GB_DBase extends GB_UnitTestCase {
 				'field2'	=> NULL,
 		);
 		$key = array('id' => 'unique_id');
+		
+		$suppress = gbdb()->suppress_errors();
 
-		// TODO: Доделать эти тесты только после перевода всех ошибок на gb_die()
-// 		$this->assertFalse(gbdb()->_set_row_insert('?_table', $data, 'qwe'));
-// 		$this->assertFalse(gbdb()->_set_row_insert('?_table', $data, 'insert'));
-// 		$this->assertFalse(gbdb()->_set_row_update('?_table', $data, $key, FALSE));
-// 		$this->assertFalse(gbdb()->_set_row_update('?_table', $data, 'unique_id', FALSE));
+		$this->assertFalse(gbdb()->_set_row_insert('?_table', $data, 'qwe'));
+		$this->assertNotEmpty(gbdb()->last_error);
+		$this->assertFalse(gbdb()->_set_row_insert('?_table', $data, 'insert'));
+		$this->assertNotEmpty(gbdb()->last_error);
+		$this->assertFalse(gbdb()->_set_row_insert('?_table', $data, GB_DBase::MODE_UPDATE));
+		$this->assertNotEmpty(gbdb()->last_error);
+		$this->assertFalse(gbdb()->_set_row_update('?_table', $data, $key, 'qwe'));
+		$this->assertNotEmpty(gbdb()->last_error);
+		$this->assertFalse(gbdb()->_set_row_update('?_table', $data, $key, 'update'));
+		$this->assertNotEmpty(gbdb()->last_error);
+		$this->assertFalse(gbdb()->_set_row_update('?_table', $data, $key, GB_DBase::MODE_INSERT));
+		$this->assertNotEmpty(gbdb()->last_error);
+
+		gbdb()->suppress_errors($suppress);
 	}
 
 	function test_split_queries() {

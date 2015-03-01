@@ -27,6 +27,15 @@ class GB_DBase	{
 	protected	$host, $user, $password, $base, $prefix;
 
 	/**
+	 * Amount of queries made
+	 *
+	 * @since 2.0.0
+	 * @access private
+	 * @var int
+	 */
+	var $num_queries = 0;
+
+	/**
 	 * Whether to show SQL/DB errors.
 	 *
 	 * Default behavior is to show errors if both GB_DEBUG, GB_DEBUG_SQL_PROF and GB_DEBUG_DISPLAY
@@ -48,6 +57,15 @@ class GB_DBase	{
 	var $suppress_errors = false;
 
 	/**
+	 * Saved queries that were executed.
+	 *
+	 * @since	2.0.0
+	 * @access private
+	 * @var array
+	 */
+	var $queries;
+	
+	/**
 	 * Last query made.
 	 *
 	 * @since	2.0.0
@@ -55,7 +73,33 @@ class GB_DBase	{
 	 * @var array
 	 */
 	var $last_query;
-	
+
+	/**
+	 * The last error during query.
+	 *
+	 * @since	2.0.0
+	 * @var string
+	 */
+	public $last_error = '';
+
+	/**
+	 * Count of affected rows by previous query
+	 *
+	 * @since	2.0.0
+	 * @access private
+	 * @var int
+	 */
+	var $rows_affected = 0;
+
+	/**
+	 * The ID generated for an AUTO_INCREMENT column by the previous query (usually INSERT).
+	 *
+	 * @since	2.0.0
+	 * @access public
+	 * @var int
+	 */
+	var $insert_id = 0;
+
 
 
 	/**
@@ -69,16 +113,22 @@ class GB_DBase	{
 		$this->password = $password;
 		$this->base = $base;
 		$this->prefix = $prefix;
+
+		if(GB_DEBUG && GB_DEBUG_DISPLAY)
+			$this->show_errors();
 	}
 
 
 
 	/**
 	 * Уничтожаем экземпляр класса.
+	 * @return bool true
 	 */
 	function __destruct(){
 		// Закрываем соединение с СУБД, если оно было
 		if($this->db)	$this->db->close();
+
+		return TRUE;
 	}
 
 	/**
@@ -323,6 +373,7 @@ class GB_DBase	{
 		}
 		$regexp .= ')/';
 
+		// TODO: Remove this?
 // 		if(GB_DEBUG_SQL_PROF)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
@@ -423,39 +474,51 @@ class GB_DBase	{
 	 * @since 2.0.0
 	 * @global array $GB_SQL_ERROR Stores error information of query and error string
 	 *
-	 * @param string $error The error to display
+	 * @param string $error The error text to display
 	 */
 	public function print_error($error = ''){
 		global $GB_SQL_ERROR;
 	
-		if(!$error)
-			$error = $this->db->error;
+		if(!$error)	$error = $this->db->error;
+		$this->last_error = $error;
 		$GB_SQL_ERROR[] = array('query' => $this->last_query, 'error_str' => $error);
 	
-		if ( $this->suppress_errors )
+		if($this->suppress_errors)
 			return;
 	
 		gb_load_translations_early();
 	
-		if ( $caller = $this->get_caller() )
-			$error_str = sprintf( __( 'GeniBase database error %1$s for query %2$s made by %3$s' ), $error, $this->last_query, $caller );
+		if($caller = $this->get_caller())
+			$error_str = sprintf( __('GeniBase database error \"%1$s\" for query %2$s made by %3$s'), $error, $this->last_query, $caller);
 		else
-			$error_str = sprintf( __( 'GeniBase database error %1$s for query %2$s' ), $error, $this->last_query );
+			$error_str = sprintf( __('GeniBase database error \"%1$s\" for query %2$s'), $error, $this->last_query);
 	
-		error_log( $error_str );
+		error_log($error_str);
 	
 		// Are we showing errors?
 		if(!$this->show_errors)
 			return;
 	
 		// If there is an error then take note of it
-		$str   = htmlspecialchars( $error, ENT_QUOTES );
-		$query = htmlspecialchars( $this->last_query, ENT_QUOTES );
+		$str   = htmlspecialchars($error, ENT_QUOTES);
+		$query = htmlspecialchars($this->last_query, ENT_QUOTES);
 
-		print "<div id='error'>
-		<p class='dberror'><strong>GeniBase database error:</strong> [$str]<br />
+		print "<div class='error'>
+		<p class='db_error'><strong>GeniBase database error:</strong> [$str]<br />
 		<code>$query</code></p>
 		</div>";
+	}
+
+	/**
+	 * Kill cached query results.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public function flush() {
+		$this->last_query  = null;
+		$this->rows_affected = 0;
+		$this->last_error  = '';
 	}
 
 	/**
@@ -466,18 +529,52 @@ class GB_DBase	{
 	 *
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return mixed	Результат выполнения запроса
+	 * @return mixed	Результат выполнения запроса. FALSE при ошибке.
 	 */
 	function query($query, $substitutions = array()) {
 		$this->connect();
+		$this->flush();
+
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
 		if(GB_DEBUG_SQL_PROF)	gb_debug_info($query_sub, __CLASS__);
 		
+		// Remove any comments from query and trim space symbols.
+		$query_sub = trim($this->remove_comments($query_sub));
+		
+		// Keep track of the last query for debug.
 		$this->last_query = $query;
-		$result = $this->db->query($query_sub);
-		if(!$result)
+
+		if(defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+			$time_start = microtime(true);
+
+		$result = @$this->db->query($query_sub);
+		$this->num_queries++;
+
+		if(defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+			$this->queries[] = array($query_sub, microtime(true) - $time_start, $this->get_caller());
+
+		// If there is an error then take note of it.
+		if($this->db->error){
+			// Clear insert_id on a subsequent failed insert.
+			if($this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub))
+				$this->insert_id = 0;
+
 			$this->print_error();
+			return FALSE;
+		}
+
+		if(preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query)){
+			$this->rows_affected = $this->db->affected_rows;
+
+			// Take note of the insert_id
+			if(preg_match('/^(INSERT|REPLACE)\s/usi', $query))
+				$this->insert_id = $this->db->insert_id;
+
+			// Return number of rows affected
+			$result = $this->rows_affected;
+		}
+
 		return $result;
 	}
 
@@ -496,10 +593,10 @@ class GB_DBase	{
 	 * 								в ключи массива, а второго — в значения.
 	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
-	function get_column($query, $substitutions = array(), $get_assoc = false) {
+	function get_column($query, $substitutions = array(), $get_assoc = FALSE) {
 		$result = $this->query($query, $substitutions);
-		if(false === $result)
-			return false;
+		if(FALSE === $result)
+			return FALSE;
 	
 		$data = array();
 		if ($get_assoc) {
@@ -528,13 +625,13 @@ class GB_DBase	{
 	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
 	function get_cell($query, $substitutions = array()) {
-	    $result = $this->get_column($query, $substitutions, false);
-		if(false === $result)
-			return false;
+	    $result = $this->get_column($query, $substitutions, FALSE);
+		if(FALSE === $result)
+			return FALSE;
 		
 	    return ($result)
 	          ? reset($result)
-	          : null;
+	          : NULL;
 	}
 	
 	
@@ -552,10 +649,10 @@ class GB_DBase	{
 	 * 							в ключи массива
 	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
-	function get_table($query, $substitutions = array(), $key_col = false) {
+	function get_table($query, $substitutions = array(), $key_col = FALSE) {
 		$result = $this->query($query, $substitutions);
-		if(false === $result)
-			return false;
+		if(FALSE === $result)
+			return FALSE;
 		
 		$data = array();
 		if ($key_col){
@@ -583,9 +680,9 @@ class GB_DBase	{
 	 * @return array|bool	False on failure. Результат выполнения запроса
 	 */
 	function get_row($query, $substitutions = array()) {
-		$result = $this->get_table($query, $substitutions, false);
-		if(false === $result)
-			return false;
+		$result = $this->get_table($query, $substitutions, FALSE);
+		if(FALSE === $result)
+			return FALSE;
 		
 		return ($result)
 			? reset($result)
@@ -625,32 +722,17 @@ class GB_DBase	{
 	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
 	 */
 	function set_row($tablename, $data, $unique_key = FALSE, $mode = FALSE) {
-		if (!$unique_key) {
-			// INSERT or REPLACE
-			$q = $this->_set_row_insert($tablename, $data, $mode);
-		}else{
-			// UPDATE or INSERT … ON DUPLICATE KEY UPDATE
-			$q = $this->_set_row_update($tablename, $data, $unique_key, $mode);
-		}
-		if(FALSE === $q)	return FALSE;
+		$this->flush();
+
+		$query = (!$unique_key)
+				// INSERT or REPLACE
+				? $this->_set_row_insert($tablename, $data, $mode)
+				// UPDATE or INSERT … ON DUPLICATE KEY UPDATE
+				: $this->_set_row_update($tablename, $data, $unique_key, $mode);
+		if(FALSE === $query)
+			return FALSE;
 		
-		$result = $this->query($q['query'], $q['data']);
-		if(FALSE === $result)	return FALSE;
-		
-		switch ($q['result']){
-			case 'insert_id':
-				return $this->db->insert_id;
-			case 'affected_rows':
-				return $this->db->affected_rows;
-			default:
-				// TODO: Make correct error reporting trougth print_error()
-				$trace = reset(debug_backtrace());
-				$message = "Unknown result mode \"$mode\" given to $trace[function]() " .
-					"in file $trace[file] at line $trace[line].<br />" .
-					"Terminating function run.";
-				trigger_error($message, E_USER_WARNING);
-				return FALSE;
-		}
+		return $this->query($query);
 	}
 	
 	/**
@@ -658,24 +740,20 @@ class GB_DBase	{
 	 * 
 	 * @since	2.0.0
 	 * @access	private
+	 * @see GB_DBase::set_row()
 	 * 
 	 * @param string $tablename	Имя обновляемой таблицы
 	 * @param array $data		Массив с данными для добавления
 	 * @param string $mode		Режим добавление данных: MODE_INSERT, MODE_IGNORE («INSERT IGNORE …»), MODE_REPLACE.
 	 * 							Default MODE_INSERT.
-	 * @return array	Associative array with data for {@see GB_DBase::set_row()} or FALSE on error.
+	 * @return string	SQL-query or FALSE on error.
 	 */
 	function _set_row_insert($tablename, $data, $mode) {
 		if (!$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
 		elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
 		elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
 		else {
-			// TODO: Make correct error reporting trougth print_error()
-			$trace = reset(debug_backtrace());
-			$message = "Unknown mode \"$mode\" given to $trace[function]() " .
-				"in file $trace[file] at line $trace[line].<br />" .
-				"Terminating function run.";
-			trigger_error($message, E_USER_WARNING);
+			$this->print_error("Unknown mode '$mode'");
 			return FALSE;
 		}
 		
@@ -693,10 +771,7 @@ class GB_DBase	{
 		implode(', ', array_map(array($this, 'field_escape'), array_keys($first_el))) .
 		") VALUES " . implode(', ', $data);
 
-		return array(
-				'query'		=> $query,
-				'result'	=> 'insert_id',
-		);
+		return $query;
 	}	// function
 
 	/**
@@ -704,6 +779,7 @@ class GB_DBase	{
 	 *
 	 * @since	2.0.0
 	 * @access	private
+	 * @see GB_DBase::set_row()
 	 *
 	 * @param string $tablename	Имя обновляемой таблицы
 	 * @param array $data		Массив с данными для добавления
@@ -712,7 +788,7 @@ class GB_DBase	{
 	 * 							либо массив имён ключей из $data,
 	 * 							либо скалярное значение, тогда ключём будет "id".
 	 * @param string $mode		Режим обновление данных: MODE_UPDATE, MODE_DUPLICATE («INSERT … ON DUPLICATE KEY UPDATE»).
-	 * @return array	Associative array with data for {@see GB_DBase::set_row()} or FALSE on error.
+	 * @return string	SQL-query or FALSE on error.
 	 */
 	function _set_row_update($tablename, $data, $unique_key, $mode) {
 		if (!is_array($unique_key))		// если указана скалярная величина —
@@ -742,10 +818,8 @@ class GB_DBase	{
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
 				$query = substr($query, 0, -5);	// убираем последние AND и пробелы
 			}
-			return array(
-					'query'		=> $query,
-					'result'	=> 'affected_rows',
-			);
+
+			return $query;
 			
 		} elseif ($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
 			$append = is_string(key($unique_key));
@@ -780,20 +854,13 @@ class GB_DBase	{
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 				$query = substr($query, 0, -2); // убираем последние запятую и пробел
 			}
-			return array(
-					'query'		=> $query,
-					'result'	=> 'insert_id',	// Т.к. запрос INSERT - возвращает LAST_INSERT_ID()
-			);
+
+			return $query;
 
 		}else{
-			// TODO: Make correct error reporting trougth print_error()
-			$trace = reset(debug_backtrace());
-			$message = "Unknown mode \"$mode\" given to $trace[function]() " .
-			"in file $trace[file] at line $trace[line].<br />" .
-			"Terminating function run.";
-			trigger_error($message, E_USER_WARNING);
+			$this->print_error("Unknown mode '$mode'");
 			return FALSE;
-		}	// if
+		}
 	}	// function
 
 	/**
@@ -841,10 +908,13 @@ class GB_DBase	{
 	 * @param bool	 $allow_deletions
 	 * @return array
 	 */
-	function create_table_patch($query, $allow_deletions = false){
+	function create_table_patch($query, $allow_deletions = FALSE){
 		// Run function only for CREATE TABLE queries
-		if(!preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches))
-			return false;
+		if(!preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches)){
+			// TODO: Добавить сообщение об ошибке
+// 			$this->print_error("Unknown mode '$mode'");
+			return FALSE;
+		}
 
 		$table = $matches[1];
 
@@ -876,14 +946,14 @@ class GB_DBase	{
 			preg_match('/^(\S+)\s+(.*)$/uS', $fld, $fvals);
 
 			// Verify the found field name.
-			$validfield = true;
+			$validfield = TRUE;
 			switch (strtoupper($fvals[1])) {
 				case 'PRIMARY':
 				case 'INDEX':
 				case 'FULLTEXT':
 				case 'UNIQUE':
 				case 'KEY':
-					$validfield = false;
+					$validfield = FALSE;
 					$indices[] = trim($fld, ", \n");
 					break;
 			}
@@ -897,7 +967,7 @@ class GB_DBase	{
 		foreach ($tablefields as $tablefield) {
 			$fld = strtolower($tablefield['Field']);
 				
-			// If the table field exists in the field array ...
+			// If the table field exists in the field array…
 			if (array_key_exists($fld, $cfields)) {
 
 				// Get the field type from the query.
@@ -957,7 +1027,7 @@ class GB_DBase	{
 				$index_ary[$keyname]['columns'][] =
 					array('fieldname' => $tableindex['Column_name'],
 							'subpart' => $tableindex['Sub_part']);
-				$index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0)?true:false;
+				$index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0)?TRUE:FALSE;
 			}
 
 			// For each actual index in the index array.
@@ -986,7 +1056,7 @@ class GB_DBase	{
 				// Add the column list to the index create string.
 				$index_string .= ' ('.$index_columns.')';
 
-				if (!(($aindex = array_search($index_string, $indices)) === false)) {
+				if (!(($aindex = array_search($index_string, $indices)) === FALSE)) {
 					unset($indices[$aindex]);
 					// TODO: Remove this?
 // 					echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br />Found index:".$index_string."</pre>\n";
