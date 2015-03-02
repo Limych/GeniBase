@@ -35,6 +35,9 @@ function gb_initial_constants() {
 			@ini_set( 'memory_limit', GB_MEMORY_LIMIT );
 	}
 
+	if(!defined('GB_CONTENT_DIR'))
+		define('GB_CONTENT_DIR', BASE_DIR . '/gb-content'); // no trailing slash, full paths only - GB_CONTENT_URL is defined further down
+
 	// Add define('GB_DEBUG', true); to gb-config.php to enable display of notices during development.
 	if ( !defined('GB_DEBUG') )
 		define( 'GB_DEBUG', false );
@@ -55,4 +58,15 @@ function gb_initial_constants() {
 	define( 'DAY_IN_SECONDS',    24 * HOUR_IN_SECONDS   );
 	define( 'WEEK_IN_SECONDS',    7 * DAY_IN_SECONDS    );
 	define( 'YEAR_IN_SECONDS',  365 * DAY_IN_SECONDS    );
+}
+
+/**
+ * Defines plugin directory GeniBase constants
+ *
+ * @since 2.0.0
+ */
+function gb_plugin_constants() {
+	if(!defined('GB_CONTENT_URL'))
+		define( 'GB_CONTENT_URL', BASE_URL . '/gb-content'); // full url - GB_CONTENT_DIR is defined further up
+// 		define( 'GB_CONTENT_URL', get_option('siteurl') . '/gb-content'); // full url - GB_CONTENT_DIR is defined further up
 }

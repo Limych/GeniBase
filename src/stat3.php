@@ -81,7 +81,7 @@ foreach($date as $key => $val){
 	$tmp->add(new DateInterval("P${key}D"));
 	$hist = intval((HIST_WIDTH - 10) * $val / $max);
 	if($val)	$hist += 10;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($tmp->format('d-M-Y')) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n\t<td class='alignright'><div style='width: " . $hist . "px; background: blue'>&nbsp;</div></td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($tmp->format('d-M-Y')) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n\t<td class='alignright'><div style='width: " . $hist . "px; background: blue'>&nbsp;</div></td>\n</tr>";
 }
 ?>
 </tbody></table>

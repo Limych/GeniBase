@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-02-24 00:22+0300\n"
-"PO-Revision-Date: 2015-02-24 00:22+0300\n"
+"POT-Creation-Date: 2015-03-02 16:43+0300\n"
+"PO-Revision-Date: 2015-03-02 16:44+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru_RU\n"
@@ -19,25 +19,34 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
 "esc_attr__\n"
-"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-SearchPath-0: .\n"
 
-#: ../gb/class.GB_DBase.php:356
+#: class.GB_DBase.php:492
 #, php-format
-msgid "GeniBase database error %1$s for query %2$s made by %3$s"
+msgid "GeniBase database error \\\"%1$s\\\" for query %2$s made by %3$s"
 msgstr ""
-"База данных GeniBase вернула ошибку %1$s в ответ на запрос %2$s, "
+"База данных GeniBase вернула ошибку \\\"%1$s\\\" в ответ на запрос %2$s, "
 "выполненный %3$s"
 
-#: ../gb/class.GB_DBase.php:358
+#: class.GB_DBase.php:494
 #, php-format
-msgid "GeniBase database error %1$s for query %2$s"
-msgstr "База данных GeniBase вернула ошибку %1$s в ответ на запрос %2$s"
+msgid "GeniBase database error \\\"%1$s\\\" for query %2$s"
+msgstr ""
+"База данных GeniBase вернула ошибку \\\"%1$s\\\" в ответ на запрос %2$s"
 
-#: ../gb/load.php:155 ../gb/load.php:168
+#: functions.php:590
+msgid "&laquo; Back"
+msgstr "&laquo; Назад"
+
+#: functions.php:602
+msgid "GeniBase Error"
+msgstr "Ошибка GeniBase"
+
+#: load.php:243 load.php:256
 msgid "Maintenance"
 msgstr "Техническое обслуживание"
 
-#: ../gb/load.php:169
+#: load.php:257
 msgid ""
 "This website is currently under going maintenance and will be back online "
 "shortly. Thank you for your patience."
@@ -45,7 +54,7 @@ msgstr ""
 "Этот сайт сейчас находится на техническом обслуживании и будет доступен "
 "через некоторое время. Спасибо за Ваше терпение."
 
-#: ../gb/load.php:196
+#: load.php:284
 #, php-format
 msgid ""
 "Your server is running PHP version %1$s but GeniBase %2$s requires at least "
@@ -54,7 +63,7 @@ msgstr ""
 "На сервере установлен PHP версии %1$s, однако для GeniBase %2$s требуется "
 "хотя бы %3$s."
 
-#: ../gb/load.php:202
+#: load.php:290
 msgid ""
 "Your PHP installation appears to be missing the MySQL extension which is "
 "required by GeniBase."
@@ -62,223 +71,228 @@ msgstr ""
 "Похоже, в вашей конфигурации PHP отсутствует расширение MySQL, необходимое "
 "для работы GeniBase."
 
-#: ../gb/locale.php:104 ../gb/locale.php:114 ../gb/locale.php:127
+#: locale.php:104 locale.php:114 locale.php:127
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: ../gb/locale.php:105 ../gb/locale.php:115 ../gb/locale.php:128
+#: locale.php:105 locale.php:115 locale.php:128
 msgid "Monday"
 msgstr "Понедельник"
 
-#: ../gb/locale.php:106 ../gb/locale.php:116 ../gb/locale.php:129
+#: locale.php:106 locale.php:116 locale.php:129
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: ../gb/locale.php:107 ../gb/locale.php:117 ../gb/locale.php:130
+#: locale.php:107 locale.php:117 locale.php:130
 msgid "Wednesday"
 msgstr "Среда"
 
-#: ../gb/locale.php:108 ../gb/locale.php:118 ../gb/locale.php:131
+#: locale.php:108 locale.php:118 locale.php:131
 msgid "Thursday"
 msgstr "Четверг"
 
-#: ../gb/locale.php:109 ../gb/locale.php:119 ../gb/locale.php:132
+#: locale.php:109 locale.php:119 locale.php:132
 msgid "Friday"
 msgstr "Пятница"
 
-#: ../gb/locale.php:110 ../gb/locale.php:120 ../gb/locale.php:133
+#: locale.php:110 locale.php:120 locale.php:133
 msgid "Saturday"
 msgstr "Суббота"
 
-#: ../gb/locale.php:114
+#: locale.php:114
 msgid "S_Sunday_initial"
 msgstr "Вс"
 
-#: ../gb/locale.php:115
+#: locale.php:115
 msgid "M_Monday_initial"
 msgstr "Пн"
 
-#: ../gb/locale.php:116
+#: locale.php:116
 msgid "T_Tuesday_initial"
 msgstr "Вт"
 
-#: ../gb/locale.php:117
+#: locale.php:117
 msgid "W_Wednesday_initial"
 msgstr "Ср"
 
-#: ../gb/locale.php:118
+#: locale.php:118
 msgid "T_Thursday_initial"
 msgstr "Чт"
 
-#: ../gb/locale.php:119
+#: locale.php:119
 msgid "F_Friday_initial"
 msgstr "Пт"
 
-#: ../gb/locale.php:120
+#: locale.php:120
 msgid "S_Saturday_initial"
 msgstr "Сб"
 
-#: ../gb/locale.php:127
+#: locale.php:127
 msgid "Sun"
 msgstr "Вс"
 
-#: ../gb/locale.php:128
+#: locale.php:128
 msgid "Mon"
 msgstr "Пн"
 
-#: ../gb/locale.php:129
+#: locale.php:129
 msgid "Tue"
 msgstr "Вт"
 
-#: ../gb/locale.php:130
+#: locale.php:130
 msgid "Wed"
 msgstr "Ср"
 
-#: ../gb/locale.php:131
+#: locale.php:131
 msgid "Thu"
 msgstr "Чт"
 
-#: ../gb/locale.php:132
+#: locale.php:132
 msgid "Fri"
 msgstr "Пт"
 
-#: ../gb/locale.php:133
+#: locale.php:133
 msgid "Sat"
 msgstr "Сб"
 
-#: ../gb/locale.php:136 ../gb/locale.php:151
+#: locale.php:136 locale.php:151
 msgid "January"
 msgstr "Январь"
 
-#: ../gb/locale.php:137 ../gb/locale.php:152
+#: locale.php:137 locale.php:152
 msgid "February"
 msgstr "Февраль"
 
-#: ../gb/locale.php:138 ../gb/locale.php:153
+#: locale.php:138 locale.php:153
 msgid "March"
 msgstr "Март"
 
-#: ../gb/locale.php:139 ../gb/locale.php:154
+#: locale.php:139 locale.php:154
 msgid "April"
 msgstr "Апрель"
 
-#: ../gb/locale.php:140 ../gb/locale.php:155
+#: locale.php:140 locale.php:155
 msgid "May"
 msgstr "Май"
 
-#: ../gb/locale.php:141 ../gb/locale.php:156
+#: locale.php:141 locale.php:156
 msgid "June"
 msgstr "Июнь"
 
-#: ../gb/locale.php:142 ../gb/locale.php:157
+#: locale.php:142 locale.php:157
 msgid "July"
 msgstr "Июль"
 
-#: ../gb/locale.php:143 ../gb/locale.php:158
+#: locale.php:143 locale.php:158
 msgid "August"
 msgstr "Август"
 
-#: ../gb/locale.php:144 ../gb/locale.php:159
+#: locale.php:144 locale.php:159
 msgid "September"
 msgstr "Сентябрь"
 
-#: ../gb/locale.php:145 ../gb/locale.php:160
+#: locale.php:145 locale.php:160
 msgid "October"
 msgstr "Октябрь"
 
-#: ../gb/locale.php:146 ../gb/locale.php:161
+#: locale.php:146 locale.php:161
 msgid "November"
 msgstr "Ноябрь"
 
-#: ../gb/locale.php:147 ../gb/locale.php:162
+#: locale.php:147 locale.php:162
 msgid "December"
 msgstr "Декабрь"
 
-#: ../gb/locale.php:151
+#: locale.php:151
 msgid "Jan_January_abbreviation"
 msgstr "Янв"
 
-#: ../gb/locale.php:152
+#: locale.php:152
 msgid "Feb_February_abbreviation"
 msgstr "Фев"
 
-#: ../gb/locale.php:153
+#: locale.php:153
 msgid "Mar_March_abbreviation"
 msgstr "Мар"
 
-#: ../gb/locale.php:154
+#: locale.php:154
 msgid "Apr_April_abbreviation"
 msgstr "Апр"
 
-#: ../gb/locale.php:155
+#: locale.php:155
 msgid "May_May_abbreviation"
 msgstr "Май"
 
-#: ../gb/locale.php:156
+#: locale.php:156
 msgid "Jun_June_abbreviation"
 msgstr "Июн"
 
-#: ../gb/locale.php:157
+#: locale.php:157
 msgid "Jul_July_abbreviation"
 msgstr "Июл"
 
-#: ../gb/locale.php:158
+#: locale.php:158
 msgid "Aug_August_abbreviation"
 msgstr "Авг"
 
-#: ../gb/locale.php:159
+#: locale.php:159
 msgid "Sep_September_abbreviation"
 msgstr "Сен"
 
-#: ../gb/locale.php:160
+#: locale.php:160
 msgid "Oct_October_abbreviation"
 msgstr "Окт"
 
-#: ../gb/locale.php:161
+#: locale.php:161
 msgid "Nov_November_abbreviation"
 msgstr "Ноя"
 
-#: ../gb/locale.php:162
+#: locale.php:162
 msgid "Dec_December_abbreviation"
 msgstr "Дек"
 
-#: ../gb/locale.php:169
+#: locale.php:169
 msgid "am"
 msgstr "дп"
 
-#: ../gb/locale.php:170
+#: locale.php:170
 msgid "pm"
 msgstr "пп"
 
-#: ../gb/locale.php:171
+#: locale.php:171
 msgid "AM"
 msgstr "ДП"
 
-#: ../gb/locale.php:172
+#: locale.php:172
 msgid "PM"
 msgstr "ПП"
 
-#: ../gb/locale.php:178
+#: locale.php:178
 msgid "number_format_thousands_sep"
 msgstr " "
 
-#: ../gb/locale.php:182
+#: locale.php:182
 msgid "number_format_decimal_point"
 msgstr ","
 
-#: ../gb/locale.php:189
+#: locale.php:189
 msgctxt "text direction"
 msgid "ltr"
 msgstr "ltr"
 
-#: ../gb/locale.php:356
+#: locale.php:356
 msgid "F j, Y"
 msgstr "d.m.Y"
 
-#: ../gb/locale.php:358
+#: locale.php:358
 msgid "g:i a"
 msgstr "H:i"
 
-#: ../gb/locale.php:360
+#: locale.php:360
 msgid "F j, Y g:i a"
 msgstr "d.m.Y H:i"
+
+#: option.php:142
+#, php-format
+msgid "%s is a protected GB option and may not be modified"
+msgstr "%s защищённая опция GB и не может изменяться"

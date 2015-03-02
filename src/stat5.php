@@ -31,7 +31,7 @@ foreach ($result as $field => $cnt){
 	$even = 1-$even;
 	if(empty($field))
 		$field = '(не указано)';
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($field) .
 			"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 }
 ?>
@@ -61,9 +61,9 @@ function region_stat($parent_id = 0, $level = 1){
 	foreach ($result as $row){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
-				$row['id'] . "'>" . htmlspecialchars($row['title']) .
+				$row['id'] . "'>" . esc_html($row['title']) .
 				(empty($row['region_comment']) ? '' : ' <span class="comment">' .
-						htmlspecialchars($row['region_comment']) . '</span>') .
+						esc_html($row['region_comment']) . '</span>') .
 				"</td>\n\t<td class='alignright'>" . format_num($row['region_cnt']) . "</td>\n";
 
 		region_stat($row['id'], $level + 1);
@@ -81,7 +81,7 @@ function dic_stat($caption, $field_title, $field){
 <script type="text/javascript">
 	$(document).ready(function(){
 		var data = google.visualization.arrayToDataTable([
-			['<?php print htmlspecialchars($field_title); ?>',  'Записей'],
+			['<?php print esc_js($field_title); ?>',  'Записей'],
 <?php
 				$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table
 						WHERE ?#field_cnt != 0 ORDER BY ?#field',
@@ -91,12 +91,12 @@ function dic_stat($caption, $field_title, $field){
 							'#field_cnt'	=> "{$field}_cnt",
 						), TRUE);
 				foreach ($result as $fld => $cnt)
-					print "\t\t\t['" . htmlspecialchars($fld) . "',  " . intval($cnt) . "],\n";
+					print "\t\t\t['" . esc_js($fld) . "',  " . intval($cnt) . "],\n";
 ?>
 		]);
 		
 		var options = {
-			title:	'<?php print htmlspecialchars($caption); ?>',
+			title:	'<?php print esc_js($caption); ?>',
 			vAxis:	{minValue: 0,	title: 'Потери'},
 			legend:	{position: 'none'},
 		};
@@ -124,7 +124,7 @@ function dic_stat($caption, $field_title, $field){
 	$even = 0;
 	foreach($result as $field => $cnt){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($field) .
 				"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 	}
 ?>

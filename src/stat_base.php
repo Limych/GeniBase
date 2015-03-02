@@ -91,9 +91,9 @@ while($row = $result->fetch_array(MYSQLI_NUM)){
 	$even = 1-$even;
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" 
  		               // . format_date($row[0]) . "</td>\n\t" 
- 		               // . htmlspecialchars(date_create($row[0])->format('d-M-Y'))      . "</td>\n\t"
+ 		               // . esc_html(date_create($row[0])->format('d-M-Y'))      . "</td>\n\t"
  		               // . "<td class='alignright'>" . format_num($row[0]) . "</td>\n"
- 		                .                       htmlspecialchars($row[0]) . "</td>\n\t"
+ 		                .                       esc_html($row[0]) . "</td>\n\t"
  		                . "<td class='alignright'>" . format_num($row[1]) . "</td>\n"
  		                . "<td class='alignright'>" . format_num($row[2]) . "</td>\n"
  						. "<td class='alignright'>" . format_num($row[3]) . "</td>\n"

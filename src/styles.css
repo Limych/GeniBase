@@ -149,6 +149,7 @@ table.report	{
 table.stat	{
 	float: left;
 	margin: 1em;
+	max-width: 45%;
 }
 th	{
 	background-color: #FFA500;

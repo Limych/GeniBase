@@ -7,7 +7,7 @@ $tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
 $squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
-html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
+html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
@@ -60,7 +60,7 @@ $res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" 
 		ORDER BY datetime DESC LIMIT 12');
 foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';
-	$res[$key] = "<a href='$row[url]'>" . htmlspecialchars($row['query']) . "</a>";
+	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
 print "<p class='lastq aligncenter'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 

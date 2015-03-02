@@ -33,7 +33,6 @@ CREATE VIEW `?_v_persons` AS SELECT
 	`sc`.`source` AS `source`,
 	`sc`.`source_url` AS `source_url`,
 	`sc`.`pg_correction` AS `pg_correction`,
-	`p`.`list_pg` AS `list_pg`,
 	`p`.`comments` AS `comments`,
 	`rg`.`region_idx` AS `region_idx`
 FROM `?_persons` AS `p`
@@ -92,12 +91,51 @@ abstract class ww1_database {
  * Класс работы с базой данных нижних чинов
  */
 class ww1_database_solders extends ww1_database {
-	var	$surname_ext	= false;
-	var	$name_ext		= false;
-	const simple_fields		= 'surname name place';
-	const extended_fields	= 'surname name rank religion marital region place reason date_from date_to list_nr list_pg';
-	const query_fields		= 'id surname name rank religion.religion marital.marital region.region place reason.reason date source.source source.source_url source.pg_correction list_pg comments';
+	/**
+	 * If TRUE, the surname was automatically expanded with search keys.
+	 * @var boolean
+	 */
+	var	$surname_ext	= FALSE;
 	
+	/**
+	 * If TRUE, the name was automatically expanded with search keys.
+	 * @var boolean
+	 */
+	var	$name_ext		= FALSE;
+	
+	/**
+	 * List of fields for simple search mode.
+	 * @var array
+	 */
+	private $simple_fields		= array('surname', 'name', 'place');
+	
+	/**
+	 * List of fields for extended search mode.
+	 * @var array
+	 */
+	private $extended_fields	= array('surname', 'name', 'rank', 'religion', 'marital', 'region',
+			'place', 'reason', 'date_from', 'date_to', 'list_pg');
+	
+	/**
+	 * List of fields with numeric values.
+	 * @var array
+	 */
+	private $numeric_fields		= array('religion', 'marital', 'reason', 'list_pg');
+
+	/**
+	 * List of fields with IDs.
+	 * @var array
+	 */
+	private $ids_fields			= array('religion', 'marital', 'reason');
+
+	/**
+	 * List of fields that have dictionaries.
+	 * @var array
+	 */
+	private $dictionary_fields	= array('rank', 'religion', 'marital', 'reason');
+
+
+
 	/**
 	 * Создание экземпляра класса.
 	 *
@@ -108,7 +146,7 @@ class ww1_database_solders extends ww1_database {
 
 		if($qmode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
-			foreach(explode(' ', self::simple_fields) as $key){
+			foreach($this->simple_fields as $key){
 				$this->query[$key] = get_request_attr($key);
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
@@ -116,12 +154,11 @@ class ww1_database_solders extends ww1_database {
 			}
 		}else{
 			// Расширенный режим поиска **************************************
-			$dics = explode(' ', 'rank religion marital reason');
-			foreach(explode(' ', self::extended_fields) as $key){
+			foreach($this->extended_fields as $key){
 				$this->query[$key] = get_request_attr($key);
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
-				if(in_array($key, $dics) && !is_array($this->query[$key]))
+				if(in_array($key, $this->dictionary_fields) && !is_array($this->query[$key]))
 					$this->query[$key] = array();
 				$this->have_query |= !empty($this->query[$key]);
 			}
@@ -147,7 +184,7 @@ class ww1_database_solders extends ww1_database {
 					'place'		=> 'Место жительства',
 			);
 			foreach($fields as $key => $val){
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . htmlspecialchars($this->query[$key]) . "'></div>\n";
+				print "\t<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "'></div>\n";
 			}
 			return;
 		}
@@ -182,41 +219,60 @@ class ww1_database_solders extends ww1_database {
 				'place'		=> 'Волость/Нас.пункт',
 				'reason'	=> 'Событие',
 				'date'		=> 'Дата события',
-				'list_nr'	=> 'Номер списка',
-				'list_pg'	=> 'Страница списка',
+				'list_pg'	=> 'Страница источника',
 		);
-		foreach($fields as $key => $val)
+		foreach($fields as $key => $val){
 			switch($key){
-			case 'surname':
-				// Текстовые поля
-				
-				//Отключение фонетического поиска
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <div class='block'><input type='text' id='q_$key' name='$key' value='" . htmlspecialchars($this->query[$key]) . "' /><br /><label><input type='checkbox' name='surname_ext' value='1'" . (!isset($_GET['surname_ext']) ? "" : " checked='checked'") . " />&nbsp;фонетический поиск по&nbsp;фамилиям</label></div></div>\n";
-				break;
-			case 'name':
-				// Текстовые поля
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <div class='block'><input type='text' id='q_$key' name='$key' value='" . htmlspecialchars($this->query[$key]) . "' /><br /><label><input type='checkbox' name='name_ext' value='1'" . (!isset($_GET['name_ext']) ? "" : " checked='checked'") . " />&nbsp;автоматическое расширение поиска</label></div></div>\n";
-				break;
-			case 'rank':
-			case 'religion':
-			case 'marital':
-			case 'reason':
-				// Списковые поля
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <select id='q_$key' name='${key}[]' multiple='multiple' size='5'>\n";
-				foreach($dics[$key] as $k => $v){
-					print "\t\t<option value='" . htmlspecialchars($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . htmlspecialchars($v) . "</option>\n";
-				}
-				print "</select></div>\n";
-				break;
-			case 'date':
-				// Поля дат
-				print "\t<div class='field'><label for='q_$key'>$val:</label> c&nbsp;<input type='date' id='q_$key' name='date_from' value='" . htmlspecialchars($this->query['date_from']) . "' min='1914-07-28' max='1918-11-11' /> по&nbsp;<input type='date' name='date_to' value='" . htmlspecialchars($this->query['date_to']) . "' min='1914-07-28' max='1918-11-11' /></div>\n";
-				break;
-			default:
-				// Текстовые поля
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . htmlspecialchars($this->query[$key]) . "' /></div>\n";
-				break;
+				case 'surname':
+					// Текстовые поля
+					print "\t<div class='field'><label for='q_$key'>$val:</label> <div" .
+							" class='block'><input type='text' id='q_$key' name='$key' value='" .
+							esc_attr($this->query[$key]) . "' /><br /><label><input" .
+							" type='checkbox' name='surname_ext' value='1'" .
+							(!isset($_GET['surname_ext']) ? "" : " checked='checked'") .
+							" />&nbsp;фонетический поиск по&nbsp;фамилиям</label></div></div>\n";
+					break;
+
+				case 'name':
+					// Текстовые поля
+					print "\t<div class='field'><label for='q_$key'>$val:</label> <div" .
+							" class='block'><input type='text' id='q_$key' name='$key' value='" .
+							esc_attr($this->query[$key]) . "' /><br /><label><input" .
+							" type='checkbox' name='name_ext' value='1'" .
+							(!isset($_GET['name_ext']) ? "" : " checked='checked'") .
+							" />&nbsp;автоматическое расширение поиска</label></div></div>\n";
+					break;
+
+				case 'date':
+					// Поля дат
+					print "\t<div class='field'><label for='q_$key'>$val:</label> c&nbsp;<input" .
+							" type='date' id='q_$key' name='date_from' value='" .
+							esc_attr($this->query['date_from']) . "' min='1914-07-28'" .
+							" max='1918-11-11' /> по&nbsp;<input type='date' name='date_to'" .
+							" value='" . esc_attr($this->query['date_to']) . "' min='1914-07-28'" .
+							" max='1918-11-11' /></div>\n";
+					break;
+
+				default:
+					if(in_array($key, $this->dictionary_fields)){		// Списковые поля
+						print "\t<div class='field'><label for='q_$key'>$val:</label> <select" .
+								" id='q_$key' name='${key}[]' multiple='multiple' size='5'>\n";
+						foreach($dics[$key] as $k => $v){
+							print "\t\t<option value='" . esc_attr($k) . "'" .
+									(is_array($this->query[$key]) && in_array($k,
+											$this->query[$key]) ? " selected='selected'" : '') .
+									">" . esc_html($v) . "</option>\n";
+						}
+						print "</select></div>\n";
+
+					}else{	// Текстовые поля
+						print "\t<div class='field'><label for='q_$key'>$val:</label> <input" .
+								" type='text' id='q_$key' name='$key' value='" .
+								esc_attr($this->query[$key]) . "' /></div>\n";
+					}
+					break;
 			}	// switch
+		} // foreach $fields
 	}	// function
 
 		
@@ -227,14 +283,12 @@ class ww1_database_solders extends ww1_database {
 	function do_search(){
 		if($this->query_mode == Q_SIMPLE){
 			// Простой режим поиска
-			$fields = explode(' ', self::simple_fields);
+			$fields = $this->simple_fields;
 			$this->name_ext = $this->surname_ext = true;
 		}else{
 			// Расширенный режим поиска
-			$fields = explode(' ', self::extended_fields);
+			$fields = $this->extended_fields;
 		}
-		$nums = explode(' ', 'religion marital reason list_nr list_pg');	// Список полей, в которых передаются числовые данные
-		$ids  = explode(' ', 'religion marital reason');	// Список полей, в которых передаются идентификаторы
 
 		// Формируем основной поисковый запрос в БД
 		$from = $where = $order = array();
@@ -255,9 +309,9 @@ class ww1_database_solders extends ww1_database {
 				// Дата по
 				$where[] = '`date_from` <= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
 
-			}elseif(in_array($key, $nums)){
+			}elseif(in_array($key, $this->numeric_fields)){
 				// Числовые данные
-				if(in_array($key, $ids))	$key .= '_id';	// Проверка на поля с ID
+				if(in_array($key, $this->ids_fields))	$key .= '_id';	// Проверка на поля с ID
 				if(!is_array($val))
 					$val = preg_split('/\D+/uS', trim($val));
 				$val = implode(', ', array_map('intval', $val));

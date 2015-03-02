@@ -35,7 +35,7 @@ foreach ($result as $row){
 	$even = 1-$even;
 	if(empty($row['rank']))
 		$row['rank'] = '(не указано)';
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($row['rank']) . "</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($row['rank']) . "</td>\n\t<td class='alignright'>" . format_num($row['cnt']) . "</td>\n</tr>";
 }
 ?>
 </tbody></table>
@@ -55,19 +55,11 @@ foreach ($result as $row){
 	$even = 1-$even;
 	if(empty($row['event_type']))	$row['event_type'] = '(не указано)';
 	if(empty($row['reason']))		$row['reason'] = '(не указано)';
-	if(strlen(htmlspecialchars($row['reason'])) > 100){
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
-				."<td>" .             htmlspecialchars($row['event_type']) .              "</td>\n\t"
-				."<td>" . '<small>' . htmlspecialchars($row['reason']) . '</small>' . "</td>\n\t"
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
+				."<td>" . esc_html($row['event_type']) . "</td>\n\t"
+				."<td>" . esc_html($row['reason']) . "</td>\n\t"
 				."<td class='alignright'>" . format_num($row['cnt']) . "</td>\n"
 			."</tr>";
-	}else{
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
-				."<td>" . htmlspecialchars($row['event_type']) . "</td>\n\t"
-				."<td>" . htmlspecialchars($row['reason']) . "</td>\n\t"
-				."<td class='alignright'>" . format_num($row['cnt']) . "</td>\n"
-			."</tr>";
-	}
 }
 ?>
 </tbody></table>
@@ -87,9 +79,9 @@ function region_stat($parent_id = 0, $level = 1){
 	foreach ($result as $row){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
-				$row['id'] . "'>" . htmlspecialchars($row['title']) .
+				$row['id'] . "'>" . esc_html($row['title']) .
 				(empty($row['region_comment']) ? '' : ' <span class="comment">' .
-						htmlspecialchars($row['region_comment']) . '</span>') .
+						esc_html($row['region_comment']) . '</span>') .
 				"</td>\n\t<td class='alignright'>" . format_num($row['region_cnt']) . "</td>\n";
 
 		region_stat($row['id'], $level + 1);
@@ -116,7 +108,7 @@ function dic_stat($caption, $field_title, $field){
 	$even = 0;
 	foreach ($result as $field => $cnt){
 		$even = 1-$even;
-		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($field) .
+		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($field) .
 				"</td>\n\t<td class='alignright'>" . format_num($cnt) . "</td>\n</tr>";
 	}
 ?>

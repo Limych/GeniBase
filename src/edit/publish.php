@@ -258,10 +258,10 @@ foreach($fields as $key => $def){
 		if($key == 'source_id'){
 			$have_link = isset($raw[$key]) && !empty($dic_source_url[$raw[$key]]);
 			print "<input type='text' size=60 name='raw[$key]' value='" .
-					($have_link ? htmlspecialchars($dic_source[$raw[$key]]) : '') . "' />";
+					($have_link ? esc_attr($dic_source[$raw[$key]]) : '') . "' />";
 			print "<br />";
 			if($have_link){
-				$pg_raw = htmlspecialchars($raw[list_pg]); //list_pg
+				$pg_raw = esc_html($raw[list_pg]); //list_pg
 				$url_raw = str_replace('{pg}', $pg_raw + $dic_source_pg_corr[$raw[$key]] , $dic_source_url[$raw[$key]]);
 				$text_raw = trim_text($dic_source[$raw[$key]], 40);
 				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр.$pg_raw</small>";
@@ -269,7 +269,7 @@ foreach($fields as $key => $def){
 				print "<small>Ссылка на источник не указана</small>";
 		}else{
 			print "<input type='text' size=60 name='raw[$key]' value='" .
-					(isset($raw[$key]) ? htmlspecialchars($raw[$key]) : '') . "' />";
+					(isset($raw[$key]) ? esc_attr($raw[$key]) : '') . "' />";
 		}
 		print "</td>\n";
 	}
@@ -284,7 +284,7 @@ foreach($fields as $key => $def){
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_rank as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
-						htmlspecialchars(trim_text($d)) . "</option>\n";
+						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'religion_id'){
@@ -292,7 +292,7 @@ foreach($fields as $key => $def){
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_religion as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
-						htmlspecialchars(trim_text($d)) . "</option>\n";
+						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'marital_id'){
@@ -300,7 +300,7 @@ foreach($fields as $key => $def){
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_marital as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
-						htmlspecialchars(trim_text($d)) . "</option>\n";
+						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'source_id'){
@@ -308,7 +308,7 @@ foreach($fields as $key => $def){
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_source as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
-						htmlspecialchars(trim_text($d)) . "</option>\n";
+						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select><div id='source_link'></div>";
 		}elseif($key == 'reason_id'){
@@ -316,23 +316,23 @@ foreach($fields as $key => $def){
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_reason as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
-						htmlspecialchars(trim_text($d)) . "</option>\n";
+						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
 		}elseif($key == 'date_from' || $key == 'date_to'){
-			print "<input id='$key' type='date' name='pub[$key]' value='" . htmlspecialchars($pub[$key]) .
+			print "<input id='$key' type='date' name='pub[$key]' value='" . esc_attr($pub[$key]) .
 					"' min='1914-07-28' max='1918-11-11'>";
 		}elseif($key == 'comments'){
 			print "<textarea id='$key' name='pub[$key]' rows='7' cols='30'>" .
-					(isset($pub[$key]) ? htmlspecialchars($pub[$key]) : '') . "</textarea>";
+					(isset($pub[$key]) ? esc_html($pub[$key]) : '') . "</textarea>";
 		}else{
 			if($key == 'date'){
 				print "<input id='$key' type='text' name='pub[$key]' value='" .
-						(isset($pub[$key]) ? htmlspecialchars($pub[$key], ENT_QUOTES) : '') . "' />";
+						(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
 				print " <small>Машина это видит как «${date_norm}»</small>";
 			}else{
 				print "<input id='$key' type='text' size=60 name='pub[$key]' value='" .
-						(isset($pub[$key]) ? htmlspecialchars($pub[$key], ENT_QUOTES) : '') . "' />";
+						(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
 			}
 		}
 		print "</td>\n";

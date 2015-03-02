@@ -105,7 +105,7 @@ class ww1_solders_set extends ww1_records_set{
 		<th>№ <nobr>п/п</nobr></th>
 <?php
 		foreach(array_values($brief_fields) as $val){
-			print "\t\t<th>" . htmlspecialchars($val) . "</th>\n";
+			print "\t\t<th>" . esc_html($val) . "</th>\n";
 		}
 		if($show_detailed)
 			print "\t\t<th></th>\n";
@@ -120,7 +120,7 @@ class ww1_solders_set extends ww1_records_set{
 			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
 			foreach(array_keys($brief_fields) as $key)
-				print "\t\t<td>" . htmlspecialchars($row[$key]) . "</td>\n";
+				print "\t\t<td>" . esc_html($row[$key]) . "</td>\n";
 			if($show_detailed){
 				print "\t\t<td><div class='arrow'></div></td>\n";
 ?>
@@ -131,7 +131,7 @@ class ww1_solders_set extends ww1_records_set{
 <?php
 				foreach($detailed_fields as $key => $val){
 					if(!isset($row[$key]))	continue;
-					$text = htmlspecialchars($row[$key]);
+					$text = esc_html($row[$key]);
 					if($key == 'source'){
 						if(!empty($row['source_url'])){
 							if($row['list_pg'] > 0)
@@ -146,7 +146,7 @@ class ww1_solders_set extends ww1_records_set{
 					if($key == 'comments')					
 						print "\t\t\t\t\t<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
 					else {
-						print "\t\t\t\t\t<th>" . htmlspecialchars($val) . ":</th>\n";
+						print "\t\t\t\t\t<th>" . esc_html($val) . ":</th>\n";
 						print "\t\t\t\t\t<td>" . $text . "</td>\n";
 					}
 					print "\t\t\t\t</tr>\n";

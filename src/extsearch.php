@@ -7,7 +7,7 @@ $tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
 $squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
-html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . htmlspecialchars($squery) . '"'));
+html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report">
@@ -53,7 +53,6 @@ if($dbase->have_query){
 		'birthdate'	=> 'Дата рождения',
 		'source'	=> 'Источник',
 		'comments'	=> '',
-		//'id'		=> 'Идентификатор записи',
 	);
 	$tmp = array();
 	foreach(array_keys($detailed_fields) as $key){

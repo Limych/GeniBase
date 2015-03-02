@@ -17,21 +17,24 @@ if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidd
  * Основной подключаемый файл системы
  */
 
-
-
-// Запоминаем текущий каталог, как основу для всех подключаемых файлов системы
-if(!defined('BASE_DIR'))	define('BASE_DIR',	dirname(dirname(__FILE__)));
+// Запоминаем родительский каталог, как основу для всех подключаемых файлов системы
+if(!defined('BASE_DIR'))
+	define('BASE_DIR',	dirname(dirname(__FILE__)));	// no trailing slash, full paths only
 
 // Константы для быстрого обращения к каталогам с подключаемыми файлами
-if(!defined('GB_INC_DIR'))	define('GB_INC_DIR',	BASE_DIR . '/gb');
-if(!defined('GB_LANG_DIR'))	define('GB_LANG_DIR',	GB_INC_DIR . '/languages');
+if(!defined('GB_INC_DIR'))
+	define('GB_INC_DIR',	BASE_DIR . '/gb');
+if(!defined('GB_LANG_DIR'))
+	define('GB_LANG_DIR',	GB_INC_DIR . '/languages');
 
 // Запоминаем текущий каталог, как корень сайта
-if(!defined('BASE_URL'))	define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER[ 'DOCUMENT_ROOT' ])) . '/');
+if(!defined('BASE_URL'))
+	define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER[ 'DOCUMENT_ROOT' ])));	// no trailing slash
 
 // Подключаем настройки системы
 if(!defined('GB_TESTING_MODE')){	// … но не в режиме тестирования (т.к. в нём особые настройки уже загружены)
-	if(!file_exists(BASE_DIR . '/gb-config.php'))	die('<b>ERROR:</b> Unable to find configuration file!');
+	if(!file_exists(BASE_DIR . '/gb-config.php'))
+		die('<b>ERROR:</b> Unable to find configuration file!');
 	require_once(BASE_DIR . '/gb-config.php');
 }
 
@@ -77,23 +80,15 @@ require_once(GB_INC_DIR . '/general-template.php');
 // Load the L10n library.
 require_once(GB_INC_DIR . '/l10n.php');
 
-// Таблица сокращений регионов
-static $region_short = array(
-	' генерал-губернаторство'	=> ' ген.-губ.',
-	' наместничество'	=> ' нам.',
-	' губерния'	=> ' губ.',
-	' область'	=> ' обл.',
-	' уезд'	=> ' у.',
-	' волость'	=> ' вол.',
-	' округа'	=> ' окр.',
-);
-
 // Load most of GeniBase.
 require_once(GB_INC_DIR . '/kses.php');
 require_once(GB_INC_DIR . '/formatting.php');
 require_once(GB_INC_DIR . '/text.php');
 require_once(GB_INC_DIR . '/class.ww1_database.php');
 require_once(GB_INC_DIR . '/class.ww1_records_set.php');
+
+// Define constants that rely on the API to obtain the default value.
+gb_plugin_constants();
 
 // Load the default text localization domain.
 load_default_textdomain();
@@ -113,6 +108,19 @@ require_once(GB_INC_DIR . '/locale.php');
  * @since 2.0.0
 */
 $GLOBALS['gb_locale'] = new GB_Locale();
+
+
+
+// Таблица сокращений регионов
+static $region_short = array(
+		' генерал-губернаторство'	=> ' ген.-губ.',
+		' наместничество'	=> ' нам.',
+		' губерния'	=> ' губ.',
+		' область'	=> ' обл.',
+		' уезд'	=> ' у.',
+		' волость'	=> ' вол.',
+		' округа'	=> ' окр.',
+);
 
 
 

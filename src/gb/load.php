@@ -373,7 +373,7 @@ function gb_debug_mode() {
 
 		if ( GB_DEBUG_LOG ) {
 			ini_set( 'log_errors', 1 );
-			ini_set( 'error_log', BASE_DIR . '/debug.log' );
+			ini_set( 'error_log', GB_CONTENT_DIR . '/debug.log' );
 		}
 	} else {
 		error_reporting( E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR );

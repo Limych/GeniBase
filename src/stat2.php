@@ -53,7 +53,7 @@ $even = 0;
 foreach($name_reductions as $key => $val){
 	if($val < MIN_NAMES_CNT)	break;
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($key) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($key) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n</tr>";
 }
 ?>
 </tbody></table>
@@ -69,7 +69,7 @@ $even = 0;
 foreach($patronymic_reductions as $key => $val){
 	if($val < MIN_NAMES_CNT)	break;
 	$even = 1-$even;
-	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . htmlspecialchars($key) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n</tr>";
+	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($key) . "</td>\n\t<td class='alignright'>" . $val . "</td>\n</tr>";
 }
 ?>
 </tbody></table>
