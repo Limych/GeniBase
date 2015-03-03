@@ -1,0 +1,117 @@
+.responsive-table	{
+	width: 100%;
+}
+.responsive-table thead	{
+	position: absolute;
+	clip: rect(1px 1px 1px 1px);
+	/* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+	padding: 0;
+	border: 0;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+}
+.responsive-table tbody,
+.responsive-table tr,
+.responsive-table th,
+.responsive-table td	{
+	display: block;
+	padding: 0;
+	text-align: left;
+	white-space: normal;
+}
+.responsive-table tbody tr {
+	margin-bottom: 0.5em;
+	border: 2px solid #FFA500;
+	background-color: #F9F9F9;
+}
+.responsive-table tbody tr:last-of-type {
+	margin-bottom: 0;
+}
+.responsive-table th,
+.responsive-table td {
+	padding: 0.5em;
+	vertical-align: middle;
+}
+.responsive-table tbody td {
+	text-align: right;
+}
+.responsive-table .rt-hide	{
+	display: none;
+}
+.responsive-table .rt-show	{
+	display: initial;
+}
+.responsive-table tbody td[scope="row"]	{
+	background-color: #FFA500;
+	text-align: left;
+}
+.responsive-table tbody td[data-rt-title]:before	{
+	content: attr(data-rt-title);
+	float: left;
+	color: #999;
+	margin-right: 0.5em;
+	text-align: left;
+}
+
+
+
+/*** Media Queries ****************************************************************/
+
+/* Tablet screen */
+@media (min-width: 30em)	{
+}/**/
+
+/* Narrow PC screen */
+@media print, (min-width: 42em)	{
+	.responsive-table thead {
+		position: relative;
+		clip: auto;
+		height: auto;
+		width: auto;
+		overflow: auto;
+	}
+	.responsive-table tbody	{
+		display: table-row-group;
+	}
+	.responsive-table tr,
+	.responsive-table tbody tr {
+		border: 0;
+		display: table-row;
+	}
+	.responsive-table tr.even {
+		background-color: #EEE;
+	}
+	.responsive-table th,
+	.responsive-table tbody th	{
+		display: table-cell;
+		text-align: center;
+	}
+	.responsive-table td,
+	.responsive-table tbody td {
+		display: table-cell;
+		text-align: left;
+	}
+	.responsive-table tbody td[scope="row"] {
+		background-color: transparent;
+		text-align: right;
+	}
+	.responsive-table tbody td[data-rt-title]:before {
+		content: none;
+	}
+	.responsive-table th.rt-hide,
+	.responsive-table td.rt-hide	{
+		display: table-cell;
+	}
+	.responsive-table .rt-show	{
+		display: none;
+	}
+	.responsive-table .rt-hide	{
+		display: initial;
+	}
+}/**/
+
+/* Normal PC screen */
+@media (min-width: 62em)	{
+}/**/

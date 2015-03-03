@@ -78,9 +78,8 @@ class ww1_solders_set extends ww1_records_set{
 ?>
 <script type="text/javascript">
 	$(document).ready(function(){
-		$(".report tr.detailed").hide();
 		$(".report tr.brief").click(function(){
-			$(this).next("tr").toggle();
+			$(this).next("tr").toggleClass("h");
 			$(this).find(".arrow").toggleClass("up");
 		});
 		$('body').keydown(function(e){
@@ -102,13 +101,13 @@ class ww1_solders_set extends ww1_records_set{
 ?>
 <table id="report" class="report responsive-table"><thead>
 	<tr>
-		<th>№ <nobr>п/п</nobr></th>
+		<th scope='col'>№ <nobr>п/п</nobr></th>
 <?php
 		foreach(array_values($brief_fields) as $val){
-			print "\t\t<th scope='col'>" . esc_html($val) . "</th>\n";
+			print "<th scope='col'>" . esc_html($val) . "</th>\n";
 		}
 		if($show_detailed)
-			print "\t\t<th></th>\n";
+			print "<th class='no-print'></th>\n";
 ?>
 	</tr>
 </thead><tbody>
@@ -117,14 +116,19 @@ class ww1_solders_set extends ww1_records_set{
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
 			$even = 1-$even;
-			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
-			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
-			foreach($brief_fields as $key => $title)
-				print "\t\t<td data-title='" . esc_attr($title) . "'>" . esc_html($row[$key]) . "</td>\n";
+			print "<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
+			$details = '. ' . ($row['surname'] ? $row['surname'] : '<span class="na">(фамилия не указана)</span>') . ', ' . ($row['name'] ? $row['name'] : '<span class="na">(имя не указано)</span>'); 
+			print "<td scope='row' class='alignright'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
+			foreach($brief_fields as $key => $title){
+				$val = $row[$key] ? esc_html($row[$key]) : '(не&nbsp;указано)';
+				if(substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
+				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $val . "</td>\n";
+			}
 			if($show_detailed){
-				print "\t\t<td><div class='arrow'></div></td>\n";
+				print "<td class='rt-hide no-print'><div class='arrow'></div></td>\n";
+
+			print "</tr><tr class='detailed h" . ($even ? ' even' : ' odd') . "'>\n";
 ?>
-	</tr><tr class='detailed'>
 		<td></td>
 		<td class='detailed' colspan="<?php print $brief_fields_cnt+1; ?>">
 			<table>
@@ -142,14 +146,18 @@ class ww1_solders_set extends ww1_records_set{
 							$text = '«' . $text . '», стр.' . $row['source_pg'];
 					}
 
-					print "\t\t\t\t<tr>\n";
-					if($key == 'comments')					
-						print "\t\t\t\t\t<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
-					else {
-						print "\t\t\t\t\t<th>" . esc_html($val) . ":</th>\n";
-						print "\t\t\t\t\t<td>" . $text . "</td>\n";
+					if(!empty($text)){
+						print "<tr>\n";
+						if($key == 'comments')					
+							print "<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
+						else {
+							print "<th>" . $val . ":</th>\n";
+							$text = $text ? $text : '(не&nbsp;указано)';
+							if(substr($text, 0, 1) === '(')	$text = "<span class='na'>$text</span>";
+							print "<td>" . $text . "</td>\n";
+						}
+						print "</tr>\n";
 					}
-					print "\t\t\t\t</tr>\n";
 				}
 ?>
 			</table>
@@ -177,7 +185,7 @@ class ww1_solders_set extends ww1_records_set{
 				'Обычно при поиске система автоматически ищет близкие по звучанию или написанию варианты фамилий. Все найденные варианты показываются в конце списка.',
 			);
 			shuffle($hints);
-			print "<p class='nb aligncenter' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
+			print "<p class='nb aligncenter no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
 		else:
 ?>
 <div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>

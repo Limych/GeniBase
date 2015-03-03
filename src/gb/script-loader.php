@@ -60,7 +60,7 @@ function gb_default_styles() {
 	// External libraries and friends
 	_gb_styles()->add('normalize', "/gb/css/normalize.css");
 
-	// External libraries and friends
+	// 
 	_gb_styles()->add('responsive-table', "/gb/css/responsive-table.css", array('normalize'));
 }
 

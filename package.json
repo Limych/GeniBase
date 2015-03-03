@@ -25,7 +25,8 @@
     "grunt-jsvalidate": "~0.2.2",
     "grunt-legacy-util": "^0.2.0",
     "grunt-sass": "~0.18.0",
-    "matchdep": "~0.3.0"
+    "matchdep": "~0.3.0",
     "normalize.css": "^3.0.2",
+    "jquery": "^2.1.1"
   }
 }
