@@ -57,8 +57,8 @@ define('Q_EXTENDED',	'Q_EXTENDED');	// Расширенный режим пои�
 //
 abstract class ww1_database {
 	protected	$query_mode;	// Режим поиска
-	public		$query;			// Набор условий поиска
-	protected	$page;			// Текущая страница результатов
+	public		$query;		// Набор условий поиска
+	protected	$page;		// Текущая страница результатов
 	public		$have_query;	// Признак наличия данных для запроса
 	public		$records_cnt;	// Общее число записей в базе
 	
@@ -129,7 +129,7 @@ class ww1_database_solders extends ww1_database {
 	 * List of fields with IDs.
 	 * @var array
 	 */
-	private $ids_fields			= array('religion', 'marital', 'reason', 'source_type');
+	private $ids_fields		= array('religion', 'marital', 'reason', 'source_type');
 
 	/**
 	 * List of fields that have dictionaries.
@@ -217,18 +217,18 @@ class ww1_database_solders extends ww1_database {
 
 		// Выводим html-поля
 		static $fields = array(
-				'surname'		=> 'Фамилия',
-				'name'			=> 'Имя-отчество',
-				'rank'			=> 'Воинское звание',
-				'religion'		=> 'Вероисповедание',
-				'marital'		=> 'Семейное положение',
-				'region'		=> 'Губерния, уезд, волость',
-				'place'			=> 'Волость/Нас.пункт',
-				'reason'		=> 'Событие',
-				'date'			=> 'Дата события',
+				'surname'	=> 'Фамилия',
+				'name'		=> 'Имя-отчество',
+				'rank'		=> 'Воинское звание',
+				'religion'	=> 'Вероисповедание',
+				'marital'	=> 'Семейное положение',
+				'region'	=> 'Губерния, уезд, волость',
+				'place'		=> 'Волость/Нас.пункт',
+				'reason'	=> 'Событие',
+				'date'		=> 'Дата события',
 				'source_type'	=> 'Тип источника',
-				'source_nr'		=> 'Номер источника',
-				'source_pg'		=> 'Страница источника',
+				'source_nr'	=> 'Номер источника',
+				'source_pg'	=> 'Страница источника',
 		);
 		foreach($fields as $key => $val){
 			switch($key){
