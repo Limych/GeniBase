@@ -25,16 +25,19 @@ CREATE VIEW `?_v_persons` AS SELECT
 	`p`.`marital_id` AS `marital_id`,
 	`mr`.`marital` AS `marital`,
 	`rg`.`region` AS `region`,
+	`rg`.`region_idx` AS `region_idx`,
 	`p`.`place` AS `place`,
 	`p`.`reason_id` AS `reason_id`,
 	`rs`.`reason` AS `reason`,
 	`p`.`date` AS `date`,
 	`p`.`source_id` AS `source_id`,
 	`sc`.`source` AS `source`,
+	`sc`.`source_type_id` AS `source_type_id`,
+	`sc`.`source_number` AS `source_nr`,
+	`p`.`list_pg` AS `source_pg`,
 	`sc`.`source_url` AS `source_url`,
-	`sc`.`pg_correction` AS `pg_correction`,
-	`p`.`comments` AS `comments`,
-	`rg`.`region_idx` AS `region_idx`
+	`sc`.`source_pg_correction` AS `source_pg_correction`,
+	TRIM(LEADING CHAR(10) FROM CONCAT_WS(CHAR(10),TRIM(`p`.`comments`),TRIM(`sc`.`comments`))) AS `comments`
 FROM `?_persons` AS `p`
 	JOIN `?_dic_region` AS `rg` ON (`p`.`region_id` = `rg`.`id` AND `rg`.`locale` = 'ru')
 	JOIN `?_dic_source` AS `sc` ON (`p`.`source_id` = `sc`.`id` AND `sc`.`locale` = 'ru')
@@ -114,13 +117,13 @@ class ww1_database_solders extends ww1_database {
 	 * @var array
 	 */
 	private $extended_fields	= array('surname', 'name', 'rank', 'religion', 'marital', 'region',
-			'place', 'reason', 'date_from', 'date_to', 'list_pg');
+			'place', 'reason', 'date_from', 'date_to', 'source_pg');
 	
 	/**
 	 * List of fields with numeric values.
 	 * @var array
 	 */
-	private $numeric_fields		= array('religion', 'marital', 'reason', 'list_pg');
+	private $numeric_fields		= array('religion', 'marital', 'reason', 'source_pg');
 
 	/**
 	 * List of fields with IDs.
@@ -219,7 +222,7 @@ class ww1_database_solders extends ww1_database {
 				'place'		=> 'Волость/Нас.пункт',
 				'reason'	=> 'Событие',
 				'date'		=> 'Дата события',
-				'list_pg'	=> 'Страница источника',
+				'source_pg'	=> 'Страница источника',
 		);
 		foreach($fields as $key => $val){
 			switch($key){
@@ -398,7 +401,7 @@ class ww1_database_solders extends ww1_database {
 			} // if
 		} // foreach
 
-		$order[] = 'p.surname, p.name, p.region, p.place, p.`rank`, p.source, p.list_pg';
+		$order[] = 'p.surname, p.name, p.region, p.place, p.`rank`, p.source, p.source_pg';
 
 		$from	= ' FROM ' . implode(', ', $from);
 		$where	= ' WHERE ' . implode(' AND ', $where);
@@ -444,10 +447,10 @@ class ww1_database_solders extends ww1_database {
 		if (defined('GB_DEBUG_SQL_PROF')) {
 			print("\n<!-- SQL-Profile:\n");
 			$total = 0;
-			$result = gbdb()->get_column('SHOW PROFILE', TRUE);
+			$result = gbdb()->get_column('SHOW PROFILE', array(), TRUE);
 			foreach ($result as $key => $val){
 				printf("%20s: %7.3f sec\n", $key, $val);
-				if ($row[0] == 'Table lock')
+				if($key == 'Table lock')
 					continue;
 				$total += $val;
 			}

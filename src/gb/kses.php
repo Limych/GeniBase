@@ -555,7 +555,7 @@ function gb_kses_allowed_html( $context = '' ) {
 
 	switch ( $context ) {
 		case 'post':
-			/** This filter is documented in gb-includes/kses.php */
+			/** This filter is documented in gb/kses.php */
 // 			return apply_filters( 'gb_kses_allowed_html', $allowedposttags, $context );
 			return $allowedposttags;
 			break;
@@ -563,23 +563,23 @@ function gb_kses_allowed_html( $context = '' ) {
 		case 'pre_user_description':
 			$tags = $allowedtags;
 			$tags['a']['rel'] = true;
-			/** This filter is documented in gb-includes/kses.php */
+			/** This filter is documented in gb/kses.php */
 // 			return apply_filters( 'gb_kses_allowed_html', $tags, $context );
 			return $tags;
 			break;
 		case 'strip':
-			/** This filter is documented in gb-includes/kses.php */
+			/** This filter is documented in gb/kses.php */
 // 			return apply_filters( 'gb_kses_allowed_html', array(), $context );
 			return array();
 			break;
 		case 'entities':
-			/** This filter is documented in gb-includes/kses.php */
+			/** This filter is documented in gb/kses.php */
 // 			return apply_filters( 'gb_kses_allowed_html', $allowedentitynames, $context);
 			return $allowedentitynames;
 			break;
 		case 'data':
 		default:
-			/** This filter is documented in gb-includes/kses.php */
+			/** This filter is documented in gb/kses.php */
 // 			return apply_filters( 'gb_kses_allowed_html', $allowedtags, $context );
 			return $allowedtags;
 	}

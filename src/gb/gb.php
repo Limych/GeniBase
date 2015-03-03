@@ -83,12 +83,16 @@ require_once(GB_INC_DIR . '/l10n.php');
 // Load most of GeniBase.
 require_once(GB_INC_DIR . '/kses.php');
 require_once(GB_INC_DIR . '/formatting.php');
+require_once(GB_INC_DIR . '/script-loader.php');
 require_once(GB_INC_DIR . '/text.php');
 require_once(GB_INC_DIR . '/class.ww1_database.php');
 require_once(GB_INC_DIR . '/class.ww1_records_set.php');
 
 // Define constants that rely on the API to obtain the default value.
 gb_plugin_constants();
+
+// Load default scripts and styles
+gb_default_styles();
 
 // Load the default text localization domain.
 load_default_textdomain();

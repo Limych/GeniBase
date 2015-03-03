@@ -7,14 +7,14 @@
  * 
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  * @copyright	Partially copyright © 2010, Michail Serov
- * @copyright	Partially copyright © WordPress
+ * @copyright	Partially copyright © WordPress Team
  */
 
 // Запрещено непосредственное исполнение этого скрипта
 if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 // Инициализация режима отладки значением по умолчанию
-if(!defined('GB_DEBUG_SQL_PROF'))	define('GB_DEBUG_SQL_PROF', FALSE);
+if(!defined('GB_DEBUG_SQL'))	define('GB_DEBUG_SQL', FALSE);
 
 
 
@@ -38,7 +38,7 @@ class GB_DBase	{
 	/**
 	 * Whether to show SQL/DB errors.
 	 *
-	 * Default behavior is to show errors if both GB_DEBUG, GB_DEBUG_SQL_PROF and GB_DEBUG_DISPLAY
+	 * Default behavior is to show errors if both GB_DEBUG, GB_DEBUG_SQL and GB_DEBUG_DISPLAY
 	 * evaluated to true.
 	 *
 	 * @since	2.0.0
@@ -352,6 +352,11 @@ class GB_DBase	{
 	 * @return string	SQL-запрос с подставленными параметрами
 	 */
 	function prepare_query($query, $substitutions = array()){
+		if(!is_array($substitutions)){
+			// TODO: Print error
+			$substitutions = array();
+		}
+
 		// Чтобы следующая метка не могла затронуть содержание предыдущей,
 		// например, в случае $subst = array('id' => 5, 'title' => 'а тут ?id'),
 		// проводить их замену приходится не по очереди через простой foreach,
@@ -374,7 +379,7 @@ class GB_DBase	{
 		$regexp .= ')/';
 
 		// TODO: Remove this?
-// 		if(GB_DEBUG_SQL_PROF)	print("\n<!-- $regexp -->\n");
+// 		if(GB_DEBUG_SQL)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
 		$query = preg_replace_callback(
@@ -537,7 +542,7 @@ class GB_DBase	{
 
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if(GB_DEBUG_SQL_PROF)	gb_debug_info($query_sub, __CLASS__);
+		if(GB_DEBUG_SQL)	gb_debug_info($query_sub, __CLASS__);
 		
 		// Remove any comments from query and trim space symbols.
 		$query_sub = trim($this->remove_comments($query_sub));

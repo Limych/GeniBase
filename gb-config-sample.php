@@ -13,9 +13,9 @@ if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__
  */
 // define('GB_DEBUG',	TRUE);	// Общий режим отладки
 //
-// define('GB_DEBUG_SQL_PROF',	TRUE);	// Режим отладки SQL-запросов
+// define('GB_DEBUG_SQL',	TRUE);	// Режим отладки SQL-запросов
+// define('GB_DEBUG_SQL_PROF',	TRUE);	// Режим профилирования SQL-запросов
 // define('P_DEBUG',	TRUE);	// Режим отладки сиситемы ручной публикации
-// define('SQL_DEBUG_PROF',	TRUE);	// Режим профилирования SQL-запросов
 
 
 

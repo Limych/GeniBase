@@ -151,11 +151,28 @@ function language_attributes($doctype = 'html') {
 }
 
 /**
+ * Fire the wp_head action.
+ * 
+ * @since	2.0.0
+ */
+function gb_head(){
+	/**
+	 * Print scripts or data in the head tag on the front end.
+	 *
+	 * @since	2.0.0
+	 */
+// 	do_action( 'gb_head' );
+	gb_print_styles();
+}
+
+/**
  * Вывод начальной части страницы
  *
  * @param	string	$title	Title of the page.
  */
 function html_header($title){
+	gb_enqueue_style('main', '/styles.css', array('normalize', 'responsive-table'));
+
 	@header('Content-Type: text/html; charset=utf-8');
 	?>
 <!DOCTYPE html>
@@ -165,9 +182,9 @@ function html_header($title){
 
 	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 
-	<link rel="stylesheet" type="text/css" href="/styles.css" />
 	<link rel="icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
+<?php gb_head(); ?>
 </head><body>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
 	<script type="text/javascript">

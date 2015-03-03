@@ -251,3 +251,103 @@ function esc_js( $text ) {
 // 	return apply_filters( 'js_escape', $safe_text, $text );
 	return $safe_text;
 }
+
+/**
+ * Checks and cleans a URL.
+ *
+ * A number of characters are removed from the URL. If the URL is for displaying
+ * (the default behaviour) ampersands are also replaced. The 'clean_url' filter
+ * is applied to the returned cleaned URL.
+ *
+ * @since 2.0.0
+ *
+ * @param string $url The URL to be cleaned.
+ * @param array $protocols Optional. An array of acceptable protocols.
+ *		Defaults to 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn' if not set.
+ * @param string $_context Private. Use esc_url_raw() for database usage.
+ * @return string The cleaned $url after the 'clean_url' filter is applied.
+ */
+function esc_url( $url, $protocols = null, $_context = 'display' ) {
+	$original_url = $url;
+
+	if ( '' == $url )
+		return $url;
+	$url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff]|i', '', $url);
+	$strip = array('%0d', '%0a', '%0D', '%0A');
+	$url = _deep_replace($strip, $url);
+	$url = str_replace(';//', '://', $url);
+	/* If the URL doesn't appear to contain a scheme, we
+	 * presume it needs http:// appended (unless a relative
+	 * link starting with /, # or ? or a php file).
+	*/
+	if ( strpos($url, ':') === false && ! in_array( $url[0], array( '/', '#', '?' ) ) &&
+			! preg_match('/^[a-z0-9-]+?\.php/i', $url) )
+				$url = 'http://' . $url;
+
+	// Replace ampersands and single quotes only when displaying.
+	if ( 'display' == $_context ) {
+		$url = gb_kses_normalize_entities( $url );
+		$url = str_replace( '&amp;', '&#038;', $url );
+		$url = str_replace( "'", '&#039;', $url );
+	}
+
+	if ( '/' === $url[0] ) {
+		$good_protocol_url = $url;
+	} else {
+		if ( ! is_array( $protocols ) )
+			$protocols = gb_allowed_protocols();
+		$good_protocol_url = gb_kses_bad_protocol( $url, $protocols );
+		if ( strtolower( $good_protocol_url ) != strtolower( $url ) )
+			return '';
+	}
+
+	/**
+	 * Filter a string cleaned and escaped for output as a URL.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $good_protocol_url The cleaned URL to be returned.
+	 * @param string $original_url      The URL prior to cleaning.
+	 * @param string $_context          If 'display', replace ampersands and single quotes only.
+	 */
+// 	return apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
+	return $good_protocol_url;
+}
+
+/**
+ * Perform a deep string replace operation to ensure the values in $search are no longer present
+ *
+ * Repeats the replacement operation until it no longer replaces anything so as to remove "nested" values
+ * e.g. $subject = '%0%0%0DDD', $search ='%0D', $result ='' rather than the '%0%0DD' that
+ * str_replace would return
+ *
+ * @since 2.0.0
+ * @access private
+ *
+ * @param string|array $search The value being searched for, otherwise known as the needle. An array may be used to designate multiple needles.
+ * @param string $subject The string being searched and replaced on, otherwise known as the haystack.
+ * @return string The string with the replaced svalues.
+ */
+function _deep_replace( $search, $subject ) {
+	$subject = (string) $subject;
+
+	$count = 1;
+	while ( $count ) {
+		$subject = str_replace( $search, '', $subject, $count );
+	}
+
+	return $subject;
+}
+
+/**
+ * Navigates through an array and encodes the values to be used in a URL.
+ *
+ * @since	2.0.0
+ *
+ * @param array|string $value The array or string to be encoded.
+ * @return array|string $value The encoded array (or string from the callback).
+ */
+function urlencode_deep($value) {
+	$value = is_array($value) ? array_map('urlencode_deep', $value) : urlencode($value);
+	return $value;
+}

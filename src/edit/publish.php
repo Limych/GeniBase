@@ -44,12 +44,12 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 	}elseif(isset($_REQUEST['source_id'])){
 		if(intval($_REQUEST['source_id']) < 1)	exit;
 
-		$r = gbdb()->get_row('SELECT source, source_url, pg_correction FROM ?_dic_source WHERE id = ?id',
+		$r = gbdb()->get_row('SELECT source, source_url, source_pg_correction FROM ?_dic_source WHERE id = ?id',
 				array('id' => $_REQUEST['source_id']));
 		if(!$r || empty($r['source_url']))	exit;
 
 		$pg = intval($_REQUEST['list_pg']);
-		$url = str_replace('{pg}', $pg + $r['pg_correction'], $r['source_url']);
+		$url = str_replace('{pg}', $pg + $r['source_pg_correction'], $r['source_url']);
 		$text = trim_text($r['source'], 40);
 		print "<small>Ссылка на источник: «<a href='$url' target='_blank'>$text</a>», стр.$pg</small>";
 		exit;
@@ -132,11 +132,11 @@ $dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_rank ORDER BY rank', 
 //
 $dic_reason = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
-$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM ?_dic_source');
+$result = gbdb()->get_table('SELECT id, source, source_url, source_pg_correction FROM ?_dic_source');
 foreach ($result as $r){
 	$dic_source        [$r['id']] = $r['source'];
 	$dic_source_url    [$r['id']] = $r['source_url'];
-	$dic_source_pg_corr[$r['id']] = $r['pg_correction'];
+	$dic_source_pg_corr[$r['id']] = $r['source_pg_correction'];
 }
 uasort($dic_source, function($a, $b){
 	if(preg_match('/№(\d+)/uS', $a, $ma) && preg_match('/№(\d+)/uS', $b, $mb)){

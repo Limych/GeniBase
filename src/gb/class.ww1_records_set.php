@@ -100,12 +100,12 @@ class ww1_solders_set extends ww1_records_set{
 		$pag = paginator($this->page, $max_pg);
 		print $pag;	// Вывод пагинатора
 ?>
-<table id="report" class="report"><thead>
+<table id="report" class="report responsive-table"><thead>
 	<tr>
 		<th>№ <nobr>п/п</nobr></th>
 <?php
 		foreach(array_values($brief_fields) as $val){
-			print "\t\t<th>" . esc_html($val) . "</th>\n";
+			print "\t\t<th scope='col'>" . esc_html($val) . "</th>\n";
 		}
 		if($show_detailed)
 			print "\t\t<th></th>\n";
@@ -119,8 +119,8 @@ class ww1_solders_set extends ww1_records_set{
 			$even = 1-$even;
 			print "\t<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
 			print "\t\t<td class='alignright'>" . (++$num) . "</td>\n";
-			foreach(array_keys($brief_fields) as $key)
-				print "\t\t<td>" . esc_html($row[$key]) . "</td>\n";
+			foreach($brief_fields as $key => $title)
+				print "\t\t<td data-title='" . esc_attr($title) . "'>" . esc_html($row[$key]) . "</td>\n";
 			if($show_detailed){
 				print "\t\t<td><div class='arrow'></div></td>\n";
 ?>
@@ -134,12 +134,12 @@ class ww1_solders_set extends ww1_records_set{
 					$text = esc_html($row[$key]);
 					if($key == 'source'){
 						if(!empty($row['source_url'])){
-							if($row['list_pg'] > 0)
-								$text = '<a href="' . str_replace('{pg}', (int) $row['list_pg'] + (int) $row['pg_correction'], $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['list_pg'];
+							if($row['source_pg'] > 0)
+								$text = '<a href="' . str_replace('{pg}', (int) $row['source_pg'] + (int) $row['source_pg_correction'], $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
 							else
 								$text = '<a href="' . $row['source_url'] . '" target="_blank">«' . $text . '»</a>';
 						} else
-							$text = '«' . $text . '», стр.' . $row['list_pg'];
+							$text = '«' . $text . '», стр.' . $row['source_pg'];
 					}
 
 					print "\t\t\t\t<tr>\n";

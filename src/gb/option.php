@@ -58,7 +58,7 @@ function get_option( $option, $default = false ) {
 		if(!empty($row))
 			$value = $row['option_value'];
 		else{
-			/** This filter is documented in gb-includes/option.php */
+			/** This filter is documented in gb/option.php */
 // 			return apply_filters( 'default_option_' . $option, $default );
 			return $default;
 		}
