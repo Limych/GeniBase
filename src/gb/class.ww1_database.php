@@ -117,25 +117,25 @@ class ww1_database_solders extends ww1_database {
 	 * @var array
 	 */
 	private $extended_fields	= array('surname', 'name', 'rank', 'religion', 'marital', 'region',
-			'place', 'reason', 'date_from', 'date_to', 'source_pg');
+			'place', 'reason', 'date_from', 'date_to', 'source_type', 'source_nr', 'source_pg');
 	
 	/**
 	 * List of fields with numeric values.
 	 * @var array
 	 */
-	private $numeric_fields		= array('religion', 'marital', 'reason', 'source_pg');
+	private $numeric_fields		= array('religion', 'marital', 'reason', 'source_nr', 'source_pg');
 
 	/**
 	 * List of fields with IDs.
 	 * @var array
 	 */
-	private $ids_fields			= array('religion', 'marital', 'reason');
+	private $ids_fields			= array('religion', 'marital', 'reason', 'source_type');
 
 	/**
 	 * List of fields that have dictionaries.
 	 * @var array
 	 */
-	private $dictionary_fields	= array('rank', 'religion', 'marital', 'reason');
+	private $dictionary_fields	= array('rank', 'religion', 'marital', 'reason', 'source_type');
 
 
 
@@ -200,29 +200,35 @@ class ww1_database_solders extends ww1_database {
 				ORDER BY rank', array(), TRUE);
 
 		// Получаем список всех вариантов значений вероисповеданий
-		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion
+		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion and locale = "ru"
 				WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
 
 		// Получаем список всех вариантов значений семейных положений
-		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital
+		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital and locale = "ru"
 				WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
 
 		// Получаем список всех вариантов значений событий
-		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0
+		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0 and locale = "ru"
 				ORDER BY reason', array(), TRUE);
+
+		// Получаем список всех вариантов значений типов источников
+		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_type WHERE source_cnt != 0 and locale = "ru"
+				ORDER BY source_type', array(), TRUE);
 
 		// Выводим html-поля
 		static $fields = array(
-				'surname'	=> 'Фамилия',
-				'name'		=> 'Имя-отчество',
-				'rank'		=> 'Воинское звание',
-				'religion'	=> 'Вероисповедание',
-				'marital'	=> 'Семейное положение',
-				'region'	=> 'Губерния, уезд, волость',
-				'place'		=> 'Волость/Нас.пункт',
-				'reason'	=> 'Событие',
-				'date'		=> 'Дата события',
-				'source_pg'	=> 'Страница источника',
+				'surname'		=> 'Фамилия',
+				'name'			=> 'Имя-отчество',
+				'rank'			=> 'Воинское звание',
+				'religion'		=> 'Вероисповедание',
+				'marital'		=> 'Семейное положение',
+				'region'		=> 'Губерния, уезд, волость',
+				'place'			=> 'Волость/Нас.пункт',
+				'reason'		=> 'Событие',
+				'date'			=> 'Дата события',
+				'source_type'	=> 'Тип источника',
+				'source_nr'		=> 'Номер источника',
+				'source_pg'		=> 'Страница источника',
 		);
 		foreach($fields as $key => $val){
 			switch($key){
