@@ -216,7 +216,12 @@ function html_header($title){
 function html_footer(){
 ?>
 <footer>
-	<p style="text-align: center; margin-top: 3em" class="no-print"><a href="/stat.php">Статистика</a> | <a href="/guestbook/index.php">Гостевая книга</a>  | <a href="/todo.php">ToDo-list</a> | <a href="http://forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a> (<a href="http://forum.svrt.ru/index.php?showtopic=7343&view=getnewpost" target="_blank">техническое</a>) | <a href="crue.php">Команда проекта</a></p>
+	<p style="text-align: center; margin-top: 3em" class="no-print">
+		<a href="/stat.php">Статистика</a>
+		| <a href="/guestbook/index.php">Гостевая книга</a> 
+		| <a href="//forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a>
+		| <a href="crue.php">Команда проекта</a>
+	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <?php if(GB_DEBUG): ?>
 	<p><small>Statistic: <?php
