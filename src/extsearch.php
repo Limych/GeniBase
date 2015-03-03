@@ -10,7 +10,7 @@ $squery = trim($squery);
 html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
 show_records_stat();
 ?>
-<form action="<?php print $_SERVER['PHP_SELF']?>#report">
+<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='no-print'>
 	<h2>Форма расширенного поиска</h2>
 	<p class="small alignright"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>
 	<?php $dbase->search_form(); ?>

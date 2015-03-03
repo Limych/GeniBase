@@ -139,7 +139,6 @@ table td	{
 thead	{
 	font-weight: bold;
 }
-table.report,
 table.stat	{
 	border: 1px solid #CCC;
 }
@@ -167,22 +166,8 @@ tr.brief:hover	{
 tr.brief	{
 	cursor: pointer;
 }
-.detailed	{
-	background-color: #FFE9BF;
-	padding: 0.5em;
-	font-size: 90%;
-}
-.detailed table th	{
-	background-color: transparent;
-	padding: 0 0.5em 0 0;
-	text-align: right;
-}
-.detailed table td	{
-	padding: 0.125em 0.5em;
-}
-.detailed table td.comments	{
-	padding-top: 1em;
-	text-align: justify;
+td .na	{
+	opacity: 0.3;
 	font-style: italic;
 }
 .arrow:after	{
@@ -198,6 +183,55 @@ tr.brief	{
 .nonstrict-match	{
 	color: darkred;
 }
+.responsive-table tr.detailed	{
+	margin-top: -0.5em;
+	border-top: 0;
+	padding: 0.25em 0.5em 0.25em 1.5em;
+}
+.responsive-table .detailed tr	{
+	border: 0;
+}
+.responsive-table .detailed th,
+.responsive-table .detailed td	{
+	display: inline;
+	padding: 0;
+	background: transparent;
+	text-align: left;
+}
+.responsive-table .detailed th	{
+	color: #999;
+	font-weight: normal;
+}
+@media print, (min-width: 42em)	{
+	.responsive-table td.detailed	{
+		padding: 0.5em;
+		font-size: 90%;
+		border-top: 1px solid #CCC;
+	}
+	.responsive-table .detailed th,
+	.responsive-table .detailed td	{
+		display: table-cell;
+	}
+	.responsive-table td.detailed table tr,
+	.responsive-table td.detailed table th,
+	.responsive-table td.detailed table td	{
+		background-color: transparent;
+	}
+	.responsive-table td.detailed table th	{
+		padding: 0 0.5em 0 0;
+		text-align: right;
+		vertical-align: top;
+	}
+	.responsive-table td.detailed table td	{
+		padding: 0.125em 0.5em;
+		text-align: left;
+	}
+	.responsive-table td.detailed table td.comments	{
+		padding-top: 1em;
+		text-align: justify;
+		font-style: italic;
+	}
+}/**/
 
 
 /*** «Лесенка» уровней ***/

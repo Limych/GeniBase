@@ -10,7 +10,7 @@ $squery = trim($squery);
 html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
 show_records_stat();
 ?>
-<form action="<?php print $_SERVER['PHP_SELF']?>#report">
+<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='no-print'>
 	<h2>Поиск персоны</h2>
 	<p class="small alignright"><a href="/extsearch.php">Расширенный поиск</a></p>
 	<?php $dbase->search_form()	?>
@@ -62,6 +62,6 @@ foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';
 	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
-print "<p class='lastq aligncenter'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
+print "<p class='lastq aligncenter no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 
 html_footer();
