@@ -6,7 +6,7 @@
  * @subpackage Template
  *
  * @copyright	Copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
- * @copyright	Partially copyright © WordPress
+ * @copyright	Partially copyright © WordPress Team
  */
 
 // Direct execution forbidden for this script
