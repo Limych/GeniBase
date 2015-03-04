@@ -36,7 +36,7 @@ abstract class ww1_records_set {
  * Класс хранения результатов поиска по спискам погибших
 */
 class ww1_solders_set extends ww1_records_set{
-	protected	$records;
+	var	$records;
 	public	$records_cnt;
 
 	// Создание экземпляра класса и сохранение результатов поиска
@@ -71,6 +71,7 @@ class ww1_solders_set extends ww1_records_set{
 		if($this->page > $max_pg)	$this->page = $max_pg;
 
 		$brief_fields_cnt = count($brief_fields);
+		// TODO: gettext
 		?>
 <p class="aligncenter">Всего найдено <?php print format_num($this->records_cnt, ' запись.', ' записи.', ' записей.')?></p>
 <?php
@@ -84,11 +85,13 @@ class ww1_solders_set extends ww1_records_set{
 		});
 		$('body').keydown(function(e){
 			if(e.ctrlKey && e.keyCode == 37){	// Ctrl+Left
-				location.href = $('.paginator:first .prev').attr('href');
+				el = $('.paginator:first .prev');
+				if(el.length)	location.href = el.attr('href');
 			}
 			if(e.ctrlKey && e.keyCode == 39){	// Ctrl+Right
-				location.href = $('.paginator:first .next').attr('href');
-			}
+				el = $('.paginator:first .next');
+				if(el.length)	location.href = el.attr('href');
+		}
 		});
 	});
 </script>
@@ -98,6 +101,7 @@ class ww1_solders_set extends ww1_records_set{
 		// Формируем пагинатор
 		$pag = paginator($this->page, $max_pg);
 		print $pag;	// Вывод пагинатора
+		// TODO: gettext
 ?>
 <table id="report" class="report responsive-table"><thead>
 	<tr>
@@ -117,9 +121,11 @@ class ww1_solders_set extends ww1_records_set{
 		foreach($this->records as $row){
 			$even = 1-$even;
 			print "<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
+			// TODO: gettext
 			$details = '. ' . ($row['surname'] ? $row['surname'] : '<span class="na">(фамилия не указана)</span>') . ', ' . ($row['name'] ? $row['name'] : '<span class="na">(имя не указано)</span>'); 
 			print "<td scope='row' class='alignright'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
 			foreach($brief_fields as $key => $title){
+				// TODO: gettext
 				$val = $row[$key] ? esc_html($row[$key]) : '(не&nbsp;указано)';
 				if(substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
 				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $val . "</td>\n";
@@ -138,12 +144,17 @@ class ww1_solders_set extends ww1_records_set{
 					$text = esc_html($row[$key]);
 					if($key == 'source'){
 						if(!empty($row['source_url'])){
-							if($row['source_pg'] > 0)
+							if($row['source_pg'] > 0){
+								// TODO: gettext
 								$text = '<a href="' . str_replace('{pg}', (int) $row['source_pg'] + (int) $row['source_pg_correction'], $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
-							else
+							}else{
+								// TODO: gettext
 								$text = '<a href="' . $row['source_url'] . '" target="_blank">«' . $text . '»</a>';
-						} else
+							}
+						} else{
+							// TODO: gettext
 							$text = '«' . $text . '», стр.' . $row['source_pg'];
+						}
 					}
 
 					if(!empty($text)){
@@ -152,6 +163,7 @@ class ww1_solders_set extends ww1_records_set{
 							print "<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
 						else {
 							print "<th>" . $val . ":</th>\n";
+							// TODO: gettext
 							$text = $text ? $text : '(не&nbsp;указано)';
 							if(substr($text, 0, 1) === '(')	$text = "<span class='na'>$text</span>";
 							print "<td>" . $text . "</td>\n";
@@ -167,6 +179,7 @@ class ww1_solders_set extends ww1_records_set{
 			}	// if($show_detailed)
 		}	// foreach($this->records)
 		if($num == 0):
+			// TODO: gettext
 ?>
 	<tr>
 		<td colspan="<?php print $brief_fields_cnt+2 ?>" style="text-align: center">Ничего не найдено</td>
@@ -178,6 +191,7 @@ class ww1_solders_set extends ww1_records_set{
 <?php
 		print $pag;	// Вывод пагинатора
 		if($num != 0):
+			// TODO: gettext
 			static $hints = array(
 				'По клику на строке интересной Вам записи открывается дополнительная информация.',
 				'По страницам результатов поиска можно перемещаться, используя клавиши <span class="kbdKey">Ctrl</span>+<span class="kbdKey">→</span> и <span class="kbdKey">Ctrl</span>+<span class="kbdKey">←</span>.',
@@ -185,8 +199,10 @@ class ww1_solders_set extends ww1_records_set{
 				'Обычно при поиске система автоматически ищет близкие по звучанию или написанию варианты фамилий. Все найденные варианты показываются в конце списка.',
 			);
 			shuffle($hints);
+			// TODO: gettext
 			print "<p class='nb aligncenter no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
 		else:
+		// TODO: gettext
 ?>
 <div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>
 <ol>

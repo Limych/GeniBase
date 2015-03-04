@@ -187,12 +187,14 @@ function db_update(){
 			'metaphone'		=> 101,
 			'metascript'	=> 102,
 	);
+	// NB: В начале мы делаем выборку того, что НАДО СОХРАНИТЬ!
 	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p
 			WHERE NOT EXISTS (
 				SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`
 				AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`
 				AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")
-			) ORDER BY `update_datetime` ASC LIMIT 15', array('exp' => IDX_EXPIRATION_DATE));
+			) ORDER BY `update_datetime` ASC LIMIT 15',
+			array('exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE)) );
 	foreach ($result as $surname){
 		gbdb()->query('DELETE FROM ?_idx_search_keys USING ?_idx_search_keys AS sk
 				INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
@@ -299,6 +301,7 @@ function show_records_stat(){
 				: gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons');
 	$cnt2	= gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons_raw');
 	//
+	// TODO: gettext
 	$txt = format_num($cnt, ' запись.', ' записи.', ' записей.');
 	if($cnt != $cnt2)
 		$txt = format_num($cnt2, ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
@@ -366,6 +369,7 @@ function load_check(){
 		gbdb()->query('UPDATE ?_load_check SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, ?ban, NOW())
 				WHERE `ip` = ?ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
+		// TODO: gettext
 		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
 		die();
 

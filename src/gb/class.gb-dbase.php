@@ -216,11 +216,15 @@ class GB_DBase	{
 			@header('HTTP/1.1 503 Service Temporarily Unavailable');
 			@header('Status: 503 Service Temporarily Unavailable');
 			@header('Retry-After: 600');	// 600 seconds
+			// TODO: gettext
 			die('Ошибка подключения (' . $this->db->connect_errno . ') ' . $this->db->connect_error);
 		}
 	
 		// Проверка версии MySQL
-		if(version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<"))	die('<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!');
+		if(version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<")){
+			// TODO: gettext
+			die('<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!');
+		}
 	
 		$this->db->set_charset('utf8');
 	}

@@ -65,7 +65,7 @@ html_header('Команда проекта');
 	<span class="name">Игорь Чернухин,</span>
 	<span class="name">Николай Чернухин,</span>
 	<span class="name">Алексей Щенников,</span>
-	<span class="name">Яковлев Игорь</span>
+	<span class="name">Игорь Яковлев</span>
 </p>
 <p class="crue"><strong>Программирование:</strong>
 	<span class="name">Андрей Хроленок</span>

@@ -1,5 +1,5 @@
 .responsive-table	{
-	width: 100%;
+	max-width: 100%;
 }
 .responsive-table thead	{
 	position: absolute;

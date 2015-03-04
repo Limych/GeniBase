@@ -117,19 +117,19 @@ class ww1_database_solders extends ww1_database {
 	 * @var array
 	 */
 	private $extended_fields	= array('surname', 'name', 'rank', 'religion', 'marital', 'region',
-			'place', 'reason', 'date_from', 'date_to', 'source_pg');
+			'place', 'reason', 'date_from', 'date_to', 'source_pg', 'id');
 	
 	/**
 	 * List of fields with numeric values.
 	 * @var array
 	 */
-	private $numeric_fields		= array('religion', 'marital', 'reason', 'source_pg');
+	private $numeric_fields		= array('id', 'religion', 'marital', 'reason', 'source_pg');
 
 	/**
 	 * List of fields with IDs.
 	 * @var array
 	 */
-	private $ids_fields			= array('religion', 'marital', 'reason');
+	private $ids_fields			= array(/*don't add 'id',*/ 'religion', 'marital', 'reason');
 
 	/**
 	 * List of fields that have dictionaries.
@@ -183,11 +183,11 @@ class ww1_database_solders extends ww1_database {
 			// Выводим html-поля
 			$fields = array(
 					'surname'	=> 'Фамилия',
-					'name'		=> 'Имя-отчество',
+					'name'		=> 'Имя Отчество',
 					'place'		=> 'Место жительства',
 			);
 			foreach($fields as $key => $val){
-				print "\t<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "'></div>\n";
+				print "<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "'></div>\n";
 			}
 			return;
 		}
@@ -214,7 +214,7 @@ class ww1_database_solders extends ww1_database {
 		// Выводим html-поля
 		static $fields = array(
 				'surname'	=> 'Фамилия',
-				'name'		=> 'Имя-отчество',
+				'name'		=> 'Имя Отчество',
 				'rank'		=> 'Воинское звание',
 				'religion'	=> 'Вероисповедание',
 				'marital'	=> 'Семейное положение',
@@ -223,6 +223,7 @@ class ww1_database_solders extends ww1_database {
 				'reason'	=> 'Событие',
 				'date'		=> 'Дата события',
 				'source_pg'	=> 'Страница источника',
+				'id'		=> 'ID записи',
 		);
 		foreach($fields as $key => $val){
 			switch($key){
@@ -233,6 +234,7 @@ class ww1_database_solders extends ww1_database {
 							esc_attr($this->query[$key]) . "' /><br /><label><input" .
 							" type='checkbox' name='surname_ext' value='1'" .
 							(!isset($_GET['surname_ext']) ? "" : " checked='checked'") .
+							// TODO: gettext
 							" />&nbsp;фонетический поиск по&nbsp;фамилиям</label></div></div>\n";
 					break;
 
@@ -243,6 +245,7 @@ class ww1_database_solders extends ww1_database {
 							esc_attr($this->query[$key]) . "' /><br /><label><input" .
 							" type='checkbox' name='name_ext' value='1'" .
 							(!isset($_GET['name_ext']) ? "" : " checked='checked'") .
+							// TODO: gettext
 							" />&nbsp;автоматическое расширение поиска</label></div></div>\n";
 					break;
 

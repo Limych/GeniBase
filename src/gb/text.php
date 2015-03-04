@@ -36,6 +36,12 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 
 	return $formatted;
 }	// function format_num
+
+/**
+ * Date of last modification search keys making alghoritm.
+ * @var string
+ */
+define('GB_SEARCH_KEYS_MAKE_DATE', '2015-03-04');	// YYYY-MM-DD
  
 /**
  * Функция вычисления поисковых ключей слов.
@@ -55,9 +61,6 @@ function make_search_keys($text, $use_hierarhy = false){
 	foreach($text as $key => $word){
 		$key_metaphone	= (array) rus_metaphone($word, true);
 		$key_metascript	= (array) rus_metascript(mb_ucfirst($word));
-
-		$key_metaphone	= array_filter($key_metaphone, function ($val){ return mb_strlen($val) >= 2; });
-		$key_metascript	= array_filter($key_metascript, function ($val){ return mb_strlen($val) >= 2; });
 
 		if(!$use_hierarhy)
 			$res = array_merge($res, array($word), $key_metaphone, $key_metascript);
