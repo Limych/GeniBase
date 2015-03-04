@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @group	class.GB_DBase.php
+ * @group	class.gb-dbase.php
  */
 class Tests_GB_DBase extends GB_UnitTestCase {
 	// gbdb()->table_unescape are skipped — it's synonim for gbdb()->field_unescape

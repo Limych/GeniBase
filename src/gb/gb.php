@@ -74,7 +74,7 @@ gb_debug_mode();
 // Load early GeniBase files.
 require_once(GB_INC_DIR . '/pomo/mo.php');
 require_once(GB_INC_DIR . '/functions.php');
-require_once(GB_INC_DIR . '/class.GB_DBase.php');
+require_once(GB_INC_DIR . '/class.gb-dbase.php');
 require_once(GB_INC_DIR . '/general-template.php');
 
 // Load the L10n library.
@@ -85,8 +85,8 @@ require_once(GB_INC_DIR . '/kses.php');
 require_once(GB_INC_DIR . '/formatting.php');
 require_once(GB_INC_DIR . '/script-loader.php');
 require_once(GB_INC_DIR . '/text.php');
-require_once(GB_INC_DIR . '/class.ww1_database.php');
-require_once(GB_INC_DIR . '/class.ww1_records_set.php');
+require_once(GB_INC_DIR . '/class.ww1-database.php');
+require_once(GB_INC_DIR . '/class.ww1-records-set.php');
 
 // Define constants that rely on the API to obtain the default value.
 gb_plugin_constants();
