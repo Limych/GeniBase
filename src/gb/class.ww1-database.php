@@ -16,34 +16,34 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 
 /*
 CREATE VIEW `?_v_persons` AS SELECT
-	`p`.`id` AS `id`,
-	`p`.`surname` AS `surname`,
-	`p`.`name` AS `name`,
-	`p`.`rank` AS `rank`,
+	`p`.`id`          AS `id`,
+	`p`.`surname`     AS `surname`,
+	`p`.`name`        AS `name`,
+	`p`.`rank`        AS `rank`,
 	`p`.`religion_id` AS `religion_id`,
-	`rl`.`religion` AS `religion`,
-	`p`.`marital_id` AS `marital_id`,
-	`mr`.`marital` AS `marital`,
-	`rg`.`region` AS `region`,
+	`rl`.`religion`   AS `religion`,
+	`p`.`marital_id`  AS `marital_id`,
+	`mr`.`marital`    AS `marital`,
+	`rg`.`region`     AS `region`,
 	`rg`.`region_idx` AS `region_idx`,
-	`p`.`place` AS `place`,
-	`p`.`reason_id` AS `reason_id`,
-	`rs`.`reason` AS `reason`,
-	`p`.`date` AS `date`,
-	`p`.`source_id` AS `source_id`,
-	`sc`.`source` AS `source`,
-	`sc`.`source_type_id` AS `source_type_id`,
-	`sc`.`source_number` AS `source_nr`,
-	`p`.`list_pg` AS `source_pg`,
-	`sc`.`source_url` AS `source_url`,
+	`p`.`place`       AS `place`,
+	`p`.`reason_id`   AS `reason_id`,
+	`rs`.`reason`     AS `reason`,
+	`p`.`date`        AS `date`,
+	`p`.`source_id`             AS `source_id`,
+	`sc`.`source`               AS `source`,
+	`sc`.`source_type_id`       AS `source_type_id`,
+	`sc`.`source_number`        AS `source_nr`,
+	`p`.`list_pg`               AS `source_pg`,
+	`sc`.`source_url`           AS `source_url`,
 	`sc`.`source_pg_correction` AS `source_pg_correction`,
 	TRIM(LEADING CHAR(10) FROM CONCAT_WS(CHAR(10),TRIM(`p`.`comments`),TRIM(`sc`.`comments`))) AS `comments`
 FROM `?_persons` AS `p`
-	JOIN `?_dic_region` AS `rg` ON (`p`.`region_id` = `rg`.`id` AND `rg`.`locale` = 'ru')
-	JOIN `?_dic_source` AS `sc` ON (`p`.`source_id` = `sc`.`id` AND `sc`.`locale` = 'ru')
-	JOIN `?_dic_reason` AS `rs` ON (`p`.`reason_id` = `rs`.`id` AND `rs`.`locale` = 'ru')
+	JOIN `?_dic_region`   AS `rg` ON (`p`.`region_id`   = `rg`.`id` AND `rg`.`locale` = 'ru')
+	JOIN `?_dic_source`   AS `sc` ON (`p`.`source_id`   = `sc`.`id` AND `sc`.`locale` = 'ru')
+	JOIN `?_dic_reason`   AS `rs` ON (`p`.`reason_id`   = `rs`.`id` AND `rs`.`locale` = 'ru')
 	JOIN `?_dic_religion` AS `rl` ON (`p`.`religion_id` = `rl`.`id` AND `rl`.`locale` = 'ru')
-	JOIN `?_dic_marital` AS `mr` ON (`p`.`marital_id` = `mr`.`id` AND `mr`.`locale` = 'ru')
+	JOIN `?_dic_marital`  AS `mr` ON (`p`.`marital_id`  = `mr`.`id` AND `mr`.`locale` = 'ru')
 WHERE (1 = 1)
 */
 
@@ -117,25 +117,28 @@ class ww1_database_solders extends ww1_database {
 	 * @var array
 	 */
 	private $extended_fields	= array('surname', 'name', 'rank', 'religion', 'marital', 'region',
-			'place', 'reason', 'date_from', 'date_to', 'source_pg', 'id');
+			'place', 'reason', 'date_from', 'date_to', 'source_type', 'source_nr', 'source_pg',
+			'id');
 	
 	/**
 	 * List of fields with numeric values.
 	 * @var array
 	 */
-	private $numeric_fields		= array('id', 'religion', 'marital', 'reason', 'source_pg');
+	private $numeric_fields		= array('id', 'religion', 'marital', 'reason', 'source_type',
+			'source_nr', 'source_pg');
 
 	/**
 	 * List of fields with IDs.
 	 * @var array
 	 */
-	private $ids_fields			= array(/*don't add 'id',*/ 'religion', 'marital', 'reason');
+	private $ids_fields			= array(/*don't add 'id',*/ 'religion', 'marital', 'reason',
+			'source_type');
 
 	/**
 	 * List of fields that have dictionaries.
 	 * @var array
 	 */
-	private $dictionary_fields	= array('rank', 'religion', 'marital', 'reason');
+	private $dictionary_fields	= array('rank', 'religion', 'marital', 'reason', 'source_type');
 
 
 
@@ -211,6 +214,10 @@ class ww1_database_solders extends ww1_database {
 		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0
 				ORDER BY reason', array(), TRUE);
 
+		// Получаем список всех вариантов значений типов источников
+		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_type WHERE source_type_cnt != 0
+				ORDER BY source_type', array(), TRUE);
+
 		// Выводим html-поля
 		static $fields = array(
 				'surname'	=> 'Фамилия',
@@ -222,6 +229,8 @@ class ww1_database_solders extends ww1_database {
 				'place'		=> 'Волость/Нас.пункт',
 				'reason'	=> 'Событие',
 				'date'		=> 'Дата события',
+				'source_type'	=> 'Тип источника',
+				'source_nr'		=> 'Номер источника',
 				'source_pg'	=> 'Страница источника',
 				'id'		=> 'ID записи',
 		);
@@ -347,8 +356,7 @@ class ww1_database_solders extends ww1_database {
 						case 'surname':
 							$from_q = gbdb()->prepare_query('( SELECT DISTINCT k.person_id
 										FROM ?_idx_search_keys AS k WHERE ');
-							$q_fused_match = '2*(p.surname LIKE "%?%") + 4*(p.surname LIKE "%*%")
-									+ 8*(p.surname = "*")';
+							$q_fused_match = '2*(p.surname LIKE "%?%") + 4*(p.surname LIKE "%*%") + 8*(p.surname = "*")';
 							if($is_regex || !$this->surname_ext){
 								$data = gbdb()->data_escape(GB_DBase::make_condition($val_a), TRUE);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
