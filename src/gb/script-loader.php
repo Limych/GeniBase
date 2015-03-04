@@ -20,14 +20,39 @@
  * @copyright	Partially copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
-/** BackPress: GeniBase Dependencies Class */
 require_once(GB_INC_DIR . '/class.gb-dependencies.php');
-
-/** BackPress: GeniBase Styles Class */
+require_once(GB_INC_DIR . '/class.gb-scripts.php');
+require_once(GB_INC_DIR . '/functions.gb-scripts.php');
 require_once(GB_INC_DIR . '/class.gb-styles.php');
-
-/** BackPress: GeniBase Styles Functions */
 require_once(GB_INC_DIR . '/functions.gb-styles.php');
+
+/**
+ * Register all GeniBase scripts.
+ *
+ * Localizes some of them.
+ * args order: $scripts->add( 'handle', 'url', 'dependencies', 'query-string', 1 );
+ * when last arg === 1 queues the script for the footer
+ *
+ * @since	2.0.0
+ */
+function gb_default_scripts() {
+	if(!defined('GB_SCRIPT_DEBUG'))		define('GB_SCRIPT_DEBUG', GB_DEBUG);
+
+// 	if ( ! $guessurl = site_url() )
+// 		$guessurl = gb_guess_url();
+	$guessurl = BASE_URL;
+
+	_gb_scripts()->base_url = $guessurl;
+	_gb_scripts()->content_url = defined('GB_CONTENT_URL') ? GB_CONTENT_URL : '';
+	_gb_scripts()->default_version = get_siteinfo( 'version' );
+	_gb_scripts()->default_dirs = array('/gb-admin/js/', '/gb/js/');
+
+	$suffix = GB_SCRIPT_DEBUG ? '' : '.min';
+
+	// jQuery
+	_gb_scripts()->add('jquery', false, array('jquery-core'), null);
+	_gb_scripts()->add('jquery-core', "http://code.jquery.com/jquery-2.1.3$suffix.js", array(), null);
+}
 
 /**
  * Assign default styles to $styles object.
@@ -57,11 +82,165 @@ function gb_default_styles() {
 
 	$suffix = GB_SCRIPT_DEBUG ? '' : '.min';
 
-	// External libraries and friends
-	_gb_styles()->add('normalize', "/gb/css/normalize.css");
-
-	// 
+	// Common files
 	_gb_styles()->add('responsive-table', "/gb/css/responsive-table.css", array('normalize'));
+	
+	// External libraries and friends
+	_gb_styles()->add('normalize', "/gb/css/normalize$suffix.css");
+}
+
+/**
+ * Prints the script queue in the HTML head on admin pages.
+ *
+ * Postpones the scripts that were queued for the footer.
+ * print_footer_scripts() is called in the footer to print these scripts.
+ *
+ * @since	2.0.0
+ *
+ * @see gb_print_scripts()
+ */
+function print_head_scripts() {
+	global $concatenate_scripts;
+
+// 	if ( ! did_action('gb_print_scripts') ) {
+// 		/** This action is documented in gb/functions.gb-scripts.php */
+// 		do_action( 'gb_print_scripts' );
+// 	}
+
+	script_concat_settings();
+	_gb_scripts()->do_concat = $concatenate_scripts;
+	_gb_scripts()->do_head_items();
+
+	/**
+	 * Filter whether to print the head scripts.
+	 *
+	 * @since	2.0.0
+	 *
+	 * @param bool $print Whether to print the head scripts. Default true.
+	*/
+// 	if ( apply_filters( 'print_head_scripts', true ) ) {
+		_print_scripts();
+// 	}
+
+	_gb_scripts()->reset();
+	return _gb_scripts()->done;
+}
+
+/**
+ * Prints the scripts that were queued for the footer or too late for the HTML head.
+ *
+ * @since	2.0.0
+ */
+function print_footer_scripts() {
+	global $concatenate_scripts;
+
+	script_concat_settings();
+	_gb_scripts()->do_concat = $concatenate_scripts;
+	_gb_scripts()->do_footer_items();
+
+	/**
+	 * Filter whether to print the footer scripts.
+	 *
+	 * @since	2.0.0
+	 *
+	 * @param bool $print Whether to print the footer scripts. Default true.
+	*/
+// 	if ( apply_filters( 'print_footer_scripts', true ) ) {
+		_print_scripts();
+// 	}
+
+	_gb_scripts()->reset();
+	return _gb_scripts()->done;
+}
+
+/**
+ * @internal use
+ */
+function _print_scripts() {
+	global $compress_scripts;
+
+	$zip = $compress_scripts ? 1 : 0;
+	if ( $zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP )
+		$zip = 'gzip';
+
+	_gb_scripts()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
+	if ( $concat = trim( _gb_scripts()->concat, ', ' ) ) {
+		if ( !empty(_gb_scripts()->print_code) ) {
+			echo "\n<script type='text/javascript'>\n";
+			echo "/* <![CDATA[ */\n"; // not needed in HTML 5
+			echo _gb_scripts()->print_code;
+			echo "/* ]]> */\n";
+			echo "</script>\n";
+		}
+
+		$concat = str_split( $concat, 128 );
+		$concat = 'load%5B%5D=' . implode( '&load%5B%5D=', $concat );
+
+		$src = _gb_scripts()->base_url . "/gb/load-scripts.php?c={$zip}&" . $concat . '&ver=' . _gb_scripts()->default_version;
+		echo "<script type='text/javascript' src='" . esc_attr($src) . "'></script>\n";
+	}
+
+	if ( !empty(_gb_scripts()->print_html) )
+		echo _gb_scripts()->print_html;
+}
+
+/**
+ * Prints the script queue in the HTML head on the front end.
+ *
+ * Postpones the scripts that were queued for the footer.
+ * gb_print_footer_scripts() is called in the footer to print these scripts.
+ *
+ * @since	2.0.0
+ */
+function gb_print_head_scripts() {
+// 	if ( ! did_action('gb_print_scripts') ) {
+// 		/** This action is documented in wp-includes/functions.wp-scripts.php */
+// 		do_action( 'gb_print_scripts' );
+// 	}
+
+	return print_head_scripts();
+}
+
+/**
+ * Private, for use in *_footer_scripts hooks
+ *
+ * @since	2.0.0
+ */
+function _gb_footer_scripts() {
+	print_late_styles();
+	print_footer_scripts();
+}
+
+/**
+ * Hooks to print the scripts and styles in the footer.
+ *
+ * @since	2.0.0
+ */
+function gb_print_footer_scripts() {
+	/**
+	 * Fires when footer scripts are printed.
+	 *
+	 * @since	2.0.0
+	 */
+// 	do_action( 'gb_print_footer_scripts' );
+	_gb_footer_scripts();	// TODO: Remove after actions enabled
+}
+
+/**
+ * Wrapper for do_action('gb_enqueue_scripts')
+ *
+ * Allows plugins to queue scripts for the front end using gb_enqueue_script().
+ * Runs first in gb_head() where all is_home(), is_page(), etc. functions are available.
+ *
+ * @since	2.0.0
+ */
+function gb_enqueue_scripts() {
+	/**
+	 * Fires when scripts and styles are enqueued.
+	 *
+	 * @since	2.0.0
+	 */
+	do_action( 'gb_enqueue_scripts' );
 }
 
 /**
@@ -100,10 +279,11 @@ function _print_styles() {
 	if ( $zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP )
 		$zip = 'gzip';
 
+	_gb_styles()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	if ( !empty(_gb_styles()->concat) ) {
 		$dir = _gb_styles()->text_direction;
 		$ver = _gb_styles()->default_version;
-		$href = _gb_styles()->base_url . "/gb-admin/load-styles.php?c={$zip}&dir={$dir}&load=" . trim(_gb_styles()->concat, ', ') . '&ver=' . $ver;
+		$href = _gb_styles()->base_url . "/gb/load-styles.php?c={$zip}&dir={$dir}&load=" . trim(_gb_styles()->concat, ', ') . '&ver=' . $ver;
 		echo "<link rel='stylesheet' href='" . esc_attr($href) . "' type='text/css' media='all' />\n";
 
 		if ( !empty(_gb_styles()->print_code) ) {

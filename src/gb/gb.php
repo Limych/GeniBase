@@ -92,7 +92,9 @@ require_once(GB_INC_DIR . '/class.ww1-records-set.php');
 gb_plugin_constants();
 
 // Load default scripts and styles
+// TODO: Remove after actions enabled
 gb_default_styles();
+gb_default_scripts();
 
 // Load the default text localization domain.
 load_default_textdomain();

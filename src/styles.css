@@ -230,7 +230,7 @@ td .na	{
 		text-align: left;
 	}
 	.responsive-table td.detailed table td.comments	{
-		padding-top: 1em;
+		padding-top: 0.25em;
 		text-align: justify;
 		font-style: italic;
 	}

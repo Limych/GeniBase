@@ -151,7 +151,7 @@ function language_attributes($doctype = 'html') {
 }
 
 /**
- * Fire the wp_head action.
+ * Fire the gb_head action.
  * 
  * @since	2.0.0
  */
@@ -162,7 +162,10 @@ function gb_head(){
 	 * @since	2.0.0
 	 */
 // 	do_action( 'gb_head' );
+
+	// TODO: Remove after enabling an actions
 	gb_print_styles();
+	gb_print_scripts();
 }
 
 /**
@@ -171,8 +174,10 @@ function gb_head(){
  * @param	string	$title	Title of the page.
  */
 function html_header($title){
-	gb_enqueue_style('main', '/styles.css', array('normalize', 'responsive-table'));
+	gb_enqueue_style('styles', '/styles.css', array('normalize', 'responsive-table'));
 	gb_enqueue_style('print', '/print.css', array(), FALSE, 'print');
+	
+	gb_enqueue_script('jquery');
 
 	@header('Content-Type: text/html; charset=utf-8');
 	?>
@@ -187,7 +192,6 @@ function html_header($title){
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
 <?php gb_head(); ?>
 </head><body>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$('.clearForm').on('click', function (){

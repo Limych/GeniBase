@@ -49,6 +49,8 @@ function gb_print_styles( $handles = false ) {
 	 *
 	 * @since	2.0.0
 	 */
+// 	do_action( 'gb_print_styles' );
+
 // 	if ( ! $handles )
 // 		do_action( 'gb_print_styles' );
 
