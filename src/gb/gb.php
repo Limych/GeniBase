@@ -339,8 +339,9 @@ function log_event($records_found = 0){
 	$squery = trim(get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)"));
 
 	gbdb()->set_row('?_logs', array(
-		'query' => $squery,
-		'url'	=> $url,
+		'query'		=> $squery,
+		'is_robot'	=> is_bot_user(FALSE),
+		'url'		=> $url,
 		'records_found'	=> $records_found,
 		'duration'	=> timer_stop(),
 	), FALSE, GB_DBase::MODE_INSERT);
