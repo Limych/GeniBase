@@ -83,7 +83,8 @@ function gb_default_styles() {
 	$suffix = GB_SCRIPT_DEBUG ? '' : '.min';
 
 	// Common files
-	_gb_styles()->add('responsive-table', "/gb/css/responsive-table.css", array('normalize'));
+	_gb_styles()->add('responsive-tables', "/gb/css/responsive-tables.css", array('normalize'));
+	_gb_styles()->add('responsive-forms', "/gb/css/responsive-forms.css", array('normalize'));
 	
 	// External libraries and friends
 	_gb_styles()->add('normalize', "/gb/css/normalize$suffix.css");

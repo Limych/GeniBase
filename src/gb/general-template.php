@@ -164,6 +164,7 @@ function gb_head(){
 // 	do_action( 'gb_head' );
 
 	// TODO: Remove after enabling an actions
+	@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
 	gb_print_styles();
 	gb_print_scripts();
 }
@@ -174,7 +175,7 @@ function gb_head(){
  * @param	string	$title	Title of the page.
  */
 function html_header($title){
-	gb_enqueue_style('styles', '/styles.css', array('normalize', 'responsive-table'));
+	gb_enqueue_style('styles', '/styles.css', array('normalize', 'responsive-tables', 'responsive-forms'));
 	gb_enqueue_style('print', '/print.css', array(), FALSE, 'print');
 	
 	gb_enqueue_script('jquery');
@@ -188,8 +189,8 @@ function html_header($title){
 
 	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 
-	<link rel="icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
-	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico" />
+	<link rel="icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
+	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
 <?php gb_head(); ?>
 </head><body>
 	<script type="text/javascript">
@@ -201,15 +202,15 @@ function html_header($title){
 			});
 		});
 	</script>
-	<table style="max-width: 50em; margin: 1em auto; border: 0"><tr>
-		<td width="150">
-			<a href="<?php print BASE_URL; ?>"><img src="/img/logo03c.jpg" /></a>
-		</td>
-		<td style="text-align: center">
-			<h2>Первая мировая война, 1914–1918 гг.</h2>
-			<a href="http://www.svrt.ru/">Проект Союза Возрождений Родословных Традиций (СВРТ)</a>
-		</td>
-	</tr></table>
+	<header>
+		<div class='logo'>
+			<a href="<?php print BASE_URL; ?>"><img src="<?php print BASE_URL; ?>/img/logo.jpg" alt='' /></a>
+		</div>
+		<div class='title'>
+			<h1>Первая мировая война, <nobr>1914&ndash;1918 гг.</nobr></h1>
+			<div><small><a href="http://www.svrt.ru/">Проект Союза Возрождений Родословных Традиций (СВРТ)</a></small></div>
+		</div>
+	</header>
 <?php
 }
 
@@ -221,10 +222,10 @@ function html_footer(){
 ?>
 <footer>
 	<p style="text-align: center; margin-top: 3em" class="no-print">
-		<a href="/stat.php">Статистика</a>
-		| <a href="/guestbook/index.php">Гостевая книга</a> 
+		<a href="<?php print BASE_URL; ?>/stat.php">Статистика</a>
+		| <a href="<?php print BASE_URL; ?>/guestbook/index.php">Гостевая книга</a> 
 		| <a href="//forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a>
-		| <a href="crue.php">Команда проекта</a>
+		| <a href="/<?php print BASE_URL; ?>crue.php">Команда проекта</a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <?php if(GB_DEBUG): ?>

@@ -2,6 +2,29 @@ body	{
 	font-family: sans-serif;
 	padding: 1em 1.5em;
 }
+header	{
+	display: table;
+	margin: 0 auto;
+}
+header > div	{
+	display: table-cell;
+	vertical-align: middle;
+	padding: 0 1em;
+	text-align: center;
+}
+header .logo img	{
+	width: 100%;
+}
+header .title h1	{
+	margin: 0;
+	font-size: 1.5em;
+}
+/* Narrow PC screen */
+@media print, (min-width: 42em)	{
+	header .title h1	{
+		font-size: 2em;
+	}
+}/**/
 footer	{
 	clear: both;
 }
@@ -20,10 +43,10 @@ li	{
 }
 
 form	{
+	max-width: 45em;
 	margin: 1em auto;
-	max-width: 40em;
 	background-color: #FFE9BF;
-	padding: 1em 3em;
+	padding: 1em 2em;
 }
 form.editor	{
 	max-width: none;
@@ -44,39 +67,6 @@ form h3	{
 }
 form p	{
 	text-align: justify;
-}
-form .field	{
-	display: table-row;
-}
-form .field .block,
-form .field label,
-form .field input	{
-	display: table-cell;
-	vertical-align: top;
-}
-form .field .block input,
-form .field .block label	{
-	display: initial;
-}
-form .field label	{
-	text-align: right;
-	padding-right: 0.5em;
-}
-form .field input	{
-	width: 24em;
-}
-form .field input[type='date'],
-form .field input[type='checkbox']	{
-	width: auto;
-}
-form .buttons	{
-	display: block;
-	margin: 0.5em 0 1em;
-	text-align: right;
-}
-form .buttons button	{
-	display: inline-block;
-	margin-left: 1em;
 }
 form .trouble	{
 	background: #F60;
@@ -183,6 +173,74 @@ td .na	{
 .nonstrict-match	{
 	color: darkred;
 }
+
+
+/*** «Лесенка» уровней ***/
+.level_1	{	padding-left: 0;	}
+td.level_1	{	padding-left: 1em;	}
+
+.level_2	{	padding-left: 1.5em;	}
+td.level_2	{	padding-left: 2.5em;	}
+
+.level_3	{	padding-left: 3em;	}
+td.level_3	{	padding-left: 4em;	}
+
+.level_4	{	padding-left: 4.5em;	}
+td.level_4	{	padding-left: 5.5em;	}
+
+.level_5	{	padding-left: 6em;	}
+td.level_5	{	padding-left: 7em;	}
+
+
+/*** Пагинация ***/
+.paginator	{
+	margin: 1em auto;
+	text-align: center;
+}
+.paginator a,
+.paginator span	{
+	min-width: 1.5em;
+	display: inline-block;
+	padding: 0.1em;
+}
+.paginator a	{
+	background-color: #EEE;
+}
+.paginator a:hover	{
+	text-decoration: none;
+	background-color: #FFD280;
+}
+.paginator .prev,
+.paginator .next	{
+	width: 3em;
+	margin: 0 2em;
+}
+.paginator .current	{
+	background-color: #FFA500;
+}
+
+
+
+/*** Кнопки клавиатуры ***/
+.kbdKey	{
+	border-color: #A9A9A9 #8C8C8C #C6C6C6 #C0C0C0;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1px 1px 2px;
+	box-shadow: -1px 1px 1px #484848, 1px 1px 1px #484848;
+	font-family: "Courier New",Courier,monospace;
+	font-size: 90%;
+	padding: 1px 5px;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+	text-transform: capitalize;
+	margin: 0 0.25em;
+	position: relative;
+	top: -2px;
+}
+
+
+
+/*** Responsive Tables Patch ***/
 .responsive-table tr.detailed.h	{
 	display: none;
 }
@@ -237,78 +295,12 @@ td .na	{
 }/**/
 
 
-/*** «Лесенка» уровней ***/
-.level_1	{	padding-left: 0;	}
-td.level_1	{	padding-left: 1em;	}
 
-.level_2	{	padding-left: 1.5em;	}
-td.level_2	{	padding-left: 2.5em;	}
-
-.level_3	{	padding-left: 3em;	}
-td.level_3	{	padding-left: 4em;	}
-
-.level_4	{	padding-left: 4.5em;	}
-td.level_4	{	padding-left: 5.5em;	}
-
-.level_5	{	padding-left: 6em;	}
-td.level_5	{	padding-left: 7em;	}
-
-
-/*** Пагинация ***/
-.paginator	{
-	margin: 1em auto;
-	text-align: center;
-}
-.paginator a,
-.paginator span	{
-	min-width: 1.5em;
-	display: inline-block;
-	padding: 0.1em;
-}
-.paginator a	{
-	background-color: #EEE;
-}
-.paginator a:hover	{
-	text-decoration: none;
-	background-color: #FFD280;
-}
-.paginator .prev,
-.paginator .next	{
-	width: 3em;
-	margin: 0 2em;
-}
-.paginator .current	{
-	background-color: #FFA500;
-}
-
-
-
-/*** Формы ***/
-input[type="text"]	{
-	border: 1px solid #CCC;
-}
-input[readonly]	{
-	background: #EEE;
-}
-input[type='number']	{
-	text-align: right;
-}
-
-
-
-/*** Кнопки клавиатуры ***/
-.kbdKey	{
-	border-color: #A9A9A9 #8C8C8C #C6C6C6 #C0C0C0;
-	border-radius: 5px;
-	border-style: solid;
-	border-width: 1px 1px 2px;
-	box-shadow: -1px 1px 1px #484848, 1px 1px 1px #484848;
-	font-family: "Courier New",Courier,monospace;
-	font-size: 90%;
-	padding: 1px 5px;
-	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-	text-transform: capitalize;
-	margin: 0 0.25em;
-	position: relative;
-	top: -2px;
+/*** Responsive Forms Patch ***/
+/* Narrow PC screen */
+@media print, (min-width: 42em)	{
+	.responsive-form div.fieldset > label,
+	.responsive-form div.field > label	{
+		width: 30%;
+	}
 }

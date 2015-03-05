@@ -269,9 +269,7 @@ function fix_russian($text){
  * Функция расширения поискового запроса по именам
  */
 function expand_names($names){
-	// TODO: Заменить указанные ниже строки, когда словарь имён в базе будет переведён в верхний регистр
-// 	$names = array_map('mb_strtoupper', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
-	$names = array_map('mb_strtolower', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
+	$names = array_map('mb_strtoupper', preg_split('/\s+/uS', strtr($names, array('ё'	=> 'е', 'Ё'	=> 'Е'))));
 	$have_name = false;
 	foreach($names as $key => $n){
 		$exp = array($n);
@@ -286,8 +284,7 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-// 			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
-			$names[$key] = '[[:blank:]](' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
+			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 
 		}elseif(!$have_name){
 			// Это имя
@@ -296,9 +293,9 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-// 			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
-			$names[$key] = '^(' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
+			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
 			$have_name = true;
+
 		}else{
 			// Это непонятно что
 			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key',
@@ -306,11 +303,10 @@ function expand_names($names){
 			foreach ($result as $tmp)
 				$exp = array_merge($exp, explode(' ', $tmp));
 
-// 			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
-			$names[$key] = '[[:<:]](' . implode('|', array_map('mb_strtoupper', array_unique($exp))) . ')[[:>:]]';
+			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 		}
 	}
-// print "<!-- "; var_export($names); print " -->";
+// print "<!-- "; var_export($names); print " -->";	// TODO: Remove me?
 	return $names;
 } // function expand_names
 

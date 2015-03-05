@@ -10,10 +10,10 @@ $squery = trim($squery);
 html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
 show_records_stat();
 ?>
-<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='no-print'>
+<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
 	<h2>Поиск персоны</h2>
 	<p class="small alignright"><a href="/extsearch.php">Расширенный поиск</a></p>
-	<?php $dbase->search_form()	?>
+	<div class='fields'><?php $dbase->search_form(); ?></div>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>
 		<button class="clearForm" type="button">Очистить</button>

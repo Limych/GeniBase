@@ -190,7 +190,10 @@ class ww1_database_solders extends ww1_database {
 					'place'		=> 'Место жительства',
 			);
 			foreach($fields as $key => $val){
-				print "<div class='field'><label for='q_$key'>$val:</label> <input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "'></div>\n";
+				print "<div class='field'>" .
+						"<label for='q_$key'>$val:</label>" .
+						"<div><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+						"</div>\n";
 			}
 			return;
 		}
@@ -238,52 +241,51 @@ class ww1_database_solders extends ww1_database {
 			switch($key){
 				case 'surname':
 					// Текстовые поля
-					print "\t<div class='field'><label for='q_$key'>$val:</label> <div" .
-							" class='block'><input type='text' id='q_$key' name='$key' value='" .
-							esc_attr($this->query[$key]) . "' /><br /><label><input" .
-							" type='checkbox' name='surname_ext' value='1'" .
-							(!isset($_GET['surname_ext']) ? "" : " checked='checked'") .
-							// TODO: gettext
-							" />&nbsp;фонетический поиск по&nbsp;фамилиям</label></div></div>\n";
+					print "<div class='fieldset'>" .
+							"<label for='q_$key'>$val:</label>" .
+							"<div>" .
+								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+								// TODO: gettext
+								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!isset($_GET['surname_ext']) ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>фонетический поиск по&nbsp;фамилиям</label></div>" .
+							"</div>" .
+							"</div>\n";
 					break;
 
 				case 'name':
 					// Текстовые поля
-					print "\t<div class='field'><label for='q_$key'>$val:</label> <div" .
-							" class='block'><input type='text' id='q_$key' name='$key' value='" .
-							esc_attr($this->query[$key]) . "' /><br /><label><input" .
-							" type='checkbox' name='name_ext' value='1'" .
-							(!isset($_GET['name_ext']) ? "" : " checked='checked'") .
-							// TODO: gettext
-							" />&nbsp;автоматическое расширение поиска</label></div></div>\n";
+					print "<div class='fieldset'>" .
+							"<label for='q_$key'>$val:</label>" .
+							"<div>" .
+								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+								// TODO: gettext
+								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!isset($_GET['name_ext']) ? "" : " checked='checked'") . " /> <label for='q_name_ext'>автоматическое расширение поиска</label></div>" .
+							"</div>" .
+							"</div>\n";
 					break;
 
 				case 'date':
 					// Поля дат
-					print "\t<div class='field'><label for='q_$key'>$val:</label> c&nbsp;<input" .
-							" type='date' id='q_$key' name='date_from' value='" .
-							esc_attr($this->query['date_from']) . "' min='1914-07-28'" .
-							" max='1918-11-11' /> по&nbsp;<input type='date' name='date_to'" .
-							" value='" . esc_attr($this->query['date_to']) . "' min='1914-07-28'" .
-							" max='1918-11-11' /></div>\n";
+					print "<div class='field'>" .
+							"<label for='q_$key'>$val:</label>" .
+							"<div><nobr>c <input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='1914-07-28' max='1918-11-11' /></nobr> " .
+								"<nobr>по <input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='1914-07-28' max='1918-11-11' /></nobr></div>" .
+							"</div>\n";
 					break;
 
 				default:
 					if(in_array($key, $this->dictionary_fields)){		// Списковые поля
-						print "\t<div class='field'><label for='q_$key'>$val:</label> <select" .
-								" id='q_$key' name='${key}[]' multiple='multiple' size='5'>\n";
-						foreach($dics[$key] as $k => $v){
-							print "\t\t<option value='" . esc_attr($k) . "'" .
-									(is_array($this->query[$key]) && in_array($k,
-											$this->query[$key]) ? " selected='selected'" : '') .
-									">" . esc_html($v) . "</option>\n";
-						}
-						print "</select></div>\n";
+						print "<div class='field'>" .
+								"<label for='q_$key'>$val:</label>" .
+								"<div><select id='q_$key' name='${key}[]' multiple='multiple' size='5'>";
+						foreach($dics[$key] as $k => $v)
+							print "<option value='" . esc_attr($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . esc_html($v) . "</option>";
+						print "</select></div></div>\n";
 
 					}else{	// Текстовые поля
-						print "\t<div class='field'><label for='q_$key'>$val:</label> <input" .
-								" type='text' id='q_$key' name='$key' value='" .
-								esc_attr($this->query[$key]) . "' /></div>\n";
+						print "<div class='field'>" .
+								"<label for='q_$key'>$val:</label>" .
+								"<div><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+								"</div>\n";
 					}
 					break;
 			}	// switch

@@ -1,5 +1,10 @@
-.responsive-table	{
-	max-width: 100%;
+/*! responsive-tables.css v1.0.0 | github.com/Limych/GeniBase */
+
+.responsive-table,
+.responsive-table * {
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 }
 .responsive-table thead	{
 	position: absolute;
