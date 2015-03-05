@@ -7,7 +7,15 @@ $tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
 $squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)");
 $squery = trim($squery);
 
-html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'));
+$report = null;
+if($dbase->have_query){
+	load_check();
+	$report = $dbase->do_search();
+	log_event($report->records_cnt);
+}
+
+html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'),
+		($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
@@ -29,10 +37,6 @@ show_records_stat();
 </form>
 <?php
 if($dbase->have_query){
-	load_check();
-	$report = $dbase->do_search();
-	log_event($report->records_cnt);
-
 	// Определяем, какие поля будут выводиться в поле краткой информации, а какие в подробной
 	$brief_fields = array(
 		'surname'	=> 'Фамилия',

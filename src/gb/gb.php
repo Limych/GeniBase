@@ -371,8 +371,15 @@ function load_check(){
 		gbdb()->query('UPDATE ?_load_check SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, ?ban, NOW())' .
 				' WHERE `ip` = ?ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
+
+		$protocol = $_SERVER["SERVER_PROTOCOL"];
+		if('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
+		@header("$protocol 503 Service Unavailable", true, 503);
+		@header('Retry-After: 600000');
+		html_header('Доступ приостановлен', FALSE);
 		// TODO: gettext
 		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
+		html_footer();
 		die();
 
 	}else{

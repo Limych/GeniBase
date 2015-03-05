@@ -142,7 +142,7 @@ class GB_DBase	{
 	 * @since 2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
-	 * @param string $full_word	False, если надо искать по этой маске части слов
+	 * @param string $full_word	FALSE, если надо искать по этой маске части слов
 	 * @return string	Регулярное выражение для поиска через RLIKE
 	 */
 	static function make_regex($str, $full_word = TRUE){
@@ -184,10 +184,10 @@ class GB_DBase	{
 	 * @since 2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
-	 * @param string $full_text	False, если надо искать по этой маске части данных
+	 * @param string $full_text	FALSE, если надо искать по этой маске части данных
 	 * @return string	Условное выражение для поиска через LIKE
 	 */
-	static function make_condition($str, $full_text = true){
+	static function make_condition($str, $full_text = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
 		if(is_array($str)){

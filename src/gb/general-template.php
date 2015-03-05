@@ -171,14 +171,19 @@ function gb_head(){
 
 /**
  * Вывод начальной части страницы
+ * 
+ * @since	2.1.0	Added $do_index parameter.
  *
  * @param	string	$title	Title of the page.
+ * @param	boolean	$do_index	FALSE for restrict indexation of page.
  */
-function html_header($title){
+function html_header($title, $do_index = TRUE){
 	gb_enqueue_style('styles', '/styles.css', array('normalize', 'responsive-tables', 'responsive-forms'));
 	gb_enqueue_style('print', '/print.css', array(), FALSE, 'print');
 	
 	gb_enqueue_script('jquery');
+	
+	$robots = $do_index ? 'All' : 'NoIndex,Follow';
 
 	@header('Content-Type: text/html; charset=utf-8');
 	?>
@@ -186,6 +191,7 @@ function html_header($title){
 <html xmlns="http://www.w3.org/1999/xhtml" <?php language_attributes(); ?>><head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, user-scalable=no" />
+	<meta name='robots' content='<?php print $robots; ?>' />
 
 	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
 

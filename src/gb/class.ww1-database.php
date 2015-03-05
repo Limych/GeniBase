@@ -246,7 +246,7 @@ class ww1_database_solders extends ww1_database {
 							"<div>" .
 								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
 								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!isset($_GET['surname_ext']) ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>фонетический поиск по&nbsp;фамилиям</label></div>" .
+								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!isset($_GET['surname_ext']) ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>искать похожие фамилии</label></div>" .
 							"</div>" .
 							"</div>\n";
 					break;
@@ -258,7 +258,7 @@ class ww1_database_solders extends ww1_database {
 							"<div>" .
 								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
 								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!isset($_GET['name_ext']) ? "" : " checked='checked'") . " /> <label for='q_name_ext'>автоматическое расширение поиска</label></div>" .
+								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!isset($_GET['name_ext']) ? "" : " checked='checked'") . " /> <label for='q_name_ext'>искать сокращения имён</label></div>" .
 							"</div>" .
 							"</div>\n";
 					break;
@@ -356,9 +356,10 @@ class ww1_database_solders extends ww1_database {
 					$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtoupper($val), -1, PREG_SPLIT_NO_EMPTY);
 					switch($key){
 						case 'surname':
-							$from_q = gbdb()->prepare_query('( SELECT DISTINCT k.person_id' .
-									' FROM ?_idx_search_keys AS k WHERE ');
-							$q_fused_match = '2*(p.surname LIKE "%?%") + 4*(p.surname LIKE "%*%") + 8*(p.surname = "*")';
+							$from_q = gbdb()->prepare_query('( SELECT k.person_id, MIN(k.surname_key_type)' .
+									' AS ktype FROM ?_idx_search_keys AS k WHERE ');
+							$q_fused_match = '2*(p.surname LIKE "%?%") +4*(p.surname LIKE "%*%")' .
+									' +8*(p.surname = "*")';
 							if($is_regex || !$this->surname_ext){
 								$data = gbdb()->data_escape(GB_DBase::make_condition($val_a), TRUE);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
@@ -366,23 +367,24 @@ class ww1_database_solders extends ww1_database {
 										implode(' OR k.surname_key LIKE ', $data) .
 										')) OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
-										' LIKE k.surname_mask) ) AS isk';
+										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk';
 							}else{
 								$data2 = gbdb()->data_escape($val_a, TRUE);
 								$from_q .= gbdb()->prepare_query('k.surname_key IN (?keys)' .
 										' OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
-										' LIKE k.surname_mask) ) AS isk',
+										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk',
 										array('keys' => make_search_keys($val_a)));
 								$q_fused_match = '(p.surname NOT LIKE ' .
 										implode(' OR p.surname NOT LIKE ',
 												gbdb()->data_escape(array_map(function ($text) {
 													return "%$text%";
-												}, $val_a), TRUE)) . ') + ' . $q_fused_match;
+												}, $val_a), TRUE)) . ') +' . $q_fused_match;
 							}
 							$from[] = $from_q;
 							$where[] = 'p.id = isk.person_id';
 							$order[] = $q_fused_match;
+							$order[] = 'isk.ktype';
 							break;
 	
 						case 'name':
@@ -393,20 +395,20 @@ class ww1_database_solders extends ww1_database {
 							break;
 	
 						case 'region':
-							$data = gbdb()->data_escape(GB_DBase::make_condition($val_a, false), TRUE);
-							$where[] = 'p.region_idx LIKE ' .
-									implode(' AND p.region_idx LIKE ', $data);
+							$data = gbdb()->data_escape(GB_DBase::make_regex($val_a), TRUE);
+							$where[] = 'p.region_idx RLIKE ' .
+									implode(' AND p.region_idx RLIKE ', $data);
 							break;
 
 						case 'place':
-							$data = gbdb()->data_escape(GB_DBase::make_condition($val_a, false), TRUE);
+							$data = gbdb()->data_escape(GB_DBase::make_regex($val_a), TRUE);
 							if($this->query_mode == Q_SIMPLE){
 								$where[] = implode(' AND ', array_map(function ($v){
-											return "(p.region_idx LIKE $v OR UPPER(p.place) LIKE $v)";
+											return "(p.region_idx RLIKE $v OR UPPER(p.place) RLIKE $v)";
 										}, $data));
 							}else{
-								$where[] = 'UPPER(p.place) LIKE ' .
-										implode(' AND UPPER(p.place) LIKE ', $data);
+								$where[] = 'UPPER(p.place) RLIKE ' .
+										implode(' AND UPPER(p.place) RLIKE ', $data);
 							}
 							break;
 					} // switch
@@ -435,10 +437,10 @@ class ww1_database_solders extends ww1_database {
 			// TODO: Добавить сохранение результатов поиска в кэш
 		}
 
-		$data = array();
-		if(!empty($ids)){
+		$data = $ids_part = array();
+		if(!empty($ids))
 			$ids_part = array_slice($ids, ($this->page - 1) * Q_LIMIT, Q_LIMIT);
-
+		if(!empty($ids_part)){
 			// Получаем текущую порцию результатов для вывода в таблицу
 			$result = gbdb()->get_table('SELECT p.*, ' . $q_fused_match .
 					' AS fused_match FROM ?_v_persons AS p WHERE p.id IN (?ids)',

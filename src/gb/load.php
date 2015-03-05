@@ -229,8 +229,7 @@ function gb_maintenance() {
 	gb_load_translations_early();
 
 	$protocol = $_SERVER["SERVER_PROTOCOL"];
-	if('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)
-		$protocol = 'HTTP/1.0';
+	if('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
 	$lang = str_replace('_', '-', get_locale());
 	$rtl = (function_exists('is_rtl') && is_rtl()) ? ' dir="rtl"' : '';
 	header("$protocol 503 Service Unavailable", true, 503);
