@@ -49,8 +49,8 @@ foreach ($result as $row){
 </tr></thead><tbody>
 <?php
 $even = 0;
-$result = gbdb()->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt FROM ?_dic_reason
-		GROUP BY event_type, reason ORDER BY 1,2');
+$result = gbdb()->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt FROM ?_dic_reason' .
+		' GROUP BY event_type, reason ORDER BY 1,2');
 foreach ($result as $row){
 	$even = 1-$even;
 	if(empty($row['event_type']))	$row['event_type'] = '(не указано)';
@@ -74,8 +74,8 @@ dic_stat('Распределение по&nbsp;семейному положен
 function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
-	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_region
-			WHERE parent_id = ?parent_id ORDER BY title', array('parent_id' => $parent_id));
+	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_region' .
+			' WHERE parent_id = ?parent_id ORDER BY title', array('parent_id' => $parent_id));
 	foreach ($result as $row){
 		$even = 1-$even;
 		print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td class='region level_$level id_" .
@@ -98,8 +98,8 @@ function dic_stat($caption, $field_title, $field){
 	<th>Записей</th>
 </tr></thead><tbody>
 <?php
-	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table
-			WHERE ?#field_cnt != 0 ORDER BY ?#field',
+	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table' .
+			' WHERE ?#field_cnt != 0 ORDER BY ?#field',
 			array(
 				'@table'		=> "dic_$field",
 				'#field'		=> $field,

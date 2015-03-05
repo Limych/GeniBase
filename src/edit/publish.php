@@ -12,8 +12,8 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 		$cur_id = intval($_REQUEST['region_id']);
 		$html = array();
 
-		$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id
-				ORDER BY title', array('id' => $cur_id), TRUE);
+		$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id' .
+				' ORDER BY title', array('id' => $cur_id), TRUE);
 		$tmp = array();
 		foreach ($result as $id => $title)
 			$tmp[] = "<option value='$id'>$title</option>";
@@ -24,8 +24,8 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 					array('id' => $cur_id));
 			if(!$r)	exit;
 
-			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id
-					ORDER BY title', array('id' => $cur_id), TRUE);
+			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id' .
+					' ORDER BY title', array('id' => $cur_id), TRUE);
 			$tmp = array();
 			foreach ($result as $id => $title)
 				$tmp[] = "<option value='$id'" . ($id != $cur_id ? "" : " selected='selected'") . ">$title</option>";
@@ -85,8 +85,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 	case 'raw':
 		// Исправление исходных данных во всех похожих записях
 		foreach($mod as $key => $val){
-			gbdb()->query('UPDATE ?_persons_raw SET ?#key = ?new WHERE `status` != "Published"
-					AND ?#key = ?old' . (!empty($_POST['raw_similar']) ? '' : ' AND id = ?id'),
+			gbdb()->query('UPDATE ?_persons_raw SET ?#key = ?new WHERE `status` != "Published"' .
+					' AND ?#key = ?old' . (!empty($_POST['raw_similar']) ? '' : ' AND id = ?id'),
 					array('#key' => $key, 'new' => $val, 'old' => $raw[$key], 'id' => $raw['id']));
 			$raw[$key] = $val;
 		}
@@ -116,12 +116,12 @@ if(!isset($_REQUEST['id']) && !$have_trouble){
 }
 
 // Считаем, сколько у нас каких записей
-$cnt = (object) gbdb()->get_row('SELECT COUNT(*) `total`
-		, SUM(CASE WHEN `status` = "Draft"        THEN 1 ELSE 0 END) `draft`
-		, SUM(CASE WHEN `status` = "Published"    THEN 1 ELSE 0 END) `published`
-		, SUM(CASE WHEN `status` = "Cant publish" THEN 1 ELSE 0 END) `cant_publish`
-		, SUM(CASE WHEN `status` = "Require edit" THEN 1 ELSE 0 END) `require_edit`
-		FROM ?_persons_raw');
+$cnt = (object) gbdb()->get_row('SELECT COUNT(*) `total`' .
+		' , SUM(CASE WHEN `status` = "Draft"        THEN 1 ELSE 0 END) `draft`' .
+		' , SUM(CASE WHEN `status` = "Published"    THEN 1 ELSE 0 END) `published`' .
+		' , SUM(CASE WHEN `status` = "Cant publish" THEN 1 ELSE 0 END) `cant_publish`' .
+		' , SUM(CASE WHEN `status` = "Require edit" THEN 1 ELSE 0 END) `require_edit`' .
+		' FROM ?_persons_raw');
 
 // Делаем выборку справочников
 $dic_source = $dic_rank = array();

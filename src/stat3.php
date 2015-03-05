@@ -24,8 +24,8 @@ html_header('Статистика');
 if(get_request_attr('list_from') && get_request_attr('list_to')):
 	$ignore_per = intval(get_request_attr('ignore_per', 0));
 	
-	$result = gbdb()->get_row('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`), MIN(`date_from`)) AS `days`
-			FROM ?_persons WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to',
+	$result = gbdb()->get_row('SELECT MIN(`date_from`), DATEDIFF(MAX(`date_to`), MIN(`date_from`)) AS `days`' .
+			' FROM ?_persons WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to',
 			array(
 				'list_from'	=> intval(get_request_attr('list_from')),
 				'list_to'	=> intval(get_request_attr('list_to')),
@@ -35,10 +35,10 @@ if(get_request_attr('list_from') && get_request_attr('list_to')):
 	for($i = 0; $i < $to; $i++)
 		$date[$i] = 0;
 
-	$result = gbdb()->get_table('SELECT DATEDIFF(`date_from`, ?date_from) AS `first`,
-			DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM ?_persons
-			WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to
-			GROUP BY `date_from`, `days` HAVING `days` <= ?days_ignore',
+	$result = gbdb()->get_table('SELECT DATEDIFF(`date_from`, ?date_from) AS `first`,' .
+			' DATEDIFF(`date_to`, `date_from`) AS `days`, COUNT(*) AS `cnt` FROM ?_persons' .
+			' WHERE `date_from` AND `list_nr` >= ?list_from AND `list_nr` <= ?list_to' .
+			' GROUP BY `date_from`, `days` HAVING `days` <= ?days_ignore',
 			array(
 				'date_from'		=> $date_min,
 				'list_from'		=> $_REQUEST['list_from'],

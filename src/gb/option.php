@@ -52,8 +52,8 @@ function get_option( $option, $default = false ) {
 
 	if(defined('GB_INSTALLING')){
 		$suppress = gbdb()->suppress_errors();
-		$row = gbdb()->get_row('SELECT option_value FROM ?_options WHERE option_name = ?key
-				LIMIT 1', array('key' => $option));
+		$row = gbdb()->get_row('SELECT option_value FROM ?_options WHERE option_name = ?key LIMIT 1',
+				array('key' => $option));
 		gbdb()->suppress_errors($suppress);
 		if(!empty($row))
 			$value = $row['option_value'];
@@ -88,8 +88,8 @@ function get_option( $option, $default = false ) {
 		else{
 			$value = gb_cache_get($option, 'options');
 			if(false === $value){
-				$row = gbdb()->get_row('SELECT option_value FROM ?_options
-						WHERE option_name = ?key LIMIT 1', array('key' => $option));
+				$row = gbdb()->get_row('SELECT option_value FROM ?_options' .
+						' WHERE option_name = ?key LIMIT 1', array('key' => $option));
 				if(!empty($row)){
 					$value = $row['option_value'];
 					gb_cache_add($option, $value, 'options');

@@ -202,24 +202,24 @@ class ww1_database_solders extends ww1_database {
 		$dics = array();
 
 		// Получаем список всех вариантов значений воиских званий
-		$dics['rank'] = gbdb()->get_column('SELECT DISTINCT rank, rank FROM ?_persons WHERE rank != ""
-				ORDER BY rank', array(), TRUE);
+		$dics['rank'] = gbdb()->get_column('SELECT DISTINCT rank, rank FROM ?_persons WHERE rank != ""' .
+				' ORDER BY rank', array(), TRUE);
 
 		// Получаем список всех вариантов значений вероисповеданий
-		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion
-				WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
+		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion' .
+				' WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
 
 		// Получаем список всех вариантов значений семейных положений
-		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital
-				WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
+		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital' .
+				' WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
 
 		// Получаем список всех вариантов значений событий
-		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0
-				ORDER BY reason', array(), TRUE);
+		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0' .
+				' ORDER BY reason', array(), TRUE);
 
 		// Получаем список всех вариантов значений типов источников
-		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_type WHERE source_type_cnt != 0
-				ORDER BY source_type', array(), TRUE);
+		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_type WHERE source_type_cnt != 0' .
+				' ORDER BY source_type', array(), TRUE);
 
 		// Выводим html-поля
 		static $fields = array(
@@ -356,21 +356,21 @@ class ww1_database_solders extends ww1_database {
 					$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtoupper($val), -1, PREG_SPLIT_NO_EMPTY);
 					switch($key){
 						case 'surname':
-							$from_q = gbdb()->prepare_query('( SELECT DISTINCT k.person_id
-										FROM ?_idx_search_keys AS k WHERE ');
+							$from_q = gbdb()->prepare_query('( SELECT DISTINCT k.person_id' .
+									' FROM ?_idx_search_keys AS k WHERE ');
 							$q_fused_match = '2*(p.surname LIKE "%?%") + 4*(p.surname LIKE "%*%") + 8*(p.surname = "*")';
 							if($is_regex || !$this->surname_ext){
 								$data = gbdb()->data_escape(GB_DBase::make_condition($val_a), TRUE);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
-								$from_q .= '(k.surname_key_type = 1 AND (k.surname_key
-										LIKE ' . implode(' OR k.surname_key LIKE ', $data) . '))
-										OR (k.surname_mask != "" AND ' .
+								$from_q .= '(k.surname_key_type = 1 AND (k.surname_key LIKE ' .
+										implode(' OR k.surname_key LIKE ', $data) .
+										')) OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
 										' LIKE k.surname_mask) ) AS isk';
 							}else{
 								$data2 = gbdb()->data_escape($val_a, TRUE);
-								$from_q .= gbdb()->prepare_query('k.surname_key IN (?keys)
-										OR (k.surname_mask != "" AND ' .
+								$from_q .= gbdb()->prepare_query('k.surname_key IN (?keys)' .
+										' OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
 										' LIKE k.surname_mask) ) AS isk',
 										array('keys' => make_search_keys($val_a)));
@@ -440,14 +440,14 @@ class ww1_database_solders extends ww1_database {
 			$ids_part = array_slice($ids, ($this->page - 1) * Q_LIMIT, Q_LIMIT);
 
 			// Получаем текущую порцию результатов для вывода в таблицу
-			$result = gbdb()->get_table('SELECT p.*, ' . $q_fused_match . ' AS fused_match
-					FROM ?_v_persons AS p WHERE p.id IN (?ids)',
+			$result = gbdb()->get_table('SELECT p.*, ' . $q_fused_match .
+					' AS fused_match FROM ?_v_persons AS p WHERE p.id IN (?ids)',
 					array('ids' => $ids_part), 'id');
 			//
 			// Дополняем данные новыми (неформализуемыми) полями
 			if(!empty($result)){
-				$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,
-						additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
+				$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,' .
+						' additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
 						array('ids' => $ids_part));
 				if(is_array($add_fields))	array_merge($result, array_filter($add_fields));
 				

@@ -207,8 +207,8 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if (empty($religion_conts)) {
 			$religion_conts[''] = 18;	// Special ID for "(not set)"
 	
-			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religion
-					WHERE `religion` NOT LIKE "(%"');
+			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religion' .
+					' WHERE `religion` NOT LIKE "(%"');
 			foreach ($result as $row){
 				$tmp = array_merge((array) mb_strtolower($row['religion']),
 						preg_split('/\W+/uS', mb_strtolower($row['contractions']), -1, PREG_SPLIT_NO_EMPTY));
@@ -254,8 +254,8 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if (empty($reason_conts)) {
 			$reason_conts[''] = 1;	// Special ID for "(not set)"
 	
-			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2reason AS r2r,
-					?_dic_reason AS r WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
+			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2reason AS r2r,' .
+					' ?_dic_reason AS r WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 			foreach ($result as $row)
 				$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
 		}
@@ -285,8 +285,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	
 	// Уточняем региональную привязку
 	if(!empty($raw['uyezd'])){
-		$res = gbdb()->get_cell('SELECT id FROM ?_dic_region WHERE parent_id = ?parent_id
-				AND title LIKE ?title',
+		$res = gbdb()->get_cell('SELECT id FROM ?_dic_region WHERE parent_id = ?parent_id AND title LIKE ?title',
 				array(
 					'parent_id'	=> $raw['region_id'],
 					'title'		=> $raw['uyezd'] . ' %',

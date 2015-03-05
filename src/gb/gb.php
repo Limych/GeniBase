@@ -92,7 +92,7 @@ require_once(GB_INC_DIR . '/class.ww1-records-set.php');
 gb_plugin_constants();
 
 // Load default scripts and styles
-// TODO: Remove after actions enabled
+// TODO: Remove after enabling actions
 gb_default_styles();
 gb_default_scripts();
 
@@ -140,16 +140,15 @@ function publish_cron($force = false){
 		$max_date = gbdb()->get_cell('SELECT MAX(update_datetime) FROM ?_persons_raw');
 		$tmp = date_diff(date_create($max_date), date_create('now'));
 		$tmp = intval($tmp->format('%i'));
-// var_export($tmp);
+// var_export($tmp);	// TODO: Remove me?
 		if($tmp < 1)	return;
 	}
 
 	require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
 
 	// Делаем выборку записей для публикации
-// 	$drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft" ORDER BY `list_pg`, `id` LIMIT ' . P_LIMIT);
-	$drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft" ORDER BY RAND()
-			LIMIT ' . P_LIMIT);
+	$drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft"' .
+			' ORDER BY RAND() LIMIT ' . P_LIMIT);
 	
 	// Нормирование данных
 	foreach($drafts as $raw){
@@ -179,9 +178,9 @@ function db_update(){
 // 	if(GB_DEBUG && !defined('GB_TESTING_MODE'))	return;
 
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
-	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL
-			AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)
-			OR `banned_to_datetime` < NOW()');
+	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL' .
+			' AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)' .
+			' OR `banned_to_datetime` < NOW()');
 
 	// Генерируем поисковые ключи для фамилий
 	static $search_key_types = array(
@@ -190,16 +189,16 @@ function db_update(){
 			'metascript'	=> 102,
 	);
 	// NB: В начале мы делаем выборку того, что НАДО СОХРАНИТЬ!
-	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p
-			WHERE NOT EXISTS (
-				SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`
-				AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`
-				AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")
-			) ORDER BY `update_datetime` ASC LIMIT 15',
+	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p' .
+			' WHERE NOT EXISTS (' .
+				' SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`' .
+				' AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`' .
+				' AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")' .
+			' ) ORDER BY `update_datetime` ASC LIMIT 15',
 			array('exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE)) );
 	foreach ($result as $surname){
-		gbdb()->query('DELETE FROM ?_idx_search_keys USING ?_idx_search_keys AS sk
-				INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
+		gbdb()->query('DELETE FROM ?_idx_search_keys USING ?_idx_search_keys AS sk' .
+				' INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
 				array('surname' => $surname));
 		
 		$keys = make_search_keys_assoc($surname);
@@ -208,9 +207,9 @@ function db_update(){
 				foreach((array) $vals as $v){
 					$v = mb_strtoupper($v);
 					$mask = !preg_match('/[?*]/uSs', $v) ? '' : GB_DBase::make_condition($v);
-					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,
-							`surname_key_type`, `surname_mask`) SELECT `id`, ?key, ?type,
-							?mask FROM ?_persons WHERE `surname` = ?surname',
+					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,' .
+							' `surname_key_type`, `surname_mask`) SELECT `id`, ?key, ?type,' .
+							' ?mask FROM ?_persons WHERE `surname` = ?surname',
 							array(
 									'surname'	=> $surname,
 									'key'		=> $v,
@@ -253,20 +252,20 @@ function db_update(){
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM ?_dic_region
-			ORDER BY `update_datetime` ASC LIMIT 7', array(), TRUE);
+	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM ?_dic_region' .
+			' ORDER BY `update_datetime` ASC LIMIT 7', array(), TRUE);
 	foreach ($result as $id => $region_ids){
 		if(empty($region_ids))	$region_ids = $id;
 		$cnt = '';
 		if(false !== strpos($region_ids, ',')){
 			// У региона есть вложенные регионы — просуммируем их статистику и прибавим к статистике региона
-			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM ?_dic_region
-					WHERE `parent_id` = ?parent_id', array('parent_id' => $id));
+			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM ?_dic_region' .
+					' WHERE `parent_id` = ?parent_id', array('parent_id' => $id));
 			$cnt = $childs . ' + ';
 		}
 		gbdb()->query('UPDATE LOW_PRIORITY ?_dic_region SET `region_cnt` = ' . $cnt .
-				'( SELECT COUNT(*) FROM ?_persons WHERE `region_id` = ?region_ids ),
-				`update_datetime` = NOW() WHERE `id` = ?id',
+				'( SELECT COUNT(*) FROM ?_persons WHERE `region_id` = ?region_ids ),' .
+				' `update_datetime` = NOW() WHERE `id` = ?id',
 				array('id' => $id, 'region_ids' => $region_ids));
 	}
 	//
@@ -275,9 +274,9 @@ function db_update(){
 		$result = gbdb()->get_column('SELECT `id` FROM ?@table ORDER BY `update_datetime` ASC LIMIT 1',
 				array('@table' => "dic_$key"));
 		foreach($result as $row){
-			gbdb()->query('UPDATE LOW_PRIORITY ?@table SET ?#field_cnt =
-					( SELECT COUNT(*) FROM ?_persons WHERE ?#field_id = ?id ),
-					`update_datetime` = NOW() WHERE `id` = ?id',
+			gbdb()->query('UPDATE LOW_PRIORITY ?@table SET ?#field_cnt =' .
+					' ( SELECT COUNT(*) FROM ?_persons WHERE ?#field_id = ?id ),' .
+					' `update_datetime` = NOW() WHERE `id` = ?id',
 					array(
 						'@table'		=> "dic_$key",
 						'#field_cnt'	=> "{$key}_cnt",
@@ -355,11 +354,11 @@ function log_event($records_found = 0){
  * В случае выявления перенагрузки, функция не возвращает ничего, а исполнение скрипта прерывается.
  */
 function load_check(){
-	$row = gbdb()->get_row('SELECT
-			TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) AS `period_in_sec`,
-			CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`,
-			`banned_to_datetime` >= NOW() AS `banned` 
-			FROM ?_load_check WHERE `ip` = ?ip',
+	$row = gbdb()->get_row('SELECT' .
+			' TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) AS `period_in_sec`,' .
+			' CEIL(TIMESTAMPDIFF(SECOND, `first_request_datetime`, NOW()) / `requests_counter`) AS `speed`,' .
+			' `banned_to_datetime` >= NOW() AS `banned`' .
+			' FROM ?_load_check WHERE `ip` = ?ip',
 			array('ip'		=> $_SERVER["REMOTE_ADDR"]));
 
 	if(!$row){
@@ -368,8 +367,8 @@ function load_check(){
 
 	}elseif($row['banned'] || (($row['speed'] < 3) && ($row['period_in_sec'] > 30))){
 		// Пользователь проштрафился
-		gbdb()->query('UPDATE ?_load_check SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, ?ban, NOW())
-				WHERE `ip` = ?ip',
+		gbdb()->query('UPDATE ?_load_check SET `banned_to_datetime` = TIMESTAMPADD(MINUTE, ?ban, NOW())' .
+				' WHERE `ip` = ?ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
 		// TODO: gettext
 		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
