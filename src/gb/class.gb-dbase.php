@@ -498,9 +498,9 @@ class GB_DBase	{
 		gb_load_translations_early();
 	
 		if($caller = $this->get_caller())
-			$error_str = sprintf( __('GeniBase database error \"%1$s\" for query %2$s made by %3$s'), $error, $this->last_query, $caller);
+			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s made by %3$s', $error, $this->last_query, $caller);
 		else
-			$error_str = sprintf( __('GeniBase database error \"%1$s\" for query %2$s'), $error, $this->last_query);
+			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s', $error, $this->last_query);
 	
 		error_log($error_str);
 	
@@ -552,7 +552,7 @@ class GB_DBase	{
 		$query_sub = trim($this->remove_comments($query_sub));
 		
 		// Keep track of the last query for debug.
-		$this->last_query = $query;
+		$this->last_query = $query_sub;
 
 		if(defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
 			$time_start = microtime(true);

@@ -197,7 +197,7 @@ function db_update(){
 			' ) ORDER BY `update_datetime` ASC LIMIT 15',
 			array('exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE)) );
 	foreach ($result as $surname){
-		gbdb()->query('DELETE FROM ?_idx_search_keys USING ?_idx_search_keys AS sk' .
+		gbdb()->query('DELETE FROM sk USING ?_idx_search_keys AS sk' .
 				' INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
 				array('surname' => $surname));
 		
