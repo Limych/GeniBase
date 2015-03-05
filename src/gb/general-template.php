@@ -225,7 +225,7 @@ function html_footer(){
 		<a href="<?php print BASE_URL; ?>/stat.php">Статистика</a>
 		| <a href="<?php print BASE_URL; ?>/guestbook/index.php">Гостевая книга</a> 
 		| <a href="//forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a>
-		| <a href="/<?php print BASE_URL; ?>crue.php">Команда проекта</a>
+		| <a href="<?php print BASE_URL; ?>/crue.php">Команда проекта</a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <?php if(GB_DEBUG): ?>

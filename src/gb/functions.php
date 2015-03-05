@@ -973,3 +973,51 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 
 	return implode($sep, $ret);
 }
+
+/**
+ * Checks if the browser/device is a robot
+ *
+ * @since  2.1.0
+ * 
+ * @param string $is_first_visited_page	FALSE, if this user visit other pages before. 
+ * @return boolean	TRUE if user is a robot.
+ */
+function is_bot_user($is_first_visited_page = TRUE) {
+	$is_bot = FALSE;
+
+// 	if(!is_user_logged_in()){	// TODO: Uncomment after enabling users
+		// XML RPC requests are probably from cybernetic beasts
+		if(!$is_bot && defined('XMLRPC_REQUEST') && XMLRPC_REQUEST)
+			$is_bot = TRUE;
+
+		if(!$is_bot && !empty($_SERVER['HTTP_USER_AGENT'])){
+			// the user agent could be google bot, bing bot or some other bot,  one would hope real user agents do not have the
+			// string 'bot|spider|crawler|preview' in them, there are bots that don't do us the kindness of identifying themselves as such,
+			// check for the user being logged in in a real user is using a bot to access content from our site
+			$bot_agent_strings = array('alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider',
+					'bingbot', 'bot', 'chtml generic', 'crawler', 'fastmobilecrawl', 'feedfetcher-google',
+					'firefly', 'froogle', 'gigabot', 'googlebot', 'googlebot-mobile', 'heritrix',
+					'ia_archiver', 'infoseek', 'irlbot', 'jumpbot', 'lycos', 'mail.ru', 'mediapartners',
+					'mediobot', 'motionbot', 'mshots', 'msnbot', 'openbot', 'php', 'preview',
+					'pss-webkit-request', 'pythumbnail', 'robot', 'scooter', 'slurp', 'snapbot',
+					'spider', 'stackrambler', 'taptubot', 'technoratisnoop', 'teleport', 'teoma',
+					'twiceler', 'webalta', 'wget', 'wordpress', 'yahooseeker', 'yahooysmcm', 'yammybot', );
+// 			$bot_agent_strings = apply_filters('bot_user_agents', $bot_agent_strings);	// TODO: Uncomment after enabling actions
+			foreach($bot_agent_strings as $bot){
+				if(stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false){
+					$is_bot = TRUE;
+					break;
+				}
+			}
+		}
+		
+		if(!$is_bot && !$is_first_visited_page){
+			// TODO: Add check for saving cookies
+
+			if(!$is_bot && (!isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER'])))
+				$is_bot = TRUE;
+		}
+// 	}	// TODO: Uncomment after enabling users
+
+	return $is_bot;
+}
