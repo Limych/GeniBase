@@ -121,11 +121,12 @@ $GLOBALS['gb_locale'] = new GB_Locale();
 static $region_short = array(
 		' генерал-губернаторство'	=> ' ген.-губ.',
 		' наместничество'	=> ' нам.',
-		' губерния'	=> ' губ.',
-		' область'	=> ' обл.',
-		' уезд'	=> ' у.',
-		' волость'	=> ' вол.',
-		' округа'	=> ' окр.',
+		' губерния'			=> ' губ.',
+		' область'			=> ' обл.',
+		' уезд'				=> ' у.',
+		' волость'			=> ' вол.',
+		' округа'			=> ' окр.',
+		' гмина'			=> ' гм.',
 );
 
 
@@ -188,19 +189,28 @@ function db_update(){
 			'metaphone'		=> 101,
 			'metascript'	=> 102,
 	);
-	// NB: В начале мы делаем выборку того, что НАДО СОХРАНИТЬ!
-	$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p' .
+		// Отбираем любые фамилии, кроме тех, у которых индекс ненулевого типа
+		// создан позже времени модификации как самой записи, так и алгоритма
+		$result = gbdb()->get_column('SELECT DISTINCT `surname` FROM ?_persons AS p' .
 			' WHERE NOT EXISTS (' .
 				' SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`' .
-				' AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`' .
+				' AND sk.`surname_key_type` != 0' .
+			    ' AND sk.`update_datetime` > p.`update_datetime`' .
 				' AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")' .
 			' ) ORDER BY `update_datetime` ASC LIMIT 15',
 			array('exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE)) );
 	foreach ($result as $surname){
-		gbdb()->query('DELETE FROM sk USING ?_idx_search_keys AS sk' .
-				' INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
-				array('surname' => $surname));
+		// Удаляем устаревшие(!) или нулевого типа ключи для записей с отобранными фамилиям
+		gbdb()->query(
+				'DELETE FROM sk USING ?_idx_search_keys AS sk' .
+				' INNER JOIN ?_persons AS p' .
+				' WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`' .
+				' AND (   (sk.`surname_key_type` = 0)' .
+				     ' or (sk.`update_datetime` < p.`update_datetime`)' .
+				     ' or (sk.`update_datetime` < STR_TO_DATE(?exp, "%Y-%m-%d")))',
+				array('surname' => $surname, 'exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE) ));
 		
+		// Создаём ключи для записей с отобранными фамилиями их не имеющих
 		$keys = make_search_keys_assoc($surname);
 		foreach ($keys as $key){
 			foreach ($key as $type => $vals){
@@ -208,8 +218,9 @@ function db_update(){
 					$v = mb_strtoupper($v);
 					$mask = !preg_match('/[?*]/uSs', $v) ? '' : GB_DBase::make_condition($v);
 					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,' .
-							' `surname_key_type`, `surname_mask`) SELECT `id`, ?key, ?type,' .
-							' ?mask FROM ?_persons WHERE `surname` = ?surname',
+							' `surname_key_type`, `surname_mask`) SELECT p.`id`, ?key, ?type,' .
+							' ?mask FROM ?_persons AS p WHERE p.`surname` = ?surname' .
+							' AND NOT EXISTS (SELECT 1 FROM ?_idx_search_keys AS sk WHERE p.`id` = sk.`person_id`)',
 							array(
 									'surname'	=> $surname,
 									'key'		=> $v,
