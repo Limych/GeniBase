@@ -10,13 +10,13 @@
  * @copyright	Partially copyright © WordPress Team
  */
 
-// Запрещено непосредственное исполнение этого скрипта
+// Direct execution forbidden for this script
 if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
 
 // Инициализация режима отладки значением по умолчанию
 if(!defined('GB_DEBUG_SQL'))	define('GB_DEBUG_SQL', FALSE);
-
-
 
 /***************************************************************************
  * Класс работы с базой данных
@@ -332,7 +332,7 @@ class GB_DBase	{
 			return '"' . $this->db->real_escape_string($value) . '"';
 	
 		}elseif (is_numeric($value))
-			return $value;
+			return ($value == intval($value)) ? intval($value) : rtrim(sprintf('%F', $value), '0');
 	
 		elseif (is_null($value))
 			return 'NULL';

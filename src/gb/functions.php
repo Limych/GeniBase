@@ -811,6 +811,49 @@ function gb_allowed_protocols() {
 }
 
 /**
+ * Parse query URI for protocol, base, query and anchor parts.
+ * 
+ * Mostly for internal use.
+ * 
+ * @since	2.1.0
+ * 
+ * @param string $uri
+ * @return array
+ */
+function parse_query($uri = false){
+	if($uri === false)
+		$uri = $_SERVER['REQUEST_URI'];
+
+	if ( $frag = strstr( $uri, '#' ) )
+		$uri = substr( $uri, 0, -strlen( $frag ) );
+	else
+		$frag = '';
+	
+	if ( 0 === stripos( $uri, 'http://' ) ) {
+		$protocol = 'http://';
+		$uri = substr( $uri, 7 );
+	} elseif ( 0 === stripos( $uri, 'https://' ) ) {
+		$protocol = 'https://';
+		$uri = substr( $uri, 8 );
+	} else {
+		$protocol = '';
+	}
+	
+	if ( strpos( $uri, '?' ) !== false ) {
+		list( $base, $query ) = explode( '?', $uri, 2 );
+		$base .= '?';
+	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
+		$base = $uri . '?';
+		$query = '';
+	} else {
+		$base = '';
+		$query = $uri;
+	}
+	
+	return array($protocol, $base, $query, $frag);
+}
+
+/**
  * Retrieve a modified URL query string.
  *
  * You can rebuild the URL and append a new query variable to the URL query by
@@ -842,31 +885,7 @@ function add_query_arg() {
 			$uri = $args[2];
 	}
 
-	if ( $frag = strstr( $uri, '#' ) )
-		$uri = substr( $uri, 0, -strlen( $frag ) );
-	else
-		$frag = '';
-
-	if ( 0 === stripos( $uri, 'http://' ) ) {
-		$protocol = 'http://';
-		$uri = substr( $uri, 7 );
-	} elseif ( 0 === stripos( $uri, 'https://' ) ) {
-		$protocol = 'https://';
-		$uri = substr( $uri, 8 );
-	} else {
-		$protocol = '';
-	}
-
-	if ( strpos( $uri, '?' ) !== false ) {
-		list( $base, $query ) = explode( '?', $uri, 2 );
-		$base .= '?';
-	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
-		$base = $uri . '?';
-		$query = '';
-	} else {
-		$base = '';
-		$query = $uri;
-	}
+	list($protocol, $base, $query, $frag) = parse_query($uri);
 
 	gb_parse_str( $query, $qs );
 	$qs = urlencode_deep( $qs ); // this re-URL-encodes things that were already in the query string
@@ -895,17 +914,17 @@ function add_query_arg() {
  *
  * @since	2.0.0
  *
- * @param string|array $key   Query key or keys to remove.
- * @param bool|string  $query Optional. When false uses the $_SERVER value. Default false.
+ * @param string|array $key	Query key or keys to remove.
+ * @param bool|string  $uri	Optional. When false uses the $_SERVER value. Default false.
  * @return string New URL query string.
  */
-function remove_query_arg( $key, $query = false ) {
+function remove_query_arg($key, $uri = false){
 	if ( is_array( $key ) ) { // removing multiple keys
 		foreach ( $key as $k )
-			$query = add_query_arg( $k, false, $query );
+			$query = add_query_arg( $k, false, $uri);
 		return $query;
 	}
-	return add_query_arg( $key, false, $query );
+	return add_query_arg( $key, false, $uri);
 }
 
 /**
@@ -1012,12 +1031,67 @@ function is_bot_user($is_first_visited_page = TRUE) {
 		}
 		
 		if(!$is_bot && !$is_first_visited_page){
+			// Common bots don't save cookies
 			// TODO: Add check for saving cookies
 
+			// Common bots don't send referers
 			if(!$is_bot && (!isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER'])))
 				$is_bot = TRUE;
 		}
 // 	}	// TODO: Uncomment after enabling users
 
 	return $is_bot;
+}
+
+/**
+ * Determine if SSL is used.
+ *
+ * @since 2.1.0
+ *
+ * @return bool True if SSL, false if not used.
+ */
+function is_ssl() {
+	if ( isset($_SERVER['HTTPS']) ) {
+		if ( 'on' == strtolower($_SERVER['HTTPS']) )
+			return true;
+		if ( '1' == $_SERVER['HTTPS'] )
+			return true;
+	} elseif ( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Whether SSL login should be forced.
+ *
+ * @since 2.1.0
+ *
+ * @see force_ssl_admin()
+ *
+ * @param string|bool $force Optional Whether to force SSL login. Default null.
+ * @return bool True if forced, false if not forced.
+ */
+function force_ssl_login( $force = null ) {
+	return force_ssl_admin( $force );
+}
+
+/**
+ * Whether to force SSL used for the Administration Screens.
+ *
+ * @since 2.1.0
+ *
+ * @param string|bool $force Optional. Whether to force SSL in admin screens. Default null.
+ * @return bool True if forced, false if not forced.
+ */
+function force_ssl_admin( $force = null ) {
+	static $forced = false;
+
+	if ( !is_null( $force ) ) {
+		$old_forced = $forced;
+		$forced = $force;
+		return $old_forced;
+	}
+
+	return $forced;
 }

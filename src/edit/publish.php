@@ -132,7 +132,7 @@ $dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_rank ORDER BY rank', 
 //
 $dic_reason = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
-$result = gbdb()->get_table('SELECT id, source, source_url, source_pg_correction FROM ?_dic_source');
+$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM ?_dic_source');
 foreach ($result as $r){
 	$dic_source        [$r['id']] = $r['source'];
 	$dic_source_url    [$r['id']] = $r['source_url'];
@@ -287,6 +287,7 @@ foreach($fields as $key => $def){
 						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
+
 		}elseif($key == 'religion_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
@@ -295,6 +296,7 @@ foreach($fields as $key => $def){
 						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
+
 		}elseif($key == 'marital_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
@@ -303,6 +305,7 @@ foreach($fields as $key => $def){
 						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
+
 		}elseif($key == 'source_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
@@ -311,6 +314,7 @@ foreach($fields as $key => $def){
 						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select><div id='source_link'></div>";
+
 		}elseif($key == 'reason_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
@@ -319,21 +323,23 @@ foreach($fields as $key => $def){
 						esc_html(trim_text($d)) . "</option>\n";
 			}
 			print "</select>";
+
 		}elseif($key == 'date_from' || $key == 'date_to'){
 			print "<input id='$key' type='date' name='pub[$key]' value='" . esc_attr($pub[$key]) .
-					"' min='1914-07-28' max='1918-11-11'>";
+					"' min='" . MIN_DATE . "' max='" . MAX_DATE . "'>";
+
 		}elseif($key == 'comments'){
 			print "<textarea id='$key' name='pub[$key]' rows='7' cols='30'>" .
 					(isset($pub[$key]) ? esc_html($pub[$key]) : '') . "</textarea>";
+
+		}elseif($key == 'date'){
+			print "<input id='$key' type='text' name='pub[$key]' value='" .
+					(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
+			print " <small>Машина это видит как «${date_norm}»</small>";
+
 		}else{
-			if($key == 'date'){
-				print "<input id='$key' type='text' name='pub[$key]' value='" .
-						(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
-				print " <small>Машина это видит как «${date_norm}»</small>";
-			}else{
-				print "<input id='$key' type='text' size=60 name='pub[$key]' value='" .
-						(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
-			}
+			print "<input id='$key' type='text' size=60 name='pub[$key]' value='" .
+					(isset($pub[$key]) ? esc_attr($pub[$key]) : '') . "' />";
 		}
 		print "</td>\n";
 	}

@@ -12,6 +12,11 @@
  * @copyright	Partially copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 /**
  * BackPress Scripts enqueue class.
  *

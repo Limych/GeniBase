@@ -8,6 +8,11 @@
  * @copyright	Partially copyright © WordPress Team
  */
 
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 /**
  * Defines initial GeniBase constants
  *

@@ -20,6 +20,11 @@
  * @copyright	Partially copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 require_once(GB_INC_DIR . '/class.gb-dependencies.php');
 require_once(GB_INC_DIR . '/class.gb-scripts.php');
 require_once(GB_INC_DIR . '/functions.gb-scripts.php');

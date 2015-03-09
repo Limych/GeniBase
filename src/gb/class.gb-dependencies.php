@@ -12,6 +12,12 @@
  * 
  * @copyright	Copyright © WordPress Team
  */
+
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 class GB_Dependencies {
 	/**
 	 * An array of registered handle objects.

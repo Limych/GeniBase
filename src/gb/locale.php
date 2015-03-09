@@ -6,6 +6,11 @@
  * @subpackage i18n
  */
 
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 /**
  * Class that loads the calendar locale.
  *

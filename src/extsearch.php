@@ -24,7 +24,6 @@ show_records_stat();
 	<div class='fields'><?php $dbase->search_form(); ?></div>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>
-		<button class="clearForm" type="button">Очистить</button>
 	</div>
 	<div id="help">
 	<p class="nb">Фонетический поиск по фамилиям учитывает близость произношения разных звуков. Изначально списки были рукописными и часто писались «со слов», потому одна и та же фамилия может в списках быть записана очень по-разному.</p>
@@ -56,8 +55,8 @@ if($dbase->have_query){
 		'additional_info'	=> 'Доп. инф-ция',
 		'birthdate'	=> 'Дата рождения',
 		'source'	=> 'Источник',
-		'comments'	=> '',
 		'id'		=> 'ID записи',
+		'comments'	=> '',	// Place it always last
 	);
 	$tmp = array();
 	foreach(array_keys($detailed_fields) as $key){

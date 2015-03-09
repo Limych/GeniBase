@@ -11,8 +11,10 @@
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
-// Запрещено непосредственное исполнение этого скрипта
+// Direct execution forbidden for this script
 if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
 
 /*
 CREATE VIEW `?_v_persons` AS SELECT
@@ -47,7 +49,8 @@ FROM `?_persons` AS `p`
 WHERE (1 = 1)
 */
 
-
+if(!defined('MIN_DATE'))	define('MIN_DATE', '1914-07-28');
+if(!defined('MAX_DATE'))	define('MAX_DATE', '1918-11-11');
 
 /********************************************************************************
  * Абстрактный класс работы с базой данных
@@ -149,28 +152,46 @@ class ww1_database_solders extends ww1_database {
 	 */
 	function __construct($qmode = Q_SIMPLE){
 		parent::__construct($qmode);
+		$args = array_map('trim', gb_parse_args($_REQUEST));
 
 		if($qmode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 			foreach($this->simple_fields as $key){
-				$this->query[$key] = get_request_attr($key);
+				$this->query[$key] = isset($args[$key]) ? $args[$key] : '';
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
 				$this->have_query |= !empty($this->query[$key]);
 			}
+			$this->name_ext		= TRUE;
+			$this->surname_ext	= TRUE;
+
+			$args = $this->query;
+
 		}else{
 			// Расширенный режим поиска **************************************
 			foreach($this->extended_fields as $key){
-				$this->query[$key] = get_request_attr($key);
+				$this->query[$key] = isset($args[$key]) ? $args[$key] : '';
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
 				if(in_array($key, $this->dictionary_fields) && !is_array($this->query[$key]))
 					$this->query[$key] = array();
 				$this->have_query |= !empty($this->query[$key]);
 			}
-			$this->surname_ext	= isset($_REQUEST['surname_ext']);
-			$this->name_ext		= isset($_REQUEST['name_ext']);
-		}	// if
+			$this->name_ext		= isset($args['name_ext']) ? (bool) $args['name_ext'] : TRUE;
+			$this->surname_ext	= isset($args['surname_ext']) ? (bool) $args['surname_ext'] : TRUE;
+
+			$args = $this->query;
+			$args['name_ext']		= $this->name_ext;
+			$args['surname_ext']	= $this->surname_ext;
+		}
+
+		// Make optimized request URI for current page 
+		list($protocol, $base, $query, $frag) = parse_query($_SERVER['REQUEST_URI']);
+		$rq = build_query( array_filter($args) );
+		$rq = trim( $rq, '?' );
+		$rq = $protocol . $base . $rq . $frag;
+		$rq = rtrim( $rq, '?' );
+		$_SERVER['REQUEST_URI'] = $rq;
 
 		// Считаем, сколько всего записей в базе
 		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons');
@@ -246,7 +267,7 @@ class ww1_database_solders extends ww1_database {
 							"<div>" .
 								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
 								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!isset($_GET['surname_ext']) ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>искать похожие фамилии</label></div>" .
+								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>искать похожие фамилии</label></div>" .
 							"</div>" .
 							"</div>\n";
 					break;
@@ -258,7 +279,7 @@ class ww1_database_solders extends ww1_database {
 							"<div>" .
 								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
 								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!isset($_GET['name_ext']) ? "" : " checked='checked'") . " /> <label for='q_name_ext'>искать сокращения имён</label></div>" .
+								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->name_ext ? "" : " checked='checked'") . " /> <label for='q_name_ext'>искать сокращения имён</label></div>" .
 							"</div>" .
 							"</div>\n";
 					break;
@@ -267,8 +288,8 @@ class ww1_database_solders extends ww1_database {
 					// Поля дат
 					print "<div class='field'>" .
 							"<label for='q_$key'>$val:</label>" .
-							"<div><nobr>c <input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='1914-07-28' max='1918-11-11' /></nobr> " .
-								"<nobr>по <input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='1914-07-28' max='1918-11-11' /></nobr></div>" .
+							"<div><nobr>c <input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr> " .
+								"<nobr>по <input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr></div>" .
 							"</div>\n";
 					break;
 

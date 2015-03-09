@@ -75,12 +75,13 @@ gb_debug_mode();
 require_once(GB_INC_DIR . '/pomo/mo.php');
 require_once(GB_INC_DIR . '/functions.php');
 require_once(GB_INC_DIR . '/class.gb-dbase.php');
-require_once(GB_INC_DIR . '/general-template.php');
 
 // Load the L10n library.
 require_once(GB_INC_DIR . '/l10n.php');
 
 // Load most of GeniBase.
+require_once(GB_INC_DIR . '/general-template.php');
+require_once(GB_INC_DIR . '/link-template.php');
 require_once(GB_INC_DIR . '/kses.php');
 require_once(GB_INC_DIR . '/formatting.php');
 require_once(GB_INC_DIR . '/script-loader.php');
@@ -331,19 +332,21 @@ function log_event($records_found = 0){
 		}));
 	}, $_SERVER['REQUEST_URI']);
 
-	if(gbdb()->get_cell('SELECT 1 FROM ?_logs WHERE `url` = ?url AND `datetime` >= NOW() - INTERVAL 1 HOUR',
+	if(gbdb()->get_cell('SELECT 1 FROM ?_logs WHERE `url` = ?url AND `datetime` >= NOW() - INTERVAL 3 HOUR',
 			array('url' => $url)))
 		return;
 
 	$tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
 	$squery = trim(get_request_attr('surname') . ' ' . get_request_attr('name') . (empty($tmp) ? '' : " ($tmp)"));
 
+	global $gb_timer;
+	$timetotal = microtime(true) - $gb_timer['start'];
 	gbdb()->set_row('?_logs', array(
 		'query'		=> $squery,
 		'is_robot'	=> is_bot_user(FALSE),
 		'url'		=> $url,
 		'records_found'	=> $records_found,
-		'duration'	=> timer_stop(),
+		'duration'	=> $timetotal,
 	), FALSE, GB_DBase::MODE_INSERT);
 }
 

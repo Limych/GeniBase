@@ -11,6 +11,11 @@
  * @copyright	Partially copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
+// Direct execution forbidden for this script
+if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+
+
+
 /**
  * Return instance of GB_Style object.
  *

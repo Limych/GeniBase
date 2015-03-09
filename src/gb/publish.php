@@ -5,7 +5,7 @@
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
-// Запрещено непосредственное исполнение этого скрипта
+// Direct execution forbidden for this script
 if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
@@ -14,15 +14,15 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * Функции формализации и публикации записей
  */
 
-
+require_once(GB_INC_DIR . '/class.ww1-database.php');
 
 /**
  * Функция нормирования дат
  */
 function prepublish_date(&$raw, &$date_norm){
 	if(empty($raw['date'])){
-		$raw['date_from']	= '1914-08-01';
-		$raw['date_to']		= '1918-11-11';
+		$raw['date_from']	= MIN_DATE;
+		$raw['date_to']		= MAX_DATE;
 		return;
 	}
 
@@ -155,13 +155,13 @@ function prepublish_date(&$raw, &$date_norm){
 		if($tmp)
 			$raw['date_to'] = $tmp->format('Y-m-d');
 		
-		if(($raw['date_from'] < '1914-07-01') || ($raw['date_from'] > '1920-12-31')
-		|| ($raw['date_to'] < '1914-07-01') || ($raw['date_to'] > '1920-12-31')){
+		if(($raw['date_from'] < MIN_DATE) || ($raw['date_from'] > MAX_DATE)
+		|| ($raw['date_to'] < MIN_DATE) || ($raw['date_to'] > MAX_DATE)){
 			unset($raw['date_from']);
 			unset($raw['date_to']);
 		}
 	}
-// var_export($matches);
+// var_export($matches);	// TODO: Remove me?
 }
 
 
@@ -323,8 +323,8 @@ function prepublish_make_data($raw_norm, &$have_trouble){
 	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_nr list_pg') as $key){
 		if(!isset($raw_norm[$key])
 		|| ((empty($raw_norm[$key]) || absint($raw_norm[$key]) != $raw_norm[$key]) && $key != 'source_id' && preg_match('/(^|_)id$/uS', $key))
-		|| ($key == 'date_from' && ($raw_norm['date_from'] < '1914-07-01' || $raw_norm['date_from'] > '1920-12-31'))
-		|| ($key == 'date_to' && ($raw_norm['date_to'] < '1914-07-01' || $raw_norm['date_to'] > '1920-12-31')))
+		|| ($key == 'date_from' && ($raw_norm['date_from'] < MIN_DATE || $raw_norm['date_from'] > MAX_DATE))
+		|| ($key == 'date_to' && ($raw_norm['date_to'] < MIN_DATE || $raw_norm['date_to'] > MAX_DATE)))
 			$have_trouble = true;
 		else
 			$pub[$key] = $raw_norm[$key];

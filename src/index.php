@@ -24,7 +24,6 @@ show_records_stat();
 	<div class='fields'><?php $dbase->search_form(); ?></div>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>
-		<button class="clearForm" type="button">Очистить</button>
 	</div>
 	<div id="help">
 	<p class="nb">Система при поиске автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий. Неполные совпадения выводятся в&nbsp;конце списка и&nbsp;выделяются цветом.</p>
@@ -65,14 +64,14 @@ if($dbase->have_query){
 }
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска
-$res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" AND `is_robot` = 0 AND `records_found`' .
-		' ORDER BY datetime DESC LIMIT 120');
+$res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" AND `is_robot` = 0' .
+		' AND `records_found` AND `datetime` >= NOW() - INTERVAL 3 HOUR');
 shuffle($res);
 $res = array_slice($res, 0, 12);
 foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';
 	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
-print "<p class='lastq aligncenter no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
+if($res)	print "<p class='lastq aligncenter no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 
 html_footer();

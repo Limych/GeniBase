@@ -51,10 +51,10 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			$output = site_url();
 			break;
 		case 'description':
-// 			$output = get_option('blogdescription');
+// 			$output = get_option('blogdescription');	// TODO: get_option()
 			break;
 		case 'pingback_url':
-// 			$output = site_url( 'xmlrpc.php' );
+			$output = site_url( 'xmlrpc.php' );
 			break;
 		case 'stylesheet_url':
 			$output = get_stylesheet_uri();
@@ -67,11 +67,11 @@ function get_siteinfo($show = '', $filter = 'raw'){
 // 			$output = get_template_directory_uri();
 			break;
 		case 'charset':
-// 			$output = get_option('blog_charset');
+// 			$output = get_option('blog_charset');	// TODO: get_option()
 			if(empty($output))	$output = 'UTF-8';
 			break;
 		case 'html_type' :
-// 			$output = get_option('html_type');
+// 			$output = get_option('html_type');	// TODO: get_option()
 			break;
 		case 'version':
 			$output = GB_VERSION;
@@ -97,7 +97,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			 * @param mixed $output The URL returned by siteinfo().
 			 * @param mixed $show   Type of information requested.
 			 */
-// 			$output = apply_filters( 'siteinfo_url', $output, $show );
+// 			$output = apply_filters( 'siteinfo_url', $output, $show );	// TODO: actions
 		}else{
 			/**
 			 * Filter the site information returned by get_siteinfo().
@@ -107,7 +107,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			 * @param mixed $output The requested non-URL site information.
 			 * @param mixed $show   Type of information requested.
 			 */
-// 			$output = apply_filters( 'siteinfo', $output, $show );
+// 			$output = apply_filters( 'siteinfo', $output, $show );	// TODO: actions
 		}
 	}
 
@@ -131,10 +131,10 @@ function language_attributes($doctype = 'html') {
 		$attributes[] = 'dir="rtl"';
 
 	if($lang = get_siteinfo('language')){
-		if(/* get_option('html_type') == 'text/html' || */ $doctype == 'html' )
+		if(/* get_option('html_type') == 'text/html' || */ $doctype == 'html' )	// TODO: options
 			$attributes[] = "lang=\"$lang\"";
 
-		if(/* get_option('html_type') != 'text/html' || */ $doctype == 'xhtml')
+		if(/* get_option('html_type') != 'text/html' || */ $doctype == 'xhtml')	// TODO: options
 			$attributes[] = "xml:lang=\"$lang\"";
 	}
 
@@ -147,7 +147,8 @@ function language_attributes($doctype = 'html') {
 	 *
 	 * @param string $output A space-separated list of language attributes.
 	*/
-// 	echo apply_filters('language_attributes', $output);
+	echo $output;
+// 	echo apply_filters('language_attributes', $output);	// TODO: actions
 }
 
 /**
@@ -161,7 +162,7 @@ function gb_head(){
 	 *
 	 * @since	2.0.0
 	 */
-// 	do_action( 'gb_head' );
+// 	do_action( 'gb_head' );	// TODO: actions
 
 	// TODO: Remove after enabling an actions
 	@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
@@ -199,22 +200,13 @@ function html_header($title, $do_index = TRUE){
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
 <?php gb_head(); ?>
 </head><body>
-	<script type="text/javascript">
-		$(document).ready(function(){
-			$('.clearForm').on('click', function (){
-				f_el = $(this).parents('form');
-				f_el.find(':input').not(':button, :submit, :reset, :hidden, :checkbox, :radio').val('');
-				f_el.find(':checkbox, :radio').prop('checked', false);
-			});
-		});
-	</script>
 	<header>
 		<div class='logo'>
-			<a href="<?php print BASE_URL; ?>"><img src="<?php print BASE_URL; ?>/img/logo.jpg" alt='' /></a>
+			<a href="<?php print BASE_URL; ?>" tabindex="-2"><img src="<?php print BASE_URL; ?>/img/logo.jpg" alt='' /></a>
 		</div>
 		<div class='title'>
 			<h1>Первая мировая война, <nobr>1914&ndash;1918 гг.</nobr></h1>
-			<div><small><a href="http://www.svrt.ru/">Проект Союза Возрождений Родословных Традиций (СВРТ)</a></small></div>
+			<div><small><a href="http://www.svrt.ru/" tabindex="-1">Проект Союза Возрождений Родословных Традиций (СВРТ)</a></small></div>
 		</div>
 	</header>
 <?php
@@ -228,10 +220,10 @@ function html_footer(){
 ?>
 <footer>
 	<p style="text-align: center; margin-top: 3em" class="no-print">
-		<a href="<?php print BASE_URL; ?>/stat.php">Статистика</a>
-		| <a href="<?php print BASE_URL; ?>/guestbook/index.php">Гостевая книга</a> 
+		<a href="<?php print site_url('/stat.php'); ?>">Статистика</a>
+		| <a href="<?php print site_url('/guestbook/'); ?>">Гостевая книга</a> 
 		| <a href="//forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a>
-		| <a href="<?php print BASE_URL; ?>/crue.php">Команда проекта</a>
+		| <a href="<?php print site_url('/crue.php'); ?>">Команда проекта</a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <?php if(GB_DEBUG): ?>
@@ -257,7 +249,18 @@ function html_footer(){
 <?php
 }
 
-
+/**
+ * For internal use.
+ * 
+ * @access	private
+ * @since	2.1.0
+ * 
+ * @param string $pg
+ * @return string
+ */
+function _paginator_url($pg){
+	return add_query_arg('pg', ($pg > 1) ? $pg : false) . '#report';
+}
 
 /**
  * Функция формирования блока ссылок для перемещения между страницами.
@@ -268,33 +271,30 @@ function html_footer(){
  */
 function paginator($pg, $max_pg){
 	$pag = array();
-	$url1 = preg_replace('/&pg=\d+/S', '', $_SERVER['REQUEST_URI']);
-	$url = $url1 . '&pg=';
 	
-	if($pg > 1)	$pag[] = '<a href="' . ($pg == 2 ? $url1 : $url . ($pg-1)) . '#report" class="prev">←</a>';
-	if($pg > 1)	$pag[] = '<a href="' . $url1 . '#report">1</a>';
+	if($pg > 1)	$pag[] = '<a href="' . _paginator_url($pg - 1) . '" class="prev">←</a>';
+	if($pg > 1)	$pag[] = '<a href="' . _paginator_url(1) . '">1</a>';
 
 	if($pg > 12)	$pag[] = '<span>…</span>';
-	if($pg > 11)	$pag[] = '<a href="' . $url . ($pg-10) . '#report">' . ($pg-10) . '</a>';
+	if($pg > 11)	$pag[] = '<a href="' . _paginator_url($pg - 10) . '">' . ($pg - 10) . '</a>';
 	
-	if($pg == 8)	$pag[] = '<a href="' . $url . '2#report">2</a>';
+	if($pg == 8)	$pag[] = '<a href="' . _paginator_url(2) . '">2</a>';
 	elseif($pg > 8)	$pag[] = '<span>…</span>';
-	for($i = max($pg-5, 2); $i < $pg; $i++){
-		$pag[] = '<a href="' . $url . $i . '#report">' . $i . '</a>';
-	}
+	for($i = max($pg - 5, 2); $i < $pg; $i++)
+		$pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
 
 	$pag[] = '<span class="current">' . $pg . '</span>';
 
-	for($i = $pg+1; $i < min($pg+5, $max_pg); $i++){
-		$pag[] = '<a href="' . $url . $i . '#report">' . $i . '</a>';
-	}
-	if($pg == $max_pg-6)	$pag[] = '<a href="' . $url . ($max_pg-1) . '#report">' . ($max_pg-1) . '</a>';
-	elseif($pg < $max_pg-6)	$pag[] = '<span>…</span>';
+	for($i = $pg + 1; $i < min($pg + 5, $max_pg); $i++)
+		$pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
+	if($pg == $max_pg - 6)		$pag[] = '<a href="' . _paginator_url($max_pg - 1) . '">' . ($max_pg - 1) . '</a>';
+	elseif($pg < $max_pg - 6)	$pag[] = '<span>…</span>';
 
-	if($pg < $max_pg-10)	$pag[] = '<a href="' . $url . ($pg+10) . '#report">' . ($pg+10) . '</a>';
-	if($pg < $max_pg-11)	$pag[] = '<span>…</span>';
+	if($pg < $max_pg - 10)	$pag[] = '<a href="' . _paginator_url($pg + 10) . '">' . ($pg + 10) . '</a>';
+	if($pg < $max_pg - 11)	$pag[] = '<span>…</span>';
 	
-	if($pg < $max_pg)	$pag[] = '<a href="' . $url . $max_pg . '#report">' . $max_pg . '</a>';
-	if($pg < $max_pg)	$pag[] = '<a href="' . $url . ($pg+1) . '#report" class="next">→</a>';
+	if($pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($max_pg) . '">' . $max_pg . '</a>';
+	if($pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($pg + 1) . '" class="next">→</a>';
+
 	return '<div class="paginator">' . implode(' ', $pag) . '</div>';
 }
