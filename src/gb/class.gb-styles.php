@@ -190,6 +190,7 @@ class GB_Styles extends GB_Dependencies {
 			 *
 			 * @param array $to_do The list of enqueued styles about to be processed.
 			 */
+			// TODO: actions
 // 			$this->to_do = apply_filters( 'print_styles_array', $this->to_do );
 		}
 		return $r;
@@ -217,8 +218,9 @@ class GB_Styles extends GB_Dependencies {
 		 * @param string $src    The source URL of the enqueued style.
 		 * @param string $handle The style's registered handle.
 		 */
-// 		$src = apply_filters( 'style_loader_src', $src, $handle );
+		// TODO: actions
 		return esc_url( $src );
+// 		$src = apply_filters( 'style_loader_src', $src, $handle );
 	}
 
 	/**

@@ -44,7 +44,7 @@ function gb_default_scripts() {
 	if(!defined('GB_SCRIPT_DEBUG'))		define('GB_SCRIPT_DEBUG', GB_DEBUG);
 
 // 	if ( ! $guessurl = site_url() )
-// 		$guessurl = gb_guess_url();
+// 		$guessurl = gb_guess_url();	// TODO: gb_guess_url()
 	$guessurl = BASE_URL;
 
 	_gb_scripts()->base_url = $guessurl;
@@ -76,7 +76,7 @@ function gb_default_styles() {
 	if(!defined('GB_SCRIPT_DEBUG'))		define('GB_SCRIPT_DEBUG', GB_DEBUG);
 
 // 	if ( ! $guessurl = site_url() )
-// 		$guessurl = gb_guess_url();
+// 		$guessurl = gb_guess_url();	// TODO: gb_guess_url()
 	$guessurl = BASE_URL;
 
 	_gb_styles()->base_url = $guessurl;
@@ -108,6 +108,7 @@ function gb_default_styles() {
 function print_head_scripts() {
 	global $concatenate_scripts;
 
+	// TODO: actions
 // 	if ( ! did_action('gb_print_scripts') ) {
 // 		/** This action is documented in gb/functions.gb-scripts.php */
 // 		do_action( 'gb_print_scripts' );
@@ -124,6 +125,7 @@ function print_head_scripts() {
 	 *
 	 * @param bool $print Whether to print the head scripts. Default true.
 	*/
+	// TODO: actions
 // 	if ( apply_filters( 'print_head_scripts', true ) ) {
 		_print_scripts();
 // 	}
@@ -151,6 +153,7 @@ function print_footer_scripts() {
 	 *
 	 * @param bool $print Whether to print the footer scripts. Default true.
 	*/
+	// TODO: actions
 // 	if ( apply_filters( 'print_footer_scripts', true ) ) {
 		_print_scripts();
 // 	}
@@ -199,6 +202,7 @@ function _print_scripts() {
  * @since	2.0.0
  */
 function gb_print_head_scripts() {
+	// TODO: actions
 // 	if ( ! did_action('gb_print_scripts') ) {
 // 		/** This action is documented in wp-includes/functions.wp-scripts.php */
 // 		do_action( 'gb_print_scripts' );
@@ -228,8 +232,8 @@ function gb_print_footer_scripts() {
 	 *
 	 * @since	2.0.0
 	 */
+	_gb_footer_scripts();	// TODO: Remove after actions will be enabled
 // 	do_action( 'gb_print_footer_scripts' );
-	_gb_footer_scripts();	// TODO: Remove after actions enabled
 }
 
 /**
@@ -267,6 +271,7 @@ function print_late_styles() {
 	 *
 	 * @param bool $print Whether to print the 'late' styles. Default true.
 	 */
+	// TODO: actions
 // 	if ( apply_filters( 'print_late_styles', true ) ) {
 		_print_styles();
 // 	}
@@ -332,6 +337,7 @@ function script_concat_settings() {
 	}
 }
 
+// TODO: actions
 // add_action( 'gb_default_scripts', 'gb_default_scripts' );
 // add_filter( 'gb_print_scripts', 'gb_just_in_time_script_localization' );
 // add_filter( 'print_scripts_array', 'gb_prototype_before_jquery' );

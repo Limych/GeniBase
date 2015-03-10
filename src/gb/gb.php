@@ -93,7 +93,7 @@ require_once(GB_INC_DIR . '/class.ww1-records-set.php');
 gb_plugin_constants();
 
 // Load default scripts and styles
-// TODO: Remove after enabling actions
+// TODO: Remove block after actions will be enabled
 gb_default_styles();
 gb_default_scripts();
 
@@ -141,7 +141,7 @@ function publish_cron($force = false){
 		$max_date = gbdb()->get_cell('SELECT MAX(update_datetime) FROM ?_persons_raw');
 		$tmp = date_diff(date_create($max_date), date_create('now'));
 		$tmp = intval($tmp->format('%i'));
-// var_export($tmp);	// TODO: Remove me?
+// var_export($tmp);	// TODO: Remove this?
 		if($tmp < 1)	return;
 	}
 
@@ -176,7 +176,7 @@ if(GB_DEBUG)	var_export($pub);
  */
 function db_update(){
 	// Skip updation for debug mode but not for testing mode
-// 	if(GB_DEBUG && !defined('GB_TESTING_MODE'))	return;
+// 	if(GB_DEBUG && !defined('GB_TESTING_MODE'))	return;	// TODO: Remove this?
 
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
 	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL' .
@@ -206,6 +206,8 @@ function db_update(){
 		foreach ($keys as $key){
 			foreach ($key as $type => $vals){
 				foreach((array) $vals as $v){
+					if($v == '')	continue;
+
 					$v = mb_strtoupper($v);
 					$mask = !preg_match('/[?*]/uSs', $v) ? '' : GB_DBase::make_condition($v);
 					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,' .
@@ -307,7 +309,7 @@ function show_records_stat(){
 	$txt = format_num($cnt, ' запись.', ' записи.', ' записей.');
 	if($cnt != $cnt2)
 		$txt = format_num($cnt2, ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
-	print "<p class='aligncenter'>На данный момент в базе содержится $txt</p>\n";
+	print "<p class='align-center'>На данный момент в базе содержится $txt</p>\n";
 }
 
 

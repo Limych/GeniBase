@@ -51,7 +51,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			$output = site_url();
 			break;
 		case 'description':
-// 			$output = get_option('blogdescription');	// TODO: get_option()
+// 			$output = get_option('blogdescription');	// TODO: options
 			break;
 		case 'pingback_url':
 			$output = site_url( 'xmlrpc.php' );
@@ -67,11 +67,11 @@ function get_siteinfo($show = '', $filter = 'raw'){
 // 			$output = get_template_directory_uri();
 			break;
 		case 'charset':
-// 			$output = get_option('blog_charset');	// TODO: get_option()
+// 			$output = get_option('blog_charset');	// TODO: options
 			if(empty($output))	$output = 'UTF-8';
 			break;
 		case 'html_type' :
-// 			$output = get_option('html_type');	// TODO: get_option()
+// 			$output = get_option('html_type');	// TODO: options
 			break;
 		case 'version':
 			$output = GB_VERSION;
@@ -164,7 +164,7 @@ function gb_head(){
 	 */
 // 	do_action( 'gb_head' );	// TODO: actions
 
-	// TODO: Remove after enabling an actions
+	// TODO: Remove block after actions will be enabled
 	@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
 	gb_print_styles();
 	gb_print_scripts();
@@ -222,7 +222,7 @@ function html_footer(){
 	<p style="text-align: center; margin-top: 3em" class="no-print">
 		<a href="<?php print site_url('/stat.php'); ?>">Статистика</a>
 		| <a href="<?php print site_url('/guestbook/'); ?>">Гостевая книга</a> 
-		| <a href="//forum.svrt.ru/index.php?showtopic=3936&view=getnewpost" target="_blank">Обсуждение сервиса</a>
+		| <a href="http://forum.svrt.ru/index.php?showforum=127" target="_blank">Обсуждение проекта</a>
 		| <a href="<?php print site_url('/crue.php'); ?>">Команда проекта</a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>

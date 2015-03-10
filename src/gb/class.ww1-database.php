@@ -152,12 +152,12 @@ class ww1_database_solders extends ww1_database {
 	 */
 	function __construct($qmode = Q_SIMPLE){
 		parent::__construct($qmode);
-		$args = array_map('trim', gb_parse_args($_REQUEST));
+		$args = gb_parse_args($_REQUEST);
 
 		if($qmode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 			foreach($this->simple_fields as $key){
-				$this->query[$key] = isset($args[$key]) ? $args[$key] : '';
+				$this->query[$key] = isset($args[$key]) ? trim((string) $args[$key]) : '';
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
 				$this->have_query |= !empty($this->query[$key]);
@@ -171,6 +171,8 @@ class ww1_database_solders extends ww1_database {
 			// Расширенный режим поиска **************************************
 			foreach($this->extended_fields as $key){
 				$this->query[$key] = isset($args[$key]) ? $args[$key] : '';
+				if(is_string($this->query[$key]))
+					$this->query[$key] = trim($this->query[$key]);
 				if (is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
 				if(in_array($key, $this->dictionary_fields) && !is_array($this->query[$key]))
@@ -194,7 +196,9 @@ class ww1_database_solders extends ww1_database {
 		$_SERVER['REQUEST_URI'] = $rq;
 
 		// Считаем, сколько всего записей в базе
-		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons');
+		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons AS p WHERE p.surname = "*"' .
+				'OR p.surname LIKE "(%" OR EXISTS ( SELECT 1 FROM ?_idx_search_keys i' .
+					' WHERE i.person_id = p.id )');
 	}
 
 	/**
@@ -439,9 +443,12 @@ class ww1_database_solders extends ww1_database {
 
 		$order[] = 'p.surname, p.name, p.region, p.place, p.`rank`, p.source, p.source_pg';
 
+		if(empty($from) || empty($where))
+			return new ww1_solders_set($this->page);
+
 		$from	= ' FROM ' . implode(', ', $from);
 		$where	= ' WHERE ' . implode(' AND ', $where);
-		$order	= ' ORDER BY ' . implode(', ', $order);
+		$order	= empty($order) ? '' : (' ORDER BY ' . implode(', ', $order));
 		$query	= 'SELECT' . (!defined('GB_DEBUG_SQL_PROF') ? '' : ' SQL_NO_CACHE') . ' p.id' .
 				$from . $where . $order;
 		

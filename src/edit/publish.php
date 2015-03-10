@@ -151,7 +151,7 @@ uasort($dic_source, function($a, $b){
 
 html_header('');
 
-print "<p class='aligncenter'>"
+print "<p class='align-center'>"
 							."Опубликовано "        . format_num(   intval($cnt->published)+intval($cnt->require_edit),      ' запись', ' записи', ' записей')
                                                     . " (" . round((intval($cnt->published)+intval($cnt->require_edit)) * 100 / $cnt->total, 2) . "%), "
 							."из которых требуют правки " . format_num($cnt->require_edit, ' ', ' ', ' ')
@@ -181,8 +181,8 @@ $fields = array(
 $dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_nr list_pg uyezd source_id');
 $pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_nr list_pg comments date_from date_to source_id');
 ?>
-<p class='aligncenter'> <b>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</b></p>
-<p class='aligncenter'> <b>Внимание! Временно работать с формой ЗАПРЕЩЕНО!!!</b></p>
+<p class='align-center'> <b>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</b></p>
+<p class='align-center'> <b>Внимание! Временно работать с формой ЗАПРЕЩЕНО!!!</b></p>
 <script type="text/javascript">
 	$(function(){
 		$('form').on('reset', function(){
@@ -221,8 +221,6 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 			mode: 'get_data',
 			region_id: region
 		}, function(){
-console.log(region_id);
-console.log($('#region_id').val());
 			$('#regions select').toggleClass('modifyed', region_id != $('#region_id').prop('defaultValue')).on('change', function(){
 				load_region($(this).find('option:selected').val());
 			});
@@ -231,13 +229,13 @@ console.log($('#region_id').val());
 </script>
 <form method="post" class="editor">
 
-<div class="aligncenter">
+<div class="align-center">
 	<select name="row_type">
 		<option selected="selected" value="">Выводить неформализовавшиеся записи</option>
 		<option                     value="">Выводить записи, требующие правки</option>
 	</select>
 </div>
-<div class="aligncenter"><button>Пропустить эту запись</button></div>
+<div class="align-center"><button>Пропустить эту запись</button></div>
 <input type='hidden' name='id' value='<?php print isset($raw['id']) ? $raw['id'] : ''; ?>' />
 <table class="report"><tr>
 	<td></td>
@@ -346,12 +344,12 @@ foreach($fields as $key => $def){
 	print "</tr>";
 }
 ?><tr>
-	<td class="aligncenter"><button id="reset" type="reset">Сброс изменений</button></td>
-	<td class="aligncenter">
+	<td class="align-center"><button id="reset" type="reset">Сброс изменений</button></td>
+	<td class="align-center">
 		<small><label><input type="checkbox" name="raw_similar" value="1" checked="checked" /> применить ко всем подобным записям</label></small><br/>
 		<button name="mode" value="raw">Изменить исходные данные</button>
 	</td>
-	<td class="aligncenter">
+	<td class="align-center">
 		<button name="mode" value="pub">Изменить формализованные данные</button><br/>
 		<small>(только в текущей записи)</small>
 	</td>

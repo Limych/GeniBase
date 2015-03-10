@@ -20,7 +20,7 @@ show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
 	<h2>Поиск персоны</h2>
-	<p class="small alignright"><a href="/extsearch.php">Расширенный поиск</a></p>
+	<p class="small align-right"><a href="/extsearch.php">Расширенный поиск</a></p>
 	<div class='fields'><?php $dbase->search_form(); ?></div>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>
@@ -72,6 +72,6 @@ foreach ($res as $key => $row){
 	if(empty($row['query']))	$row['query'] = '.';
 	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
-if($res)	print "<p class='lastq aligncenter no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
+if($res)	print "<p class='lastq align-center no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 
 html_footer();

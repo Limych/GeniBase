@@ -14,13 +14,13 @@ if($dbase->have_query){
 	log_event($report->records_cnt);
 }
 
-html_header('Поиск' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'),
+html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'),
 		($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
 	<h2>Форма расширенного поиска</h2>
-	<p class="small alignright"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>
+	<p class="small align-right"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>
 	<div class='fields'><?php $dbase->search_form(); ?></div>
 	<div class="buttons">
 		<button class="search" type="submit">Искать</button>

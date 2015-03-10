@@ -54,8 +54,8 @@ class Tests_GB_DBase extends GB_UnitTestCase {
 	}
 
 	function test_data_escape() {
-		$src = array('text', "text\0\n\r'\"\x1Atext", 123, NULL, 12.34);
-		$res = array('"text"', '"text\\0\\n\\r\\\'\\"\\Ztext"', 123, 'NULL', 12.34);
+		$src = array('text', "text\0\n\r'\"\x1Atext", 123, NULL, 12.34, 1.0);
+		$res = array('"text"', '"text\\0\\n\\r\\\'\\"\\Ztext"', 123, 'NULL', '12.34', 1);
 		foreach(array_keys($src) as $key)
 			$this->assertEquals($res[$key], gbdb()->data_escape($src[$key]));
 
@@ -205,5 +205,6 @@ class Tests_GB_DBase extends GB_UnitTestCase {
 	}
 
 	function test_create_table_patch() {	// !!! NEED MySQL
+		// TODO
 	}
 }

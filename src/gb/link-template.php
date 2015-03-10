@@ -47,7 +47,7 @@ function site_url( $path = '', $scheme = null ) {
  * @return string Site url link with optional path appended.
  */
 function get_site_url($path = '', $scheme = null) {
-	// TODO: Replace when get_option() will be available
+	// TODO: options
 	$url = BASE_URL;
 // 	$url = get_option( 'siteurl' );
 
@@ -66,7 +66,7 @@ function get_site_url($path = '', $scheme = null) {
 	 * @param string|null $scheme  Scheme to give the site URL context. Accepts 'http', 'https', 'login',
 	 *                             'login_post', 'admin', 'relative' or null.
 	*/
-	return $url;	// TODO: Replace when the actions will be available
+	return $url;	// TODO: actions
 // 	return apply_filters( 'site_url', $url, $path, $scheme);
 }
 
@@ -108,7 +108,7 @@ function get_admin_url($path = '', $scheme = 'admin') {
 	 * @param string   $url     The complete admin area URL including scheme and path.
 	 * @param string   $path    Path relative to the admin area URL. Blank string if no path is specified.
 	*/
-	return $url;	// TODO: Replace when the actions will be available
+	return $url;	// TODO: actions
 // 	return apply_filters('admin_url', $url, $path);
 }
 
@@ -154,6 +154,6 @@ function set_url_scheme( $url, $scheme = null ) {
 	 * @param string $orig_scheme Scheme requested for the URL. One of 'http', 'https', 'login',
 	 *                            'login_post', 'admin', 'rpc', or 'relative'.
 	 */
-	return $url;	// TODO: Replace when the actions will be available
+	return $url;	// TODO: actions
 // 	return apply_filters( 'set_url_scheme', $url, $scheme, $orig_scheme );
 }

@@ -59,8 +59,8 @@ function make_search_keys($text, $use_hierarhy = false){
 
 	$res = array();
 	foreach($text as $key => $word){
-		$key_metaphone	= (array) rus_metaphone($word, true);
-		$key_metascript	= (array) rus_metascript(mb_ucfirst($word));
+		$key_metaphone	= array_filter((array) rus_metaphone($word, true));
+		$key_metascript	= array_filter((array) rus_metascript(mb_ucfirst($word)));
 
 		if(!$use_hierarhy)
 			$res = array_merge($res, array($word), $key_metaphone, $key_metascript);
@@ -306,7 +306,7 @@ function expand_names($names){
 			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 		}
 	}
-// print "<!-- "; var_export($names); print " -->";	// TODO: Remove me?
+// print "<!-- "; var_export($names); print " -->";	// TODO: Remove this?
 	return $names;
 } // function expand_names
 

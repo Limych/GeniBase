@@ -1004,7 +1004,7 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 function is_bot_user($is_first_visited_page = TRUE) {
 	$is_bot = FALSE;
 
-// 	if(!is_user_logged_in()){	// TODO: Uncomment after enabling users
+// 	if(!is_user_logged_in()){	// TODO: users
 		// XML RPC requests are probably from cybernetic beasts
 		if(!$is_bot && defined('XMLRPC_REQUEST') && XMLRPC_REQUEST)
 			$is_bot = TRUE;
@@ -1021,7 +1021,7 @@ function is_bot_user($is_first_visited_page = TRUE) {
 					'pss-webkit-request', 'pythumbnail', 'robot', 'scooter', 'slurp', 'snapbot',
 					'spider', 'stackrambler', 'taptubot', 'technoratisnoop', 'teleport', 'teoma',
 					'twiceler', 'webalta', 'wget', 'wordpress', 'yahooseeker', 'yahooysmcm', 'yammybot', );
-// 			$bot_agent_strings = apply_filters('bot_user_agents', $bot_agent_strings);	// TODO: Uncomment after enabling actions
+// 			$bot_agent_strings = apply_filters('bot_user_agents', $bot_agent_strings);	// TODO: actions
 			foreach($bot_agent_strings as $bot){
 				if(stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false){
 					$is_bot = TRUE;
@@ -1038,7 +1038,7 @@ function is_bot_user($is_first_visited_page = TRUE) {
 			if(!$is_bot && (!isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER'])))
 				$is_bot = TRUE;
 		}
-// 	}	// TODO: Uncomment after enabling users
+// 	}	// TODO: users
 
 	return $is_bot;
 }

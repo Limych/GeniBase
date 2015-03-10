@@ -72,7 +72,7 @@ function gb_initial_constants() {
  */
 function gb_plugin_constants() {
 	if(!defined('GB_CONTENT_URL'))
-		define( 'GB_CONTENT_URL', BASE_URL . '/gb-content'); // full url - GB_CONTENT_DIR is defined further up
+		define( 'GB_CONTENT_URL', BASE_URL . '/gb-content'); // TODO: options
 // 		define( 'GB_CONTENT_URL', get_option('siteurl') . '/gb-content'); // full url - GB_CONTENT_DIR is defined further up
 
 	/**
@@ -80,6 +80,7 @@ function gb_plugin_constants() {
 	 *
 	 * @since 2.0.0
 	 */
+	// TODO: actions
 // 	if(!defined('GB_PLUGIN_DIR'))
 // 		define('GB_PLUGIN_DIR', GB_CONTENT_DIR . '/plugins'); // full path, no trailing slash
 
@@ -88,6 +89,7 @@ function gb_plugin_constants() {
 	 *
 	 * @since 2.0.0
 	 */
+	// TODO: actions
 // 	if(!defined('GB_PLUGIN_URL'))
 // 		define('GB_PLUGIN_URL', GB_CONTENT_URL . '/plugins'); // full url, no trailing slash
 }

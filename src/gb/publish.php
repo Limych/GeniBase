@@ -161,7 +161,7 @@ function prepublish_date(&$raw, &$date_norm){
 			unset($raw['date_to']);
 		}
 	}
-// var_export($matches);	// TODO: Remove me?
+// var_export($matches);	// TODO: Remove this?
 }
 
 
@@ -224,6 +224,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 
 	// Расшифровываем семейные положения
 	if(isset($raw['marital'])){
+		// TODO: Move to SQL-table
 		static $maritals = array(
 			''		=> 4,
 			// Женатые
@@ -247,21 +248,18 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 
 	// Формализуем события
 	if(isset($raw['reason'])){
-		/** @var	int[]	Array of correspondences between contractions of events names and their IDs in the database. */
+		// Get event/reason names and it's reductions from dbase
 		static	$reason_conts = array();
-		//
-		// Fetch events/reasons names and reductions from dbase
-		if (empty($reason_conts)) {
+		if(empty($reason_conts)){
+			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2id AS rid,' .
+					' ?_dic_reason AS r WHERE rid.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 			$reason_conts[''] = 1;	// Special ID for "(not set)"
-	
-			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2reason AS r2r,' .
-					' ?_dic_reason AS r WHERE r2r.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 			foreach ($result as $row)
 				$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
 		}
-	 	//
+
 		$tmp = trim(mb_strtolower($raw['reason']));
-		// if(defined('P_DEBUG'))	var_export($tmp);
+// if(defined('P_DEBUG'))	var_export($tmp);	// TODO: Remove this?
 		if(isset($reason_conts[$tmp]))
 			$raw['reason_id'] = $reason_conts[$tmp];
 	}

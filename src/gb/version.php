@@ -7,7 +7,7 @@ define('GB_VERSION', '2.1.0');
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.
  */
-define('GB_DB_VERSION', 2);
+define('GB_DB_VERSION', 3);
 
 
 

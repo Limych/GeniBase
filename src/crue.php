@@ -70,5 +70,6 @@ html_header('Команда проекта');
 <p class="crue"><strong>Программирование:</strong>
 	<span class="name">Андрей Хроленок</span>
 </p>
+<p class="align-center">Хотите <a href="http://forum.svrt.ru/index.php?showtopic=7282" target="_blank">присоединиться к проекту? Добро пожаловать!</a></p>
 <?php
 html_footer();

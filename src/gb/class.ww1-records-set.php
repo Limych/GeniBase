@@ -40,7 +40,7 @@ class ww1_solders_set extends ww1_records_set{
 	public	$records_cnt;
 
 	// Создание экземпляра класса и сохранение результатов поиска
-	function __construct($page, $data, $records_cnt = NULL){
+	function __construct($page, $data = array(), $records_cnt = NULL){
 		parent::__construct($page);
 
 		$this->records = array();
@@ -73,7 +73,7 @@ class ww1_solders_set extends ww1_records_set{
 		$brief_fields_cnt = count($brief_fields);
 		// TODO: gettext
 		?>
-<p class="aligncenter">Всего найдено <?php print format_num($this->records_cnt, ' запись.', ' записи.', ' записей.')?></p>
+<p class="align-center">Всего найдено <?php print format_num($this->records_cnt, ' запись.', ' записи.', ' записей.')?></p>
 <?php
 		if(false !== ($show_detailed = !empty($detailed_fields))){
 ?>
@@ -123,7 +123,7 @@ class ww1_solders_set extends ww1_records_set{
 			print "<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
 			// TODO: gettext
 			$details = '. ' . ($row['surname'] ? $row['surname'] : '<span class="na">(фамилия не указана)</span>') . ', ' . ($row['name'] ? $row['name'] : '<span class="na">(имя не указано)</span>'); 
-			print "<td scope='row' class='alignright'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
+			print "<td scope='row' class='align-right'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
 			foreach($brief_fields as $key => $title){
 				// TODO: gettext
 				$val = $row[$key] ? esc_html($row[$key]) : '(не&nbsp;указано)';
@@ -200,7 +200,7 @@ class ww1_solders_set extends ww1_records_set{
 			);
 			shuffle($hints);
 			// TODO: gettext
-			print "<p class='nb aligncenter no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
+			print "<p class='nb align-center no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
 		else:
 		// TODO: gettext
 ?>
