@@ -266,9 +266,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		
 	// Расшифровываем источники
 	if(empty($raw['source_id']) || $raw['source_id'] == 0){
-		if(empty($raw['list_nr'])){
-			$raw['source_id'] = 0;
-		}else{
+		if(!empty($raw['list_nr'])){
 			$res = gbdb()->get_cell('SELECT id FROM ?_dic_source WHERE source LIKE ?title',
 					array('title' => "Именной список №$raw[list_nr] %"));
 			if($res)
