@@ -53,15 +53,15 @@ function _gb_scripts(){
  * @return array On success, a processed array of GB_Dependencies items; otherwise, an empty array.
  */
 function gb_print_scripts( $handles = false ) {
+	if('' === $handles) // for gb_head
+		$handles = false;
+
 	/**
 	 * Fires before scripts in the $handles queue are printed.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 */
-// 	do_action( 'gb_print_scripts' );
-
-// 	if ( !$handles )
-// 		return array(); // No need to instantiate if nothing is there.
+	do_action('gb_print_scripts');
 
 	return _gb_scripts()->do_items( $handles );
 }

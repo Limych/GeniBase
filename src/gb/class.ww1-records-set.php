@@ -74,28 +74,9 @@ class ww1_solders_set extends ww1_records_set{
 		if($this->page > $max_pg)	$this->page = $max_pg;
 
 		$brief_fields_cnt = count($brief_fields);
-		if(false !== ($show_detailed = !empty($detailed_fields))):
-?>
-<script type="text/javascript">
-	$(document).ready(function(){
-		$(".report tr.brief").click(function(){
-			$(this).next("tr").toggleClass("h");
-			$(this).find(".arrow").toggleClass("up");
-		});
-		$('body').keydown(function(e){
-			if(e.ctrlKey && e.keyCode == 37){	// Ctrl+Left
-				el = $('.paginator:first .prev');
-				if(el.length)	location.href = el.attr('href');
-			}
-			if(e.ctrlKey && e.keyCode == 39){	// Ctrl+Right
-				el = $('.paginator:first .next');
-				if(el.length)	location.href = el.attr('href');
+		if(false !== ($show_detailed = !empty($detailed_fields))){
+			gb_enqueue_script('ww1-records', '/gb/js/ww1-records.js', array('jquery'));
 		}
-		});
-	});
-</script>
-<?php
-		endif;	// if($show_detailed)
 	
 		// Формируем пагинатор
 		$pag = paginator($this->page, $max_pg);
@@ -197,7 +178,7 @@ class ww1_solders_set extends ww1_records_set{
 			print '<p class="align-center">Увы, ничего не найдено.</p>';
 			// TODO: gettext
 ?>
-<div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>
+<div class="notfound"><p>Что теперь делать?</p>
 <ol>
 	<li>Попробовать разные близкие варианты написания имён, фамилий, мест.
 		<div class="nb">Изначально списки писались от-руки в&nbsp;условиях войны и&nbsp;не&nbsp;всегда очень грамотными писарями. Во&nbsp;время их написания, набора в&nbsp;типографии и&nbsp;во&nbsp;время оцифровки их волонтёрами могли закрасться различные ошибки;</div></li>

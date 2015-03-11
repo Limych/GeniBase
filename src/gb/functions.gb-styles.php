@@ -48,16 +48,17 @@ function _gb_styles(){
  * @param string|bool|array $handles Styles to be printed. Default 'false'.
  * @return array On success, a processed array of GB_Dependencies items; otherwise, an empty array.
  */
-function gb_print_styles( $handles = false ) {
+function gb_print_styles($handles = false) {
+	if('' === $handles) // for gb_head
+		$handles = false;
+
 	/**
 	 * Fires before styles in the $handles queue are printed.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 */
-// 	do_action( 'gb_print_styles' );
-
-// 	if ( ! $handles )
-// 		do_action( 'gb_print_styles' );
+	if(!$handles)
+		do_action('gb_print_styles');
 
 	return _gb_styles()->do_items( $handles );
 }

@@ -143,12 +143,11 @@ function language_attributes($doctype = 'html') {
 	/**
 	 * Filter the language attributes for display in the html tag.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param string $output A space-separated list of language attributes.
 	*/
-	echo $output;
-// 	echo apply_filters('language_attributes', $output);	// TODO: actions
+	echo apply_filters('language_attributes', $output);
 }
 
 /**
@@ -160,14 +159,23 @@ function gb_head(){
 	/**
 	 * Print scripts or data in the head tag on the front end.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 */
-// 	do_action( 'gb_head' );	// TODO: actions
+	do_action('gb_head');
+}
 
-	// TODO: Remove block after actions will be enabled
-	@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
-	gb_print_styles();
-	gb_print_scripts();
+/**
+ * Fire the wp_footer action
+ *
+ * @since	2.1.0
+ */
+function gb_footer() {
+	/**
+	 * Print scripts or data before the closing body tag on the front end.
+	 *
+	 * @since	2.1.0
+	 */
+	do_action('gb_footer');
 }
 
 /**
@@ -182,8 +190,6 @@ function html_header($title, $do_index = TRUE){
 	gb_enqueue_style('styles', '/styles.css', array('normalize', 'responsive-tables', 'responsive-forms'));
 	gb_enqueue_style('print', '/print.css', array(), FALSE, 'print');
 	
-	gb_enqueue_script('jquery');
-	
 	$robots = $do_index ? 'All' : 'NoIndex,Follow';
 
 	@header('Content-Type: text/html; charset=utf-8');
@@ -194,7 +200,7 @@ function html_header($title, $do_index = TRUE){
 	<meta name="viewport" content="width=device-width, user-scalable=no" />
 	<meta name='robots' content='<?php print $robots; ?>' />
 
-	<title><?php echo $title; ?> - Первая мировая война, 1914–1918 гг. Алфавитные списки потерь нижних чинов</title>
+	<title><?php echo $title; ?>&nbsp;&mdash; Первая мировая война, 1914&ndash;1918 гг.</title>
 
 	<link rel="icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
@@ -245,6 +251,7 @@ function html_footer(){
 	ga('require', 'linkid', 'linkid.js');
 	ga('send', 'pageview');
 </script>
+<?php gb_footer(); ?>
 </body></html>
 <?php
 }

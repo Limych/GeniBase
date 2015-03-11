@@ -47,6 +47,9 @@ require_once(GB_INC_DIR . '/version.php');
 require_once(GB_INC_DIR . '/load.php');
 require_once(GB_INC_DIR . '/default-constants.php');
 
+// Add GeniBase version to headers
+@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
+
 // Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
 gb_initial_constants();
 
@@ -72,9 +75,13 @@ timer_start();
 gb_debug_mode();
 
 // Load early GeniBase files.
-require_once(GB_INC_DIR . '/pomo/mo.php');
 require_once(GB_INC_DIR . '/functions.php');
+require_once(GB_INC_DIR . '/actions.php');
+require_once(GB_INC_DIR . '/pomo/mo.php');
 require_once(GB_INC_DIR . '/class.gb-dbase.php');
+
+// Attach the default filters.
+require_once(GB_INC_DIR . '/default-filters.php');
 
 // Load the L10n library.
 require_once(GB_INC_DIR . '/l10n.php');

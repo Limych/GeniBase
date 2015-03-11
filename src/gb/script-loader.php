@@ -108,11 +108,10 @@ function gb_default_styles() {
 function print_head_scripts() {
 	global $concatenate_scripts;
 
-	// TODO: actions
-// 	if ( ! did_action('gb_print_scripts') ) {
-// 		/** This action is documented in gb/functions.gb-scripts.php */
-// 		do_action( 'gb_print_scripts' );
-// 	}
+	if(!did_action('gb_print_scripts')){
+		/** This action is documented in gb/functions.gb-scripts.php */
+		do_action('gb_print_scripts');
+	}
 
 	script_concat_settings();
 	_gb_scripts()->do_concat = $concatenate_scripts;
@@ -121,14 +120,12 @@ function print_head_scripts() {
 	/**
 	 * Filter whether to print the head scripts.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 *
 	 * @param bool $print Whether to print the head scripts. Default true.
 	*/
-	// TODO: actions
-// 	if ( apply_filters( 'print_head_scripts', true ) ) {
+	if(apply_filters('print_head_scripts', true))
 		_print_scripts();
-// 	}
 
 	_gb_scripts()->reset();
 	return _gb_scripts()->done;
@@ -149,14 +146,12 @@ function print_footer_scripts() {
 	/**
 	 * Filter whether to print the footer scripts.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 *
 	 * @param bool $print Whether to print the footer scripts. Default true.
 	*/
-	// TODO: actions
-// 	if ( apply_filters( 'print_footer_scripts', true ) ) {
+	if(apply_filters('print_footer_scripts', true))
 		_print_scripts();
-// 	}
 
 	_gb_scripts()->reset();
 	return _gb_scripts()->done;
@@ -202,11 +197,10 @@ function _print_scripts() {
  * @since	2.0.0
  */
 function gb_print_head_scripts() {
-	// TODO: actions
-// 	if ( ! did_action('gb_print_scripts') ) {
-// 		/** This action is documented in wp-includes/functions.wp-scripts.php */
-// 		do_action( 'gb_print_scripts' );
-// 	}
+	if(!did_action('gb_print_scripts')){
+		/** This action is documented in gb/functions.gb-scripts.php */
+		do_action( 'gb_print_scripts' );
+	}
 
 	return print_head_scripts();
 }
@@ -230,27 +224,26 @@ function gb_print_footer_scripts() {
 	/**
 	 * Fires when footer scripts are printed.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 */
-	_gb_footer_scripts();	// TODO: Remove after actions will be enabled
-// 	do_action( 'gb_print_footer_scripts' );
+	do_action( 'gb_print_footer_scripts' );
 }
 
 /**
  * Wrapper for do_action('gb_enqueue_scripts')
  *
  * Allows plugins to queue scripts for the front end using gb_enqueue_script().
- * Runs first in gb_head() where all is_home(), is_page(), etc. functions are available.
+ * Runs first in gb_head().
  *
- * @since	2.0.0
+ * @since	2.1.0
  */
 function gb_enqueue_scripts() {
 	/**
 	 * Fires when scripts and styles are enqueued.
 	 *
-	 * @since	2.0.0
+	 * @since	2.1.0
 	 */
-	do_action( 'gb_enqueue_scripts' );
+	do_action('gb_enqueue_scripts');
 }
 
 /**
@@ -320,19 +313,19 @@ function script_concat_settings() {
 
 	if ( ! isset($concatenate_scripts) ) {
 		$concatenate_scripts = defined('CONCATENATE_SCRIPTS') ? CONCATENATE_SCRIPTS : true;
-		if ( ! is_admin() || ( defined('GB_SCRIPT_DEBUG') && GB_SCRIPT_DEBUG ) )
+		if ( /*!is_admin() ||*/ ( defined('GB_SCRIPT_DEBUG') && GB_SCRIPT_DEBUG ) )
 			$concatenate_scripts = false;
 	}
 
 	if ( ! isset($compress_scripts) ) {
 		$compress_scripts = defined('COMPRESS_SCRIPTS') ? COMPRESS_SCRIPTS : true;
-		if ( $compress_scripts && ( ! get_site_option('can_compress_scripts') || $compressed_output ) )
+		if ( $compress_scripts && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output ) )
 			$compress_scripts = false;
 	}
 
 	if ( ! isset($compress_css) ) {
 		$compress_css = defined('COMPRESS_CSS') ? COMPRESS_CSS : true;
-		if ( $compress_css && ( ! get_site_option('can_compress_scripts') || $compressed_output ) )
+		if ( $compress_css && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output ) )
 			$compress_css = false;
 	}
 }
