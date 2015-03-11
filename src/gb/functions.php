@@ -815,7 +815,7 @@ function gb_allowed_protocols() {
  * 
  * Mostly for internal use.
  * 
- * @since	2.1.0
+ * @since	2.0.1
  * 
  * @param string $uri
  * @return array
@@ -996,7 +996,7 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 /**
  * Checks if the browser/device is a robot
  *
- * @since  2.1.0
+ * @since  2.0.1
  * 
  * @param string $is_first_visited_page	FALSE, if this user visit other pages before. 
  * @return boolean	TRUE if user is a robot.
@@ -1046,7 +1046,7 @@ function is_bot_user($is_first_visited_page = TRUE) {
 /**
  * Determine if SSL is used.
  *
- * @since 2.1.0
+ * @since 2.0.1
  *
  * @return bool True if SSL, false if not used.
  */
@@ -1065,7 +1065,7 @@ function is_ssl() {
 /**
  * Whether SSL login should be forced.
  *
- * @since 2.1.0
+ * @since 2.0.1
  *
  * @see force_ssl_admin()
  *
@@ -1079,7 +1079,7 @@ function force_ssl_login( $force = null ) {
 /**
  * Whether to force SSL used for the Administration Screens.
  *
- * @since 2.1.0
+ * @since 2.0.1
  *
  * @param string|bool $force Optional. Whether to force SSL in admin screens. Default null.
  * @return bool True if forced, false if not forced.
@@ -1094,4 +1094,18 @@ function force_ssl_admin( $force = null ) {
 	}
 
 	return $forced;
+}
+
+if(!function_exists('mb_ucfirst')){
+	/**
+	 * Make a string's first character uppercase (Multibyte version)
+	 *
+	 * @since	1.0.0
+	 *
+	 * @param	string	$str	The input string
+	 * @return	string		The resilting string.
+	 */
+	function mb_ucfirst($str){
+		return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
+	}
 }

@@ -18,28 +18,30 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 
 /*
 CREATE VIEW `?_v_persons` AS SELECT
-	`p`.`id`          AS `id`,
-	`p`.`surname`     AS `surname`,
-	`p`.`name`        AS `name`,
-	`p`.`rank`        AS `rank`,
-	`p`.`religion_id` AS `religion_id`,
-	`rl`.`religion`   AS `religion`,
-	`p`.`marital_id`  AS `marital_id`,
-	`mr`.`marital`    AS `marital`,
-	`rg`.`region`     AS `region`,
-	`rg`.`region_idx` AS `region_idx`,
-	`p`.`place`       AS `place`,
-	`p`.`reason_id`   AS `reason_id`,
-	`rs`.`reason`     AS `reason`,
-	`p`.`date`        AS `date`,
-	`p`.`source_id`             AS `source_id`,
-	`sc`.`source`               AS `source`,
-	`sc`.`source_type_id`       AS `source_type_id`,
-	`sc`.`source_number`        AS `source_nr`,
-	`p`.`list_pg`               AS `source_pg`,
-	`sc`.`source_url`           AS `source_url`,
-	`sc`.`source_pg_correction` AS `source_pg_correction`,
-	TRIM(LEADING CHAR(10) FROM CONCAT_WS(CHAR(10),TRIM(`p`.`comments`),TRIM(`sc`.`comments`))) AS `comments`
+	`p`.`id`			AS `id`,
+	`p`.`surname`		AS `surname`,
+	`p`.`name`			AS `name`,
+	`p`.`rank`			AS `rank`,
+	`p`.`religion_id`	AS `religion_id`,
+	`rl`.`religion`		AS `religion`,
+	`p`.`marital_id`	AS `marital_id`,
+	`mr`.`marital`		AS `marital`,
+	`rg`.`region`		AS `region`,
+	`rg`.`region_idx`	AS `region_idx`,
+	`p`.`place`			AS `place`,
+	`p`.`reason_id`		AS `reason_id`,
+	`rs`.`reason`		AS `reason`,
+	`p`.`date`			AS `date`,
+	`p`.`date_from`		AS `date_from`,
+	`p`.`date_to`		AS `date_to`,
+	`p`.`source_id`		AS `source_id`,
+	`sc`.`source`		AS `source`,
+	`sc`.`source_type_id`	AS `source_type_id`,
+	`sc`.`source_number`	AS `source_nr`,
+	`p`.`list_pg`		AS `source_pg`,		// TODO: Rename list_pg → source_pg
+	`sc`.`source_url`	AS `source_url`,
+	`sc`.`pg_correction`	AS `source_pg_correction`,
+	TRIM(LEADING CHAR(10) FROM CONCAT_WS(CHAR(10),TRIM(`p`.`comments`),TRIM(`sc`.`comments`)))	AS `comments`
 FROM `?_persons` AS `p`
 	JOIN `?_dic_region`   AS `rg` ON (`p`.`region_id`   = `rg`.`id` AND `rg`.`locale` = 'ru')
 	JOIN `?_dic_source`   AS `sc` ON (`p`.`source_id`   = `sc`.`id` AND `sc`.`locale` = 'ru')
@@ -196,9 +198,10 @@ class ww1_database_solders extends ww1_database {
 		$_SERVER['REQUEST_URI'] = $rq;
 
 		// Считаем, сколько всего записей в базе
-		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons AS p WHERE p.surname = "*"' .
-				'OR p.surname LIKE "(%" OR EXISTS ( SELECT 1 FROM ?_idx_search_keys i' .
-					' WHERE i.person_id = p.id )');
+		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons');
+// 		$this->records_cnt = gbdb()->get_cell('SELECT COUNT(*) FROM ?_persons AS p WHERE p.surname = "*" ' .
+// 				'OR p.surname LIKE "(%" OR EXISTS ( SELECT 1 FROM ?_idx_search_keys AS i ' .
+// 					'WHERE i.person_id = p.id )');
 	}
 
 	/**
@@ -345,11 +348,11 @@ class ww1_database_solders extends ww1_database {
 			$is_regex = is_string($val) && preg_match('/[?*]/uSs', $val);
 			if($key == 'date_from'){
 				// Дата с
-				$where[] = '`date_to` >= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
+				$where[] = 'p.`date_to` >= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
 
 			}elseif($key == 'date_to'){
 				// Дата по
-				$where[] = '`date_from` <= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
+				$where[] = 'p.`date_from` <= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
 
 			}elseif(in_array($key, $this->numeric_fields)){
 				// Числовые данные
@@ -358,15 +361,15 @@ class ww1_database_solders extends ww1_database {
 					$val = preg_split('/\D+/uS', trim($val));
 				$val = implode(', ', array_map('intval', $val));
 				if(false === strchr($val, ','))
-					$where[] = "`$key` = $val";	// Одиночное значение
+					$where[] = "p.`$key` = $val";	// Одиночное значение
 				else
-					$where[] = "`$key` IN ($val)";	// Множественное значение
+					$where[] = "p.`$key` IN ($val)";	// Множественное значение
 
 			}else{
 				// Текстовые данные…
 				if(is_array($val)){
 					// … в виде массива строк
-					$where[] = "`$key` IN (" .
+					$where[] = "p.`$key` IN (" .
 							implode(', ', array_map(array(gbdb(), 'data_escape'), $val)) . ')';
 
 				}else{
@@ -399,7 +402,7 @@ class ww1_database_solders extends ww1_database {
 										' OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
 										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk',
-										array('keys' => make_search_keys($val_a)));
+										array('keys' => make_metakeys($val_a)));
 								$q_fused_match = '(p.surname NOT LIKE ' .
 										implode(' OR p.surname NOT LIKE ',
 												gbdb()->data_escape(array_map(function ($text) {

@@ -173,7 +173,7 @@ function gb_head(){
 /**
  * Вывод начальной части страницы
  * 
- * @since	2.1.0	Added $do_index parameter.
+ * @since	2.0.1	Added $do_index parameter.
  *
  * @param	string	$title	Title of the page.
  * @param	boolean	$do_index	FALSE for restrict indexation of page.
@@ -253,7 +253,7 @@ function html_footer(){
  * For internal use.
  * 
  * @access	private
- * @since	2.1.0
+ * @since	2.0.1
  * 
  * @param string $pg
  * @return string

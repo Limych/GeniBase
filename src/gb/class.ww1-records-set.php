@@ -63,19 +63,18 @@ class ww1_solders_set extends ww1_records_set{
 		$this->records_cnt = ($records_cnt !== NULL ? $records_cnt : count($this->records));
 	}
 
-	
-	
-	// Вывод результатов поиска в виде html-таблицы
-	function show_report($brief_fields = NULL, $detailed_fields = array()){
+	/**
+	 * For internal use.
+	 * 
+	 * @param unknown $brief_fields
+	 * @param unknown $detailed_fields
+	 */
+	private function _show_report($brief_fields, $detailed_fields){
 		$max_pg = max(1, ceil($this->records_cnt / Q_LIMIT));
 		if($this->page > $max_pg)	$this->page = $max_pg;
 
 		$brief_fields_cnt = count($brief_fields);
-		// TODO: gettext
-		?>
-<p class="align-center">Всего найдено <?php print format_num($this->records_cnt, ' запись.', ' записи.', ' записей.')?></p>
-<?php
-		if(false !== ($show_detailed = !empty($detailed_fields))){
+		if(false !== ($show_detailed = !empty($detailed_fields))):
 ?>
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -96,26 +95,18 @@ class ww1_solders_set extends ww1_records_set{
 	});
 </script>
 <?php
-		}	// if($show_detailed)
-
+		endif;	// if($show_detailed)
+	
 		// Формируем пагинатор
 		$pag = paginator($this->page, $max_pg);
 		print $pag;	// Вывод пагинатора
 		// TODO: gettext
-?>
-<table id="report" class="report responsive-table"><thead>
-	<tr>
-		<th scope='col'>№ <nobr>п/п</nobr></th>
-<?php
-		foreach(array_values($brief_fields) as $val){
-			print "<th scope='col'>" . esc_html($val) . "</th>\n";
-		}
+		print '<table id="report" class="report responsive-table"><thead><tr><th scope="col">№ <nobr>п/п</nobr></th>';
+		foreach(array_values($brief_fields) as $val)
+			print "<th scope='col'>" . esc_html($val) . "</th>";
 		if($show_detailed)
-			print "<th class='no-print'></th>\n";
-?>
-	</tr>
-</thead><tbody>
-<?php
+			print "<th class='no-print'></th>";
+		print "</tr></thead><tbody>";
 		$even = 0;
 		$num = ($this->page - 1) * Q_LIMIT;
 		foreach($this->records as $row){
@@ -133,7 +124,7 @@ class ww1_solders_set extends ww1_records_set{
 			if($show_detailed){
 				print "<td class='rt-hide no-print'><div class='arrow'></div></td>\n";
 
-			print "</tr><tr class='detailed h" . ($even ? ' even' : ' odd') . "'>\n";
+				print "</tr><tr class='detailed h" . ($even ? ' even' : ' odd') . "'>\n";
 ?>
 		<td></td>
 		<td class='detailed' colspan="<?php print $brief_fields_cnt+1; ?>">
@@ -171,38 +162,40 @@ class ww1_solders_set extends ww1_records_set{
 						print "</tr>\n";
 					}
 				}
-?>
-			</table>
-		</td>
-	</tr>
-<?php
+				print "</table></td></tr>";
 			}	// if($show_detailed)
 		}	// foreach($this->records)
-		if($num == 0):
-			// TODO: gettext
-?>
-	<tr>
-		<td colspan="<?php print $brief_fields_cnt+2 ?>" style="text-align: center">Ничего не найдено</td>
-	</tr>
-<?php
-		endif;
 ?>
 </tbody></table>
 <?php
 		print $pag;	// Вывод пагинатора
-		if($num != 0):
-			// TODO: gettext
-			static $hints = array(
-				'По клику на строке интересной Вам записи открывается дополнительная информация.',
-				'По страницам результатов поиска можно перемещаться, используя клавиши <span class="kbdKey">Ctrl</span>+<span class="kbdKey">→</span> и <span class="kbdKey">Ctrl</span>+<span class="kbdKey">←</span>.',
-				'Многие записи снабжены ссылками на электронные копии источников, по которым создавалась эта база данных.',
-				'Обычно при поиске система автоматически ищет близкие по звучанию или написанию варианты фамилий. Все такие находки показываются в конце списка и выделяются цветом.',
-			);
-			shuffle($hints);
-			// TODO: gettext
-			print "<p class='nb align-center no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
-		else:
+
 		// TODO: gettext
+		static $hints = array(
+			'По клику на строке интересной Вам записи открывается дополнительная информация.',
+			'По страницам результатов поиска можно перемещаться, используя клавиши <span class="kbdKey">Ctrl</span>+<span class="kbdKey">→</span> и <span class="kbdKey">Ctrl</span>+<span class="kbdKey">←</span>.',
+			'Многие записи снабжены ссылками на электронные копии источников, по которым создавалась эта база данных.',
+			'Обычно при поиске система автоматически ищет близкие по звучанию или написанию варианты фамилий. Все такие находки показываются в конце списка и выделяются цветом.',
+		);
+		shuffle($hints);
+		// TODO: gettext
+		print "<p class='nb align-center no-print' style='margin-top: 3em'><strong>Обратите внимание:</strong> " . array_shift($hints) . "</p>";
+	} // function
+	
+	/**
+	 * Вывод результатов поиска в виде html-таблицы
+	 * 
+	 * @see ww1_records_set::show_report()
+	 */
+	function show_report($brief_fields = NULL, $detailed_fields = array()){
+		if($this->records_cnt){
+			// TODO: gettext
+			print '<p class="align-center">Всего найдено ' . format_num($this->records_cnt, ' запись.', ' записи.', ' записей.') . '</p>';
+			$this->_show_report($brief_fields, $detailed_fields);
+		}else{
+			// TODO: gettext
+			print '<p class="align-center">Увы, ничего не найдено.</p>';
+			// TODO: gettext
 ?>
 <div class="notfound"><p>Что делать, если ничего не&nbsp;найдено?</p>
 <ol>
@@ -214,6 +207,6 @@ class ww1_solders_set extends ww1_records_set{
 		<div class="nb">Система постоянно пополняется новыми материалами и, возможно, необходимая Вам информация будет добавлена в&nbsp;неё через некоторое время.</div></li>
 </ol></div>
 <?php
-		endif;
+		} // if($this->records_cnt)
 	}
 }

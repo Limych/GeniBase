@@ -27,18 +27,6 @@ class Tests_text extends GB_UnitTestCase {
 // 		$res = ;
 // 		$this->assertEquals($res, absint($src));
 	}
-	
-	function test_mb_ucfirst(){
-		$data = array(
-				'СоВсем'	=> 'СоВсем',
-				'простой'	=> 'Простой',
-				'ТЕКСТ'		=> 'ТЕКСТ',
-				'lorem'		=> 'Lorem',
-				'IPSUM'		=> 'IPSUM',
-		);
-		foreach ($data as $src => $res)
-			$this->assertEquals($res, mb_ucfirst($src));
-	}
 
 	function test_fix_russian(){
 // 		$src = ;

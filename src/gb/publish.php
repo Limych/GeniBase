@@ -263,21 +263,6 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if(isset($reason_conts[$tmp]))
 			$raw['reason_id'] = $reason_conts[$tmp];
 	}
-		
-	// Расшифровываем источники
-	if(empty($raw['source_id']) || $raw['source_id'] == 0){
-		if(!empty($raw['list_nr'])){
-			$res = gbdb()->get_cell('SELECT id FROM ?_dic_source WHERE source LIKE ?title',
-					array('title' => "Именной список №$raw[list_nr] %"));
-			if($res)
-				$raw['source_id'] = $res;
-			else{
-				$tmp = "Именной список №$raw[list_nr] убитым, раненым и без вести пропавшим " . ($raw['list_nr'] < 974 ? "нижним чинам." : "солдатам.");
-				$raw['source_id'] = gbdb()->set_row('dic_source',
-						array('source' => $tmp), FALSE, GB_DBase::MODE_INSERT);
-			}
-		}
-	}
 	
 	// Уточняем региональную привязку
 	if(!empty($raw['uyezd'])){
@@ -300,7 +285,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	prepublish_date($raw, $date_norm);
 
 	// Собираем данные для занесения в основную таблицу
-if(defined('P_DEBUG'))	var_export($raw);
+if(defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
 	return prepublish_make_data($raw, $have_trouble);
 } // function prepublish
 
@@ -316,7 +301,8 @@ if(defined('P_DEBUG'))	var_export($raw);
 function prepublish_make_data($raw_norm, &$have_trouble){
 	$have_trouble = false;
 	$pub = array();
-	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_nr list_pg') as $key){
+	// TODO: Rename list_pg → source_pg
+	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_pg') as $key){
 		if(!isset($raw_norm[$key])
 		|| ((empty($raw_norm[$key]) || absint($raw_norm[$key]) != $raw_norm[$key]) && $key != 'source_id' && preg_match('/(^|_)id$/uS', $key))
 		|| ($key == 'date_from' && ($raw_norm['date_from'] < MIN_DATE || $raw_norm['date_from'] > MAX_DATE))

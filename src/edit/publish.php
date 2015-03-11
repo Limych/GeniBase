@@ -174,12 +174,12 @@ $fields = array(
 	'date_from'	=> ' начиная с …',
 	'date_to'	=> ' заканчивая по …',
 	'source'	=> 'Источник:',
-	'list_nr'	=> ' № выпуска',
-	'list_pg'	=> ' № страницы',
+	'list_pg'	=> ' № страницы',	// TODO: Rename list_pg → source_pg
 	'comments'	=> 'Комментарии',
 );
-$dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_nr list_pg uyezd source_id');
-$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_nr list_pg comments date_from date_to source_id');
+// TODO: Rename list_pg → source_pg
+$dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_pg uyezd source_id');
+$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_pg comments date_from date_to source_id');
 ?>
 <p class='align-center'> <b>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</b></p>
 <p class='align-center'> <b>Внимание! Временно работать с формой ЗАПРЕЩЕНО!!!</b></p>
@@ -200,10 +200,10 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 			$('#source_link').load('<?php print $_SERVER['PHP_SELF'] ?>', {
 				mode: 'get_data',
 				source_id: $('#source_id').val(),
-				list_pg: $('#list_pg').val()
+				list_pg: $('#list_pg').val()	// TODO: Rename list_pg → source_pg
 			});
 		});
-		$('#list_pg').on('keyup change', function(){
+		$('#list_pg').on('keyup change', function(){	// TODO: Rename list_pg → source_pg
 			$('#source_id').trigger('change');
 		});
 		
@@ -259,10 +259,10 @@ foreach($fields as $key => $def){
 					($have_link ? esc_attr($dic_source[$raw[$key]]) : '') . "' />";
 			print "<br />";
 			if($have_link){
-				$pg_raw = esc_html($raw[list_pg]); //list_pg
-				$url_raw = str_replace('{pg}', $pg_raw + $dic_source_pg_corr[$raw[$key]] , $dic_source_url[$raw[$key]]);
+				// TODO: Rename list_pg → source_pg
+				$url_raw = str_replace('{pg}', intval($raw['list_pg'] + $dic_source_pg_corr[$raw[$key]]) , $dic_source_url[$raw[$key]]);
 				$text_raw = trim_text($dic_source[$raw[$key]], 40);
-				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр.$pg_raw</small>";
+				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр." . esc_html($raw['list_pg']) . "</small>";
 			}else
 				print "<small>Ссылка на источник не указана</small>";
 		}else{

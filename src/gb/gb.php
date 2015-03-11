@@ -182,6 +182,10 @@ function db_update(){
 	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL' .
 			' AND TIMESTAMPDIFF(HOUR, `first_request_datetime`, NOW()) > 3)' .
 			' OR `banned_to_datetime` < NOW()');
+	
+	// Удаляем поисковые ключи, которым не на что ссылаться
+	gbdb()->query('DELETE FROM ?_idx_search_keys WHERE NOT EXISTS ( SELECT 1 FROM ?_persons ' .
+			'WHERE id = person_id )');
 
 	// Генерируем поисковые ключи для фамилий
 	static $search_key_types = array(
@@ -202,7 +206,7 @@ function db_update(){
 				' INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
 				array('surname' => $surname));
 		
-		$keys = make_search_keys_assoc($surname);
+		$keys = make_metakeys_assoc($surname);
 		foreach ($keys as $key){
 			foreach ($key as $type => $vals){
 				foreach((array) $vals as $v){

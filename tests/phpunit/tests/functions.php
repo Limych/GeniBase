@@ -150,4 +150,16 @@ class Tests_Functions extends GB_UnitTestCase {
 		}
 		$_SERVER['REQUEST_URI'] = $old_req_uri;
 	}
+
+	function test_mb_ucfirst(){
+		$data = array(
+				'СоВсем'	=> 'СоВсем',
+				'простой'	=> 'Простой',
+				'ТЕКСТ'		=> 'ТЕКСТ',
+				'lorem'		=> 'Lorem',
+				'IPSUM'		=> 'IPSUM',
+		);
+		foreach ($data as $src => $res)
+			$this->assertEquals($res, mb_ucfirst($src));
+	}
 }

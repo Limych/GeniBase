@@ -18,6 +18,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 
 /**
  * Функция форматирования числа и вывода сопровождающего слова в правильном склонении
+ * @deprecated
  */
 function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 	$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', number_format($number, 0, ',', ' '));
@@ -53,12 +54,13 @@ define('GB_SEARCH_KEYS_MAKE_DATE', '2015-03-04');	// YYYY-MM-DD
  * @param	boolean			$use_hierarhy	TRUE, если надо для каждого слова вернуть массив соответствующих ключей.
  * @return	array		Массив вычисленных ключей.
  */
-function make_search_keys($text, $use_hierarhy = false){
+function make_metakeys($text, $use_hierarhy = false){
 	if(!is_array($text))
 		$text = preg_split('/[^\w\?\*]+/uS', $text, -1, PREG_SPLIT_NO_EMPTY);
 
 	$res = array();
 	foreach($text as $key => $word){
+		// TODO: actions
 		$key_metaphone	= array_filter((array) rus_metaphone($word, true));
 		$key_metascript	= array_filter((array) rus_metascript(mb_ucfirst($word)));
 
@@ -79,13 +81,13 @@ function make_search_keys($text, $use_hierarhy = false){
  * Return associative array with keys for each word.
  * 
  * @since	2.0.0
- * @see	make_search_keys()
+ * @see	make_metakeys()
  * 
  * @param	string|array	$text	Text for which we make search keys.
  * @return	array	Array of associative arrays with search keys.
  */
-function make_search_keys_assoc($text){
-	return make_search_keys($text, true);
+function make_metakeys_assoc($text){
+	return make_metakeys($text, true);
 }
 
 /**
@@ -201,18 +203,6 @@ function rus_metaphone($word, $trim_surname = false){
 
 	return $word;
 } // function rus_metaphone
-
-
-
-/**
- * Функция перевода первой буквы в верхний регистр.
- * 
- * @param	string	$text	Исходный текст.
- * @return	string		Изменённый текст.
- */
-function mb_ucfirst($text){
-	return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
-}
 
 
 
