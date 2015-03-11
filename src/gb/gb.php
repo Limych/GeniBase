@@ -236,20 +236,20 @@ function db_update(){
 	}
 	
 	// Обновляем списки вложенных регионов, если это необходимо
-	$result = gbdb()->get_column('SELECT `id`, `parent_id` FROM ?_dic_region WHERE `region_ids` = ""',
+	$result = gbdb()->get_column('SELECT `id`, `parent_id` FROM ?_dic_regions WHERE `region_ids` = ""',
 			array(), TRUE);
 	foreach ($result as $id => $parent_id){
-		$ids = gbdb()->get_cell('SELECT GROUP_CONCAT(`region_ids`) FROM ?_dic_region WHERE `parent_id` = ?id',
+		$ids = gbdb()->get_cell('SELECT GROUP_CONCAT(`region_ids`) FROM ?_dic_regions WHERE `parent_id` = ?id',
 				array('id' => $id));
 		$ids = trim(preg_replace('/,,+/uS', ',', $ids) ,',');
-		gbdb()->set_row('?_dic_region', array('region_ids' => (empty($ids) ? $id : "$id,$ids")), $id);
-		gbdb()->set_row('?_dic_region', array('region_ids' => ''), $parent_id);
+		gbdb()->set_row('?_dic_regions', array('region_ids' => (empty($ids) ? $id : "$id,$ids")), $id);
+		gbdb()->set_row('?_dic_regions', array('region_ids' => ''), $parent_id);
 	}
 	
 	// Обновляем полные наименования регионов, если это необходимо
-	$result = gbdb()->get_table('SELECT `id`, `parent_id`, `title` FROM ?_dic_region WHERE `region` = ""');
+	$result = gbdb()->get_table('SELECT `id`, `parent_id`, `title` FROM ?_dic_regions WHERE `region` = ""');
 	foreach ($result as $row){
-		$parent_region = gbdb()->get_cell('SELECT `region` FROM ?_dic_region WHERE `id` = ?parent_id', $row);
+		$parent_region = gbdb()->get_cell('SELECT `region` FROM ?_dic_regions WHERE `id` = ?parent_id', $row);
 		global $region_short;
 		$tmp = trim(
 				(empty($parent_region) || substr($parent_region, 0, 1) == '('
@@ -258,26 +258,26 @@ function db_update(){
 						? '' : strtr($row['title'], $region_short)),
 				', ');
 		if($tmp){
-			gbdb()->set_row('?_dic_region', array('region' => $tmp), $row['id']);
-			gbdb()->set_row('?_dic_region', array('region' => ''), array('parent_id' => $row['id']));
+			gbdb()->set_row('?_dic_regions', array('region' => $tmp), $row['id']);
+			gbdb()->set_row('?_dic_regions', array('region' => ''), array('parent_id' => $row['id']));
 		}
 	}
 	
 	// Обновляем статистику…
 	//
 	// … по регионам
-	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM ?_dic_region' .
+	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM ?_dic_regions' .
 			' ORDER BY `update_datetime` ASC LIMIT 7', array(), TRUE);
 	foreach ($result as $id => $region_ids){
 		if(empty($region_ids))	$region_ids = $id;
 		$cnt = '';
 		if(false !== strpos($region_ids, ',')){
 			// У региона есть вложенные регионы — просуммируем их статистику и прибавим к статистике региона
-			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM ?_dic_region' .
+			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM ?_dic_regions' .
 					' WHERE `parent_id` = ?parent_id', array('parent_id' => $id));
 			$cnt = $childs . ' + ';
 		}
-		gbdb()->query('UPDATE LOW_PRIORITY ?_dic_region SET `region_cnt` = ' . $cnt .
+		gbdb()->query('UPDATE LOW_PRIORITY ?_dic_regions SET `region_cnt` = ' . $cnt .
 				'( SELECT COUNT(*) FROM ?_persons WHERE `region_id` = ?region_ids ),' .
 				' `update_datetime` = NOW() WHERE `id` = ?id',
 				array('id' => $id, 'region_ids' => $region_ids));

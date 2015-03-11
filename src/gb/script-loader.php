@@ -115,6 +115,7 @@ function print_head_scripts() {
 
 	script_concat_settings();
 	_gb_scripts()->do_concat = $concatenate_scripts;
+	_gb_scripts()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	_gb_scripts()->do_head_items();
 
 	/**
@@ -141,6 +142,7 @@ function print_footer_scripts() {
 
 	script_concat_settings();
 	_gb_scripts()->do_concat = $concatenate_scripts;
+	_gb_scripts()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	_gb_scripts()->do_footer_items();
 
 	/**
@@ -167,7 +169,6 @@ function _print_scripts() {
 	if ( $zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP )
 		$zip = 'gzip';
 
-	_gb_scripts()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	if ( $concat = trim( _gb_scripts()->concat, ', ' ) ) {
 		if ( !empty(_gb_scripts()->print_code) ) {
 			echo "\n<script type='text/javascript'>\n";
@@ -255,6 +256,7 @@ function print_late_styles() {
 	global $concatenate_scripts;
 
 	_gb_styles()->do_concat = $concatenate_scripts;
+	_gb_styles()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	_gb_styles()->do_footer_items();
 
 	/**
@@ -264,10 +266,8 @@ function print_late_styles() {
 	 *
 	 * @param bool $print Whether to print the 'late' styles. Default true.
 	 */
-	// TODO: actions
-// 	if ( apply_filters( 'print_late_styles', true ) ) {
+	if ( apply_filters( 'print_late_styles', true ) )
 		_print_styles();
-// 	}
 
 	_gb_styles()->reset();
 	return _gb_styles()->done;
@@ -283,7 +283,6 @@ function _print_styles() {
 	if ( $zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP )
 		$zip = 'gzip';
 
-	_gb_styles()->do_concat = FALSE;	// TODO: Remove for enable concatenate mode
 	if ( !empty(_gb_styles()->concat) ) {
 		$dir = _gb_styles()->text_direction;
 		$ver = _gb_styles()->default_version;

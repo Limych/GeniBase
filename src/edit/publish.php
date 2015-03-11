@@ -12,7 +12,7 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 		$cur_id = intval($_REQUEST['region_id']);
 		$html = array();
 
-		$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id' .
+		$result = gbdb()->get_column('SELECT id, title FROM ?_dic_regions WHERE parent_id = ?id' .
 				' ORDER BY title', array('id' => $cur_id), TRUE);
 		$tmp = array();
 		foreach ($result as $id => $title)
@@ -20,11 +20,11 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 		if($tmp)	$html[] = '<select>' . implode($tmp) . '</select>';
 
 		do{
-			$r = gbdb()->get_cell('SELECT parent_id FROM ?_dic_region WHERE id = ?id',
+			$r = gbdb()->get_cell('SELECT parent_id FROM ?_dic_regions WHERE id = ?id',
 					array('id' => $cur_id));
 			if(!$r)	exit;
 
-			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_region WHERE parent_id = ?id' .
+			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_regions WHERE parent_id = ?id' .
 					' ORDER BY title', array('id' => $cur_id), TRUE);
 			$tmp = array();
 			foreach ($result as $id => $title)
@@ -44,12 +44,12 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 	}elseif(isset($_REQUEST['source_id'])){
 		if(intval($_REQUEST['source_id']) < 1)	exit;
 
-		$r = gbdb()->get_row('SELECT source, source_url, source_pg_correction FROM ?_dic_source WHERE id = ?id',
+		$r = gbdb()->get_row('SELECT source, source_url, source_pg_corr FROM ?_dic_sources WHERE id = ?id',
 				array('id' => $_REQUEST['source_id']));
 		if(!$r || empty($r['source_url']))	exit;
 
-		$pg = intval($_REQUEST['list_pg']);
-		$url = str_replace('{pg}', $pg + $r['source_pg_correction'], $r['source_url']);
+		$pg = intval($_REQUEST['source_pg']);
+		$url = str_replace('{pg}', $pg + $r['source_pg_corr'], $r['source_url']);
 		$text = trim_text($r['source'], 40);
 		print "<small>Ссылка на источник: «<a href='$url' target='_blank'>$text</a>», стр.$pg</small>";
 		exit;
@@ -124,21 +124,21 @@ $cnt = (object) gbdb()->get_row('SELECT COUNT(*) `total`' .
 		' FROM ?_persons_raw');
 
 // Делаем выборку справочников
-$dic_source = $dic_rank = array();
+$dic_sources = $dic_rank = array();
 //
-$dic_religion = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion ORDER BY religion', array(), TRUE);
-$dic_marital = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital ORDER BY marital', array(), TRUE);
+$dic_religions = gbdb()->get_column('SELECT id, religion FROM ?_dic_religions ORDER BY religion', array(), TRUE);
+$dic_maritals = gbdb()->get_column('SELECT id, marital FROM ?_dic_maritals ORDER BY marital', array(), TRUE);
 $dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_rank ORDER BY rank', array(), TRUE);
 //
-$dic_reason = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
+$dic_reasons = gbdb()->get_column('SELECT id, reason FROM ?_dic_reasons where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
-$result = gbdb()->get_table('SELECT id, source, source_url, pg_correction FROM ?_dic_source');
+$result = gbdb()->get_table('SELECT id, source, source_url, source_pg_corr FROM ?_dic_sources');
 foreach ($result as $r){
-	$dic_source        [$r['id']] = $r['source'];
+	$dic_sources        [$r['id']] = $r['source'];
 	$dic_source_url    [$r['id']] = $r['source_url'];
-	$dic_source_pg_corr[$r['id']] = $r['source_pg_correction'];
+	$dic_source_pg_corr[$r['id']] = $r['source_pg_corr'];
 }
-uasort($dic_source, function($a, $b){
+uasort($dic_sources, function($a, $b){
 	if(preg_match('/№(\d+)/uS', $a, $ma) && preg_match('/№(\d+)/uS', $b, $mb)){
 		if(intval($ma[1]) == intval($mb[1]))
 			return 0;
@@ -174,12 +174,12 @@ $fields = array(
 	'date_from'	=> ' начиная с …',
 	'date_to'	=> ' заканчивая по …',
 	'source'	=> 'Источник:',
-	'list_pg'	=> ' № страницы',	// TODO: Rename list_pg → source_pg
+	'source_pg'	=> ' № страницы',	// TODO: Rename source_pg → source_pg
 	'comments'	=> 'Комментарии',
 );
-// TODO: Rename list_pg → source_pg
-$dfields = explode(' ', 'surname name region_id place rank religion marital reason date list_pg uyezd source_id');
-$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date list_pg comments date_from date_to source_id');
+// TODO: Rename source_pg → source_pg
+$dfields = explode(' ', 'surname name region_id place rank religion marital reason date source_pg uyezd source_id');
+$pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date source_pg comments date_from date_to source_id');
 ?>
 <p class='align-center'> <b>Аккуратнее с этой формой — отменить изменения НЕВОЗМОЖНО!</b></p>
 <p class='align-center'> <b>Внимание! Временно работать с формой ЗАПРЕЩЕНО!!!</b></p>
@@ -200,10 +200,10 @@ $pfields = explode(' ', 'surname name region_id place rank religion_id marital_i
 			$('#source_link').load('<?php print $_SERVER['PHP_SELF'] ?>', {
 				mode: 'get_data',
 				source_id: $('#source_id').val(),
-				list_pg: $('#list_pg').val()	// TODO: Rename list_pg → source_pg
+				source_pg: $('#source_pg').val()
 			});
 		});
-		$('#list_pg').on('keyup change', function(){	// TODO: Rename list_pg → source_pg
+		$('#source_pg').on('keyup change', function(){
 			$('#source_id').trigger('change');
 		});
 		
@@ -256,13 +256,13 @@ foreach($fields as $key => $def){
 		if($key == 'source_id'){
 			$have_link = isset($raw[$key]) && !empty($dic_source_url[$raw[$key]]);
 			print "<input type='text' size=60 name='raw[$key]' value='" .
-					($have_link ? esc_attr($dic_source[$raw[$key]]) : '') . "' />";
+					($have_link ? esc_attr($dic_sources[$raw[$key]]) : '') . "' />";
 			print "<br />";
 			if($have_link){
-				// TODO: Rename list_pg → source_pg
-				$url_raw = str_replace('{pg}', intval($raw['list_pg'] + $dic_source_pg_corr[$raw[$key]]) , $dic_source_url[$raw[$key]]);
-				$text_raw = trim_text($dic_source[$raw[$key]], 40);
-				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр." . esc_html($raw['list_pg']) . "</small>";
+				// TODO: Rename source_pg → source_pg
+				$url_raw = str_replace('{pg}', intval($raw['source_pg'] + $dic_source_pg_corr[$raw[$key]]) , $dic_source_url[$raw[$key]]);
+				$text_raw = trim_text($dic_sources[$raw[$key]], 40);
+				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр." . esc_html($raw['source_pg']) . "</small>";
 			}else
 				print "<small>Ссылка на источник не указана</small>";
 		}else{
@@ -289,7 +289,7 @@ foreach($fields as $key => $def){
 		}elseif($key == 'religion_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
-			foreach($dic_religion as $k => $d){
+			foreach($dic_religions as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
 						esc_html(trim_text($d)) . "</option>\n";
 			}
@@ -298,7 +298,7 @@ foreach($fields as $key => $def){
 		}elseif($key == 'marital_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
-			foreach($dic_marital as $k => $d){
+			foreach($dic_maritals as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
 						esc_html(trim_text($d)) . "</option>\n";
 			}
@@ -307,7 +307,7 @@ foreach($fields as $key => $def){
 		}elseif($key == 'source_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
-			foreach($dic_source as $k => $d){
+			foreach($dic_sources as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
 						esc_html(trim_text($d)) . "</option>\n";
 			}
@@ -316,7 +316,7 @@ foreach($fields as $key => $def){
 		}elseif($key == 'reason_id'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
-			foreach($dic_reason as $k => $d){
+			foreach($dic_reasons as $k => $d){
 				print "\t\t<option value='$k'" . ($k != $sel ? "" : " selected='selected'") . ">" .
 						esc_html(trim_text($d)) . "</option>\n";
 			}

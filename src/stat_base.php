@@ -27,7 +27,7 @@ html_header('Статистика по запросам к базе данных
 <?php
 $even = 0;
 
-// TODO: Rename list_pg → source_pg
+// TODO: Rename source_pg → source_pg
 $result = gbdb()->query("SELECT
  CASE WHEN `Год` IS NULL 
       THEN 'Всего'
@@ -74,7 +74,7 @@ SELECT
              OR (INSTR(url,'&name='         ) >0) THEN 1 ELSE 0 END) `Поиск по имени/отчеству` 
  ,SUM(CASE WHEN (INSTR(url,'place='         ) >0)
              OR (INSTR(url,'region='        ) >0) THEN 1 ELSE 0 END) `Поиск по месту` 
- ,SUM(CASE WHEN (INSTR(url,'list_pg='       ) >0) THEN 1 ELSE 0 END) `Поиск по № страницы` 
+ ,SUM(CASE WHEN (INSTR(url,'source_pg='       ) >0) THEN 1 ELSE 0 END) `Поиск по № страницы` 
  ,SUM(CASE WHEN (INSTR(url,'religion%5B%5D=') >0) THEN 1 ELSE 0 END) `Поиск по вероисповеданию` 
  ,SUM(CASE WHEN (INSTR(url,'marital%5B%5D=' ) >0) THEN 1 ELSE 0 END) `Поиск по семейному положению` 
  ,SUM(CASE WHEN (INSTR(url,'reason%5B%5D='  ) >0) THEN 1 ELSE 0 END) `Поиск по событиям` 

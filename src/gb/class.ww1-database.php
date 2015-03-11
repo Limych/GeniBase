@@ -18,36 +18,36 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 
 /*
 CREATE VIEW `?_v_persons` AS SELECT
-	`p`.`id`			AS `id`,
-	`p`.`surname`		AS `surname`,
-	`p`.`name`			AS `name`,
-	`p`.`rank`			AS `rank`,
-	`p`.`religion_id`	AS `religion_id`,
-	`rl`.`religion`		AS `religion`,
-	`p`.`marital_id`	AS `marital_id`,
-	`mr`.`marital`		AS `marital`,
-	`rg`.`region`		AS `region`,
-	`rg`.`region_idx`	AS `region_idx`,
-	`p`.`place`			AS `place`,
-	`p`.`reason_id`		AS `reason_id`,
-	`rs`.`reason`		AS `reason`,
-	`p`.`date`			AS `date`,
-	`p`.`date_from`		AS `date_from`,
-	`p`.`date_to`		AS `date_to`,
-	`p`.`source_id`		AS `source_id`,
-	`sc`.`source`		AS `source`,
+	 `p`.`id`				AS `id`,
+	 `p`.`surname`			AS `surname`,
+	 `p`.`name`				AS `name`,
+	 `p`.`rank`				AS `rank`,
+	 `p`.`religion_id`		AS `religion_id`,
+	`rl`.`religion`			AS `religion`,
+	 `p`.`marital_id`		AS `marital_id`,
+	`mr`.`marital`			AS `marital`,
+	`rg`.`region`			AS `region`,
+	`rg`.`region_idx`		AS `region_idx`,
+	 `p`.`place`			AS `place`,
+	 `p`.`reason_id`		AS `reason_id`,
+	`rs`.`reason`			AS `reason`,
+	 `p`.`date`				AS `date`,
+	 `p`.`date_from`		AS `date_from`,
+	 `p`.`date_to`			AS `date_to`,
+	 `p`.`source_id`		AS `source_id`,
+	`sc`.`source`			AS `source`,
 	`sc`.`source_type_id`	AS `source_type_id`,
 	`sc`.`source_number`	AS `source_nr`,
-	`p`.`list_pg`		AS `source_pg`,		// TODO: Rename list_pg → source_pg
-	`sc`.`source_url`	AS `source_url`,
-	`sc`.`pg_correction`	AS `source_pg_correction`,
+	 `p`.`source_pg`		AS `source_pg`,
+	`sc`.`source_url`		AS `source_url`,
+	`sc`.`source_pg_corr`	AS `source_pg_corr`,
 	TRIM(LEADING CHAR(10) FROM CONCAT_WS(CHAR(10),TRIM(`p`.`comments`),TRIM(`sc`.`comments`)))	AS `comments`
 FROM `?_persons` AS `p`
-	JOIN `?_dic_region`   AS `rg` ON (`p`.`region_id`   = `rg`.`id` AND `rg`.`locale` = 'ru')
-	JOIN `?_dic_source`   AS `sc` ON (`p`.`source_id`   = `sc`.`id` AND `sc`.`locale` = 'ru')
-	JOIN `?_dic_reason`   AS `rs` ON (`p`.`reason_id`   = `rs`.`id` AND `rs`.`locale` = 'ru')
-	JOIN `?_dic_religion` AS `rl` ON (`p`.`religion_id` = `rl`.`id` AND `rl`.`locale` = 'ru')
-	JOIN `?_dic_marital`  AS `mr` ON (`p`.`marital_id`  = `mr`.`id` AND `mr`.`locale` = 'ru')
+	JOIN `?_dic_regions`   AS `rg` ON (`p`.`region_id`   = `rg`.`id` AND `rg`.`locale` = 'ru')
+	JOIN `?_dic_sources`   AS `sc` ON (`p`.`source_id`   = `sc`.`id` AND `sc`.`locale` = 'ru')
+	JOIN `?_dic_reasons`   AS `rs` ON (`p`.`reason_id`   = `rs`.`id` AND `rs`.`locale` = 'ru')
+	JOIN `?_dic_religions` AS `rl` ON (`p`.`religion_id` = `rl`.`id` AND `rl`.`locale` = 'ru')
+	JOIN `?_dic_maritals`  AS `mr` ON (`p`.`marital_id`  = `mr`.`id` AND `mr`.`locale` = 'ru')
 WHERE (1 = 1)
 */
 
@@ -234,19 +234,19 @@ class ww1_database_solders extends ww1_database {
 				' ORDER BY rank', array(), TRUE);
 
 		// Получаем список всех вариантов значений вероисповеданий
-		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religion' .
+		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religions' .
 				' WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
 
 		// Получаем список всех вариантов значений семейных положений
-		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_marital' .
+		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_maritals' .
 				' WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
 
 		// Получаем список всех вариантов значений событий
-		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reason WHERE reason_cnt != 0' .
+		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reasons WHERE reason_cnt != 0' .
 				' ORDER BY reason', array(), TRUE);
 
 		// Получаем список всех вариантов значений типов источников
-		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_type WHERE source_type_cnt != 0' .
+		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_types WHERE source_type_cnt != 0' .
 				' ORDER BY source_type', array(), TRUE);
 
 		// Выводим html-поля
@@ -463,7 +463,7 @@ class ww1_database_solders extends ww1_database {
 		if(false === $ids){
 			// Получаем результаты поиска
 			$ids = gbdb()->get_column($query);
-			if($ids)	$ids = array_map('intval', $ids);
+// 			if($ids)	$ids = array_map('intval', $ids);	// TODO: Out of memory crash
 			
 			// TODO: Добавить сохранение результатов поиска в кэш
 		}

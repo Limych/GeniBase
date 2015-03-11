@@ -118,7 +118,7 @@ class ww1_solders_set extends ww1_records_set{
 						if(!empty($row['source_url'])){
 							if($row['source_pg'] > 0){
 								// TODO: gettext
-								$text = '<a href="' . str_replace('{pg}', (int) $row['source_pg'] + (int) $row['source_pg_correction'], $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
+								$text = '<a href="' . str_replace('{pg}', (int) ($row['source_pg'] + $row['source_pg_corr']), $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
 							}else{
 								// TODO: gettext
 								$text = '<a href="' . $row['source_url'] . '" target="_blank">«' . $text . '»</a>';

@@ -207,7 +207,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if (empty($religion_conts)) {
 			$religion_conts[''] = 18;	// Special ID for "(not set)"
 	
-			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religion' .
+			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religions' .
 					' WHERE `religion` NOT LIKE "(%"');
 			foreach ($result as $row){
 				$tmp = array_merge((array) mb_strtolower($row['religion']),
@@ -252,7 +252,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		static	$reason_conts = array();
 		if(empty($reason_conts)){
 			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2id AS rid,' .
-					' ?_dic_reason AS r WHERE rid.reason_id = r.id and r.`reason` NOT LIKE "(%"');
+					' ?_dic_reasons AS r WHERE rid.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 			$reason_conts[''] = 1;	// Special ID for "(not set)"
 			foreach ($result as $row)
 				$reason_conts[trim(mb_strtolower($row['reason_raw']))] = $row['reason_id'];
@@ -266,7 +266,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	
 	// Уточняем региональную привязку
 	if(!empty($raw['uyezd'])){
-		$res = gbdb()->get_cell('SELECT id FROM ?_dic_region WHERE parent_id = ?parent_id AND title LIKE ?title',
+		$res = gbdb()->get_cell('SELECT id FROM ?_dic_regions WHERE parent_id = ?parent_id AND title LIKE ?title',
 				array(
 					'parent_id'	=> $raw['region_id'],
 					'title'		=> $raw['uyezd'] . ' %',
@@ -274,7 +274,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		if($res)
 			$raw['region_id'] = $res;
 		else {
-			$raw['region_id'] = gbdb()->set_row('?_dic_region', array(
+			$raw['region_id'] = gbdb()->set_row('?_dic_regions', array(
 				'parent_id'	=> $raw['region_id'],
 				'title'		=> $raw['uyezd'] . ' ',
 			), FALSE, GB_DBase::MODE_INSERT);
@@ -301,8 +301,8 @@ if(defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
 function prepublish_make_data($raw_norm, &$have_trouble){
 	$have_trouble = false;
 	$pub = array();
-	// TODO: Rename list_pg → source_pg
-	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id list_pg') as $key){
+	// TODO: Rename source_pg → source_pg
+	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id source_pg') as $key){
 		if(!isset($raw_norm[$key])
 		|| ((empty($raw_norm[$key]) || absint($raw_norm[$key]) != $raw_norm[$key]) && $key != 'source_id' && preg_match('/(^|_)id$/uS', $key))
 		|| ($key == 'date_from' && ($raw_norm['date_from'] < MIN_DATE || $raw_norm['date_from'] > MAX_DATE))

@@ -56,7 +56,7 @@ html_footer();
 function region_stat($parent_id = 0, $level = 1){
 	global $even;
 
-	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_region' .
+	$result = gbdb()->get_table('SELECT id, title, region_comment, region_cnt FROM ?_dic_regions' .
 			' WHERE parent_id = ?parent_id ORDER BY title', array('parent_id'	=> $parent_id));
 	foreach ($result as $row){
 		$even = 1-$even;
