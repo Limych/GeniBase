@@ -12,7 +12,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -51,8 +51,8 @@ FROM `?_persons` AS `p`
 WHERE (1 = 1)
 */
 
-if(!defined('MIN_DATE'))	define('MIN_DATE', '1914-07-28');
-if(!defined('MAX_DATE'))	define('MAX_DATE', '1918-11-11');
+if( !defined('MIN_DATE'))	define('MIN_DATE', '1914-07-28');
+if( !defined('MAX_DATE'))	define('MAX_DATE', '1918-11-11');
 
 /********************************************************************************
  * Абстрактный класс работы с базой данных
@@ -79,7 +79,7 @@ abstract class ww1_database {
 		$this->records_cnt = 0;
 
 		$this->page = get_request_attr('pg', 1);
-		if($this->page < 1)	$this->page = 1;
+		if( $this->page < 1)	$this->page = 1;
 	}
 
 	/**
@@ -156,11 +156,11 @@ class ww1_database_solders extends ww1_database {
 		parent::__construct($qmode);
 		$args = gb_parse_args($_REQUEST);
 
-		if($qmode == Q_SIMPLE){
+		if( $qmode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 			foreach($this->simple_fields as $key){
 				$this->query[$key] = isset($args[$key]) ? trim((string) $args[$key]) : '';
-				if (is_translit($this->query[$key]))
+				if( is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
 				$this->have_query |= !empty($this->query[$key]);
 			}
@@ -173,11 +173,11 @@ class ww1_database_solders extends ww1_database {
 			// Расширенный режим поиска **************************************
 			foreach($this->extended_fields as $key){
 				$this->query[$key] = isset($args[$key]) ? $args[$key] : '';
-				if(is_string($this->query[$key]))
+				if( is_string($this->query[$key]))
 					$this->query[$key] = trim($this->query[$key]);
-				if (is_translit($this->query[$key]))
+				if( is_translit($this->query[$key]))
 					$this->query[$key] = translit2rus($this->query[$key]);
-				if(in_array($key, $this->dictionary_fields) && !is_array($this->query[$key]))
+				if( in_array($key, $this->dictionary_fields) && !is_array($this->query[$key]))
 					$this->query[$key] = array();
 				$this->have_query |= !empty($this->query[$key]);
 			}
@@ -208,7 +208,7 @@ class ww1_database_solders extends ww1_database {
 	 * Генерация html-формы поиска.
 	 */
 	function search_form(){
-		if($this->query_mode == Q_SIMPLE){
+		if( $this->query_mode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 
 			// Выводим html-поля
@@ -301,7 +301,7 @@ class ww1_database_solders extends ww1_database {
 					break;
 
 				default:
-					if(in_array($key, $this->dictionary_fields)){		// Списковые поля
+					if( in_array($key, $this->dictionary_fields)){		// Списковые поля
 						print "<div class='field'>" .
 								"<label for='q_$key'>$val:</label>" .
 								"<div><select id='q_$key' name='${key}[]' multiple='multiple' size='5'>";
@@ -326,7 +326,7 @@ class ww1_database_solders extends ww1_database {
 	 * Осуществление поиска и генерация класса результатов поиска.
 	 */
 	function do_search(){
-		if($this->query_mode == Q_SIMPLE){
+		if( $this->query_mode == Q_SIMPLE){
 			// Простой режим поиска
 			$fields = $this->simple_fields;
 			$this->name_ext = $this->surname_ext = true;
@@ -341,12 +341,12 @@ class ww1_database_solders extends ww1_database {
 		$q_fused_match = 0;
 		foreach($fields as $key){
 			$val = $this->query[$key];
-			if(!is_array($val))
+			if( !is_array($val))
 				$val = fix_russian($val);
-			if(empty($val))	continue;
+			if( empty($val))	continue;
 			
 			$is_regex = is_string($val) && preg_match('/[?*]/uSs', $val);
-			if($key == 'date_from'){
+			if( $key == 'date_from'){
 				// Дата с
 				$where[] = 'p.`date_to` >= STR_TO_DATE(' . gbdb()->data_escape($val) . ', "%Y-%m-%d")';
 
@@ -356,25 +356,25 @@ class ww1_database_solders extends ww1_database {
 
 			}elseif(in_array($key, $this->numeric_fields)){
 				// Числовые данные
-				if(in_array($key, $this->ids_fields))	$key .= '_id';	// Проверка на поля с ID
-				if(!is_array($val))
+				if( in_array($key, $this->ids_fields))	$key .= '_id';	// Проверка на поля с ID
+				if( !is_array($val))
 					$val = preg_split('/\D+/uS', trim($val));
 				$val = implode(', ', array_map('intval', $val));
-				if(false === strchr($val, ','))
+				if( false === strchr($val, ','))
 					$where[] = "p.`$key` = $val";	// Одиночное значение
 				else
 					$where[] = "p.`$key` IN ($val)";	// Множественное значение
 
 			}else{
 				// Текстовые данные…
-				if(is_array($val)){
+				if( is_array($val)){
 					// … в виде массива строк
 					$where[] = "p.`$key` IN (" .
 							implode(', ', array_map(array(gbdb(), 'data_escape'), $val)) . ')';
 
 				}else{
 					// … в виде строки
-					if($key == 'region' || $key == 'place'){
+					if( $key == 'region' || $key == 'place'){
 						// Удаляем слова типа «губерния», «уезд» и т.п.
 						global $region_short;
 						$val = strtr($val, array_fill_keys(array_merge(array_keys($region_short), array_values($region_short)), ''));
@@ -388,7 +388,7 @@ class ww1_database_solders extends ww1_database {
 									' AS ktype FROM ?_idx_search_keys AS k WHERE ');
 							$q_fused_match = '2*(p.surname LIKE "%?%") +4*(p.surname LIKE "%*%")' .
 									' +8*(p.surname = "*")';
-							if($is_regex || !$this->surname_ext){
+							if( $is_regex || !$this->surname_ext){
 								$data = gbdb()->data_escape(GB_DBase::make_condition($val_a), TRUE);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
 								$from_q .= '(k.surname_key_type = 1 AND (k.surname_key LIKE ' .
@@ -397,12 +397,20 @@ class ww1_database_solders extends ww1_database {
 										implode(' LIKE k.surname_mask OR ', $data2) .
 										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk';
 							}else{
+								$data = make_metakeys(array(
+										GB_MK_SURNAME => $val_a,										
+								));
+								$metakeys = array();
+								foreach($data as $mks)
+									$metakeys = array_merge($metakeys, $mks);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
-								$from_q .= gbdb()->prepare_query('k.surname_key IN (?keys)' .
-										' OR (k.surname_mask != "" AND ' .
+								$from_q .= '(k.surname_key_type >= ' . GB_MK_SURNAME .
+										' AND k.surname_key_type < ' . (GB_MK_SURNAME +100) .
+										' AND ' . gbdb()->prepare_query('k.surname_key IN (?keys)',
+											array('keys' => $metakeys)) .
+										') OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
-										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk',
-										array('keys' => make_metakeys($val_a)));
+										' LIKE k.surname_mask) GROUP BY k.person_id ) AS isk';
 								$q_fused_match = '(p.surname NOT LIKE ' .
 										implode(' OR p.surname NOT LIKE ',
 												gbdb()->data_escape(array_map(function ($text) {
@@ -430,7 +438,7 @@ class ww1_database_solders extends ww1_database {
 
 						case 'place':
 							$data = gbdb()->data_escape(GB_DBase::make_regex($val_a), TRUE);
-							if($this->query_mode == Q_SIMPLE){
+							if( $this->query_mode == Q_SIMPLE){
 								$where[] = implode(' AND ', array_map(function ($v){
 											return "(p.region_idx RLIKE $v OR UPPER(p.place) RLIKE $v)";
 										}, $data));
@@ -446,7 +454,7 @@ class ww1_database_solders extends ww1_database {
 
 		$order[] = 'p.surname, p.name, p.region, p.place, p.`rank`, p.source, p.source_pg';
 
-		if(empty($from) || empty($where))
+		if( empty($from) || empty($where))
 			return new ww1_solders_set($this->page);
 
 		$from	= ' FROM ' . implode(', ', $from);
@@ -455,34 +463,34 @@ class ww1_database_solders extends ww1_database {
 		$query	= 'SELECT' . (!defined('GB_DEBUG_SQL_PROF') ? '' : ' SQL_NO_CACHE') . ' p.id' .
 				$from . $where . $order;
 		
-		if (defined('GB_DEBUG_SQL_PROF'))
+		if( defined('GB_DEBUG_SQL_PROF'))
 			gbdb()->query('SET PROFILING=1');
 
 		$ids = false;
 		// TODO: Добавить получение результатов поиска из кэша
-		if(false === $ids){
+		if( false === $ids){
 			// Получаем результаты поиска
 			$ids = gbdb()->get_column($query);
-// 			if($ids)	$ids = array_map('intval', $ids);	// TODO: Out of memory crash
+// 			if( $ids)	$ids = array_map('intval', $ids);	// TODO: Out of memory crash
 			
 			// TODO: Добавить сохранение результатов поиска в кэш
 		}
 
 		$data = $ids_part = array();
-		if(!empty($ids))
+		if( !empty($ids))
 			$ids_part = array_slice($ids, ($this->page - 1) * Q_LIMIT, Q_LIMIT);
-		if(!empty($ids_part)){
+		if( !empty($ids_part)){
 			// Получаем текущую порцию результатов для вывода в таблицу
 			$result = gbdb()->get_table('SELECT p.*, ' . $q_fused_match .
 					' AS fused_match FROM ?_v_persons AS p WHERE p.id IN (?ids)',
 					array('ids' => $ids_part), 'id');
 			//
 			// Дополняем данные новыми (неформализуемыми) полями
-			if(!empty($result)){
+			if( !empty($result)){
 				$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,' .
 						' additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
 						array('ids' => $ids_part));
-				if(is_array($add_fields))	array_merge($result, array_filter($add_fields));
+				if( is_array($add_fields))	array_merge($result, array_filter($add_fields));
 				
 				foreach ($ids_part as $id)
 					$data[$id] = $result[$id];
@@ -490,13 +498,13 @@ class ww1_database_solders extends ww1_database {
 		}
 		$report = new ww1_solders_set($this->page, $data, count($ids));
 
-		if (defined('GB_DEBUG_SQL_PROF')) {
+		if( defined('GB_DEBUG_SQL_PROF')) {
 			print("\n<!-- SQL-Profile:\n");
 			$total = 0;
 			$result = gbdb()->get_column('SHOW PROFILE', array(), TRUE);
 			foreach ($result as $key => $val){
 				printf("%20s: %7.3f sec\n", $key, $val);
-				if($key == 'Table lock')
+				if( $key == 'Table lock')
 					continue;
 				$total += $val;
 			}

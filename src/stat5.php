@@ -29,7 +29,7 @@ $result = gbdb()->get_column('SELECT rank, COUNT(*) FROM ?_persons GROUP BY rank
 		array(), TRUE);
 foreach ($result as $field => $cnt){
 	$even = 1-$even;
-	if(empty($field))
+	if( empty($field))
 		$field = '(не указано)';
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($field) .
 			"</td>\n\t<td class='align-right'>" . format_num($cnt) . "</td>\n</tr>";

@@ -10,7 +10,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -68,7 +68,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			break;
 		case 'charset':
 // 			$output = get_option('blog_charset');	// TODO: options
-			if(empty($output))	$output = 'UTF-8';
+			if( empty($output))	$output = 'UTF-8';
 			break;
 		case 'html_type' :
 // 			$output = get_option('html_type');	// TODO: options
@@ -87,27 +87,27 @@ function get_siteinfo($show = '', $filter = 'raw'){
 	}
 
 	$url = (strpos($show, 'url') !== false || strpos($show, 'directory') !== false);
-	if('display' == $filter){
-		if($url){
+	if( 'display' == $filter){
+		if( $url){
 			/**
 			 * Filter the URL returned by get_siteinfo().
 			 *
-			 * @since 2.0.0
+			 * @since 2.1.1
 			 *
 			 * @param mixed $output The URL returned by siteinfo().
 			 * @param mixed $show   Type of information requested.
 			 */
-// 			$output = apply_filters( 'siteinfo_url', $output, $show );	// TODO: actions
+			$output = apply_filters( 'siteinfo_url', $output, $show );
 		}else{
 			/**
 			 * Filter the site information returned by get_siteinfo().
 			 *
-			 * @since 2.0.0
+			 * @since 2.1.1
 			 *
 			 * @param mixed $output The requested non-URL site information.
 			 * @param mixed $show   Type of information requested.
 			 */
-// 			$output = apply_filters( 'siteinfo', $output, $show );	// TODO: actions
+			$output = apply_filters( 'siteinfo', $output, $show );
 		}
 	}
 
@@ -127,14 +127,14 @@ function get_siteinfo($show = '', $filter = 'raw'){
 function language_attributes($doctype = 'html') {
 	$attributes = array();
 
-	if(function_exists('is_rtl') && is_rtl())
+	if( function_exists('is_rtl') && is_rtl())
 		$attributes[] = 'dir="rtl"';
 
-	if($lang = get_siteinfo('language')){
-		if(/* get_option('html_type') == 'text/html' || */ $doctype == 'html' )	// TODO: options
+	if( $lang = get_siteinfo('language')){
+		if( /* get_option('html_type') == 'text/html' || */ $doctype == 'html' )	// TODO: options
 			$attributes[] = "lang=\"$lang\"";
 
-		if(/* get_option('html_type') != 'text/html' || */ $doctype == 'xhtml')	// TODO: options
+		if( /* get_option('html_type') != 'text/html' || */ $doctype == 'xhtml')	// TODO: options
 			$attributes[] = "xml:lang=\"$lang\"";
 	}
 
@@ -202,13 +202,13 @@ function html_header($title, $do_index = TRUE){
 
 	<title><?php echo $title; ?>&nbsp;&mdash; Первая мировая война, 1914&ndash;1918 гг.</title>
 
-	<link rel="icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
-	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print BASE_URL; ?>/favicon.ico" />
+	<link rel="icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />
+	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />
 <?php gb_head(); ?>
 </head><body>
 	<header>
 		<div class='logo'>
-			<a href="<?php print BASE_URL; ?>" tabindex="-2"><img src="<?php print BASE_URL; ?>/img/logo.jpg" alt='' /></a>
+			<a href="<?php print site_url(); ?>" tabindex="-2"><img src="<?php print site_url('/img/logo.jpg'); ?>" alt='' /></a>
 		</div>
 		<div class='title'>
 			<h1>Первая мировая война, <nobr>1914&ndash;1918 гг.</nobr></h1>
@@ -232,10 +232,10 @@ function html_footer(){
 		| <a href="<?php print site_url('/crue.php'); ?>">Команда проекта</a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
-<?php if(GB_DEBUG): ?>
+<?php if( GB_DEBUG): ?>
 	<p><small>Statistic: <?php
 		print(timer_stop(0, 3) . 's');
-		if(function_exists('memory_get_usage'))
+		if( function_exists('memory_get_usage'))
 			print(' / ' . round(memory_get_usage()/1024/1024, 2) . 'mb ');
 	?></small></p>
 <?php endif; ?>
@@ -279,13 +279,13 @@ function _paginator_url($pg){
 function paginator($pg, $max_pg){
 	$pag = array();
 	
-	if($pg > 1)	$pag[] = '<a href="' . _paginator_url($pg - 1) . '" class="prev">←</a>';
-	if($pg > 1)	$pag[] = '<a href="' . _paginator_url(1) . '">1</a>';
+	if( $pg > 1)	$pag[] = '<a href="' . _paginator_url($pg - 1) . '" class="prev">←</a>';
+	if( $pg > 1)	$pag[] = '<a href="' . _paginator_url(1) . '">1</a>';
 
-	if($pg > 12)	$pag[] = '<span>…</span>';
-	if($pg > 11)	$pag[] = '<a href="' . _paginator_url($pg - 10) . '">' . ($pg - 10) . '</a>';
+	if( $pg > 12)	$pag[] = '<span>…</span>';
+	if( $pg > 11)	$pag[] = '<a href="' . _paginator_url($pg - 10) . '">' . ($pg - 10) . '</a>';
 	
-	if($pg == 8)	$pag[] = '<a href="' . _paginator_url(2) . '">2</a>';
+	if( $pg == 8)	$pag[] = '<a href="' . _paginator_url(2) . '">2</a>';
 	elseif($pg > 8)	$pag[] = '<span>…</span>';
 	for($i = max($pg - 5, 2); $i < $pg; $i++)
 		$pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
@@ -294,14 +294,14 @@ function paginator($pg, $max_pg){
 
 	for($i = $pg + 1; $i < min($pg + 5, $max_pg); $i++)
 		$pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
-	if($pg == $max_pg - 6)		$pag[] = '<a href="' . _paginator_url($max_pg - 1) . '">' . ($max_pg - 1) . '</a>';
+	if( $pg == $max_pg - 6)		$pag[] = '<a href="' . _paginator_url($max_pg - 1) . '">' . ($max_pg - 1) . '</a>';
 	elseif($pg < $max_pg - 6)	$pag[] = '<span>…</span>';
 
-	if($pg < $max_pg - 10)	$pag[] = '<a href="' . _paginator_url($pg + 10) . '">' . ($pg + 10) . '</a>';
-	if($pg < $max_pg - 11)	$pag[] = '<span>…</span>';
+	if( $pg < $max_pg - 10)	$pag[] = '<a href="' . _paginator_url($pg + 10) . '">' . ($pg + 10) . '</a>';
+	if( $pg < $max_pg - 11)	$pag[] = '<span>…</span>';
 	
-	if($pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($max_pg) . '">' . $max_pg . '</a>';
-	if($pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($pg + 1) . '" class="next">→</a>';
+	if( $pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($max_pg) . '">' . $max_pg . '</a>';
+	if( $pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($pg + 1) . '" class="next">→</a>';
 
 	return '<div class="paginator">' . implode(' ', $pag) . '</div>';
 }

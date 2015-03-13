@@ -12,7 +12,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -26,8 +26,8 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  */
 function _gb_styles(){
 	static $gb_styles;
-	if(!is_a($gb_styles, 'GB_Styles')){
-// 		if ( ! did_action( 'init' ) )
+	if( !is_a($gb_styles, 'GB_Styles')){
+// 		if( ! did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 	
@@ -49,7 +49,7 @@ function _gb_styles(){
  * @return array On success, a processed array of GB_Dependencies items; otherwise, an empty array.
  */
 function gb_print_styles($handles = false) {
-	if('' === $handles) // for gb_head
+	if( '' === $handles) // for gb_head
 		$handles = false;
 
 	/**
@@ -57,7 +57,7 @@ function gb_print_styles($handles = false) {
 	 *
 	 * @since	2.1.0
 	 */
-	if(!$handles)
+	if( !$handles)
 		do_action('gb_print_styles');
 
 	return _gb_styles()->do_items( $handles );
@@ -80,7 +80,7 @@ function gb_print_styles($handles = false) {
  * @return bool True on success, false on failure.
  */
 function gb_add_inline_style( $handle, $data ) {
-	if(false !== stripos($data, '</style>')){
+	if( false !== stripos($data, '</style>')){
 		_doing_it_wrong(__FUNCTION__, __('Do not pass style tags to gb_add_inline_style().'));
 		$data = trim(preg_replace('#<style[^>]*>(.*)</style>#is', '$1', $data));
 	}
@@ -143,7 +143,7 @@ function gb_deregister_style( $handle ) {
  *                            'screen', 'tty', or 'tv'.
  */
 function gb_enqueue_style( $handle, $src = false, $deps = array(), $ver = false, $media = 'all' ) {
-	if ( $src ) {
+	if( $src ) {
 		$_handle = explode('?', $handle);
 		_gb_styles()->add( $_handle[0], $src, $deps, $ver, $media );
 	}

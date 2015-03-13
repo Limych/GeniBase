@@ -4,13 +4,15 @@ $(document).ready(function(){
 		$(this).find(".arrow").toggleClass("up");
 	});
 	$('body').keydown(function(e){
-		if(e.ctrlKey && e.keyCode == 37){	// Ctrl+Left
+		if( e.ctrlKey && e.keyCode == 37 ){	// Ctrl+Left
 			el = $('.paginator:first .prev');
-			if(el.length)	location.href = el.attr('href');
+			if( el.length )
+				location.href = el.attr('href');
 		}
-		if(e.ctrlKey && e.keyCode == 39){	// Ctrl+Right
+		if( e.ctrlKey && e.keyCode == 39 ){	// Ctrl+Right
 			el = $('.paginator:first .next');
-			if(el.length)	location.href = el.attr('href');
+			if( el.length )
+				location.href = el.attr('href');
 	}
 	});
 });

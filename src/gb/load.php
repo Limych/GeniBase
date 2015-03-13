@@ -11,7 +11,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -24,10 +24,10 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * @return null Will return null if register_globals PHP directive was disabled.
  */
 function gb_unregister_GLOBALS() {
-	if ( !ini_get( 'register_globals' ) )
+	if( !ini_get( 'register_globals' ) )
 		return;
 
-	if ( isset( $_REQUEST['GLOBALS'] ) )
+	if( isset( $_REQUEST['GLOBALS'] ) )
 		die( 'GLOBALS overwrite attempt detected' );
 
 	// Variables that shouldn't be unset
@@ -35,7 +35,7 @@ function gb_unregister_GLOBALS() {
 
 	$input = array_merge( $_GET, $_POST, $_COOKIE, $_SERVER, $_ENV, $_FILES, isset( $_SESSION ) && is_array( $_SESSION ) ? $_SESSION : array() );
 	foreach ( $input as $k => $v )
-		if ( !in_array( $k, $no_unset ) && isset( $GLOBALS[$k] ) ) {
+		if( !in_array( $k, $no_unset ) && isset( $GLOBALS[$k] ) ) {
 			unset( $GLOBALS[$k] );
 		}
 }
@@ -60,46 +60,46 @@ function gb_fix_server_vars() {
 	$_SERVER = array_merge( $default_server_values, $_SERVER );
 
 	// Fix for IIS when running with PHP ISAPI
-	if ( empty( $_SERVER['REQUEST_URI'] ) || ( php_sapi_name() != 'cgi-fcgi' && preg_match( '/^Microsoft-IIS\//', $_SERVER['SERVER_SOFTWARE'] ) ) ) {
+	if( empty( $_SERVER['REQUEST_URI'] ) || ( php_sapi_name() != 'cgi-fcgi' && preg_match( '/^Microsoft-IIS\//', $_SERVER['SERVER_SOFTWARE'] ) ) ) {
 
 		// IIS Mod-Rewrite
-		if ( isset( $_SERVER['HTTP_X_ORIGINAL_URL'] ) ) {
+		if( isset( $_SERVER['HTTP_X_ORIGINAL_URL'] ) ) {
 			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_ORIGINAL_URL'];
 		}
 		// IIS Isapi_Rewrite
-		else if ( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
+		else if( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
 			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
 		} else {
 			// Use ORIG_PATH_INFO if there is no PATH_INFO
-			if ( !isset( $_SERVER['PATH_INFO'] ) && isset( $_SERVER['ORIG_PATH_INFO'] ) )
+			if( !isset( $_SERVER['PATH_INFO'] ) && isset( $_SERVER['ORIG_PATH_INFO'] ) )
 				$_SERVER['PATH_INFO'] = $_SERVER['ORIG_PATH_INFO'];
 
 			// Some IIS + PHP configurations puts the script-name in the path-info (No need to append it twice)
-			if ( isset( $_SERVER['PATH_INFO'] ) ) {
-				if ( $_SERVER['PATH_INFO'] == $_SERVER['SCRIPT_NAME'] )
+			if( isset( $_SERVER['PATH_INFO'] ) ) {
+				if( $_SERVER['PATH_INFO'] == $_SERVER['SCRIPT_NAME'] )
 					$_SERVER['REQUEST_URI'] = $_SERVER['PATH_INFO'];
 				else
 					$_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] . $_SERVER['PATH_INFO'];
 			}
 
 			// Append the query string if it exists and isn't null
-			if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+			if( ! empty( $_SERVER['QUERY_STRING'] ) ) {
 				$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
 			}
 		}
 	}
 
 	// Fix for PHP as CGI hosts that set SCRIPT_FILENAME to something ending in php.cgi for all requests
-	if ( isset( $_SERVER['SCRIPT_FILENAME'] ) && ( strpos( $_SERVER['SCRIPT_FILENAME'], 'php.cgi' ) == strlen( $_SERVER['SCRIPT_FILENAME'] ) - 7 ) )
+	if( isset( $_SERVER['SCRIPT_FILENAME'] ) && ( strpos( $_SERVER['SCRIPT_FILENAME'], 'php.cgi' ) == strlen( $_SERVER['SCRIPT_FILENAME'] ) - 7 ) )
 		$_SERVER['SCRIPT_FILENAME'] = $_SERVER['PATH_TRANSLATED'];
 
 	// Fix for Dreamhost and other PHP as CGI hosts
-	if ( strpos( $_SERVER['SCRIPT_NAME'], 'php.cgi' ) !== false )
+	if( strpos( $_SERVER['SCRIPT_NAME'], 'php.cgi' ) !== false )
 		unset( $_SERVER['PATH_INFO'] );
 
 	// Fix empty PHP_SELF
 	$PHP_SELF = $_SERVER['PHP_SELF'];
-	if ( empty( $PHP_SELF ) )
+	if( empty( $PHP_SELF ) )
 		$_SERVER['PHP_SELF'] = $PHP_SELF = preg_replace( '/(\?.*)?$/', '', $_SERVER["REQUEST_URI"] );
 }
 
@@ -111,7 +111,7 @@ function gb_fix_server_vars() {
  * @since 2.0.0
  */
 function gb_favicon_request(){
-	if ( '/favicon.ico' == $_SERVER['REQUEST_URI'] ) {
+	if( '/favicon.ico' == $_SERVER['REQUEST_URI'] ) {
 		header('Content-Type: image/vnd.microsoft.icon');
 		header('Content-Length: 0');
 		exit;
@@ -137,54 +137,54 @@ function gb_load_translations_early() {
 	global $text_direction, $gb_locale;
 
 	static $loaded = false;
-	if ( $loaded )
+	if( $loaded )
 		return;
 	$loaded = true;
 
-// 	if ( function_exists( 'did_action' ) && did_action( 'init' ) )
+// 	if( function_exists( 'did_action' ) && did_action( 'init' ) )
 // 		return;
 
 	// Translation and localization
-	require_once(GB_INC_DIR . '/pomo/mo.php');
-	require_once(GB_INC_DIR . '/l10n.php');
-	require_once(GB_INC_DIR . '/locale.php');
+	require_once(GB_CORE_DIR . '/pomo/mo.php');
+	require_once(GB_CORE_DIR . '/l10n.php');
+	require_once(GB_CORE_DIR . '/locale.php');
 
 	$locales = $locations = array();
 	while ( true ) {
-		if(defined('GB_LANG')){
-			if('' == GB_LANG)
+		if( defined('GB_LANG')){
+			if( '' == GB_LANG)
 				break;
 			$locales[] = GB_LANG;
 		}
 
-		if(defined('GB_LOCAL_PACKAGE') && '' != GB_LOCAL_PACKAGE)
+		if( defined('GB_LOCAL_PACKAGE') && '' != GB_LOCAL_PACKAGE)
 			$locales[] = GB_LOCAL_PACKAGE;
 
-		if(!$locales)
+		if( !$locales)
 			break;
 
-		if ( defined( 'GB_LANG_DIR' ) && @is_dir( GB_LANG_DIR ) )
+		if( defined( 'GB_LANG_DIR' ) && @is_dir( GB_LANG_DIR ) )
 			$locations[] = GB_LANG_DIR;
 
-// 		if ( defined( 'GB_CONTENT_DIR' ) && @is_dir( GB_CONTENT_DIR . '/languages' ) )
+// 		if( defined( 'GB_CONTENT_DIR' ) && @is_dir( GB_CONTENT_DIR . '/languages' ) )
 // 			$locations[] = GB_CONTENT_DIR . '/languages';
 
-// 		if ( @is_dir( ABSPATH . 'gb-content/languages' ) )
+// 		if( @is_dir( ABSPATH . 'gb-content/languages' ) )
 // 			$locations[] = ABSPATH . 'gb-content/languages';
 
-		if ( @is_dir( GB_INC_DIR . '/languages' ) )
-			$locations[] = GB_INC_DIR . '/languages';
+		if( @is_dir( GB_CORE_DIR . '/languages' ) )
+			$locations[] = GB_CORE_DIR . '/languages';
 
-		if ( ! $locations )
+		if( ! $locations )
 			break;
 
 		$locations = array_unique( $locations );
 
 		foreach ( $locales as $locale ) {
 			foreach ( $locations as $location ) {
-				if ( file_exists( $location . '/' . $locale . '.mo' ) ) {
+				if( file_exists( $location . '/' . $locale . '.mo' ) ) {
 					load_textdomain( 'default', $location . '/' . $locale . '.mo' );
-// 					if ( defined( 'GB_SETUP_CONFIG' ) && file_exists( $location . '/admin-' . $locale . '.mo' ) )
+// 					if( defined( 'GB_SETUP_CONFIG' ) && file_exists( $location . '/admin-' . $locale . '.mo' ) )
 // 						load_textdomain( 'default', $location . '/admin-' . $locale . '.mo' );
 					break 3;
 				}
@@ -211,17 +211,17 @@ function gb_load_translations_early() {
  * @access private
  */
 function gb_maintenance() {
-	if ( !file_exists( BASE_DIR . '/.maintenance' ) || defined( 'GB_INSTALLING' ) )
+	if( !file_exists( BASE_DIR . '/.maintenance' ) || defined( 'GB_INSTALLING' ) )
 		return;
 
 	// If the upgrading timestamp is older than 10 minutes, don't die.
 	$diff = time() - filemtime(BASE_DIR . '/.maintenance');
-	if($diff < 0 || $diff >= 600){
+	if( $diff < 0 || $diff >= 600){
 		@unlink(BASE_DIR . '/.maintenance');
 		return;
 	}
 
-	if(file_exists(BASE_DIR . '/maintenance_stub.php')){
+	if( file_exists(BASE_DIR . '/maintenance_stub.php')){
 		require_once(BASE_DIR . '/maintenance_stub.php');
 		die();
 	}
@@ -229,7 +229,7 @@ function gb_maintenance() {
 	gb_load_translations_early();
 
 	$protocol = $_SERVER["SERVER_PROTOCOL"];
-	if('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
+	if( 'HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
 	$lang = str_replace('_', '-', get_locale());
 	$rtl = (function_exists('is_rtl') && is_rtl()) ? ' dir="rtl"' : '';
 	header("$protocol 503 Service Unavailable", true, 503);
@@ -255,7 +255,7 @@ function gb_maintenance() {
 		<h1><?php _e( 'Maintenance' ); ?></h1>
 		<p><?php _e( 'This website is currently under going maintenance and will be back online shortly. Thank you for your patience.' ); ?></p>
 	</div>
-<?php if(substr($lang, 0, 2) != 'en'): ?>
+<?php if( substr($lang, 0, 2) != 'en'): ?>
 	<div lang="en" xml:lang="en" dir="ltr">
 		<h1>Maintenance</h1>
 		<p>This website is currently under going maintenance and will be back online shortly. Thank you for your patience.</p>
@@ -277,13 +277,13 @@ function gb_maintenance() {
  */
 function gb_check_php_mysql_versions() {
 	$php_version = phpversion();
-	if ( version_compare( GB_PHP_REQUIRED, $php_version, '>' ) ) {
+	if( version_compare( GB_PHP_REQUIRED, $php_version, '>' ) ) {
 		gb_load_translations_early();
 		header( 'Content-Type: text/html; charset=utf-8' );
 		die( sprintf( __( 'Your server is running PHP version %1$s but GeniBase %2$s requires at least %3$s.' ), $php_version, GB_VERSION, GB_PHP_REQUIRED ) );
 	}
 
-	if ( ! extension_loaded( 'mysql' ) && ! extension_loaded( 'mysqli' ) ) {
+	if( ! extension_loaded( 'mysql' ) && ! extension_loaded( 'mysqli' ) ) {
 		gb_load_translations_early();
 		header( 'Content-Type: text/html; charset=utf-8' );
 		die( __( 'Your PHP installation appears to be missing the MySQL extension which is required by GeniBase.' ) );
@@ -326,7 +326,7 @@ function timer_stop($display = false, $precision = 3){
 	$r = (function_exists('number_format_i18n'))
 			? number_format_i18n($timetotal, $precision)
 			: number_format($timetotal, $precision);
-	if($display)
+	if( $display)
 		echo $r;
 	return $r;
 }
@@ -362,22 +362,22 @@ function timer_stop($display = false, $precision = 3){
  * @access private
  */
 function gb_debug_mode() {
-	if ( GB_DEBUG ) {
+	if( GB_DEBUG ) {
 		error_reporting( E_ALL );
 
-		if ( GB_DEBUG_DISPLAY )
+		if( GB_DEBUG_DISPLAY )
 			ini_set( 'display_errors', 1 );
 		elseif ( null !== GB_DEBUG_DISPLAY )
 			ini_set( 'display_errors', 0 );
 
-		if ( GB_DEBUG_LOG ) {
+		if( GB_DEBUG_LOG ) {
 			ini_set( 'log_errors', 1 );
 			ini_set( 'error_log', GB_CONTENT_DIR . '/debug.log' );
 		}
 	} else {
 		error_reporting( E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR );
 	}
-	if ( defined( 'XMLRPC_REQUEST' ) )
+	if( defined( 'XMLRPC_REQUEST' ) )
 		ini_set( 'display_errors', 0 );
 }
 
@@ -390,12 +390,12 @@ function gb_debug_mode() {
  * @param mixed	$ignore	Class name or backtrace levels count to be ignored in report
  */
 function gb_debug_info($var, $ignore = 0){
-	if(!GB_DEBUG)	return;
+	if( !GB_DEBUG)	return;
 
 	$trace = debug_backtrace();
 	$place = substr($trace[0]['file'], strlen(BASE_DIR)) . ' #' . $trace[0]['line'];
-	if($ignore !== 0){
-		if(!is_string($ignore))
+	if( $ignore !== 0){
+		if( !is_string($ignore))
 			$level = (int) $ignore;
 		else{
 			$level = 1;

@@ -10,9 +10,26 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
+
+/**
+ * Retrieve the home url for the current site.
+ *
+ * Returns the 'home_url' option with the appropriate protocol, 'https' if
+ * is_ssl() and 'http' otherwise. If $scheme is 'http' or 'https', is_ssl() is
+ * overridden.
+ *
+ * @since 2.1.1
+ *
+ * @param string $path		Optional. Path relative to the home url.
+ * @param string $scheme	Optional. Scheme to give the home url context. See set_url_scheme().
+ * @return string	Home url link with optional path appended.
+ */
+function home_url($path = '', $scheme = null){
+	return get_site_url($path, $scheme);
+}
 
 /**
  * Retrieve the site url for the current site.
@@ -27,7 +44,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * @param string $scheme Optional. Scheme to give the site url context. See set_url_scheme().
  * @return string Site url link with optional path appended.
  */
-function site_url( $path = '', $scheme = null ) {
+function site_url($path = '', $scheme = null){
 	return get_site_url($path, $scheme);
 }
 
@@ -47,27 +64,25 @@ function site_url( $path = '', $scheme = null ) {
  * @return string Site url link with optional path appended.
  */
 function get_site_url($path = '', $scheme = null) {
-	// TODO: options
-	$url = BASE_URL;
+	$url = BASE_URL;	// TODO: options
 // 	$url = get_option( 'siteurl' );
 
 	$url = set_url_scheme( $url, $scheme );
 
-	if ( $path && is_string( $path ) )
+	if( $path && is_string( $path ) )
 		$url .= '/' . ltrim( $path, '/' );
 
 	/**
 	 * Filter the site URL.
 	 *
-	 * @since 2.7.0
+	 * @since	2.1.1
 	 *
 	 * @param string      $url     The complete site URL including scheme and path.
 	 * @param string      $path    Path relative to the site URL. Blank string if no path is specified.
 	 * @param string|null $scheme  Scheme to give the site URL context. Accepts 'http', 'https', 'login',
 	 *                             'login_post', 'admin', 'relative' or null.
 	*/
-	return $url;	// TODO: actions
-// 	return apply_filters( 'site_url', $url, $path, $scheme);
+	return apply_filters('site_url', $url, $path, $scheme);
 }
 
 /**
@@ -97,19 +112,18 @@ function admin_url( $path = '', $scheme = 'admin' ) {
 function get_admin_url($path = '', $scheme = 'admin') {
 	$url = get_site_url('gb-admin/', $scheme);
 
-	if ( $path && is_string( $path ) )
+	if( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
 
 	/**
 	 * Filter the admin area URL.
 	 *
-	 * @since 2.0.1
+	 * @since 2.1.1
 	 *
 	 * @param string   $url     The complete admin area URL including scheme and path.
 	 * @param string   $path    Path relative to the admin area URL. Blank string if no path is specified.
 	*/
-	return $url;	// TODO: actions
-// 	return apply_filters('admin_url', $url, $path);
+	return apply_filters('admin_url', $url, $path);
 }
 
 /**
@@ -124,7 +138,7 @@ function get_admin_url($path = '', $scheme = 'admin') {
 function set_url_scheme( $url, $scheme = null ) {
 	$orig_scheme = $scheme;
 
-	if ( ! $scheme ) {
+	if( ! $scheme ) {
 		$scheme = is_ssl() ? 'https' : 'http';
 	} elseif ( $scheme === 'admin' || $scheme === 'login' || $scheme === 'login_post' || $scheme === 'rpc' ) {
 		$scheme = is_ssl() || force_ssl_admin() ? 'https' : 'http';
@@ -133,12 +147,12 @@ function set_url_scheme( $url, $scheme = null ) {
 	}
 
 	$url = trim( $url );
-	if ( substr( $url, 0, 2 ) === '//' )
+	if( substr( $url, 0, 2 ) === '//' )
 		$url = 'http:' . $url;
 
-	if ( 'relative' == $scheme ) {
+	if( 'relative' == $scheme ) {
 		$url = ltrim( preg_replace( '#^\w+://[^/]*#', '', $url ) );
-		if ( $url !== '' && $url[0] === '/' )
+		if( $url !== '' && $url[0] === '/' )
 			$url = '/' . ltrim($url , "/ \t\n\r\0\x0B" );
 	} else {
 		$url = preg_replace( '#^\w+://#', $scheme . '://', $url );
@@ -147,13 +161,33 @@ function set_url_scheme( $url, $scheme = null ) {
 	/**
 	 * Filter the resulting URL after setting the scheme.
 	 *
-	 * @since 2.0.1
+	 * @since 2.1.1
 	 *
 	 * @param string $url         The complete URL including scheme and path.
 	 * @param string $scheme      Scheme applied to the URL. One of 'http', 'https', or 'relative'.
 	 * @param string $orig_scheme Scheme requested for the URL. One of 'http', 'https', 'login',
 	 *                            'login_post', 'admin', 'rpc', or 'relative'.
 	 */
-	return $url;	// TODO: actions
-// 	return apply_filters( 'set_url_scheme', $url, $scheme, $orig_scheme );
+	return apply_filters('set_url_scheme', $url, $scheme, $orig_scheme);
+}
+
+/**
+ * Output rel=canonical for current page.
+ *
+ * @since 2.1.1
+ */
+function rel_canonical() {
+	$link = get_site_url($_SERVER['REQUEST_URI']);
+
+	/**
+	 * Filter rel=canonical link.
+	 *
+	 * @since	2.1.1
+	 *
+	 * @param string $link Full URL of rel=canonical link
+	 */
+	$link = apply_filters('rel_canonical', $link);
+	
+	if(!empty($link))
+		echo "<link rel='canonical' href='$link' />\n";
 }

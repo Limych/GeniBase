@@ -6,7 +6,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -14,13 +14,13 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * Функции формализации и публикации записей
  */
 
-require_once(GB_INC_DIR . '/class.ww1-database.php');
+require_once(GB_CORE_DIR . '/class.ww1-database.php');
 
 /**
  * Функция нормирования дат
  */
 function prepublish_date(&$raw, &$date_norm){
-	if(empty($raw['date'])){
+	if( empty($raw['date'])){
 		$raw['date_from']	= MIN_DATE;
 		$raw['date_to']		= MAX_DATE;
 		return;
@@ -39,19 +39,19 @@ function prepublish_date(&$raw, &$date_norm){
 	);
 	// yyyy-mm-dd
 	$raw['date'] = preg_replace_callback('/^(\d{4})-(\d{2})-(\d{2})$/uS', function($matches) use ($month_names_norm) {
-		if(!isset($month_names_norm[intval($matches[2])]))
+		if( !isset($month_names_norm[intval($matches[2])]))
 			return $matches[0];
 		return $matches[3] . $month_names_norm[intval($matches[2])] . $matches[1];
 	}, $raw['date']);
 	// mm/dd/yyyy
 	$raw['date'] = preg_replace_callback('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/uS', function($matches) use ($month_names_norm) {
-		if(!isset($month_names_norm[intval($matches[1])]))
+		if( !isset($month_names_norm[intval($matches[1])]))
 			return $matches[0];
 		return $matches[2] . $month_names_norm[intval($matches[1])] . $matches[3];
 	}, $raw['date']);
 	// dd.mm.yyyy
 	$raw['date'] = preg_replace_callback('/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/uS', function($matches) use ($month_names_norm) {
-		if(!isset($month_names_norm[intval($matches[2])]))
+		if( !isset($month_names_norm[intval($matches[2])]))
 			return $matches[0];
 		return $matches[1] . $month_names_norm[intval($matches[2])] . $matches[3];
 	}, $raw['date']);
@@ -92,7 +92,7 @@ function prepublish_date(&$raw, &$date_norm){
 	static	$reg_months = '';
 	static	$reg_date_left	= '';
 	static	$reg_date_right	= '';
-	if(empty($reg_months)){
+	if( empty($reg_months)){
 		$reg_months = '(?:' . implode('|', array_keys($month_names)) . ')';
 		// дд[.мм[.[гг]гг]] или дд[.ммм[.[гг]гг]]
 		$reg_date_left	= "(\d\d?)(?:\.(?:($reg_months|\d\d?)(?:\.((?:\d\d)?\d\d)?)?)?)?";
@@ -103,13 +103,13 @@ function prepublish_date(&$raw, &$date_norm){
 	}
 
 	// Запись «1914/15»
-	if($date_norm == '1914/15'){
+	if( $date_norm == '1914/15'){
 		$matches = array('', '01', '08', '1914', '31', '12', '1915');
 
 	// Простая запись дд.мм.гггг или мм.гггг или гггг
 	}elseif(preg_match("/^$reg_date_left$/uS", $date_norm, $matches)
 	|| preg_match("/^$reg_date_right$/uS", $date_norm, $matches)){
-		if(empty($matches[3]))	$matches[3] = ($matches[2] >= 8 ? 1914 : 1915);
+		if( empty($matches[3]))	$matches[3] = ($matches[2] >= 8 ? 1914 : 1915);
 		$matches[4] = $matches[1];
 		$matches[5] = $matches[2];
 		$matches[6] = $matches[3];
@@ -118,44 +118,44 @@ function prepublish_date(&$raw, &$date_norm){
 	}elseif(preg_match("/^$reg_date_left-$reg_date_left$/uS", $date_norm, $matches)
 	|| preg_match("/^$reg_date_left-$reg_date_right$/uS", $date_norm, $matches)
 	|| preg_match("/^$reg_date_right-$reg_date_right$/uS", $date_norm, $matches)){
-		if(empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
-		if(empty($matches[2]))	$matches[2] = $matches[5];
-		if(empty($matches[3]))	$matches[3] = $matches[6];
+		if( empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
+		if( empty($matches[2]))	$matches[2] = $matches[5];
+		if( empty($matches[3]))	$matches[3] = $matches[6];
 
 	// Периодическая запись дд.ммм-дд.ммм.гггг
 	}elseif(preg_match("/^$reg_date_right_short-$reg_date_right$/uS", $date_norm, $matches)){
-		if(empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
-		if(empty($matches[2]))	$matches[2] = $matches[5];
-		if(empty($matches[3]))	$matches[3] = $matches[6];
+		if( empty($matches[6]))	$matches[6] = ($matches[5] >= 8 ? 1914 : 1915);
+		if( empty($matches[2]))	$matches[2] = $matches[5];
+		if( empty($matches[3]))	$matches[3] = $matches[6];
 
 	// Списочная запись дд,дд,дд.мм.гггг
 	}elseif(preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_left$/uS", $date_norm, $matches)
 	|| preg_match("/^(\d\d?),(?:\d\d?,)*$reg_date_right$/uS", $date_norm, $matches)){
-		if(empty($matches[4]))	$matches[4] = ($matches[3] >= 8 ? 1914 : 1915);
+		if( empty($matches[4]))	$matches[4] = ($matches[3] >= 8 ? 1914 : 1915);
 		array_splice($matches, 2, 0, array($matches[3], $matches[4]));
 	}
 
 	// Нормализуем данные и формируем новые поля
-	if(!empty($matches)){
+	if( !empty($matches)){
 		static $last_days = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
-		if($matches[3] < 100)	$matches[3] += 1900;
-		if(empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '08' : '01');
+		if( $matches[3] < 100)	$matches[3] += 1900;
+		if( empty($matches[2]))	$matches[2] = ($matches[3] == 1914 ? '08' : '01');
 		elseif(!is_numeric($matches[2]))	$matches[2] = $month_names[$matches[2]];
-		if(empty($matches[1]))	$matches[1] = '01';
+		if( empty($matches[1]))	$matches[1] = '01';
 		$tmp = date_create(implode('-', array($matches[3], $matches[2], $matches[1])));
-		if($tmp)
+		if( $tmp)
 			$raw['date_from'] = $tmp->format('Y-m-d');
 		//
-		if($matches[6] < 100)	$matches[6] += 1900;
-		if(empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
+		if( $matches[6] < 100)	$matches[6] += 1900;
+		if( empty($matches[5]))	$matches[5] = ($matches[5] == 1918 ? '11' : '12');
 		elseif(!is_numeric($matches[5]))	$matches[5] = $month_names[$matches[5]];
-		if(empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
+		if( empty($matches[4]))	$matches[4] = (($matches[6] == 1918) && ($matches[5] == 11) ? '11' : $last_days[intval($matches[5])-1]);
 		$tmp = date_create(implode('-', array($matches[6], $matches[5], $matches[4])));
-		if($tmp)
+		if( $tmp)
 			$raw['date_to'] = $tmp->format('Y-m-d');
 		
-		if(($raw['date_from'] < MIN_DATE) || ($raw['date_from'] > MAX_DATE)
+		if( ($raw['date_from'] < MIN_DATE) || ($raw['date_from'] > MAX_DATE)
 		|| ($raw['date_to'] < MIN_DATE) || ($raw['date_to'] > MAX_DATE)){
 			unset($raw['date_from']);
 			unset($raw['date_to']);
@@ -173,7 +173,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	static	$str_fields = array('surname', 'name', 'rank', 'religion', 'marital', 'uyezd', 'reason');
 
 	foreach($str_fields as $key){
-		if(!isset($raw[$key]))	continue;
+		if( !isset($raw[$key]))	continue;
 
 		// Убираем концевые пробелы и сокращаем множественные пробелы
 		$raw[$key] = trim(preg_replace('/\s\s+/uS', ' ', $raw[$key]));
@@ -182,7 +182,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		$raw[$key] = fix_russian($raw[$key]);
 
 		// Правим регистр букв в текстах
-		if($key == 'surname'){
+		if( $key == 'surname'){
 			// Первые буквы каждого слова в верхний регистр
 			$raw[$key] = preg_replace_callback('/\b\w+\b/uS', function ($matches){
 				return mb_ucfirst(mb_strtolower($matches[0]));
@@ -199,12 +199,12 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	}
 
 	// Расшифровываем вероисповедания
-	if(isset($raw['religion'])){
+	if( isset($raw['religion'])){
 		/** @var	int[]	Array of correspondences between contractions of religion names and their IDs in the database. */
 		static	$religion_conts = array();
 		//
 		// Fetch religion names and reductions from dbase
-		if (empty($religion_conts)) {
+		if( empty($religion_conts)) {
 			$religion_conts[''] = 18;	// Special ID for "(not set)"
 	
 			$result = gbdb()->get_table('SELECT `id`, `religion`, `contractions` FROM ?_dic_religions' .
@@ -218,12 +218,12 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		}
 	 	//
 		$tmp = trim(preg_replace('/\W+/uS', '-', mb_strtolower($raw['religion'])), '-');
-		if(isset($religion_conts[$tmp]))
+		if( isset($religion_conts[$tmp]))
 			$raw['religion_id'] = $religion_conts[$tmp];
 	}
 
 	// Расшифровываем семейные положения
-	if(isset($raw['marital'])){
+	if( isset($raw['marital'])){
 		// TODO: Move to SQL-table
 		static $maritals = array(
 			''		=> 4,
@@ -242,15 +242,15 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 			'вдовец'	=> 3,
 		);
 		$tmp = trim(preg_replace('/\W+/uS', ' ', mb_strtolower($raw['marital'])));
-		if(isset($maritals[$tmp]))
+		if( isset($maritals[$tmp]))
 			$raw['marital_id'] = $maritals[$tmp];
 	}
 
 	// Формализуем события
-	if(isset($raw['reason'])){
+	if( isset($raw['reason'])){
 		// Get event/reason names and it's reductions from dbase
 		static	$reason_conts = array();
-		if(empty($reason_conts)){
+		if( empty($reason_conts)){
 			$result = gbdb()->get_table('SELECT `reason_id`, `reason_raw` FROM ?_dic_reason2id AS rid,' .
 					' ?_dic_reasons AS r WHERE rid.reason_id = r.id and r.`reason` NOT LIKE "(%"');
 			$reason_conts[''] = 1;	// Special ID for "(not set)"
@@ -259,19 +259,19 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		}
 
 		$tmp = trim(mb_strtolower($raw['reason']));
-// if(defined('P_DEBUG'))	var_export($tmp);	// TODO: Remove this?
-		if(isset($reason_conts[$tmp]))
+// if( defined('P_DEBUG'))	var_export($tmp);	// TODO: Remove this?
+		if( isset($reason_conts[$tmp]))
 			$raw['reason_id'] = $reason_conts[$tmp];
 	}
 	
 	// Уточняем региональную привязку
-	if(!empty($raw['uyezd'])){
+	if( !empty($raw['uyezd'])){
 		$res = gbdb()->get_cell('SELECT id FROM ?_dic_regions WHERE parent_id = ?parent_id AND title LIKE ?title',
 				array(
 					'parent_id'	=> $raw['region_id'],
 					'title'		=> $raw['uyezd'] . ' %',
 				));
-		if($res)
+		if( $res)
 			$raw['region_id'] = $res;
 		else {
 			$raw['region_id'] = gbdb()->set_row('?_dic_regions', array(
@@ -285,7 +285,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	prepublish_date($raw, $date_norm);
 
 	// Собираем данные для занесения в основную таблицу
-if(defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
+if( defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
 	return prepublish_make_data($raw, $have_trouble);
 } // function prepublish
 
@@ -301,9 +301,8 @@ if(defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
 function prepublish_make_data($raw_norm, &$have_trouble){
 	$have_trouble = false;
 	$pub = array();
-	// TODO: Rename source_pg → source_pg
 	foreach(explode(' ', 'id surname name rank religion_id marital_id region_id place reason_id date date_from date_to source_id source_pg') as $key){
-		if(!isset($raw_norm[$key])
+		if( !isset($raw_norm[$key])
 		|| ((empty($raw_norm[$key]) || absint($raw_norm[$key]) != $raw_norm[$key]) && $key != 'source_id' && preg_match('/(^|_)id$/uS', $key))
 		|| ($key == 'date_from' && ($raw_norm['date_from'] < MIN_DATE || $raw_norm['date_from'] > MAX_DATE))
 		|| ($key == 'date_to' && ($raw_norm['date_to'] < MIN_DATE || $raw_norm['date_to'] > MAX_DATE)))

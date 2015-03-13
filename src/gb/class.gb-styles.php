@@ -13,7 +13,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -40,11 +40,11 @@ class GB_Styles extends GB_Dependencies {
 		/**
 		 * Fires when the GB_Styles instance is initialized.
 		 *
-		 * @since	2.0.0
+		 * @since	2.1.1
 		 *
 		 * @param GB_Styles &$this GB_Styles instance, passed by reference.
 		 */
-// 		do_action_ref_array( 'gb_default_styles', array(&$this) );
+		do_action_ref_array('gb_default_styles', array(&$this));
 	}
 
 	/**
@@ -52,20 +52,20 @@ class GB_Styles extends GB_Dependencies {
 	 * @return bool
 	 */
 	public function do_item( $handle ) {
-		if ( !parent::do_item($handle) )
+		if( !parent::do_item($handle) )
 			return false;
 
 		$obj = $this->registered[$handle];
-		if ( null === $obj->ver )
+		if( null === $obj->ver )
 			$ver = '';
 		else
 			$ver = $obj->ver ? $obj->ver : $this->default_version;
 
-		if ( isset($this->args[$handle]) )
+		if( isset($this->args[$handle]) )
 			$ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
 
-		if ( $this->do_concat ) {
-			if ( $this->in_default_dir($obj->src) && !isset($obj->extra['conditional']) && !isset($obj->extra['alt']) ) {
+		if( $this->do_concat ) {
+			if( $this->in_default_dir($obj->src) && !isset($obj->extra['conditional']) && !isset($obj->extra['alt']) ) {
 				$this->concat .= "$handle,";
 				$this->concat_version .= "$handle$ver";
 
@@ -75,31 +75,31 @@ class GB_Styles extends GB_Dependencies {
 			}
 		}
 
-		if ( isset($obj->args) )
+		if( isset($obj->args) )
 			$media = esc_attr( $obj->args );
 		else
 			$media = 'all';
 
 		$href = $this->_css_href( $obj->src, $ver, $handle );
-		if ( empty( $href ) ) {
+		if( empty( $href ) ) {
 			// Turns out there is nothing to print.
 			return true;
 		}
 		$rel = isset($obj->extra['alt']) && $obj->extra['alt'] ? 'alternate stylesheet' : 'stylesheet';
-		$title = isset($obj->extra['title']) ? "title='" . esc_attr( $obj->extra['title'] ) . "'" : '';
+		$title = isset($obj->extra['title']) ? " title='" . esc_attr( $obj->extra['title'] ) . "'" : '';
 
 		/**
 		 * Filter the HTML link tag of an enqueued style.
 		 *
-		 * @since	2.0.0
+		 * @since	2.1.1
 		 *
 		 * @param string         The link tag for the enqueued style.
 		 * @param string $handle The style's registered handle.
 		 */
-// 		$tag = apply_filters( 'style_loader_tag', "<link rel='$rel' id='$handle-css' $title href='$href' type='text/css' media='$media' />\n", $handle );
-		$tag = "<link rel='$rel' id='$handle-css' $title href='$href' type='text/css' media='$media' />\n";
-		if ( 'rtl' === $this->text_direction && isset($obj->extra['rtl']) && $obj->extra['rtl'] ) {
-			if ( is_bool( $obj->extra['rtl'] ) || 'replace' === $obj->extra['rtl'] ) {
+		$tag = apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-css'$title href='$href' type='text/css' media='$media' />\n", $handle);
+
+		if( 'rtl' === $this->text_direction && isset($obj->extra['rtl']) && $obj->extra['rtl'] ) {
+			if( is_bool( $obj->extra['rtl'] ) || 'replace' === $obj->extra['rtl'] ) {
 				$suffix = isset( $obj->extra['suffix'] ) ? $obj->extra['suffix'] : '';
 				$rtl_href = str_replace( "{$suffix}.css", "-rtl{$suffix}.css", $this->_css_href( $obj->src , $ver, "$handle-rtl" ));
 			} else {
@@ -107,22 +107,22 @@ class GB_Styles extends GB_Dependencies {
 			}
 
 			/** This filter is documented in gb/class.gb-styles.php */
-			$rtl_tag = apply_filters( 'style_loader_tag', "<link rel='$rel' id='$handle-rtl-css' $title href='$rtl_href' type='text/css' media='$media' />\n", $handle );
+			$rtl_tag = apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-rtl-css'$title href='$rtl_href' type='text/css' media='$media' />\n", $handle);
 
-			if ( $obj->extra['rtl'] === 'replace' ) {
+			if( $obj->extra['rtl'] === 'replace' ) {
 				$tag = $rtl_tag;
 			} else {
 				$tag .= $rtl_tag;
 			}
 		}
 
-		if ( isset($obj->extra['conditional']) && $obj->extra['conditional'] ) {
+		if( isset($obj->extra['conditional']) && $obj->extra['conditional'] ) {
 			$tag = "<!--[if {$obj->extra['conditional']}]>\n" . $tag . "<![endif]-->\n";
 		}
 
-		if ( $this->do_concat ) {
+		if( $this->do_concat ) {
 			$this->print_html .= $tag;
-			if ( $inline_style = $this->print_inline_style( $handle, false ) )
+			if( $inline_style = $this->print_inline_style( $handle, false ) )
 				$this->print_html .= sprintf( "<style id='%s-inline-css' type='text/css'>\n%s\n</style>\n", esc_attr( $handle ), $inline_style );
 		} else {
 			echo $tag;
@@ -137,12 +137,12 @@ class GB_Styles extends GB_Dependencies {
 	 * @param string $code
 	 */
 	public function add_inline_style( $handle, $code ) {
-		if ( ! $code ) {
+		if( ! $code ) {
 			return false;
 		}
 
 		$after = $this->get_data( $handle, 'after' );
-		if ( ! $after ) {
+		if( ! $after ) {
 			$after = array();
 		}
 
@@ -159,13 +159,13 @@ class GB_Styles extends GB_Dependencies {
 	public function print_inline_style( $handle, $echo = true ) {
 		$output = $this->get_data( $handle, 'after' );
 
-		if ( empty( $output ) ) {
+		if( empty( $output ) ) {
 			return false;
 		}
 
 		$output = implode( "\n", $output );
 
-		if ( ! $echo ) {
+		if( ! $echo ) {
 			return $output;
 		}
 
@@ -182,7 +182,7 @@ class GB_Styles extends GB_Dependencies {
 	 */
 	public function all_deps( $handles, $recursion = false, $group = false ) {
 		$r = parent::all_deps( $handles, $recursion );
-		if ( !$recursion ) {
+		if( !$recursion ) {
 			/**
 			 * Filter the array of enqueued styles before processing for output.
 			 *
@@ -202,11 +202,11 @@ class GB_Styles extends GB_Dependencies {
 	 * @return string
 	 */
 	public function _css_href( $src, $ver, $handle ) {
-		if ( !is_bool($src) && !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
+		if( !is_bool($src) && !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
 			$src = $this->base_url . $src;
 		}
 
-		if ( !empty($ver) )
+		if( !empty($ver) )
 			$src = add_query_arg('ver', $ver, $src);
 
 		/**
@@ -227,11 +227,11 @@ class GB_Styles extends GB_Dependencies {
 	 * @return bool
 	 */
 	public function in_default_dir($src) {
-		if ( ! $this->default_dirs )
+		if( ! $this->default_dirs )
 			return true;
 
 		foreach ( (array) $this->default_dirs as $test ) {
-			if ( 0 === strpos($src, $test) )
+			if( 0 === strpos($src, $test) )
 				return true;
 		}
 		return false;

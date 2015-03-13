@@ -16,13 +16,13 @@ class TracGitHubIssues {
 	 * @return	bool|null	TRUE if the issue is closed, FALSE if not closed, NULL on error
 	 */
 	public static function isTicketClosed($repos_uri, $issue_id) {
-		if (!isset(self::$trac_cache[$repos_uri])) {
+		if( !isset(self::$trac_cache[$repos_uri])) {
 			// In case you're running the tests offline, keep track of open tickets.
 			$file = DIR_TESTDATA . '/.trac-cache.' . str_replace(array('/'), array('-'), $repos_uri);
 			$issues = @file_get_contents('https://api.github.com/repos/' . $repos_uri . '/issues/?state=open');
 			// Check if our HTTP request failed.
-			if (false === $issues) {
-				if (file_exists($file)) {
+			if( false === $issues) {
+				if( file_exists($file)) {
 					register_shutdown_function(array('TracGitHubIssues', 'usingLocalCache'));
 					$issues = explode(' ', file_get_contents($file));
 				} else {

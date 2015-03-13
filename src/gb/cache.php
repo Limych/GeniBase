@@ -374,17 +374,17 @@ class GB_Object_Cache {
 	 * @return bool False if cache key and group already exist, true on success
 	 */
 	public function add( $key, $data, $group = 'default', $expire = 0 ) {
-		if ( gb_suspend_cache_addition() )
+		if( gb_suspend_cache_addition() )
 			return false;
 
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
 		$id = $key;
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$id = $this->blog_prefix . $key;
 
-		if ( $this->_exists( $id, $group ) )
+		if( $this->_exists( $id, $group ) )
 			return false;
 
 		return $this->set( $key, $data, $group, (int) $expire );
@@ -415,23 +415,23 @@ class GB_Object_Cache {
 	 * @return false|int False on failure, the item's new value on success.
 	 */
 	public function decr( $key, $offset = 1, $group = 'default' ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if ( ! $this->_exists( $key, $group ) )
+		if( ! $this->_exists( $key, $group ) )
 			return false;
 
-		if ( ! is_numeric( $this->cache[ $group ][ $key ] ) )
+		if( ! is_numeric( $this->cache[ $group ][ $key ] ) )
 			$this->cache[ $group ][ $key ] = 0;
 
 		$offset = (int) $offset;
 
 		$this->cache[ $group ][ $key ] -= $offset;
 
-		if ( $this->cache[ $group ][ $key ] < 0 )
+		if( $this->cache[ $group ][ $key ] < 0 )
 			$this->cache[ $group ][ $key ] = 0;
 
 		return $this->cache[ $group ][ $key ];
@@ -451,13 +451,13 @@ class GB_Object_Cache {
 	 * @return bool False if the contents weren't deleted and true on success
 	 */
 	public function delete( $key, $group = 'default', $deprecated = false ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if ( ! $this->_exists( $key, $group ) )
+		if( ! $this->_exists( $key, $group ) )
 			return false;
 
 		unset( $this->cache[$group][$key] );
@@ -495,16 +495,16 @@ class GB_Object_Cache {
 	 *		contents on success
 	 */
 	public function get( $key, $group = 'default', $force = false, &$found = null ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if ( $this->_exists( $key, $group ) ) {
+		if( $this->_exists( $key, $group ) ) {
 			$found = true;
 			$this->cache_hits += 1;
-			if ( is_object($this->cache[$group][$key]) )
+			if( is_object($this->cache[$group][$key]) )
 				return clone $this->cache[$group][$key];
 			else
 				return $this->cache[$group][$key];
@@ -526,23 +526,23 @@ class GB_Object_Cache {
 	 * @return false|int False on failure, the item's new value on success.
 	 */
 	public function incr( $key, $offset = 1, $group = 'default' ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if ( ! $this->_exists( $key, $group ) )
+		if( ! $this->_exists( $key, $group ) )
 			return false;
 
-		if ( ! is_numeric( $this->cache[ $group ][ $key ] ) )
+		if( ! is_numeric( $this->cache[ $group ][ $key ] ) )
 			$this->cache[ $group ][ $key ] = 0;
 
 		$offset = (int) $offset;
 
 		$this->cache[ $group ][ $key ] += $offset;
 
-		if ( $this->cache[ $group ][ $key ] < 0 )
+		if( $this->cache[ $group ][ $key ] < 0 )
 			$this->cache[ $group ][ $key ] = 0;
 
 		return $this->cache[ $group ][ $key ];
@@ -561,14 +561,14 @@ class GB_Object_Cache {
 	 * @return bool False if not exists, true if contents were replaced
 	 */
 	public function replace( $key, $data, $group = 'default', $expire = 0 ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
 		$id = $key;
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$id = $this->blog_prefix . $key;
 
-		if ( ! $this->_exists( $id, $group ) )
+		if( ! $this->_exists( $id, $group ) )
 			return false;
 
 		return $this->set( $key, $data, $group, (int) $expire );
@@ -585,7 +585,7 @@ class GB_Object_Cache {
 
 		// Clear out non-global caches since the blog ID has changed.
 		foreach ( array_keys( $this->cache ) as $group ) {
-			if ( ! isset( $this->global_groups[ $group ] ) )
+			if( ! isset( $this->global_groups[ $group ] ) )
 				unset( $this->cache[ $group ] );
 		}
 	}
@@ -611,13 +611,13 @@ class GB_Object_Cache {
 	 * @return bool Always returns true
 	 */
 	public function set( $key, $data, $group = 'default', $expire = 0 ) {
-		if ( empty( $group ) )
+		if( empty( $group ) )
 			$group = 'default';
 
-		if ( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
+		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if ( is_object( $data ) )
+		if( is_object( $data ) )
 			$data = clone $data;
 
 		$this->cache[$group][$key] = $data;

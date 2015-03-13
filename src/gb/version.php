@@ -2,14 +2,12 @@
 /**
  * The GeniBase version string.
  */
-define('GB_VERSION', '2.1.0');
+define('GB_VERSION', '2.1.1');
 
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.
  */
-define('GB_DB_VERSION', 8);
-
-
+define('GB_DB_VERSION', 9);
 
 /**
  * Required PHP version.
@@ -24,3 +22,10 @@ define('GB_MYSQL_REQUIRED',	'5.0');
 
 
 define('GB_LOCAL_PACKAGE', 'ru_RU');
+
+
+
+/*** Don't edit below this line *******************************************************/
+
+// Add GeniBase version to headers
+@header("X-Generator: GeniBase/" . GB_VERSION . "\n");

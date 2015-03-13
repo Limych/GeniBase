@@ -1,8 +1,8 @@
 <?php
 
-if (! isset($gb_did_header)):
-if ( !file_exists( dirname(__FILE__) . '/wp-config.php') ) {
-	if (strpos($_SERVER['PHP_SELF'], 'wp-admin') !== false) $path = '';
+if( ! isset($gb_did_header)):
+if( !file_exists( dirname(__FILE__) . '/wp-config.php') ) {
+	if( strpos($_SERVER['PHP_SELF'], 'wp-admin') !== false) $path = '';
 	else $path = 'wp-admin/';
 
 	require_once( dirname(__FILE__) . '/wp-includes/classes.php');
@@ -17,7 +17,7 @@ require_once( dirname(__FILE__) . '/wp-config.php');
 
 wp();
 
-require_once(GB_INC_DIR . '/template-loader.php');
+require_once(GB_CORE_DIR . '/template-loader.php');
 
 endif;
 

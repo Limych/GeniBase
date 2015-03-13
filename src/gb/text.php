@@ -6,130 +6,50 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
-
-/***************************************************************************
- * Функции работы с текстовыми данными
- */
-
-
-
-/**
- * Функция форматирования числа и вывода сопровождающего слова в правильном склонении
- * @deprecated
- */
-function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
-	$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', number_format($number, 0, ',', ' '));
-
-	if(!empty($tail_1)){
-		if($tail_2 == Null)	$tail_2 = $tail_1;
-		if($tail_5 == Null)	$tail_5 = $tail_2;
-
-		$sng = intval($number) % 10;
-		$dec = intval($number) % 100 - $sng;
-		$formatted .=
-			($dec == 10 ? $tail_5 :
-			($sng == 1 ? $tail_1 :
-			($sng >= 2 && $sng <= 4 ? $tail_2 : $tail_5)));
-	}
-
-	return $formatted;
-}	// function format_num
 
 /**
  * Date of last modification search keys making alghoritm.
  * @var string
  */
-define('GB_SEARCH_KEYS_MAKE_DATE', '2015-03-04');	// YYYY-MM-DD
+define('GB_METAKEYS_MAKE_DATE', '2015-03-04');	// YYYY-MM-DD
+
+define('GB_MK_SURNAME',		 100);
+define('GB_MK_MAIDEN_NAME',	 200);
+define('GB_MK_GIVEN_NAME',	 300);
+define('GB_MK_PATRONYMIC',	1000);
+define('GB_MK_OTHER_NAME',	9900);
  
 /**
  * Функция вычисления поисковых ключей слов.
  * 
- * @since	2.0.0	Added associative array if $use_hierarhy = TRUE
  * @since	1.0.0
  * 
- * @param	string|array	$text		Текст, для которого необходимо вычислить поисковые ключи.
- * @param	boolean			$use_hierarhy	TRUE, если надо для каждого слова вернуть массив соответствующих ключей.
- * @return	array		Массив вычисленных ключей.
+ * @param	array	$names	Associative array of names.
+ * @return	array		Associative array of arrays of metakeys. All keys are upcased.
  */
-function make_metakeys($text, $use_hierarhy = false){
-	if(!is_array($text))
-		$text = preg_split('/[^\w\?\*]+/uS', $text, -1, PREG_SPLIT_NO_EMPTY);
-
-	$res = array();
-	foreach($text as $key => $word){
-		// TODO: actions
-		$key_metaphone	= array_filter((array) rus_metaphone($word, true));
-		$key_metascript	= array_filter((array) rus_metascript(mb_ucfirst($word)));
-
-		if(!$use_hierarhy)
-			$res = array_merge($res, array($word), $key_metaphone, $key_metascript);
-		else
-			$res[$key] = array(
-					''				=> $word,
-					'metaphone'		=> $key_metaphone,
-					'metascript'	=> $key_metascript,
-			);
+function make_metakeys($names){
+	foreach($names as $key => $val){
+		if( !is_array($val))
+			$names[$key] = preg_split('/[^\w\?\*]+/uS', $val, -1, PREG_SPLIT_NO_EMPTY);
 	}
+	
+	/**
+	 * Make meta keys for names.
+	 * 
+	 * @since	2.1.1
+	 * 
+	 * @param	array	$names	Associative array of arrays of names.
+	 */
+	$metakeys = apply_filters('make_metakeys', $names);
 
-	return $res;
+	foreach($metakeys as $key => $val)
+		$metakeys[$key] = array_unique(array_map('mb_strtoupper', array_filter((array) $val)));
+
+	return array_filter($metakeys);
 }
-
-/**
- * Return associative array with keys for each word.
- * 
- * @since	2.0.0
- * @see	make_metakeys()
- * 
- * @param	string|array	$text	Text for which we make search keys.
- * @return	array	Array of associative arrays with search keys.
- */
-function make_metakeys_assoc($text){
-	return make_metakeys($text, true);
-}
-
-/**
- * Функция вычисления письменного ключа русского слова.
- * 
- * @param	string|string[]	$word	Исходное слово или массив слов.
- * @return	string|string[]		Письменный ключ слова или набор ключей для набора слов.
- */
-function rus_metascript($word){
-	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
-	if(is_array($word)){
-		foreach($word as $key => $val)
-			$word[$key] = rus_metascript($val);
-		return array_filter($word);
-	}
-
-	static $subs = array(
-		// Непропечатки печатного текста
-		// Заглавные буквы
-		'/Д/uS'	=> 'Л',
-		'/О/uS'	=> 'С',
-		'/[ТП]/uS'	=> 'Г',
-		'/[ЧК]/uS'	=> 'Н',
-		'/Щ/uS'	=> 'Ш',
-		'/Ъ/uS'	=> 'Ь',
-		'/Й/uS'	=> 'И',
-		// Строчные буквы
-		'/д/uS'	=> 'л',
-		'/о/uS'	=> 'с',
-		'/[тп]/uS'	=> 'г',
-		'/[чк]/uS'	=> 'н',
-		'/щ/uS'	=> 'ш',
-		'/ъ/uS'	=> 'ь',
-		'/й/uS'	=> 'и',
-		'/ы/uS'	=> 'м',
-		'/в/uS'	=> 'з',
-	);
-	$word = preg_replace(array_keys($subs), array_values($subs), $word);
-	return $word;
-}
-
-
 
 /**
  * Функция вычисления фонетического ключа русского слова.
@@ -141,8 +61,9 @@ function rus_metascript($word){
  * @return	string|string[]		Фонетический ключ слова или набор ключей для набора слов.
  */
 function rus_metaphone($word, $trim_surname = false){
-	// Если вместо строки передан массив, обработать каждое значение в отдельности и вернуть результат в виде массива
-	if(is_array($word)){
+	// Если вместо строки передан массив, обработать каждое значение в отдельности
+	// и вернуть результат в виде массива
+	if( is_array($word)){
 		foreach($word as $key => $val)
 			$word[$key] = rus_metaphone($val, $trim_surname);
 			return array_filter($word);
@@ -178,13 +99,13 @@ function rus_metaphone($word, $trim_surname = false){
 	// Переводим в верхний регистр и оставляем только символы из $alf
 	$word = mb_strtoupper($word, 'UTF-8');
 	$word = preg_replace("/[^$alf]+/usS", '', $word);
-	if(empty($word))	return $word;
+	if( empty($word))	return $word;
 
 	// Сжимаем парно идущие одинаковые буквы
 	$word = preg_replace("/([^\?])\\1+/uS", '\\1', $word);
 
 	// Сжимаем окончания фамилий, если это необходимо
-	if($trim_surname)	$word = preg_replace(array_keys($ends), array_values($ends), $word);
+	if( $trim_surname)	$word = preg_replace(array_keys($ends), array_values($ends), $word);
 
 	// Оглушаем последний символ, если он - звонкий согласный
 	$word = preg_replace_callback("/([$cns1])$/uS",	$callback, $word);
@@ -204,7 +125,110 @@ function rus_metaphone($word, $trim_surname = false){
 	return $word;
 } // function rus_metaphone
 
+define('GB_MK_KEY_PHONE',	10);
+/**
+ * Make metaphone word keys for names.
+ *
+ * @since	2.1.1
+ *
+ * @param array $metakeys	Associative array of names.
+ * @return array	Associative array of names and metakeys.
+*/
+function gb_metaphone($metakeys){
+	$names = array(GB_MK_SURNAME, GB_MK_MAIDEN_NAME, GB_MK_GIVEN_NAME, GB_MK_PATRONYMIC,
+			GB_MK_OTHER_NAME);
+	foreach($names as $nk){
+		if( !empty($metakeys[$nk]))
+			$metakeys[$nk + GB_MK_KEY_PHONE] = rus_metaphone($metakeys[$nk],
+					($nk === GB_MK_SURNAME));
+	}
+	return $metakeys;
+}
+add_filter('make_metakeys', 'gb_metaphone');
 
+/**
+ * Функция вычисления письменного ключа русского слова.
+ *
+ * @param	string|string[]	$word	Исходное слово или массив слов.
+ * @return	string|string[]		Письменный ключ слова или набор ключей для набора слов.
+ */
+function rus_metascript($word){
+	// Если вместо строки передан массив, обработать каждое значение в отдельности
+	// и вернуть результат в виде массива
+	if( is_array($word)){
+		foreach($word as $key => $val)
+			$word[$key] = rus_metascript($val);
+		return array_filter($word);
+	}
+
+	static $subs = array(
+			// Непропечатки печатного текста
+			// Заглавные буквы
+			'/Д/uS'	=> 'Л',
+			'/О/uS'	=> 'С',
+			'/[ТП]/uS'	=> 'Г',
+			'/[ЧК]/uS'	=> 'Н',
+			'/Щ/uS'	=> 'Ш',
+			'/Ъ/uS'	=> 'Ь',
+			'/Й/uS'	=> 'И',
+			// Строчные буквы
+			'/д/uS'	=> 'л',
+			'/о/uS'	=> 'с',
+			'/[тп]/uS'	=> 'г',
+			'/[чк]/uS'	=> 'н',
+			'/щ/uS'	=> 'ш',
+			'/ъ/uS'	=> 'ь',
+			'/й/uS'	=> 'и',
+			'/ы/uS'	=> 'м',
+			'/в/uS'	=> 'з',
+	);
+	$word = preg_replace(array_keys($subs), array_values($subs), $word);
+	return $word;
+}
+
+define('GB_MK_KEY_SCRIPT',	20);
+/**
+ * Make metascript word keys for names.
+ *
+ * @since	2.1.1
+ *
+ * @param array $metakeys	Associative array of names.
+ * @return array	Associative array of names and metakeys.
+*/
+function gb_metascript($metakeys){
+	$names = array(GB_MK_SURNAME, GB_MK_MAIDEN_NAME, GB_MK_GIVEN_NAME, GB_MK_PATRONYMIC,
+			GB_MK_OTHER_NAME);
+	foreach($names as $nk){
+		if( !empty($metakeys[$nk]))
+			$metakeys[$nk + GB_MK_KEY_SCRIPT] = rus_metascript($metakeys[$nk]);
+	}
+	return $metakeys;
+}
+add_filter('make_metakeys', 'gb_metascript');
+
+
+
+/**
+ * Функция форматирования числа и вывода сопровождающего слова в правильном склонении
+ * @deprecated
+ */
+function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
+	$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', number_format($number, 0, ',', ' '));
+
+	if( !empty($tail_1)){
+		if( $tail_2 == Null)	$tail_2 = $tail_1;
+		if( $tail_5 == Null)	$tail_5 = $tail_2;
+
+		$sng = intval($number) % 10;
+		$dec = intval($number) % 100 - $sng;
+		$formatted .=
+		($dec == 10 ? $tail_5 :
+				($sng == 1 ? $tail_1 :
+						($sng >= 2 && $sng <= 4 ? $tail_2 : $tail_5)));
+	}
+
+	return $formatted;
+}	// function format_num
 
 /**
  * Функция нормирования русского текста.
@@ -247,7 +271,7 @@ function fix_russian($text){
 		
 	$text = preg_split('/(\W+)/uS', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 	for($i = 0; $i < count($text); $i += 2){
-		if(preg_match('/[а-яА-Я]/uS', $text[$i]))
+		if( preg_match('/[а-яА-Я]/uS', $text[$i]))
 			$text[$i] = preg_replace('/[ъЪ]$/uS', '', strtr($text[$i], $alf));
 	}
 	return implode($text);
@@ -263,10 +287,10 @@ function expand_names($names){
 	$have_name = false;
 	foreach($names as $key => $n){
 		$exp = array($n);
-		if(preg_match('/\b\w+(вна|[вмт]ич|[мт]ична|ин|[ое]в(н?а)?)\b/uS', $n)){
+		if( preg_match('/\b\w+(вна|[вмт]ич|[мт]ична|ин|[ое]в(н?а)?)\b/uS', $n)){
 			// Это отчество
 			$n2 = preg_replace('/на$/uS', 'а', preg_replace('/ич$/uS', '', $n));
-			if($n != $n2)
+			if( $n != $n2)
 				$exp[] = $n2;
 
 			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` IN (?keys)' .
@@ -352,7 +376,7 @@ function translit2rus($text) {
 		'Ya'	=> 'Я',		'ya'	=> 'я',
 	);
 
-	if ($text === null)
+	if( $text === null)
 		return $tr;
 
 	return strtr($text, $tr);

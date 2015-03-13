@@ -7,7 +7,7 @@
  * @subpackage entry
  */
 
-if ( !class_exists( 'Translation_Entry' ) ):
+if( !class_exists( 'Translation_Entry' ) ):
 /**
  * Translation_Entry class encapsulates a translatable string
  */
@@ -42,17 +42,17 @@ class Translation_Entry {
 	 */
 	function Translation_Entry($args=array()) {
 		// if no singular -- empty object
-		if (!isset($args['singular'])) {
+		if( !isset($args['singular'])) {
 			return;
 		}
 		// get member variable values from args hash
 		foreach ($args as $varname => $value) {
 			$this->$varname = $value;
 		}
-		if (isset($args['plural'])) $this->is_plural = true;
-		if (!is_array($this->translations)) $this->translations = array();
-		if (!is_array($this->references)) $this->references = array();
-		if (!is_array($this->flags)) $this->flags = array();
+		if( isset($args['plural'])) $this->is_plural = true;
+		if( !is_array($this->translations)) $this->translations = array();
+		if( !is_array($this->references)) $this->references = array();
+		if( !is_array($this->flags)) $this->flags = array();
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Translation_Entry {
 	 * @return string|bool the key or false if the entry is empty
 	 */
 	function key() {
-		if (is_null($this->singular)) return false;
+		if( is_null($this->singular)) return false;
 		// prepend context and EOT, like in MO files
 		return is_null($this->context)? $this->singular : $this->context.chr(4).$this->singular;
 	}
@@ -69,7 +69,7 @@ class Translation_Entry {
 	function merge_with(&$other) {
 		$this->flags = array_unique( array_merge( $this->flags, $other->flags ) );
 		$this->references = array_unique( array_merge( $this->references, $other->references ) );
-		if ( $this->extracted_comments != $other->extracted_comments ) {
+		if( $this->extracted_comments != $other->extracted_comments ) {
 			$this->extracted_comments .= $other->extracted_comments;
 		}
 

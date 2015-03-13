@@ -45,7 +45,7 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 	
 	function _drop_temporary_tables($query) {
-		if ('DROP TABLE' === substr($query, 0, 10))
+		if( 'DROP TABLE' === substr($query, 0, 10))
 			return 'DROP TEMPORARY TABLE ' . substr($query, 10);
 		return $query;
 	}
@@ -64,7 +64,7 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	
 	function assertEqualFields( $object, $fields ) {
 		foreach( $fields as $field_name => $field_value ) {
-			if ( $object->$field_name != $field_value ) {
+			if( $object->$field_name != $field_value ) {
 				$this->fail();
 			}
 		}
@@ -77,11 +77,11 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 
 	protected function checkRequirements() {
 		parent::checkRequirements();
-		if ( GB_TESTS_FORCE_KNOWN_BUGS )
+		if( GB_TESTS_FORCE_KNOWN_BUGS )
 			return;
 		$tickets = PHPUnit_Util_Test::getTickets( get_class( $this ), $this->getName( false ) );
 		foreach ( $tickets as $ticket ) {
-			if ( is_numeric( $ticket ) ) {
+			if( is_numeric( $ticket ) ) {
 				$this->knownGBBug( $ticket );
 			}
 		}
@@ -91,9 +91,9 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	 * Skips the current test if there is an open GeniBase ticket with id $ticket_id
 	 */
 	function knownGBBug( $ticket_id ) {
-		if ( GB_TESTS_FORCE_KNOWN_BUGS || in_array( $ticket_id, self::$forced_tickets ) )
+		if( GB_TESTS_FORCE_KNOWN_BUGS || in_array( $ticket_id, self::$forced_tickets ) )
 			return;
-		if ( ! TracGitHubIssues::isTicketClosed( GB_GITHUB_REPOS, $ticket_id ) )
+		if( ! TracGitHubIssues::isTicketClosed( GB_GITHUB_REPOS, $ticket_id ) )
 			$this->markTestSkipped( sprintf( 'GeniBase Issue #%d is not fixed', $ticket_id ) );
 	}
 
@@ -108,11 +108,11 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 		$tmp_dir = '';
 		$dirs = array( 'TMP', 'TMPDIR', 'TEMP' );
 		foreach( $dirs as $dir )
-			if ( isset( $_ENV[$dir] ) && !empty( $_ENV[$dir] ) ) {
+			if( isset( $_ENV[$dir] ) && !empty( $_ENV[$dir] ) ) {
 				$tmp_dir = $dir;
 				break;
 			}
-		if ( empty( $tmp_dir ) ) {
+		if( empty( $tmp_dir ) ) {
 			$tmp_dir = '/tmp';
 		}
 		$tmp_dir = realpath( $dir );

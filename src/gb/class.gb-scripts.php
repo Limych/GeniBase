@@ -13,7 +13,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -40,18 +40,18 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function __construct() {
 		$this->init();
-// 		add_action( 'init', array( $this, 'init' ), 0 );
+// 		add_action( 'init', array( $this, 'init' ), 0 );	// TODO: action init
 	}
 
 	public function init() {
 		/**
 		 * Fires when the GB_Scripts instance is initialized.
 		 *
-		 * @since	2.0.0
+		 * @since	2.1.1
 		 *
 		 * @param GB_Scripts &$this GB_Scripts instance, passed by reference.
 		 */
-// 		do_action_ref_array( 'gb_default_scripts', array(&$this) );
+		do_action_ref_array('gb_default_scripts', array(&$this));
 	}
 
 	/**
@@ -70,10 +70,10 @@ class GB_Scripts extends GB_Dependencies {
 	}
 
 	public function print_extra_script( $handle, $echo = true ) {
-		if ( !$output = $this->get_data( $handle, 'data' ) )
+		if( !$output = $this->get_data( $handle, 'data' ) )
 			return;
 
-		if ( !$echo )
+		if( !$echo )
 			return $output;
 
 		echo "<script type='text/javascript'>\n"; // CDATA and type='text/javascript' is not needed for HTML 5
@@ -86,39 +86,38 @@ class GB_Scripts extends GB_Dependencies {
 	}
 
 	public function do_item( $handle, $group = false ) {
-		if ( !parent::do_item($handle) )
+		if( !parent::do_item($handle) )
 			return false;
 
-		if ( 0 === $group && $this->groups[$handle] > 0 ) {
+		if( 0 === $group && $this->groups[$handle] > 0 ) {
 			$this->in_footer[] = $handle;
 			return false;
 		}
 
-		if ( false === $group && in_array($handle, $this->in_footer, true) )
+		if( false === $group && in_array($handle, $this->in_footer, true) )
 			$this->in_footer = array_diff( $this->in_footer, (array) $handle );
 
-		if ( null === $this->registered[$handle]->ver )
+		if( null === $this->registered[$handle]->ver )
 			$ver = '';
 		else
 			$ver = $this->registered[$handle]->ver ? $this->registered[$handle]->ver : $this->default_version;
 
-		if ( isset($this->args[$handle]) )
+		if( isset($this->args[$handle]) )
 			$ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
 
 		$src = $this->registered[$handle]->src;
 
-		if ( $this->do_concat ) {
+		if( $this->do_concat ) {
 			/**
 			 * Filter the script loader source.
 			 *
-			 * @since	2.0.0
+			 * @since	2.1.1
 			 *
 			 * @param string $src    Script loader source path.
 			 * @param string $handle Script handle.
 			 */
-// 			$srce = apply_filters( 'script_loader_src', $src, $handle );
-			$srce = $src;
-			if ( $this->in_default_dir($srce) ) {
+			$srce = apply_filters( 'script_loader_src', $src, $handle );
+			if( $this->in_default_dir($srce) ) {
 				$this->print_code .= $this->print_extra_script( $handle, false );
 				$this->concat .= "$handle,";
 				$this->concat_version .= "$handle$ver";
@@ -130,17 +129,17 @@ class GB_Scripts extends GB_Dependencies {
 		}
 
 		$this->print_extra_script( $handle );
-		if ( !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
+		if( !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
 			$src = $this->base_url . $src;
 		}
 
-		if ( !empty($ver) )
+		if( !empty($ver) )
 			$src = add_query_arg('ver', $ver, $src);
 
-		/** This filter is documented in gb-includes/class.gb-scripts.php */
-// 		$src = esc_url( apply_filters( 'script_loader_src', $src, $handle ) );
+		/** This filter is documented in gb/class.gb-scripts.php */
+		$src = esc_url( apply_filters( 'script_loader_src', $src, $handle ) );
 
-		if ( ! $src )
+		if( ! $src )
 			return true;
 
 		$tag = "<script type='text/javascript' src='$src'></script>\n";
@@ -148,15 +147,15 @@ class GB_Scripts extends GB_Dependencies {
 		/** 
 		 * Filter the HTML script tag of an enqueued script.
 		 *
-		 * @since	2.0.0
+		 * @since	2.1.1
 		 *
 		 * @param string $tag    The `<script>` tag for the enqueued script.
 		 * @param string $handle The script's registered handle.
 		 * @param string $src    The script's source URL.
 		 */
-// 		$tag = apply_filters( 'script_loader_tag', $tag, $handle, $src );
+		$tag = apply_filters( 'script_loader_tag', $tag, $handle, $src );
 
-		if ( $this->do_concat ) {
+		if( $this->do_concat ) {
 			$this->print_html .= $tag;
 		} else {
 			echo $tag;
@@ -171,16 +170,16 @@ class GB_Scripts extends GB_Dependencies {
 	 * Localizes only if the script has already been added
 	 */
 	public function localize( $handle, $object_name, $l10n ) {
-		if ( $handle === 'jquery' )
+		if( $handle === 'jquery' )
 			$handle = 'jquery-core';
 
-		if ( is_array($l10n) && isset($l10n['l10n_print_after']) ) { // back compat, preserve the code in 'l10n_print_after' if present
+		if( is_array($l10n) && isset($l10n['l10n_print_after']) ) { // back compat, preserve the code in 'l10n_print_after' if present
 			$after = $l10n['l10n_print_after'];
 			unset($l10n['l10n_print_after']);
 		}
 
 		foreach ( (array) $l10n as $key => $value ) {
-			if ( !is_scalar($value) )
+			if( !is_scalar($value) )
 				continue;
 
 			$l10n[$key] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8');
@@ -188,12 +187,12 @@ class GB_Scripts extends GB_Dependencies {
 
 		$script = "var $object_name = " . gb_json_encode( $l10n ) . ';';
 
-		if ( !empty($after) )
+		if( !empty($after) )
 			$script .= "\n$after;";
 
 		$data = $this->get_data( $handle, 'data' );
 
-		if ( !empty( $data ) )
+		if( !empty( $data ) )
 			$script = "$data\n$script";
 
 		return $this->add_data( $handle, 'data', $script );
@@ -201,12 +200,12 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function set_group( $handle, $recursion, $group = false ) {
 
-		if ( $this->registered[$handle]->args === 1 )
+		if( $this->registered[$handle]->args === 1 )
 			$grp = 1;
 		else
 			$grp = (int) $this->get_data( $handle, 'group' );
 
-		if ( false !== $group && $grp > $group )
+		if( false !== $group && $grp > $group )
 			$grp = $group;
 
 		return parent::set_group( $handle, $recursion, $grp );
@@ -214,15 +213,15 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function all_deps( $handles, $recursion = false, $group = false ) {
 		$r = parent::all_deps( $handles, $recursion );
-		if ( ! $recursion ) {
+		if( ! $recursion ) {
 			/**
 			 * Filter the list of script dependencies left to print.
 			 *
-			 * @since	2.0.0
+			 * @since	2.1.1
 			 *
 			 * @param array $to_do An array of script dependencies.
 			 */
-// 			$this->to_do = apply_filters( 'print_scripts_array', $this->to_do );
+			$this->to_do = apply_filters('print_scripts_array', $this->to_do);
 		}
 		return $r;
 	}
@@ -238,16 +237,16 @@ class GB_Scripts extends GB_Dependencies {
 	}
 
 	public function in_default_dir( $src ) {
-		if ( ! $this->default_dirs ) {
+		if( ! $this->default_dirs ) {
 			return true;
 		}
 
-		if ( 0 === strpos( $src, '/' . GB_INC_DIR . '/js/l10n' ) ) {
+		if( 0 === strpos( $src, '/' . GB_CORE_DIR . '/js/l10n' ) ) {
 			return false;
 		}
 
 		foreach ( (array) $this->default_dirs as $test ) {
-			if ( 0 === strpos( $src, $test ) ) {
+			if( 0 === strpos( $src, $test ) ) {
 				return true;
 			}
 		}

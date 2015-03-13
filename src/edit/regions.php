@@ -1,9 +1,9 @@
 <?php
 require_once('../gb/gb.php');	// Common functions
-// require_once(GB_INC_DIR . '/publish.php');	// Function for data formalizing
+// require_once(GB_CORE_DIR . '/publish.php');	// Function for data formalizing
 
 html_header('Редактирование регионов');
-if (!isset($_POST['reg']) || empty($_POST['reg'])) {
+if( !isset($_POST['reg']) || empty($_POST['reg'])) {
 	select_region();
 }
 html_footer();

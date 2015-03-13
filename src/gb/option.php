@@ -27,7 +27,7 @@
  */
 function get_option( $option, $default = false ) {
 	$option = trim( $option );
-	if ( empty( $option ) )
+	if( empty( $option ) )
 		return false;
 
 	/**
@@ -44,18 +44,18 @@ function get_option( $option, $default = false ) {
 	 *                               Default false to skip it.
 	 */
 // 	$pre = apply_filters( 'pre_option_' . $option, false );
-// 	if ( false !== $pre )
+// 	if( false !== $pre )
 // 		return $pre;
 
-	if(defined('GB_SETUP_CONFIG'))
+	if( defined('GB_SETUP_CONFIG'))
 		return false;
 
-	if(defined('GB_INSTALLING')){
+	if( defined('GB_INSTALLING')){
 		$suppress = gbdb()->suppress_errors();
 		$row = gbdb()->get_row('SELECT option_value FROM ?_options WHERE option_name = ?key LIMIT 1',
 				array('key' => $option));
 		gbdb()->suppress_errors($suppress);
-		if(!empty($row))
+		if( !empty($row))
 			$value = $row['option_value'];
 		else{
 			/** This filter is documented in gb/option.php */
@@ -66,7 +66,7 @@ function get_option( $option, $default = false ) {
 	}else{
 		// prevent non-existent options from triggering multiple queries
 		$notoptions = gb_cache_get( 'notoptions', 'options' );
-		if(false !== $notoptions && isset($notoptions[$option])){
+		if( false !== $notoptions && isset($notoptions[$option])){
 			/**
 			 * Filter the default value for an option.
 			 *
@@ -83,14 +83,14 @@ function get_option( $option, $default = false ) {
 
 		$alloptions = gb_load_alloptions();
 
-		if(isset($alloptions[$option]))
+		if( isset($alloptions[$option]))
 			$value = $alloptions[$option];
 		else{
 			$value = gb_cache_get($option, 'options');
-			if(false === $value){
+			if( false === $value){
 				$row = gbdb()->get_row('SELECT option_value FROM ?_options' .
 						' WHERE option_name = ?key LIMIT 1', array('key' => $option));
-				if(!empty($row)){
+				if( !empty($row)){
 					$value = $row['option_value'];
 					gb_cache_add($option, $value, 'options');
 
@@ -107,10 +107,10 @@ function get_option( $option, $default = false ) {
 	} // if !GB_INSTALLING
 
 	// If home is not set use siteurl.
-	if('home' == $option && '' == $value)
+	if( 'home' == $option && '' == $value)
 		return get_option('siteurl');
 
-// 	if ( in_array( $option, array('siteurl', 'home') ) )
+// 	if( in_array( $option, array('siteurl', 'home') ) )
 // 		$value = untrailingslashit( $value );
 
 	/**
@@ -138,7 +138,7 @@ function get_option( $option, $default = false ) {
  * @param string $option Option name.
  */
 function gb_protect_special_option( $option ) {
-	if ( 'alloptions' === $option || 'notoptions' === $option )
+	if( 'alloptions' === $option || 'notoptions' === $option )
 		gb_die( sprintf( __( '%s is a protected GB option and may not be modified' ),
 				esc_html( $option ) ) );
 }
@@ -164,16 +164,16 @@ function form_option( $option ) {
 function gb_load_alloptions() {
 	$alloptions = gb_cache_get( 'alloptions', 'options' );
 
-	if ( !$alloptions ) {
+	if( !$alloptions ) {
 		$suppress = $wpdb->suppress_errors();
-		if ( !$alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" ) )
+		if( !$alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" ) )
 			$alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options" );
 		$wpdb->suppress_errors($suppress);
 		$alloptions = array();
 		foreach ( (array) $alloptions_db as $o ) {
 			$alloptions[$o->option_name] = $o->option_value;
 		}
-		if ( !defined( 'GB_INSTALLING' ) || !is_multisite() )
+		if( !defined( 'GB_INSTALLING' ) || !is_multisite() )
 			gb_cache_add( 'alloptions', $alloptions, 'options' );
 	}
 
@@ -190,10 +190,10 @@ function gb_load_alloptions() {
 function gb_load_core_site_options( $site_id = null ) {
 	global $wpdb;
 
-	if ( !is_multisite() || gb_using_ext_object_cache() || defined( 'GB_INSTALLING' ) )
+	if( !is_multisite() || gb_using_ext_object_cache() || defined( 'GB_INSTALLING' ) )
 		return;
 
-	if ( empty($site_id) )
+	if( empty($site_id) )
 		$site_id = $wpdb->siteid;
 
 	$core_options = array('site_name', 'siteurl', 'active_sitewide_plugins', '_site_transient_timeout_theme_roots', '_site_transient_theme_roots', 'site_admins', 'can_compress_scripts', 'global_terms_enabled', 'ms_files_rewriting' );
@@ -231,12 +231,12 @@ function update_option( $option, $value ) {
 	global $wpdb;
 
 	$option = trim($option);
-	if ( empty($option) )
+	if( empty($option) )
 		return false;
 
 	gb_protect_special_option( $option );
 
-	if ( is_object( $value ) )
+	if( is_object( $value ) )
 		$value = clone $value;
 
 	$value = sanitize_option( $option, $value );
@@ -266,10 +266,10 @@ function update_option( $option, $value ) {
 	$value = apply_filters( 'pre_update_option', $value, $option, $old_value );
 
 	// If the new and old values are the same, no need to update.
-	if ( $value === $old_value )
+	if( $value === $old_value )
 		return false;
 
-	if ( false === $old_value )
+	if( false === $old_value )
 		return add_option( $option, $value );
 
 	$serialized_value = maybe_serialize( $value );
@@ -286,18 +286,18 @@ function update_option( $option, $value ) {
 	do_action( 'update_option', $option, $old_value, $value );
 
 	$result = $wpdb->update( $wpdb->options, array( 'option_value' => $serialized_value ), array( 'option_name' => $option ) );
-	if ( ! $result )
+	if( ! $result )
 		return false;
 
 	$notoptions = gb_cache_get( 'notoptions', 'options' );
-	if ( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
+	if( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
 		unset( $notoptions[$option] );
 		gb_cache_set( 'notoptions', $notoptions, 'options' );
 	}
 
-	if ( ! defined( 'GB_INSTALLING' ) ) {
+	if( ! defined( 'GB_INSTALLING' ) ) {
 		$alloptions = gb_load_alloptions();
-		if ( isset( $alloptions[$option] ) ) {
+		if( isset( $alloptions[$option] ) ) {
 			$alloptions[ $option ] = $serialized_value;
 			gb_cache_set( 'alloptions', $alloptions, 'options' );
 		} else {
@@ -353,24 +353,24 @@ function update_option( $option, $value ) {
 function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' ) {
 	global $wpdb;
 
-	if ( !empty( $deprecated ) )
+	if( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '2.3' );
 
 	$option = trim($option);
-	if ( empty($option) )
+	if( empty($option) )
 		return false;
 
 	gb_protect_special_option( $option );
 
-	if ( is_object($value) )
+	if( is_object($value) )
 		$value = clone $value;
 
 	$value = sanitize_option( $option, $value );
 
 	// Make sure the option doesn't already exist. We can check the 'notoptions' cache before we ask for a db query
 	$notoptions = gb_cache_get( 'notoptions', 'options' );
-	if ( !is_array( $notoptions ) || !isset( $notoptions[$option] ) )
-		if ( false !== get_option( $option ) )
+	if( !is_array( $notoptions ) || !isset( $notoptions[$option] ) )
+		if( false !== get_option( $option ) )
 			return false;
 
 	$serialized_value = maybe_serialize( $value );
@@ -387,11 +387,11 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	do_action( 'add_option', $option, $value );
 
 	$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb->options` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `option_name` = VALUES(`option_name`), `option_value` = VALUES(`option_value`), `autoload` = VALUES(`autoload`)", $option, $serialized_value, $autoload ) );
-	if ( ! $result )
+	if( ! $result )
 		return false;
 
-	if ( ! defined( 'GB_INSTALLING' ) ) {
-		if ( 'yes' == $autoload ) {
+	if( ! defined( 'GB_INSTALLING' ) ) {
+		if( 'yes' == $autoload ) {
 			$alloptions = gb_load_alloptions();
 			$alloptions[ $option ] = $serialized_value;
 			gb_cache_set( 'alloptions', $alloptions, 'options' );
@@ -402,7 +402,7 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 
 	// This option exists now
 	$notoptions = gb_cache_get( 'notoptions', 'options' ); // yes, again... we need it to be fresh
-	if ( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
+	if( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
 		unset( $notoptions[$option] );
 		gb_cache_set( 'notoptions', $notoptions, 'options' );
 	}
@@ -444,14 +444,14 @@ function delete_option( $option ) {
 	global $wpdb;
 
 	$option = trim( $option );
-	if ( empty( $option ) )
+	if( empty( $option ) )
 		return false;
 
 	gb_protect_special_option( $option );
 
 	// Get the ID, if no ID then return
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT autoload FROM $wpdb->options WHERE option_name = %s", $option ) );
-	if ( is_null( $row ) )
+	if( is_null( $row ) )
 		return false;
 
 	/**
@@ -464,10 +464,10 @@ function delete_option( $option ) {
 	do_action( 'delete_option', $option );
 
 	$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option ) );
-	if ( ! defined( 'GB_INSTALLING' ) ) {
-		if ( 'yes' == $row->autoload ) {
+	if( ! defined( 'GB_INSTALLING' ) ) {
+		if( 'yes' == $row->autoload ) {
 			$alloptions = gb_load_alloptions();
-			if ( is_array( $alloptions ) && isset( $alloptions[$option] ) ) {
+			if( is_array( $alloptions ) && isset( $alloptions[$option] ) ) {
 				unset( $alloptions[$option] );
 				gb_cache_set( 'alloptions', $alloptions, 'options' );
 			}
@@ -475,7 +475,7 @@ function delete_option( $option ) {
 			gb_cache_delete( $option, 'options' );
 		}
 	}
-	if ( $result ) {
+	if( $result ) {
 
 		/**
 		 * Fires after a specific option has been deleted.
@@ -522,17 +522,17 @@ function delete_transient( $transient ) {
 	 */
 	do_action( 'delete_transient_' . $transient, $transient );
 
-	if ( gb_using_ext_object_cache() ) {
+	if( gb_using_ext_object_cache() ) {
 		$result = gb_cache_delete( $transient, 'transient' );
 	} else {
 		$option_timeout = '_transient_timeout_' . $transient;
 		$option = '_transient_' . $transient;
 		$result = delete_option( $option );
-		if ( $result )
+		if( $result )
 			delete_option( $option_timeout );
 	}
 
-	if ( $result ) {
+	if( $result ) {
 
 		/**
 		 * Fires after a transient is deleted.
@@ -575,19 +575,19 @@ function get_transient( $transient ) {
 	 *                             of the transient, and return the returned value.
 	 */
 	$pre = apply_filters( 'pre_transient_' . $transient, false );
-	if ( false !== $pre )
+	if( false !== $pre )
 		return $pre;
 
-	if ( gb_using_ext_object_cache() ) {
+	if( gb_using_ext_object_cache() ) {
 		$value = gb_cache_get( $transient, 'transient' );
 	} else {
 		$transient_option = '_transient_' . $transient;
-		if ( ! defined( 'GB_INSTALLING' ) ) {
+		if( ! defined( 'GB_INSTALLING' ) ) {
 			// If option is not in alloptions, it is not autoloaded and thus has a timeout
 			$alloptions = gb_load_alloptions();
-			if ( !isset( $alloptions[$transient_option] ) ) {
+			if( !isset( $alloptions[$transient_option] ) ) {
 				$transient_timeout = '_transient_timeout_' . $transient;
-				if ( get_option( $transient_timeout ) < time() ) {
+				if( get_option( $transient_timeout ) < time() ) {
 					delete_option( $transient_option  );
 					delete_option( $transient_timeout );
 					$value = false;
@@ -595,7 +595,7 @@ function get_transient( $transient ) {
 			}
 		}
 
-		if ( ! isset( $value ) )
+		if( ! isset( $value ) )
 			$value = get_option( $transient_option );
 	}
 
@@ -641,14 +641,14 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 
 	$expiration = (int) $expiration;
 
-	if ( gb_using_ext_object_cache() ) {
+	if( gb_using_ext_object_cache() ) {
 		$result = gb_cache_set( $transient, $value, 'transient', $expiration );
 	} else {
 		$transient_timeout = '_transient_timeout_' . $transient;
 		$transient = '_transient_' . $transient;
-		if ( false === get_option( $transient ) ) {
+		if( false === get_option( $transient ) ) {
 			$autoload = 'yes';
-			if ( $expiration ) {
+			if( $expiration ) {
 				$autoload = 'no';
 				add_option( $transient_timeout, time() + $expiration, '', 'no' );
 			}
@@ -657,8 +657,8 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 			// If expiration is requested, but the transient has no timeout option,
 			// delete, then re-create transient rather than update.
 			$update = true;
-			if ( $expiration ) {
-				if ( false === get_option( $transient_timeout ) ) {
+			if( $expiration ) {
+				if( false === get_option( $transient_timeout ) ) {
 					delete_option( $transient );
 					add_option( $transient_timeout, time() + $expiration, '', 'no' );
 					$result = add_option( $transient, $value, '', 'no' );
@@ -667,13 +667,13 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 					update_option( $transient_timeout, time() + $expiration );
 				}
 			}
-			if ( $update ) {
+			if( $update ) {
 				$result = update_option( $transient, $value );
 			}
 		}
 	}
 
-	if ( $result ) {
+	if( $result ) {
 
 		/**
 		 * Fires after the value for a specific transient has been set.

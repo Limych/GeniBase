@@ -1,13 +1,13 @@
 <?php
 require_once('../gb/gb.php');	// Общие функции системы
-require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
+require_once(GB_CORE_DIR . '/publish.php');	// Функции формализации данных
 
 
 
 // Поддержка запросов данных через AJAX
-if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
-	if(isset($_REQUEST['region_id'])){
-		if(intval($_REQUEST['region_id']) < 1)	exit;
+if( isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
+	if( isset($_REQUEST['region_id'])){
+		if( intval($_REQUEST['region_id']) < 1)	exit;
 
 		$cur_id = intval($_REQUEST['region_id']);
 		$html = array();
@@ -17,12 +17,12 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 		$tmp = array();
 		foreach ($result as $id => $title)
 			$tmp[] = "<option value='$id'>$title</option>";
-		if($tmp)	$html[] = '<select>' . implode($tmp) . '</select>';
+		if( $tmp)	$html[] = '<select>' . implode($tmp) . '</select>';
 
 		do{
 			$r = gbdb()->get_cell('SELECT parent_id FROM ?_dic_regions WHERE id = ?id',
 					array('id' => $cur_id));
-			if(!$r)	exit;
+			if( !$r)	exit;
 
 			$result = gbdb()->get_column('SELECT id, title FROM ?_dic_regions WHERE parent_id = ?id' .
 					' ORDER BY title', array('id' => $cur_id), TRUE);
@@ -42,11 +42,11 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 		exit;
 
 	}elseif(isset($_REQUEST['source_id'])){
-		if(intval($_REQUEST['source_id']) < 1)	exit;
+		if( intval($_REQUEST['source_id']) < 1)	exit;
 
 		$r = gbdb()->get_row('SELECT source, source_url, source_pg_corr FROM ?_dic_sources WHERE id = ?id',
 				array('id' => $_REQUEST['source_id']));
-		if(!$r || empty($r['source_url']))	exit;
+		if( !$r || empty($r['source_url']))	exit;
 
 		$pg = intval($_REQUEST['source_pg']);
 		$url = str_replace('{pg}', $pg + $r['source_pg_corr'], $r['source_url']);
@@ -60,26 +60,26 @@ if(isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data'){
 
 
 // Делаем выборку записей для публикации
-if(isset($_REQUEST['id']))
+if( isset($_REQUEST['id']))
 	$raw = gbdb()->get_row('SELECT * FROM ?_persons_raw WHERE id = ?id', array('id' => $_REQUEST['id']));
 else
 	$raw = gbdb()->get_row('SELECT * FROM ?_persons_raw WHERE status = "Cant publish" ORDER BY RAND()
 			LIMIT 1');
 
 // Для отладки
-if(defined('P_DEBUG'))	print "\n\n======================================\n";
-if(defined('P_DEBUG'))	var_export($raw);
+if( defined('P_DEBUG'))	print "\n\n======================================\n";
+if( defined('P_DEBUG'))	var_export($raw);
 $pub = prepublish($raw, $have_trouble, $date_norm);
-if(defined('P_DEBUG'))	var_export($have_trouble);
-if(defined('P_DEBUG'))	var_export($pub);
+if( defined('P_DEBUG'))	var_export($have_trouble);
+if( defined('P_DEBUG'))	var_export($pub);
 
 // Если режим правки данных…
-if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
+if( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 
 	// Вычисляем вносимые изменения
-	if(defined('P_DEBUG'))	print "\n\n=== Edit ===================================\n";
+	if( defined('P_DEBUG'))	print "\n\n=== Edit ===================================\n";
 	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
-	if(defined('P_DEBUG'))	var_export($mod);
+	if( defined('P_DEBUG'))	var_export($mod);
 	
 	switch($_POST['mode']){
 	case 'raw':
@@ -99,14 +99,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 		$pub = prepublish_make_data($pub, $have_trouble);
 		break;
 	}
-if(defined('P_DEBUG'))	var_export($have_trouble);
-if(defined('P_DEBUG'))	var_export($pub);
+if( defined('P_DEBUG'))	var_export($have_trouble);
+if( defined('P_DEBUG'))	var_export($pub);
 }
 
 // Если формализация сейчас прошла успешно …
-if(!isset($_REQUEST['id']) && !$have_trouble){
+if( !isset($_REQUEST['id']) && !$have_trouble){
 	// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
-	if(!GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
+	if( !GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
 		gbdb()->set_row('?_persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
 		gbdb()->set_row('?_persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
 	}
@@ -139,8 +139,8 @@ foreach ($result as $r){
 	$dic_source_pg_corr[$r['id']] = $r['source_pg_corr'];
 }
 uasort($dic_sources, function($a, $b){
-	if(preg_match('/№(\d+)/uS', $a, $ma) && preg_match('/№(\d+)/uS', $b, $mb)){
-		if(intval($ma[1]) == intval($mb[1]))
+	if( preg_match('/№(\d+)/uS', $a, $ma) && preg_match('/№(\d+)/uS', $b, $mb)){
+		if( intval($ma[1]) == intval($mb[1]))
 			return 0;
 		return (intval($ma[1]) < intval($mb[1])) ? -1 : 1;
 	}
@@ -174,10 +174,9 @@ $fields = array(
 	'date_from'	=> ' начиная с …',
 	'date_to'	=> ' заканчивая по …',
 	'source'	=> 'Источник:',
-	'source_pg'	=> ' № страницы',	// TODO: Rename source_pg → source_pg
+	'source_pg'	=> '№ страницы',
 	'comments'	=> 'Комментарии',
 );
-// TODO: Rename source_pg → source_pg
 $dfields = explode(' ', 'surname name region_id place rank religion marital reason date source_pg uyezd source_id');
 $pfields = explode(' ', 'surname name region_id place rank religion_id marital_id reason_id date source_pg comments date_from date_to source_id');
 ?>
@@ -250,16 +249,15 @@ foreach($fields as $key => $def){
 	
 	//вывод столбца исходных данных
 	if( in_array($key.'_id', $dfields)) $key = $key.'_id';
-	if(!in_array($key      , $dfields)) print "\t<td></td>\n";
+	if( !in_array($key      , $dfields)) print "\t<td></td>\n";
 	else{
 		print "\t<td>";
-		if($key == 'source_id'){
+		if( $key == 'source_id'){
 			$have_link = isset($raw[$key]) && !empty($dic_source_url[$raw[$key]]);
 			print "<input type='text' size=60 name='raw[$key]' value='" .
 					($have_link ? esc_attr($dic_sources[$raw[$key]]) : '') . "' />";
 			print "<br />";
-			if($have_link){
-				// TODO: Rename source_pg → source_pg
+			if( $have_link){
 				$url_raw = str_replace('{pg}', intval($raw['source_pg'] + $dic_source_pg_corr[$raw[$key]]) , $dic_source_url[$raw[$key]]);
 				$text_raw = trim_text($dic_sources[$raw[$key]], 40);
 				print "<small>Ссылка на источник: «<a href='$url_raw' target='_blank'>$text_raw</a>», стр." . esc_html($raw['source_pg']) . "</small>";
@@ -274,10 +272,10 @@ foreach($fields as $key => $def){
 	
 	//вывод столбца формализованных данных
 	if( in_array($key.'_id', $pfields)) $key = $key.'_id';
-	if(!in_array($key      , $pfields))	print "\t<td></td>";
+	if( !in_array($key      , $pfields))	print "\t<td></td>";
 	else{
 		print "\t<td" . ($key == 'comments' || isset($pub[$key]) ? '' : ' class="trouble"') . ">";
-		if($key == 'rank'){
+		if( $key == 'rank'){
 			print "<select id='$key' name='pub[$key]'>\n";
 			$sel = isset($pub[$key]) ? $pub[$key] : -1;
 			foreach($dic_rank as $k => $d){
@@ -366,7 +364,7 @@ foreach($fields as $key => $def){
 
 function trim_text($text, $max_len = 70){
 	$text = trim($text);
-	if(mb_strlen($text) > $max_len)
+	if( mb_strlen($text) > $max_len)
 		$text = preg_replace('/\s+\w*$/uS', '', mb_substr($text, 0, $max_len)) . '…';
 	return $text;
 }

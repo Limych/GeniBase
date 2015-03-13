@@ -27,7 +27,7 @@ class NotGettextedTest extends PHPUnit_Framework_TestCase {
 <?php
 	$s = 8;
 echo /* GB_I18N_GUGU*/ 	"yes" /* /GB_I18N_UGU		*/;
-	if ($x == "18181") { gb_die(sprintf(/*GB_I18N_DIE*/\'We died %d times!\'/*GB_I18N_DIE*/)); }
+	if( $x == "18181") { gb_die(sprintf(/*GB_I18N_DIE*/\'We died %d times!\'/*GB_I18N_DIE*/)); }
 ?>';
 		$tokens = token_get_all($code);
 		$this->assertEquals( '', $this->ng->walk_tokens( $tokens, array($this->ng, 'ignore_token'), array($this->ng, 'ignore_token') ) );

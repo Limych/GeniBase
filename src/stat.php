@@ -33,7 +33,7 @@ $even = 0;
 $result = gbdb()->get_table('SELECT rank, COUNT(*) AS cnt FROM ?_persons GROUP BY rank ORDER BY rank');
 foreach ($result as $row){
 	$even = 1-$even;
-	if(empty($row['rank']))
+	if( empty($row['rank']))
 		$row['rank'] = '(не указано)';
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($row['rank']) . "</td>\n\t<td class='align-right'>" . format_num($row['cnt']) . "</td>\n</tr>";
 }
@@ -53,8 +53,8 @@ $result = gbdb()->get_table('SELECT event_type, reason, SUM(reason_cnt) AS cnt F
 		' GROUP BY event_type, reason ORDER BY 1,2');
 foreach ($result as $row){
 	$even = 1-$even;
-	if(empty($row['event_type']))	$row['event_type'] = '(не указано)';
-	if(empty($row['reason']))		$row['reason'] = '(не указано)';
+	if( empty($row['event_type']))	$row['event_type'] = '(не указано)';
+	if( empty($row['reason']))		$row['reason'] = '(не указано)';
 	print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t"
 				."<td>" . esc_html($row['event_type']) . "</td>\n\t"
 				."<td>" . esc_html($row['reason']) . "</td>\n\t"

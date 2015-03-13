@@ -27,7 +27,6 @@ html_header('Статистика по запросам к базе данных
 <?php
 $even = 0;
 
-// TODO: Rename source_pg → source_pg
 $result = gbdb()->query("SELECT
  CASE WHEN `Год` IS NULL 
       THEN 'Всего'

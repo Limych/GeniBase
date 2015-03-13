@@ -20,7 +20,7 @@ foreach ($result as $row){
 	$date2 = intval(preg_replace_callback('/^(\d+)-(\d+)-\d+$/uS', function($m){
 		return (intval($m[1]) - 1914) * 12 + intval($m[2]) - 1;
 	}, $row['date_to']));
-	if($date1 != $date2)	continue;
+	if( $date1 != $date2)	continue;
 
 	$cnt += $row['cnt'];
 	$hist[$date1] += $row['cnt'];

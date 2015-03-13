@@ -225,7 +225,7 @@ module.exports = function(grunt) {
 					var index, file = grunt.option( 'file' );
 
 					// Don't filter when no target file is specified
-					if ( ! file ) {
+					if( !file ) {
 						return true;
 					}
 
@@ -234,7 +234,7 @@ module.exports = function(grunt) {
 					index = filepath.lastIndexOf( '/' + file );
 
 					// Match only the filename passed from cli
-					if ( filepath === file || ( -1 !== index && index === filepath.length - ( file.length + 1 ) ) ) {
+					if( filepath === file || ( -1 !== index && index === filepath.length - ( file.length + 1 ) ) ) {
 						return true;
 					}
 
@@ -256,7 +256,7 @@ module.exports = function(grunt) {
 					var index, dir = grunt.option( 'dir' );
 
 					// Don't filter when no target folder is specified
-					if ( ! dir ) {
+					if( ! dir ) {
 						return true;
 					}
 
@@ -264,7 +264,7 @@ module.exports = function(grunt) {
 					index = dirpath.lastIndexOf( '/' + dir );
 
 					// Match only the folder name passed from cli
-					if ( -1 !== index ) {
+					if( -1 !== index ) {
 						return true;
 					}
 
@@ -445,7 +445,7 @@ module.exports = function(grunt) {
 	// configurations so that only the changed files are updated.
 	// On `watch:rtl`, automatically updates the `cssjanus:dynamic` configuration.
 	grunt.event.on('watch', function( action, filepath, target ) {
-		if ( target !== 'all' && target !== 'rtl' ) {
+		if( target !== 'all' && target !== 'rtl' ) {
 			return;
 		}
 

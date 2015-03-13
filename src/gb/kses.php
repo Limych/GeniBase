@@ -32,7 +32,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -46,14 +46,14 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  *
  * @since 2.0.0
  */
-if ( ! defined( 'CUSTOM_TAGS' ) )
+if( ! defined( 'CUSTOM_TAGS' ) )
 	define( 'CUSTOM_TAGS', false );
 
 // Ensure that these variables are added to the global namespace
 // (e.g. if using namespaces / autoload in the current PHP environment).
 global $allowedposttags, $allowedtags, $allowedentitynames;
 
-if ( ! CUSTOM_TAGS ) {
+if( ! CUSTOM_TAGS ) {
 	/**
 	 * Kses global for default allowable HTML tags.
 	 *
@@ -523,7 +523,7 @@ if ( ! CUSTOM_TAGS ) {
  * @return string Filtered content with only allowed HTML elements
  */
 function gb_kses( $string, $allowed_html, $allowed_protocols = array() ) {
-	if ( empty( $allowed_protocols ) )
+	if( empty( $allowed_protocols ) )
 		$allowed_protocols = gb_allowed_protocols();
 	$string = gb_kses_no_null($string);
 	$string = gb_kses_js_entities($string);
@@ -544,7 +544,7 @@ function gb_kses( $string, $allowed_html, $allowed_protocols = array() ) {
 function gb_kses_allowed_html( $context = '' ) {
 	global $allowedposttags, $allowedtags, $allowedentitynames;
 
-	if ( is_array( $context ) ) {
+	if( is_array( $context ) ) {
 		/**
 		 * Filter HTML elements allowed for a given context.
 		 *
@@ -681,15 +681,15 @@ function _gb_kses_split_callback( $match ) {
 function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 	$string = gb_kses_stripslashes($string);
 
-	if (substr($string, 0, 1) != '<')
+	if( substr($string, 0, 1) != '<')
 		return '&gt;';
 	# It matched a ">" character
 
-	if ( '<!--' == substr( $string, 0, 4 ) ) {
+	if( '<!--' == substr( $string, 0, 4 ) ) {
 		$string = str_replace( array('<!--', '-->'), '', $string );
 		while ( $string != ($newstring = gb_kses($string, $allowed_html, $allowed_protocols)) )
 			$string = $newstring;
-		if ( $string == '' )
+		if( $string == '' )
 			return '';
 		// prevent multiple dashes in comments
 		$string = preg_replace('/--+/', '-', $string);
@@ -699,7 +699,7 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 	}
 	# Allow HTML comments
 
-	if (!preg_match('%^<\s*(/\s*)?([a-zA-Z0-9]+)([^>]*)>?$%', $string, $matches))
+	if( !preg_match('%^<\s*(/\s*)?([a-zA-Z0-9]+)([^>]*)>?$%', $string, $matches))
 		return '';
 	# It's seriously malformed
 
@@ -707,14 +707,14 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 	$elem = $matches[2];
 	$attrlist = $matches[3];
 
-	if ( ! is_array( $allowed_html ) )
+	if( ! is_array( $allowed_html ) )
 		$allowed_html = gb_kses_allowed_html( $allowed_html );
 
-	if ( ! isset($allowed_html[strtolower($elem)]) )
+	if( ! isset($allowed_html[strtolower($elem)]) )
 		return '';
 	# They are using a not allowed HTML element
 
-	if ($slash != '')
+	if( $slash != '')
 		return "</$elem>";
 	# No attributes are allowed for closing elements
 
@@ -741,15 +741,15 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 	# Is there a closing XHTML slash at the end of the attributes?
 
-	if ( ! is_array( $allowed_html ) )
+	if( ! is_array( $allowed_html ) )
 		$allowed_html = gb_kses_allowed_html( $allowed_html );
 
 	$xhtml_slash = '';
-	if (preg_match('%\s*/\s*$%', $attr))
+	if( preg_match('%\s*/\s*$%', $attr))
 		$xhtml_slash = ' /';
 
 	# Are any attributes allowed at all for this element?
-	if ( ! isset($allowed_html[strtolower($element)]) || count($allowed_html[strtolower($element)]) == 0 )
+	if( ! isset($allowed_html[strtolower($element)]) || count($allowed_html[strtolower($element)]) == 0 )
 		return "<$element$xhtml_slash>";
 
 	# Split it
@@ -761,25 +761,25 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 
 	$allowed_attr = $allowed_html[strtolower($element)];
 	foreach ($attrarr as $arreach) {
-		if ( ! isset( $allowed_attr[strtolower($arreach['name'])] ) )
+		if( ! isset( $allowed_attr[strtolower($arreach['name'])] ) )
 			continue; # the attribute is not allowed
 
 		$current = $allowed_attr[strtolower($arreach['name'])];
-		if ( $current == '' )
+		if( $current == '' )
 			continue; # the attribute is not allowed
 
-		if ( strtolower( $arreach['name'] ) == 'style' ) {
+		if( strtolower( $arreach['name'] ) == 'style' ) {
 			$orig_value = $arreach['value'];
 			$value = safecss_filter_attr( $orig_value );
 
-			if ( empty( $value ) )
+			if( empty( $value ) )
 				continue;
 
 			$arreach['value'] = $value;
 			$arreach['whole'] = str_replace( $orig_value, $value, $arreach['whole'] );
 		}
 
-		if ( ! is_array($current) ) {
+		if( ! is_array($current) ) {
 			$attr2 .= ' '.$arreach['whole'];
 		# there are no checks
 
@@ -787,13 +787,13 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 			# there are some checks
 			$ok = true;
 			foreach ($current as $currkey => $currval) {
-				if ( ! gb_kses_check_attr_val($arreach['value'], $arreach['vless'], $currkey, $currval) ) {
+				if( ! gb_kses_check_attr_val($arreach['value'], $arreach['vless'], $currkey, $currval) ) {
 					$ok = false;
 					break;
 				}
 			}
 
-			if ( $ok )
+			if( $ok )
 				$attr2 .= ' '.$arreach['whole']; # it passed them
 		} # if !is_array($current)
 	} # foreach
@@ -835,7 +835,7 @@ function gb_kses_hair($attr, $allowed_protocols) {
 		switch ($mode) {
 			case 0 : # attribute name, href for instance
 
-				if ( preg_match('/^([-a-zA-Z:]+)/', $attr, $match ) ) {
+				if( preg_match('/^([-a-zA-Z:]+)/', $attr, $match ) ) {
 					$attrname = $match[1];
 					$working = $mode = 1;
 					$attr = preg_replace( '/^[-a-zA-Z:]+/', '', $attr );
@@ -845,7 +845,7 @@ function gb_kses_hair($attr, $allowed_protocols) {
 
 			case 1 : # equals sign or valueless ("selected")
 
-				if (preg_match('/^\s*=\s*/', $attr)) # equals sign
+				if( preg_match('/^\s*=\s*/', $attr)) # equals sign
 					{
 					$working = 1;
 					$mode = 2;
@@ -853,11 +853,11 @@ function gb_kses_hair($attr, $allowed_protocols) {
 					break;
 				}
 
-				if (preg_match('/^\s+/', $attr)) # valueless
+				if( preg_match('/^\s+/', $attr)) # valueless
 					{
 					$working = 1;
 					$mode = 0;
-					if(false === array_key_exists($attrname, $attrarr)) {
+					if( false === array_key_exists($attrname, $attrarr)) {
 						$attrarr[$attrname] = array ('name' => $attrname, 'value' => '', 'whole' => $attrname, 'vless' => 'y');
 					}
 					$attr = preg_replace('/^\s+/', '', $attr);
@@ -867,14 +867,14 @@ function gb_kses_hair($attr, $allowed_protocols) {
 
 			case 2 : # attribute value, a URL after href= for instance
 
-				if (preg_match('%^"([^"]*)"(\s+|/?$)%', $attr, $match))
+				if( preg_match('%^"([^"]*)"(\s+|/?$)%', $attr, $match))
 					# "value"
 					{
 					$thisval = $match[1];
-					if ( in_array(strtolower($attrname), $uris) )
+					if( in_array(strtolower($attrname), $uris) )
 						$thisval = gb_kses_bad_protocol($thisval, $allowed_protocols);
 
-					if(false === array_key_exists($attrname, $attrarr)) {
+					if( false === array_key_exists($attrname, $attrarr)) {
 						$attrarr[$attrname] = array ('name' => $attrname, 'value' => $thisval, 'whole' => "$attrname=\"$thisval\"", 'vless' => 'n');
 					}
 					$working = 1;
@@ -883,14 +883,14 @@ function gb_kses_hair($attr, $allowed_protocols) {
 					break;
 				}
 
-				if (preg_match("%^'([^']*)'(\s+|/?$)%", $attr, $match))
+				if( preg_match("%^'([^']*)'(\s+|/?$)%", $attr, $match))
 					# 'value'
 					{
 					$thisval = $match[1];
-					if ( in_array(strtolower($attrname), $uris) )
+					if( in_array(strtolower($attrname), $uris) )
 						$thisval = gb_kses_bad_protocol($thisval, $allowed_protocols);
 
-					if(false === array_key_exists($attrname, $attrarr)) {
+					if( false === array_key_exists($attrname, $attrarr)) {
 						$attrarr[$attrname] = array ('name' => $attrname, 'value' => $thisval, 'whole' => "$attrname='$thisval'", 'vless' => 'n');
 					}
 					$working = 1;
@@ -899,14 +899,14 @@ function gb_kses_hair($attr, $allowed_protocols) {
 					break;
 				}
 
-				if (preg_match("%^([^\s\"']+)(\s+|/?$)%", $attr, $match))
+				if( preg_match("%^([^\s\"']+)(\s+|/?$)%", $attr, $match))
 					# value
 					{
 					$thisval = $match[1];
-					if ( in_array(strtolower($attrname), $uris) )
+					if( in_array(strtolower($attrname), $uris) )
 						$thisval = gb_kses_bad_protocol($thisval, $allowed_protocols);
 
-					if(false === array_key_exists($attrname, $attrarr)) {
+					if( false === array_key_exists($attrname, $attrarr)) {
 						$attrarr[$attrname] = array ('name' => $attrname, 'value' => $thisval, 'whole' => "$attrname=\"$thisval\"", 'vless' => 'n');
 					}
 					# We add quotes to conform to W3C's HTML spec.
@@ -918,14 +918,14 @@ function gb_kses_hair($attr, $allowed_protocols) {
 				break;
 		} # switch
 
-		if ($working == 0) # not well formed, remove and try again
+		if( $working == 0) # not well formed, remove and try again
 		{
 			$attr = gb_kses_html_error($attr);
 			$mode = 0;
 		}
 	} # while
 
-	if ($mode == 1 && false === array_key_exists($attrname, $attrarr))
+	if( $mode == 1 && false === array_key_exists($attrname, $attrarr))
 		# special case, for when the attribute list ends with a valueless
 		# attribute like "selected"
 		$attrarr[$attrname] = array ('name' => $attrname, 'value' => '', 'whole' => $attrname, 'vless' => 'y');
@@ -956,7 +956,7 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
 			# greater than the given value. This can be used to avoid Buffer Overflows
 			# in WWW clients and various Internet servers.
 
-			if (strlen($value) > $checkvalue)
+			if( strlen($value) > $checkvalue)
 				$ok = false;
 			break;
 
@@ -964,7 +964,7 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
 			# The minlen check makes sure that the attribute value has a length not
 			# smaller than the given value.
 
-			if (strlen($value) < $checkvalue)
+			if( strlen($value) < $checkvalue)
 				$ok = false;
 			break;
 
@@ -975,9 +975,9 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
 			# value is not greater than the given value.
 			# This check can be used to avoid Denial of Service attacks.
 
-			if (!preg_match('/^\s{0,6}[0-9]{1,6}\s{0,6}$/', $value))
+			if( !preg_match('/^\s{0,6}[0-9]{1,6}\s{0,6}$/', $value))
 				$ok = false;
-			if ($value > $checkvalue)
+			if( $value > $checkvalue)
 				$ok = false;
 			break;
 
@@ -985,9 +985,9 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
 			# The minval check makes sure that the attribute value is a positive integer,
 			# and that it is not smaller than the given value.
 
-			if (!preg_match('/^\s{0,6}[0-9]{1,6}\s{0,6}$/', $value))
+			if( !preg_match('/^\s{0,6}[0-9]{1,6}\s{0,6}$/', $value))
 				$ok = false;
-			if ($value < $checkvalue)
+			if( $value < $checkvalue)
 				$ok = false;
 			break;
 
@@ -997,7 +997,7 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
 			# is a "y" or a "Y", the attribute must not have a value.
 			# If the given value is an "n" or an "N", the attribute must have one.
 
-			if (strtolower($checkvalue) != $vless)
+			if( strtolower($checkvalue) != $vless)
 				$ok = false;
 			break;
 	} # switch
@@ -1028,7 +1028,7 @@ function gb_kses_bad_protocol($string, $allowed_protocols) {
 		$string = gb_kses_bad_protocol_once($string, $allowed_protocols);
 	} while ( $original_string != $string && ++$iterations < 6 );
 
-	if ( $original_string != $string )
+	if( $original_string != $string )
 		return '';
 
 	return $string;
@@ -1132,14 +1132,14 @@ function gb_kses_html_error($string) {
  */
 function gb_kses_bad_protocol_once($string, $allowed_protocols, $count = 1 ) {
 	$string2 = preg_split( '/:|&#0*58;|&#x0*3a;/i', $string, 2 );
-	if ( isset($string2[1]) && ! preg_match('%/\?%', $string2[0]) ) {
+	if( isset($string2[1]) && ! preg_match('%/\?%', $string2[0]) ) {
 		$string = trim( $string2[1] );
 		$protocol = gb_kses_bad_protocol_once2( $string2[0], $allowed_protocols );
-		if ( 'feed:' == $protocol ) {
-			if ( $count > 2 )
+		if( 'feed:' == $protocol ) {
+			if( $count > 2 )
 				return '';
 			$string = gb_kses_bad_protocol_once( $string, $allowed_protocols, ++$count );
-			if ( empty( $string ) )
+			if( empty( $string ) )
 				return $string;
 		}
 		$string = $protocol . $string;
@@ -1169,12 +1169,12 @@ function gb_kses_bad_protocol_once2( $string, $allowed_protocols ) {
 
 	$allowed = false;
 	foreach ( (array) $allowed_protocols as $one_protocol )
-		if ( strtolower($one_protocol) == $string2 ) {
+		if( strtolower($one_protocol) == $string2 ) {
 			$allowed = true;
 			break;
 		}
 
-	if ($allowed)
+	if( $allowed)
 		return "$string2:";
 	else
 		return '';
@@ -1219,7 +1219,7 @@ function gb_kses_normalize_entities($string) {
 function gb_kses_named_entities($matches) {
 	global $allowedentitynames;
 
-	if ( empty($matches[1]) )
+	if( empty($matches[1]) )
 		return '';
 
 	$i = $matches[1];
@@ -1239,11 +1239,11 @@ function gb_kses_named_entities($matches) {
  * @return string Correctly encoded entity
  */
 function gb_kses_normalize_entities2($matches) {
-	if ( empty($matches[1]) )
+	if( empty($matches[1]) )
 		return '';
 
 	$i = $matches[1];
-	if (valid_unicode($i)) {
+	if( valid_unicode($i)) {
 		$i = str_pad(ltrim($i,'0'), 3, '0', STR_PAD_LEFT);
 		$i = "&#$i;";
 	} else {
@@ -1265,7 +1265,7 @@ function gb_kses_normalize_entities2($matches) {
  * @return string Correctly encoded entity
  */
 function gb_kses_normalize_entities3($matches) {
-	if ( empty($matches[1]) )
+	if( empty($matches[1]) )
 		return '';
 
 	$hexchars = $matches[1];
@@ -1407,7 +1407,7 @@ function kses_init_filters() {
 /*	add_filter('title_save_pre', 'gb_filter_kses');
 
 	// Comment filtering
-	if ( current_user_can( 'unfiltered_html' ) )
+	if( current_user_can( 'unfiltered_html' ) )
 		add_filter( 'pre_comment_content', 'gb_filter_post_kses' );
 	else
 		add_filter( 'pre_comment_content', 'gb_filter_kses' );
@@ -1460,7 +1460,7 @@ function kses_remove_filters() {
 function kses_init() {
 	kses_remove_filters();
 
-	if (current_user_can('unfiltered_html') == false)
+	if( current_user_can('unfiltered_html') == false)
 		kses_init_filters();
 }
 
@@ -1473,13 +1473,13 @@ function kses_init() {
  * @since 2.0.0
  */
 function safecss_filter_attr( $css, $deprecated = '' ) {
-	if ( !empty( $deprecated ) )
+	if( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '2.8.1' ); // Never implemented
 
 	$css = gb_kses_no_null($css);
 	$css = str_replace(array("\n","\r","\t"), '', $css);
 
-	if ( preg_match( '%[\\\\(&=}]|/\*%', $css ) ) // remove any inline css containing \ ( & } = or comments
+	if( preg_match( '%[\\\\(&=}]|/\*%', $css ) ) // remove any inline css containing \ ( & } = or comments
 		return '';
 
 	$css_array = explode( ';', trim( $css ) );
@@ -1503,23 +1503,23 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 	'padding-left', 'padding-right', 'padding-top', 'text-decoration', 'text-indent', 'vertical-align',
 	'width' ) );
 
-	if ( empty($allowed_attr) )
+	if( empty($allowed_attr) )
 		return $css;
 
 	$css = '';
 	foreach ( $css_array as $css_item ) {
-		if ( $css_item == '' )
+		if( $css_item == '' )
 			continue;
 		$css_item = trim( $css_item );
 		$found = false;
-		if ( strpos( $css_item, ':' ) === false ) {
+		if( strpos( $css_item, ':' ) === false ) {
 			$found = true;
 		} else {
 			$parts = explode( ':', $css_item );
-			if ( in_array( trim( $parts[0] ), $allowed_attr ) )
+			if( in_array( trim( $parts[0] ), $allowed_attr ) )
 				$found = true;
 		}
-		if ( $found ) {
+		if( $found ) {
 			if( $css != '' )
 				$css .= ';';
 			$css .= $css_item;
@@ -1547,10 +1547,10 @@ function _gb_add_global_attributes( $value ) {
 		'role' => true,
 	);
 
-	if ( true === $value )
+	if( true === $value )
 		$value = array();
 
-	if ( is_array( $value ) )
+	if( is_array( $value ) )
 		return array_merge( $value, $global_attributes );
 
 	return $value;

@@ -11,12 +11,12 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
 // Инициализация режима отладки значением по умолчанию
-if(!defined('GB_DEBUG_SQL'))	define('GB_DEBUG_SQL', FALSE);
+if( !defined('GB_DEBUG_SQL'))	define('GB_DEBUG_SQL', FALSE);
 
 /***************************************************************************
  * Класс работы с базой данных
@@ -114,7 +114,7 @@ class GB_DBase	{
 		$this->base = $base;
 		$this->prefix = $prefix;
 
-		if(GB_DEBUG && GB_DEBUG_DISPLAY)
+		if( GB_DEBUG && GB_DEBUG_DISPLAY)
 			$this->show_errors();
 	}
 
@@ -126,7 +126,7 @@ class GB_DBase	{
 	 */
 	function __destruct(){
 		// Закрываем соединение с СУБД, если оно было
-		if($this->db)	$this->db->close();
+		if( $this->db)	$this->db->close();
 
 		return TRUE;
 	}
@@ -148,7 +148,7 @@ class GB_DBase	{
 	static function make_regex($str, $full_word = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
-		if(is_array($str)){
+		if( is_array($str)){
 			foreach($str as $key => $val)
 				$str[$key] = self::make_regex($val, $full_word);
 			return $str;
@@ -167,7 +167,7 @@ class GB_DBase	{
 			// return '[[:alpha:]]' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));
 			return '(..)' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));	// Костыли для учёта двухбайтной кодировки
 		}, $str);
-		if($full_word)
+		if( $full_word)
 			$str = "[[:<:]]${str}[[:>:]]";
 
 		return $str;
@@ -190,7 +190,7 @@ class GB_DBase	{
 	static function make_condition($str, $full_text = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
-		if(is_array($str)){
+		if( is_array($str)){
 			foreach($str as $key => $val)
 				$str[$key] = self::make_condition($val, $full_text);
 			return $str;
@@ -198,7 +198,7 @@ class GB_DBase	{
 
 		$str = strtr($str, array('_' => '\\_', '%' => '\\%'));
 		$str = strtr($str, array('?' => '_', '*' => '_%'));
-		if(!$full_text)	$str = '%' . $str . '%';
+		if( !$full_text)	$str = '%' . $str . '%';
 
 		return $str;
 	}
@@ -209,10 +209,10 @@ class GB_DBase	{
 	 * @since 2.0.0
 	 */
 	protected function connect(){
-		if($this->db)	return;
+		if( $this->db)	return;
 	
 		$this->db = new MySQLi($this->host, $this->user, $this->password, $this->base);
-		if ($this->db->connect_error) {
+		if( $this->db->connect_error) {
 			@header('HTTP/1.1 503 Service Temporarily Unavailable');
 			@header('Status: 503 Service Temporarily Unavailable');
 			@header('Retry-After: 600');	// 600 seconds
@@ -221,7 +221,7 @@ class GB_DBase	{
 		}
 	
 		// Проверка версии MySQL
-		if(version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<")){
+		if( version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<")){
 			// TODO: gettext
 			die('<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!');
 		}
@@ -239,7 +239,7 @@ class GB_DBase	{
 	 * @return string|array	Имя таблицы с префиксом
 	 */
 	function table_escape($table, $preserve_array = FALSE){
-		if(is_array($table)){
+		if( is_array($table)){
 			$result = array_map(array($this, __FUNCTION__), $table);
 			return ($preserve_array)
 					? $result
@@ -249,7 +249,7 @@ class GB_DBase	{
 			$table = (string) $table;
 
 			// First unescape table name if it already escaped
-			if(substr($table, 0, 1) == '`')
+			if( substr($table, 0, 1) == '`')
 				$table = $this->table_unescape($table);
 	
 			return $this->field_escape($this->prefix . $table);
@@ -278,7 +278,7 @@ class GB_DBase	{
 	 * @return string|array	Экранированное имя поля.
 	 */
 	function field_escape($field, $preserve_array = FALSE) {
-		if(is_array($field)){
+		if( is_array($field)){
 			$result = array_map(array($this, __FUNCTION__), $field);
 			return ($preserve_array)
 					? $result
@@ -297,13 +297,13 @@ class GB_DBase	{
 	 * @return string|array	Unescaped field name. Array of unescaped fields names.
 	 */
 	function field_unescape($field) {
-		if(is_array($field))
+		if( is_array($field))
 			return array_map(array($this, __FUNCTION__), $field);
 
 		$field = (string) $field;
 
 		// First remove quotes if it have
-		if(substr($field, 0, 1) == '`')
+		if( substr($field, 0, 1) == '`')
 			$field = substr($field, 1, -1);
 
 		return str_replace('``', '`', $field);
@@ -321,7 +321,7 @@ class GB_DBase	{
 	 * @return mixed	Экранированное значение переменной
 	 */
 	function data_escape($value, $preserve_array = FALSE) {
-		if (is_array($value)){
+		if( is_array($value)){
 			$result = array_map(array($this, __FUNCTION__), $value);
 			return ($preserve_array)
 				? $result
@@ -356,7 +356,7 @@ class GB_DBase	{
 	 * @return string	SQL-запрос с подставленными параметрами
 	 */
 	function prepare_query($query, $substitutions = array()){
-		if(!is_array($substitutions)){
+		if( !is_array($substitutions)){
 			// TODO: Print error
 			$substitutions = array();
 		}
@@ -383,7 +383,7 @@ class GB_DBase	{
 		$regexp .= ')/';
 
 		// TODO: Remove this?
-// 		if(GB_DEBUG_SQL)	print("\n<!-- $regexp -->\n");
+// 		if( GB_DEBUG_SQL)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
 		$query = preg_replace_callback(
@@ -488,16 +488,16 @@ class GB_DBase	{
 	public function print_error($error = ''){
 		global $GB_SQL_ERROR;
 	
-		if(!$error)	$error = $this->db->error;
+		if( !$error)	$error = $this->db->error;
 		$this->last_error = $error;
 		$GB_SQL_ERROR[] = array('query' => $this->last_query, 'error_str' => $error);
 	
-		if($this->suppress_errors)
+		if( $this->suppress_errors)
 			return;
 	
 		gb_load_translations_early();
 	
-		if($caller = $this->get_caller())
+		if( $caller = $this->get_caller())
 			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s made by %3$s', $error, $this->last_query, $caller);
 		else
 			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s', $error, $this->last_query);
@@ -505,7 +505,7 @@ class GB_DBase	{
 		error_log($error_str);
 	
 		// Are we showing errors?
-		if(!$this->show_errors)
+		if( !$this->show_errors)
 			return;
 	
 		// If there is an error then take note of it
@@ -546,7 +546,7 @@ class GB_DBase	{
 
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if(GB_DEBUG_SQL)	gb_debug_info($query_sub, __CLASS__);
+		if( GB_DEBUG_SQL)	gb_debug_info($query_sub, __CLASS__);
 		
 		// Remove any comments from query and trim space symbols.
 		$query_sub = trim($this->remove_comments($query_sub));
@@ -554,30 +554,30 @@ class GB_DBase	{
 		// Keep track of the last query for debug.
 		$this->last_query = $query_sub;
 
-		if(defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
 			$time_start = microtime(true);
 
 		$result = @$this->db->query($query_sub);
 		$this->num_queries++;
 
-		if(defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
 			$this->queries[] = array($query_sub, microtime(true) - $time_start, $this->get_caller());
 
 		// If there is an error then take note of it.
-		if($this->db->error){
+		if( $this->db->error){
 			// Clear insert_id on a subsequent failed insert.
-			if($this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub))
+			if( $this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub))
 				$this->insert_id = 0;
 
 			$this->print_error();
 			return FALSE;
 		}
 
-		if(preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query)){
+		if( preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query)){
 			$this->rows_affected = $this->db->affected_rows;
 
 			// Take note of the insert_id
-			if(preg_match('/^(INSERT|REPLACE)\s/usi', $query))
+			if( preg_match('/^(INSERT|REPLACE)\s/usi', $query))
 				$this->insert_id = $this->db->insert_id;
 
 			// Return number of rows affected
@@ -604,11 +604,11 @@ class GB_DBase	{
 	 */
 	function get_column($query, $substitutions = array(), $get_assoc = FALSE) {
 		$result = $this->query($query, $substitutions);
-		if(FALSE === $result)
+		if( FALSE === $result)
 			return FALSE;
 	
 		$data = array();
-		if ($get_assoc) {
+		if( $get_assoc) {
 			while ($row = $result->fetch_row())
 				$data[$row{0}] = $row[1];
 		} else {
@@ -635,7 +635,7 @@ class GB_DBase	{
 	 */
 	function get_cell($query, $substitutions = array()) {
 	    $result = $this->get_column($query, $substitutions, FALSE);
-		if(FALSE === $result)
+		if( FALSE === $result)
 			return FALSE;
 		
 	    return ($result)
@@ -660,11 +660,11 @@ class GB_DBase	{
 	 */
 	function get_table($query, $substitutions = array(), $key_col = FALSE) {
 		$result = $this->query($query, $substitutions);
-		if(FALSE === $result)
+		if( FALSE === $result)
 			return FALSE;
 		
 		$data = array();
-		if ($key_col){
+		if( $key_col){
 			while ($row = $result->fetch_assoc())
 				$data[$row{$key_col}] = $row;
 		} else {
@@ -690,7 +690,7 @@ class GB_DBase	{
 	 */
 	function get_row($query, $substitutions = array()) {
 		$result = $this->get_table($query, $substitutions, FALSE);
-		if(FALSE === $result)
+		if( FALSE === $result)
 			return FALSE;
 		
 		return ($result)
@@ -738,7 +738,7 @@ class GB_DBase	{
 				? $this->_set_row_insert($tablename, $data, $mode)
 				// UPDATE or INSERT … ON DUPLICATE KEY UPDATE
 				: $this->_set_row_update($tablename, $data, $unique_key, $mode);
-		if(FALSE === $query)
+		if( FALSE === $query)
 			return FALSE;
 		
 		return $this->query($query);
@@ -758,7 +758,7 @@ class GB_DBase	{
 	 * @return string	SQL-query or FALSE on error.
 	 */
 	function _set_row_insert($tablename, $data, $mode) {
-		if (!$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
+		if( !$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
 		elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
 		elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
 		else {
@@ -767,7 +767,7 @@ class GB_DBase	{
 		}
 		
 		$first_el = reset($data);
-		if(!is_array($first_el)){
+		if( !is_array($first_el)){
 			// Insert single row — convert data array to array of arrays with single element.
 			$first_el = $data;
 			$data = array($data);
@@ -800,10 +800,10 @@ class GB_DBase	{
 	 * @return string	SQL-query or FALSE on error.
 	 */
 	function _set_row_update($tablename, $data, $unique_key, $mode) {
-		if (!is_array($unique_key))		// если указана скалярная величина —
+		if( !is_array($unique_key))		// если указана скалярная величина —
 			$unique_key = array('id' => $unique_key);	// воспринимаем её как 'id'
 
-		if (!$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
+		if( !$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
 			// В данном случае поля из второго аргумента подставляются в часть SET,
 			// а поля из третьего — в часть WHERE
 				
@@ -821,7 +821,7 @@ class GB_DBase	{
 				$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 					
-			if ($unique_key) {
+			if( $unique_key) {
 				$query .= ' WHERE ';
 				foreach ($unique_key as $key => $value)
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
@@ -840,7 +840,7 @@ class GB_DBase	{
 			// а $unique_key содержит только имена полей,
 			// которые следует исключить из ON DUPLICATE KEY
 
-			if ($append) {
+			if( $append) {
 				// Все данные для ON DUPLICATE KEY UPDATE есть в $data
 				$all_data = array_merge($data, $unique_key);
 				$data_to_update = $data;
@@ -857,7 +857,7 @@ class GB_DBase	{
 				$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 
-			if ($data_to_update) {
+			if( $data_to_update) {
 				$query .= ' ON DUPLICATE KEY UPDATE ';
 				foreach ($data_to_update as $key => $value)
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
@@ -919,7 +919,7 @@ class GB_DBase	{
 	 */
 	function create_table_patch($query, $allow_deletions = FALSE){
 		// Run function only for CREATE TABLE queries
-		if(!preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches)){
+		if( !preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches)){
 			// TODO: Добавить сообщение об ошибке
 // 			$this->print_error("Unknown mode '$mode'");
 			return FALSE;
@@ -932,7 +932,7 @@ class GB_DBase	{
 		$tablefields = $this->get_table("DESCRIBE {$table}");
 		$this->suppress_errors($suppress);
 
-		if(!$tablefields)
+		if( !$tablefields)
 			return array($query);
 
 		// Clear the field and index arrays.
@@ -968,7 +968,7 @@ class GB_DBase	{
 			}
 
 			// If it's a valid field, add it to the field array.
-			if ($validfield)
+			if( $validfield)
 				$cfields[strtolower($this->field_unescape($fvals[1]))] = trim($fvals[2], ", \n");
 		}
 
@@ -977,14 +977,14 @@ class GB_DBase	{
 			$fld = strtolower($tablefield['Field']);
 				
 			// If the table field exists in the field array…
-			if (array_key_exists($fld, $cfields)) {
+			if( array_key_exists($fld, $cfields)) {
 
 				// Get the field type from the query.
 				preg_match('/(\S+( unsigned)?)/uSi', $cfields[$fld], $matches);
 				$fieldtype = $matches[1];
 
 				// Is actual field type different from the field type in query?
-				if(0 != strcasecmp($tablefield['Type'], $fieldtype)){
+				if( 0 != strcasecmp($tablefield['Type'], $fieldtype)){
 					// Add a query to change the column type
 					$cqueries[] = "ALTER TABLE {$table} CHANGE COLUMN `{$tablefield[Field]}` `{$tablefield[Field]}` $cfields[$fld]";
 // 					$for_update[$table.'.'.$tablefield['Field']] = "Changed type of {$table}.{$tablefield['Field']} from {$tablefield['Type']} to {$fieldtype}";
@@ -993,11 +993,11 @@ class GB_DBase	{
 				// Get the default value from the array
 				// TODO: Remove this?
 // 				echo "{$cfields[$fld]}<br>";
-				if(preg_match('/\bDEFAULT\s+(?:"([^"\\\\]+|\\\\.)*"|\'([^\'\\\\]+|\\\\.)*\'|(\S+))/uSi', $cfields[$fld], $matches)) {
+				if( preg_match('/\bDEFAULT\s+(?:"([^"\\\\]+|\\\\.)*"|\'([^\'\\\\]+|\\\\.)*\'|(\S+))/uSi', $cfields[$fld], $matches)) {
 					$default_value = !empty($matches[1]) ? $matches[1]
 							: !empty($matches[2]) ? $matches[2]
 								: $matches[3];
-					if ($tablefield['Default'] != $default_value) {
+					if( $tablefield['Default'] != $default_value) {
 						// Add a query to change the column's default value
 						$cqueries[] = "ALTER TABLE {$table} ALTER COLUMN `{$tablefield['Field']}` SET DEFAULT '{$default_value}'";
 // 						$for_update[$table.'.'.$tablefield['Field']] = "Changed default value of {$table}.{$tablefield['Field']} from {$tablefield->Default} to {$default_value}";
@@ -1024,7 +1024,7 @@ class GB_DBase	{
 		// Index stuff goes here. Fetch the table index structure from the database.
 		$tableindices = $this->get_table("SHOW INDEX FROM {$table}");
 
-		if ($tableindices) {
+		if( $tableindices) {
 			// Clear the index array.
 			unset($index_ary);
 
@@ -1044,28 +1044,28 @@ class GB_DBase	{
 
 				// Build a create string to compare to the query.
 				$index_string = '';
-				if($index_name == 'PRIMARY')
+				if( $index_name == 'PRIMARY')
 					$index_string .= 'PRIMARY ';
 				elseif($index_data['unique'])
 					$index_string .= 'UNIQUE ';
 				$index_string .= 'KEY ';
-				if($index_name != 'PRIMARY')
+				if( $index_name != 'PRIMARY')
 					$index_string .= $index_name;
 				$index_columns = '';
 
 				// For each column in the index.
 				foreach ($index_data['columns'] as $column_data) {
-					if($index_columns != '')	$index_columns .= ',';
+					if( $index_columns != '')	$index_columns .= ',';
 
 					// Add the field to the column list string.
 					$index_columns .= $column_data['fieldname'];
-					if ($column_data['subpart'] != '')
+					if( $column_data['subpart'] != '')
 						$index_columns .= '('.$column_data['subpart'].')';
 				}
 				// Add the column list to the index create string.
 				$index_string .= ' ('.$index_columns.')';
 
-				if (!(($aindex = array_search($index_string, $indices)) === FALSE)) {
+				if( !(($aindex = array_search($index_string, $indices)) === FALSE)) {
 					unset($indices[$aindex]);
 					// TODO: Remove this?
 // 					echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br />Found index:".$index_string."</pre>\n";
@@ -1100,6 +1100,6 @@ function gbdb(){
 	/** @var GB_DBase */
 	static $db = NULL;
 	
-	if ($db == NULL)	$db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE, DB_PREFIX);
+	if( $db == NULL)	$db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE, DB_PREFIX);
 	return $db;
 }

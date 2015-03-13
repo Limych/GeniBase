@@ -12,7 +12,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -26,8 +26,9 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  */
 function _gb_scripts(){
 	static $gb_scripts;
-	if(!is_a($gb_scripts, 'GB_Scripts')){
-// 		if ( ! did_action( 'init' ) )
+	if( !is_a($gb_scripts, 'GB_Scripts')){
+		// TODO: _doing_it_wrong()
+// 		if( ! did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 
@@ -53,7 +54,7 @@ function _gb_scripts(){
  * @return array On success, a processed array of GB_Dependencies items; otherwise, an empty array.
  */
 function gb_print_scripts( $handles = false ) {
-	if('' === $handles) // for gb_head
+	if( '' === $handles) // for gb_head
 		$handles = false;
 
 	/**
@@ -89,7 +90,7 @@ function gb_print_scripts( $handles = false ) {
  */
 function gb_register_script( $handle, $src, $deps = array(), $ver = false, $in_footer = false ) {
 	_gb_scripts()->add( $handle, $src, $deps, $ver );
-	if ( $in_footer )
+	if( $in_footer )
 		_gb_scripts()->add_data( $handle, 'group', 1 );
 }
 
@@ -144,7 +145,7 @@ function gb_deregister_script( $handle ) {
 	 * Show minimal remorse if the correct hook is used.
 	 */
 /*	$current_filter = current_filter();
-	if ( ( is_admin() && 'admin_enqueue_scripts' !== $current_filter ) ||
+	if( ( is_admin() && 'admin_enqueue_scripts' !== $current_filter ) ||
 		( 'gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== $current_filter )
 	) {
 		$no = array(
@@ -156,7 +157,7 @@ function gb_deregister_script( $handle ) {
 			'jquery-ui-tooltip', 'jquery-ui-widget', 'underscore', 'backbone',
 		);
 
-		if ( in_array( $handle, $no ) ) {
+		if( in_array( $handle, $no ) ) {
 			$message = sprintf( __( 'Do not deregister the %1$s script in the administration area. To target the frontend theme, use the %2$s hook.' ),
 				"<code>$handle</code>", '<code>gb_enqueue_scripts</code>' );
 			_doing_it_wrong( __FUNCTION__, $message, '3.6' );
@@ -187,10 +188,10 @@ function gb_deregister_script( $handle ) {
  *                               Default 'false'. Accepts 'false' or 'true'.
  */
 function gb_enqueue_script( $handle, $src = false, $deps = array(), $ver = false, $in_footer = false ) {
-	if ( $src ) {
+	if( $src ) {
 		$_handle = explode('?', $handle);
 		_gb_scripts()->add( $_handle[0], $src, $deps, $ver );
-		if ( $in_footer )
+		if( $in_footer )
 			_gb_scripts()->add_data( $_handle[0], 'group', 1 );
 	}
 	_gb_scripts()->enqueue( $handle );

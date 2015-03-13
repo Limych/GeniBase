@@ -9,7 +9,7 @@
  */
 
 // Запрещено непосредственное исполнение этого скрипта
-if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -17,44 +17,32 @@ if(count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidd
  * Основной подключаемый файл системы
  */
 
-// Запоминаем родительский каталог, как основу для всех подключаемых файлов системы
-if(!defined('BASE_DIR'))
-	define('BASE_DIR',	dirname(dirname(__FILE__)));	// no trailing slash, full paths only
-
-// Константы для быстрого обращения к каталогам с подключаемыми файлами
-if(!defined('GB_INC_DIR'))
-	define('GB_INC_DIR',	BASE_DIR . '/gb');
-if(!defined('GB_LANG_DIR'))
-	define('GB_LANG_DIR',	GB_INC_DIR . '/languages');
-
-// Запоминаем текущий каталог, как корень сайта
-if(!defined('BASE_URL'))
-	define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER[ 'DOCUMENT_ROOT' ])));	// no trailing slash
-
-// Подключаем настройки системы
-if(!defined('GB_TESTING_MODE')){	// … но не в режиме тестирования (т.к. в нём особые настройки уже загружены)
-	if(!file_exists(BASE_DIR . '/gb-config.php'))
+// Include system config
+if( !defined('GB_TESTING_MODE')){	// … but not in testing mode
+	$base_dir = dirname(dirname(__FILE__));
+	if( !file_exists($base_dir . '/gb-config.php'))
 		die('<b>ERROR:</b> Unable to find configuration file!');
-	require_once(BASE_DIR . '/gb-config.php');
+	require_once($base_dir . '/gb-config.php');
+	unset($base_dir);
 }
+
+// Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
+require_once(dirname(__FILE__) . '/default-constants.php');
+gb_initial_constants();
+
+// Include files required for initialization.
+require_once(GB_CORE_DIR . '/version.php');
+require_once(GB_CORE_DIR . '/load.php');
+
+// Check for the required PHP version and for the MySQL extension or a database drop-in.
+gb_check_php_mysql_versions();
 
 // Базовые настройки системы
 mb_internal_encoding('UTF-8');
 setlocale(LC_ALL, array('ru_RU.utf8', 'ru_RU.UTF-8'));
 
-// Include files required for initialization.
-require_once(GB_INC_DIR . '/version.php');
-require_once(GB_INC_DIR . '/load.php');
-require_once(GB_INC_DIR . '/default-constants.php');
-
-// Add GeniBase version to headers
-@header("X-Generator: GeniBase/" . GB_VERSION . "\n");
-
-// Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
-gb_initial_constants();
-
-// Check for the required PHP version and for the MySQL extension or a database drop-in.
-gb_check_php_mysql_versions();
+// GeniBase calculates offsets from UTC.
+date_default_timezone_set( 'UTC' );
 
 // Turn register_globals off.
 gb_unregister_GLOBALS();
@@ -75,46 +63,48 @@ timer_start();
 gb_debug_mode();
 
 // Load early GeniBase files.
-require_once(GB_INC_DIR . '/functions.php');
-require_once(GB_INC_DIR . '/actions.php');
-require_once(GB_INC_DIR . '/pomo/mo.php');
-require_once(GB_INC_DIR . '/class.gb-dbase.php');
+require_once(GB_CORE_DIR . '/functions.php');
+require_once(GB_CORE_DIR . '/actions.php');
+require_once(GB_CORE_DIR . '/pomo/mo.php');
+require_once(GB_CORE_DIR . '/class.gb-dbase.php');
 
 // Attach the default filters.
-require_once(GB_INC_DIR . '/default-filters.php');
+require_once(GB_CORE_DIR . '/default-filters.php');
 
 // Load the L10n library.
-require_once(GB_INC_DIR . '/l10n.php');
+require_once(GB_CORE_DIR . '/l10n.php');
 
 // Load most of GeniBase.
-require_once(GB_INC_DIR . '/general-template.php');
-require_once(GB_INC_DIR . '/link-template.php');
-require_once(GB_INC_DIR . '/kses.php');
-require_once(GB_INC_DIR . '/formatting.php');
-require_once(GB_INC_DIR . '/script-loader.php');
-require_once(GB_INC_DIR . '/text.php');
-require_once(GB_INC_DIR . '/class.ww1-database.php');
-require_once(GB_INC_DIR . '/class.ww1-records-set.php');
+require_once(GB_CORE_DIR . '/user.php');
+require_once(GB_CORE_DIR . '/general-template.php');
+require_once(GB_CORE_DIR . '/link-template.php');
+require_once(GB_CORE_DIR . '/kses.php');
+require_once(GB_CORE_DIR . '/formatting.php');
+require_once(GB_CORE_DIR . '/script-loader.php');
+require_once(GB_CORE_DIR . '/text.php');
+require_once(GB_CORE_DIR . '/class.ww1-database.php');
+require_once(GB_CORE_DIR . '/class.ww1-records-set.php');
 
 // Define constants that rely on the API to obtain the default value.
 gb_plugin_constants();
 
-// Load default scripts and styles
-// TODO: Remove block after actions will be enabled
-gb_default_styles();
-gb_default_scripts();
+// Define cookie constants.
+gb_cookie_constants();
 
 // Load the default text localization domain.
 load_default_textdomain();
 
 $locale = get_locale();
 $locale_file = GB_LANG_DIR . "/$locale.php";
-if((0 === validate_file($locale)) && is_readable($locale_file))
+if( (0 === validate_file($locale)) && is_readable($locale_file))
 	require($locale_file);
 unset($locale_file);
 
 // Pull in locale data after loading text domain.
-require_once(GB_INC_DIR . '/locale.php');
+require_once(GB_CORE_DIR . '/locale.php');
+
+// Set up current user (renew cookie every 100 runs).
+gb_userid(0 == rand(0, 99));
 
 /**
  * GeniBase Locale object for loading locale domain date and various strings.
@@ -144,15 +134,15 @@ static $region_short = array(
  * @param	string	$force
  */
 function publish_cron($force = false){
-	if(!$force){
+	if( !$force){
 		$max_date = gbdb()->get_cell('SELECT MAX(update_datetime) FROM ?_persons_raw');
 		$tmp = date_diff(date_create($max_date), date_create('now'));
 		$tmp = intval($tmp->format('%i'));
 // var_export($tmp);	// TODO: Remove this?
-		if($tmp < 1)	return;
+		if( $tmp < 1)	return;
 	}
 
-	require_once(GB_INC_DIR . '/publish.php');	// Функции формализации данных
+	require_once(GB_CORE_DIR . '/publish.php');	// Функции формализации данных
 
 	// Делаем выборку записей для публикации
 	$drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft"' .
@@ -160,13 +150,13 @@ function publish_cron($force = false){
 	
 	// Нормирование данных
 	foreach($drafts as $raw){
-if(GB_DEBUG)	print "\n\n======================================\n";
-if(GB_DEBUG)	var_export($row);
+if( GB_DEBUG)	print "\n\n======================================\n";
+if( GB_DEBUG)	var_export($row);
 	$pub = prepublish($raw, $have_trouble, $date_norm);
-if(GB_DEBUG)	var_export($have_trouble);
-if(GB_DEBUG)	var_export($pub);
+if( GB_DEBUG)	var_export($have_trouble);
+if( GB_DEBUG)	var_export($pub);
 		// Заносим данные в основную таблицу и обновляем статус в таблице «сырых» данных
-		if(!$have_trouble)
+		if( !$have_trouble)
 			gbdb()->set_row('persons', $pub, FALSE, GB_DBase::MODE_REPLACE);
 		//
 		gbdb()->set_row('persons_raw',
@@ -183,7 +173,7 @@ if(GB_DEBUG)	var_export($pub);
  */
 function db_update(){
 	// Skip updation for debug mode but not for testing mode
-// 	if(GB_DEBUG && !defined('GB_TESTING_MODE'))	return;	// TODO: Remove this?
+// 	if( GB_DEBUG && !defined('GB_TESTING_MODE'))	return;	// TODO: Remove this?
 
 	// Удаляем устаревшие записи из таблицы контроля нагрузки на систему
 	gbdb()->query('DELETE FROM ?_load_check WHERE (`banned_to_datetime` IS NULL' .
@@ -207,33 +197,36 @@ function db_update(){
 				' AND sk.`surname_key_type` != 0 AND p.`update_datetime` < sk.`update_datetime`' .
 				' AND sk.`update_datetime` > STR_TO_DATE(?exp, "%Y-%m-%d")' .
 			' ) ORDER BY `update_datetime` ASC LIMIT 15',
-			array('exp' => max(IDX_EXPIRATION_DATE, GB_SEARCH_KEYS_MAKE_DATE)) );
+			array('exp' => max(IDX_EXPIRATION_DATE, GB_METAKEYS_MAKE_DATE)) );
 	foreach ($result as $surname){
+		// Delete old metakeys
 		gbdb()->query('DELETE FROM sk USING ?_idx_search_keys AS sk' .
 				' INNER JOIN ?_persons AS p WHERE p.`surname` = ?surname AND p.`id` = sk.`person_id`',
 				array('surname' => $surname));
 		
-		$keys = make_metakeys_assoc($surname);
-		foreach ($keys as $key){
-			foreach ($key as $type => $vals){
-				foreach((array) $vals as $v){
-					if($v == '')	continue;
+		$names = preg_split('/[^\w\?\*]+/uS', $surname, -1, PREG_SPLIT_NO_EMPTY);
+		foreach ($names as $name){
+			$metakeys = make_metakeys(array(
+					GB_MK_SURNAME	=> $name,
+			));
+			foreach ($metakeys as $type => $mks){
+				foreach($mks as $key){
+					if( $key == '')	continue;
 
-					$v = mb_strtoupper($v);
-					$mask = !preg_match('/[?*]/uSs', $v) ? '' : GB_DBase::make_condition($v);
+					$mask = !preg_match('/[?*]/uSs', $key) ? '' : GB_DBase::make_condition($key);
 					gbdb()->query('INSERT INTO ?_idx_search_keys (`person_id`, `surname_key`,' .
 							' `surname_key_type`, `surname_mask`) SELECT `id`, ?key, ?type,' .
 							' ?mask FROM ?_persons WHERE `surname` = ?surname',
 							array(
 									'surname'	=> $surname,
-									'key'		=> $v,
-									'type'		=> $search_key_types[$type],
+									'key'		=> $key,
+									'type'		=> $type,
 									'mask'		=> $mask,
 							));
-				}
-			}
-		}
-	}
+				} // foreach
+			} // foreach
+		} // foreach
+	} // foreach
 	
 	// Обновляем списки вложенных регионов, если это необходимо
 	$result = gbdb()->get_column('SELECT `id`, `parent_id` FROM ?_dic_regions WHERE `region_ids` = ""',
@@ -257,7 +250,7 @@ function db_update(){
 				(substr($row['title'], 0, 1) == '('
 						? '' : strtr($row['title'], $region_short)),
 				', ');
-		if($tmp){
+		if( $tmp){
 			gbdb()->set_row('?_dic_regions', array('region' => $tmp), $row['id']);
 			gbdb()->set_row('?_dic_regions', array('region' => ''), array('parent_id' => $row['id']));
 		}
@@ -269,9 +262,9 @@ function db_update(){
 	$result = gbdb()->get_column('SELECT `id`, `region_ids` FROM ?_dic_regions' .
 			' ORDER BY `update_datetime` ASC LIMIT 7', array(), TRUE);
 	foreach ($result as $id => $region_ids){
-		if(empty($region_ids))	$region_ids = $id;
+		if( empty($region_ids))	$region_ids = $id;
 		$cnt = '';
-		if(false !== strpos($region_ids, ',')){
+		if( false !== strpos($region_ids, ',')){
 			// У региона есть вложенные регионы — просуммируем их статистику и прибавим к статистике региона
 			$childs = gbdb()->get_cell('SELECT SUM(`region_cnt`) FROM ?_dic_regions' .
 					' WHERE `parent_id` = ?parent_id', array('parent_id' => $id));
@@ -318,7 +311,7 @@ function show_records_stat(){
 	//
 	// TODO: gettext
 	$txt = format_num($cnt, ' запись.', ' записи.', ' записей.');
-	if($cnt != $cnt2)
+	if( $cnt != $cnt2)
 		$txt = format_num($cnt2, ' запись.', ' записи.', ' записей.') . ' Из них сейчас доступны для поиска ' . $txt;
 	print "<p class='align-center'>На данный момент в базе содержится $txt</p>\n";
 }
@@ -336,7 +329,7 @@ function show_records_stat(){
  */
 function log_event($records_found = 0){
 	// Skip logging if debug mode
-	if(GB_DEBUG)	return;
+	if( GB_DEBUG)	return;
 
 	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
@@ -345,7 +338,7 @@ function log_event($records_found = 0){
 		}));
 	}, $_SERVER['REQUEST_URI']);
 
-	if(gbdb()->get_cell('SELECT 1 FROM ?_logs WHERE `url` = ?url AND `datetime` >= NOW() - INTERVAL 3 HOUR',
+	if( gbdb()->get_cell('SELECT 1 FROM ?_logs WHERE `url` = ?url AND `datetime` >= NOW() - INTERVAL 3 HOUR',
 			array('url' => $url)))
 		return;
 
@@ -378,7 +371,7 @@ function load_check(){
 			' FROM ?_load_check WHERE `ip` = ?ip',
 			array('ip'		=> $_SERVER["REMOTE_ADDR"]));
 
-	if(!$row){
+	if( !$row){
 		// Первый заход пользователя
 		gbdb()->set_row('?_load_check', array('ip' => $_SERVER["REMOTE_ADDR"]), FALSE, GB_DBase::MODE_INSERT);
 
@@ -389,7 +382,7 @@ function load_check(){
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
 
 		$protocol = $_SERVER["SERVER_PROTOCOL"];
-		if('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
+		if( 'HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
 		@header("$protocol 503 Service Unavailable", true, 503);
 		@header('Retry-After: 600000');
 		html_header('Доступ приостановлен', FALSE);

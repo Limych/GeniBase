@@ -6,9 +6,9 @@
 
 
 $config_file_path = dirname( dirname( __FILE__ ) );
-if ( ! file_exists( $config_file_path . '/gb-tests-config.php' ) ) {
+if( ! file_exists( $config_file_path . '/gb-tests-config.php' ) ) {
 	// Support the config file from the root of the develop repository.
-	if ( basename( $config_file_path ) === 'phpunit' && basename( dirname( $config_file_path ) ) === 'tests' )
+	if( basename( $config_file_path ) === 'phpunit' && basename( dirname( $config_file_path ) ) === 'tests' )
 		$config_file_path = dirname( dirname( $config_file_path ) );
 }
 $config_file_path .= '/gb-tests-config.php';
@@ -19,7 +19,7 @@ $config_file_path .= '/gb-tests-config.php';
  */
 global $gbdb, $current_site, $current_blog, $gb_rewrite, $shortcode_tags, $wp, $phpmailer;
 
-if ( !is_readable( $config_file_path ) ) {
+if( !is_readable( $config_file_path ) ) {
 	die( "ERROR: gb-tests-config.php is missing! Please use gb-tests-config-sample.php to create a config file.\n" );
 }
 define('GB_TESTING_MODE', TRUE);
@@ -27,7 +27,7 @@ require_once $config_file_path;
 
 define( 'DIR_TESTDATA', dirname( __FILE__ ) . '/../data' );
 
-if ( ! defined( 'GB_TESTS_FORCE_KNOWN_BUGS' ) )
+if( ! defined( 'GB_TESTS_FORCE_KNOWN_BUGS' ) )
 	define( 'GB_TESTS_FORCE_KNOWN_BUGS', false );
 
 // Cron tries to make an HTTP request to the blog, which always fails, because tests are run in CLI mode only
@@ -54,7 +54,7 @@ tests_add_filter( 'gb_die_handler', '_gb_die_handler_filter' );
 
 // Preset GeniBase options defined in bootstrap file.
 // Used to activate themes, plugins, as well as  other settings.
-if(isset($GLOBALS['gb_tests_options'])) {
+if( isset($GLOBALS['gb_tests_options'])) {
 	function gb_tests_options( $value ) {
 		$key = substr( current_filter(), strlen( 'pre_option_' ) );
 		return $GLOBALS['gb_tests_options'][$key];
@@ -100,7 +100,7 @@ class GB_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 		$options = array();
 		while ( list( $i, $arg ) = each( $argv ) ) {
 			try {
-				if ( strlen( $arg ) > 1 && $arg[0] === '-' && $arg[1] === '-' ) {
+				if( strlen( $arg ) > 1 && $arg[0] === '-' && $arg[1] === '-' ) {
 					PHPUnit_Util_Getopt::parseLongOption( substr( $arg, 2 ), $this->longOptions, $options, $argv );
 				}
 			}
@@ -120,7 +120,7 @@ class GB_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 				case '--group' :
 					$groups = explode( ',', $option[1] );
 					foreach ( $groups as $group ) {
-						if ( is_numeric( $group ) || preg_match( '/^(UT|Plugin)\d+$/', $group ) ) {
+						if( is_numeric( $group ) || preg_match( '/^(UT|Plugin)\d+$/', $group ) ) {
 							GB_UnitTestCase::forceTicket( $group );
 						}
 					}
@@ -128,7 +128,7 @@ class GB_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 					continue 2;
 			}
 		}
-		if ( $ajax_message ) {
+		if( $ajax_message ) {
 			echo "Not running ajax tests... To execute these, use --group ajax." . PHP_EOL;
 		}
     }

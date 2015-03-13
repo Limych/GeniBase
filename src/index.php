@@ -8,7 +8,7 @@ $squery = get_request_attr('surname') . ' ' . get_request_attr('name') . (empty(
 $squery = trim($squery);
 
 $report = null;
-if($dbase->have_query){
+if( $dbase->have_query){
 	load_check();
 	$report = $dbase->do_search();
 	log_event($report->records_cnt);
@@ -32,7 +32,7 @@ show_records_stat();
 	</div>
 </form>
 <?php
-if($dbase->have_query){
+if( $dbase->have_query){
 	// Упрощаем результаты для пользователя
 	foreach (array_keys($report->records) as $key){
 		$report->records[$key]['place'] = trim($report->records[$key]['region'] . ', ' .
@@ -69,9 +69,9 @@ $res = gbdb()->get_table('SELECT `query`, `url` FROM ?_logs WHERE `query` != "" 
 shuffle($res);
 $res = array_slice($res, 0, 12);
 foreach ($res as $key => $row){
-	if(empty($row['query']))	$row['query'] = '.';
+	if( empty($row['query']))	$row['query'] = '.';
 	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
-if($res)	print "<p class='lastq align-center no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
+if( $res)	print "<p class='lastq align-center no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
 
 html_footer();

@@ -11,7 +11,7 @@
  */
 
 // see: http://php.net/tokenizer
-if ( ! defined( 'T_ML_COMMENT' ) )
+if( ! defined( 'T_ML_COMMENT' ) )
 	    define( 'T_ML_COMMENT', T_COMMENT );
 else
 	    define( 'T_DOC_COMMENT', T_ML_COMMENT );
@@ -35,7 +35,7 @@ class NotGettexted {
 
 	function logmsg() {
 		$args = func_get_args();
-		if ($this->enable_logging) error_log(implode(' ', $args));
+		if( $this->enable_logging) error_log(implode(' ', $args));
 	}
 
 	function stderr($msg, $nl=true) {
@@ -60,11 +60,11 @@ class NotGettexted {
 		$items = scandir( $dir );
 		foreach ( (array) $items as $item ) {
 			$full_item = $dir . '/' . $item;
-			if ('.' == $item || '..' == $item)
+			if( '.' == $item || '..' == $item)
 				continue;
-			if ('.php' == substr($item, -4))
+			if( '.php' == substr($item, -4))
 				$files[] = $full_item;
-			if (is_dir($full_item))
+			if( is_dir($full_item))
 				$files += array_merge($files, NotGettexted::list_php_files($full_item, $files));
 		}
 		return $files;
@@ -91,40 +91,40 @@ class NotGettexted {
 		$line = 1;
 
 		foreach($tokens as $token) {
-			if (is_array($token)) {
+			if( is_array($token)) {
 				list($id, $text) = $token;
 				$line += substr_count($text, "\n");
-				if ((T_ML_COMMENT == $id || T_COMMENT == $id) && preg_match('|/\*\s*(/?GB_I18N_[a-z_]+)\s*\*/|i', $text, $matches)) {
-					if ($this->STAGE_OUTSIDE == $stage) {
+				if( (T_ML_COMMENT == $id || T_COMMENT == $id) && preg_match('|/\*\s*(/?GB_I18N_[a-z_]+)\s*\*/|i', $text, $matches)) {
+					if( $this->STAGE_OUTSIDE == $stage) {
 						$stage = $this->STAGE_START_COMMENT;
 						$current_comment_id = $matches[1];
 						$this->logmsg('start comment', $current_comment_id);
 						$result .= call_user_func($other_action, $token);
 						continue;
 					}
-					if ($this->STAGE_START_COMMENT <= $stage && $stage <= $this->STAGE_WHITESPACE_AFTER && '/'.$current_comment_id == $matches[1]) {
+					if( $this->STAGE_START_COMMENT <= $stage && $stage <= $this->STAGE_WHITESPACE_AFTER && '/'.$current_comment_id == $matches[1]) {
 						$stage = $this->STAGE_END_COMMENT;
 						$this->logmsg('end comment', $current_comment_id);
 						$result .= call_user_func($other_action, $token);
-						if (!is_null($register_action)) call_user_func($register_action, $current_string, $current_comment_id, $current_string_line);
+						if( !is_null($register_action)) call_user_func($register_action, $current_string, $current_comment_id, $current_string_line);
 						continue;
 					}
-				} else if (T_CONSTANT_ENCAPSED_STRING == $id) {
-					if ($this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_WHITESPACE_AFTER) {
+				} else if( T_CONSTANT_ENCAPSED_STRING == $id) {
+					if( $this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_WHITESPACE_AFTER) {
 						eval('$current_string='.$text.';');
 						$this->logmsg('string', $current_string);
 						$current_string_line = $line;
 						$result .= call_user_func($string_action, $token, $current_string);
 						continue;
 					}
-				} else if (T_WHITESPACE == $id) {
-					if ($this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_STRING) {
+				} else if( T_WHITESPACE == $id) {
+					if( $this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_STRING) {
 						$stage = $this->STAGE_WHITESPACE_BEFORE;
 						$this->logmsg('whitespace before');
 						$result .= call_user_func($other_action, $token);
 						continue;
 					}
-					if ($this->STAGE_STRING < $stage && $stage < $this->STAGE_END_COMMENT) {
+					if( $this->STAGE_STRING < $stage && $stage < $this->STAGE_END_COMMENT) {
 						$stage = $this->STAGE_WHITESPACE_AFTER;
 						$this->logmsg('whitespace after');
 						$result .= call_user_func($other_action, $token);
@@ -145,7 +145,7 @@ class NotGettexted {
 	function command_extract() {
 		$args = func_get_args();
 		$pot_filename = $args[0];
-		if (isset($args[1]) && is_array($args[1]))
+		if( isset($args[1]) && is_array($args[1]))
 			$filenames = $args[1];
 		else
 			$filenames = array_slice($args, 1);
@@ -160,7 +160,7 @@ class NotGettexted {
 		}
 
 		$potf = '-' == $pot_filename? STDOUT : @fopen($pot_filename, 'a');
-		if (false === $potf) {
+		if( false === $potf) {
 			$this->cli_die("Couldn't open pot file: $pot_filename");
 		}
 
@@ -176,14 +176,14 @@ class NotGettexted {
 			$entry = new Translation_Entry($args);
 			fwrite($potf, "\n".PO::export_entry($entry)."\n");
 		}
-		if ('-' != $pot_filename) fclose($potf);
+		if( '-' != $pot_filename) fclose($potf);
 		return true;
 	}
 
 	function command_replace() {
 		$args = func_get_args();
 		$mo_filename = $args[0];
-		if (isset($args[1]) && is_array($args[1]))
+		if( isset($args[1]) && is_array($args[1]))
 			$filenames = $args[1];
 		else
 			$filenames = array_slice($args, 1);
@@ -193,12 +193,12 @@ class NotGettexted {
 		$replacer = $this->make_mo_replacer($global_name);
 
 		$res = $GLOBALS[$global_name]->import_from_file($mo_filename);
-		if (false === $res) {
+		if( false === $res) {
 			$this->cli_die("Couldn't read MO file '$mo_filename'!");
 		}
 		foreach($filenames as $filename) {
 			$source = file_get_contents($filename);
-			if ( strlen($source) > 150000 ) continue;
+			if( strlen($source) > 150000 ) continue;
 			$tokens = token_get_all($source);
 			$new_file = $this->walk_tokens($tokens, $replacer, array($this, 'unchanged_token'));
 			$f = fopen($filename, 'w');
@@ -218,7 +218,7 @@ class NotGettexted {
 
 	function cli() {
 		global $argv, $commands;
-		if (count($argv) < 4 || !in_array($argv[1], array_keys($this->commands))) {
+		if( count($argv) < 4 || !in_array($argv[1], array_keys($this->commands))) {
 			$this->usage();
 			exit(1);
 		}
@@ -229,7 +229,7 @@ class NotGettexted {
 // run the CLI only if the file
 // wasn't included
 $included_files = get_included_files();
-if ($included_files[0] == __FILE__) {
+if( $included_files[0] == __FILE__) {
 	error_reporting(E_ALL);
 	$not_gettexted = new NotGettexted;
 	$not_gettexted->cli();

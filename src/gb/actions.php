@@ -23,7 +23,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -37,7 +37,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  */
 function _gb_hooks(){
 	static $hooks;
-	if(!is_object($hooks)){
+	if( !is_object($hooks)){
 		$hooks = (object) array(
 				// A multidimensional array of all hooks and the callbacks hooked to them.
 				'filters'			=>	array(),
@@ -72,7 +72,7 @@ function _gb_call_all_hook($args) {
 	reset( _gb_hooks()->filters['all'] );
 	do {
 		foreach( (array) current(_gb_hooks()->filters['all']) as $the_ )
-			if ( !is_null($the_['function']) )
+			if( !is_null($the_['function']) )
 				call_user_func_array($the_['function'], $args);
 
 	} while ( next(_gb_hooks()->filters['all']) !== false );
@@ -112,24 +112,24 @@ function _gb_call_all_hook($args) {
 function _gb_filter_build_unique_id($tag, $function, $priority) {
 	static $filter_id_count = 0;
 
-	if ( is_string($function) )
+	if( is_string($function) )
 		return $function;
 
-	if ( is_object($function) ) {
+	if( is_object($function) ) {
 		// Closures are currently implemented as objects
 		$function = array( $function, '' );
 	} else {
 		$function = (array) $function;
 	}
 
-	if (is_object($function[0]) ) {
+	if( is_object($function[0]) ) {
 		// Object Class Calling
-		if ( function_exists('spl_object_hash') ) {
+		if( function_exists('spl_object_hash') ) {
 			return spl_object_hash($function[0]) . $function[1];
 		} else {
 			$obj_idx = get_class($function[0]).$function[1];
-			if ( !isset($function[0]->gb_filter_id) ) {
-				if ( false === $priority )
+			if( !isset($function[0]->gb_filter_id) ) {
+				if( false === $priority )
 					return false;
 				$obj_idx .= isset(_gb_hooks()->filters[$tag][$priority]) ? count((array)_gb_hooks()->filters[$tag][$priority]) : $filter_id_count;
 				$function[0]->gb_filter_id = $filter_id_count;
@@ -140,7 +140,7 @@ function _gb_filter_build_unique_id($tag, $function, $priority) {
 
 			return $obj_idx;
 		}
-	} else if ( is_string($function[0]) ) {
+	} else if( is_string($function[0]) ) {
 		// Static Calling
 		return $function[0] . '::' . $function[1];
 	}
@@ -217,26 +217,26 @@ function has_filter($tag, $function_to_check = false) {
 	$has = !empty($filters);
 
 	// Make sure at least one priority has a filter callback
-	if($has){
+	if( $has){
 		$exists = false;
 		foreach($filters[$tag] as $callbacks){
-			if(!empty($callbacks)){
+			if( !empty($callbacks)){
 				$exists = true;
 				break;
 			}
 		}
-		if(!$exists)
+		if( !$exists)
 			$has = false;
 	}
 
-	if(false === $function_to_check || false == $has)
+	if( false === $function_to_check || false == $has)
 		return $has;
 
-	if(!$idx = _gb_filter_build_unique_id($tag, $function_to_check, false))
+	if( !$idx = _gb_filter_build_unique_id($tag, $function_to_check, false))
 		return false;
 
 	foreach((array) array_keys($filters) as $priority){
-		if(isset($filters[$tag][$priority][$idx]))
+		if( isset($filters[$tag][$priority][$idx]))
 			return $priority;
 	}
 
@@ -279,35 +279,35 @@ function apply_filters( $tag, $value ) {
 	$args = array();
 
 	// Do 'all' actions first.
-	if ( isset(_gb_hooks()->filters['all']) ) {
+	if( isset(_gb_hooks()->filters['all']) ) {
 		_gb_hooks()->current_filter[] = $tag;
 		$args = func_get_args();
 		_gb_call_all_hook($args);
 	}
 
-	if ( !isset(_gb_hooks()->filters[$tag]) ) {
-		if ( isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters[$tag]) ) {
+		if( isset(_gb_hooks()->filters['all']) )
 			array_pop(_gb_hooks()->current_filter);
 		return $value;
 	}
 
-	if ( !isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters['all']) )
 		_gb_hooks()->current_filter[] = $tag;
 
 	// Sort.
-	if ( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
+	if( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
 		ksort(_gb_hooks()->filters[$tag]);
 		_gb_hooks()->merged_filters[ $tag ] = true;
 	}
 
 	reset( _gb_hooks()->filters[ $tag ] );
 
-	if ( empty($args) )
+	if( empty($args) )
 		$args = func_get_args();
 
 	do {
 		foreach( (array) current(_gb_hooks()->filters[$tag]) as $the_ )
-			if ( !is_null($the_['function']) ){
+			if( !is_null($the_['function']) ){
 			$args[1] = $value;
 			$value = call_user_func_array($the_['function'], array_slice($args, 1, (int) $the_['accepted_args']));
 		}
@@ -333,23 +333,23 @@ function apply_filters( $tag, $value ) {
  */
 function apply_filters_ref_array($tag, $args) {
 	// Do 'all' actions first
-	if ( isset(_gb_hooks()->filters['all']) ) {
+	if( isset(_gb_hooks()->filters['all']) ) {
 		_gb_hooks()->current_filter[] = $tag;
 		$all_args = func_get_args();
 		_gb_call_all_hook($all_args);
 	}
 
-	if ( !isset(_gb_hooks()->filters[$tag]) ) {
-		if ( isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters[$tag]) ) {
+		if( isset(_gb_hooks()->filters['all']) )
 			array_pop(_gb_hooks()->current_filter);
 		return $args[0];
 	}
 
-	if ( !isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters['all']) )
 		_gb_hooks()->current_filter[] = $tag;
 
 	// Sort
-	if ( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
+	if( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
 		ksort(_gb_hooks()->filters[$tag]);
 		_gb_hooks()->merged_filters[ $tag ] = true;
 	}
@@ -358,7 +358,7 @@ function apply_filters_ref_array($tag, $args) {
 
 	do {
 		foreach( (array) current(_gb_hooks()->filters[$tag]) as $the_ )
-			if ( !is_null($the_['function']) )
+			if( !is_null($the_['function']) )
 				$args[0] = call_user_func_array($the_['function'], array_slice($args, 0, (int) $the_['accepted_args']));
 
 	} while ( next(_gb_hooks()->filters[$tag]) !== false );
@@ -391,12 +391,12 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
 
 	$r = isset(_gb_hooks()->filters[ $tag ][ $priority ][ $function_to_remove ]);
 
-	if ( true === $r ) {
+	if( true === $r ) {
 		unset(_gb_hooks()->filters[ $tag ][ $priority ][ $function_to_remove ]);
-		if(empty(_gb_hooks()->filters[$tag][$priority]))
+		if( empty(_gb_hooks()->filters[$tag][$priority]))
 			unset(_gb_hooks()->filters[$tag][$priority]);
 
-		if(empty(_gb_hooks()->filters[$tag]))
+		if( empty(_gb_hooks()->filters[$tag]))
 			_gb_hooks()->filters[$tag] = array();
 
 		unset( _gb_hooks()->merged_filters[ $tag ] );
@@ -415,14 +415,14 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
  * @return bool True when finished.
  */
 function remove_all_filters( $tag, $priority = false ) {
-	if ( isset( _gb_hooks()->filters[ $tag ]) ) {
-		if ( false !== $priority && isset( _gb_hooks()->filters[ $tag ][ $priority ] ) )
+	if( isset( _gb_hooks()->filters[ $tag ]) ) {
+		if( false !== $priority && isset( _gb_hooks()->filters[ $tag ][ $priority ] ) )
 			_gb_hooks()->filters[ $tag ][ $priority ] = array();
 		else
 			_gb_hooks()->filters[ $tag ] = array();
 	}
 
-	if(isset(_gb_hooks()->merged_filters[$tag]))
+	if( isset(_gb_hooks()->merged_filters[$tag]))
 		unset(_gb_hooks()->merged_filters[$tag]);
 
 	return true;
@@ -471,7 +471,7 @@ function current_action() {
  * @return bool Whether the filter is currently in the stack.
  */
 function doing_filter( $filter = null ) {
-	if(null === $filter)
+	if( null === $filter)
 		return !empty(_gb_hooks()->current_filter);
 
 	return in_array($filter, _gb_hooks()->current_filter);
@@ -532,29 +532,29 @@ function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) 
  * @return null Will return null if $tag does not exist in _gb_hooks()->filters array.
  */
 function do_action($tag, $arg = '') {
-	if ( ! isset(_gb_hooks()->actions[$tag]) )
+	if( ! isset(_gb_hooks()->actions[$tag]) )
 		_gb_hooks()->actions[$tag] = 1;
 	else
 		_gb_hooks()->actions[$tag]++;
 
 	// Do 'all' actions first
-	if ( isset(_gb_hooks()->filters['all']) ) {
+	if( isset(_gb_hooks()->filters['all']) ) {
 		_gb_hooks()->current_filter[] = $tag;
 		$all_args = func_get_args();
 		_gb_call_all_hook($all_args);
 	}
 
-	if ( !isset(_gb_hooks()->filters[$tag]) ) {
-		if ( isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters[$tag]) ) {
+		if( isset(_gb_hooks()->filters['all']) )
 			array_pop(_gb_hooks()->current_filter);
 		return;
 	}
 
-	if ( !isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters['all']) )
 		_gb_hooks()->current_filter[] = $tag;
 
 	$args = array();
-	if ( is_array($arg) && 1 == count($arg) && isset($arg[0]) && is_object($arg[0]) ) // array(&$this)
+	if( is_array($arg) && 1 == count($arg) && isset($arg[0]) && is_object($arg[0]) ) // array(&$this)
 		$args[] =& $arg[0];
 	else
 		$args[] = $arg;
@@ -562,7 +562,7 @@ function do_action($tag, $arg = '') {
 		$args[] = func_get_arg($a);
 
 	// Sort
-	if ( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
+	if( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
 		ksort(_gb_hooks()->filters[$tag]);
 		_gb_hooks()->merged_filters[ $tag ] = true;
 	}
@@ -571,7 +571,7 @@ function do_action($tag, $arg = '') {
 
 	do {
 		foreach ( (array) current(_gb_hooks()->filters[$tag]) as $the_ )
-			if ( !is_null($the_['function']) )
+			if( !is_null($the_['function']) )
 				call_user_func_array($the_['function'], array_slice($args, 0, (int) $the_['accepted_args']));
 
 	} while ( next(_gb_hooks()->filters[$tag]) !== false );
@@ -588,7 +588,7 @@ function do_action($tag, $arg = '') {
  * @return int The number of times action hook $tag is fired.
  */
 function did_action($tag) {
-	if ( ! isset( _gb_hooks()->actions[ $tag ] ) )
+	if( ! isset( _gb_hooks()->actions[ $tag ] ) )
 		return 0;
 
 	return _gb_hooks()->actions[$tag];
@@ -607,29 +607,29 @@ function did_action($tag) {
  * @return null Will return null if `$tag` does not exist in `_gb_hooks()->filters` array.
  */
 function do_action_ref_array($tag, $args) {
-	if ( ! isset(_gb_hooks()->actions[$tag]) )
+	if( ! isset(_gb_hooks()->actions[$tag]) )
 		_gb_hooks()->actions[$tag] = 1;
 	else
 		_gb_hooks()->actions[$tag]++;
 
 	// Do 'all' actions first
-	if ( isset(_gb_hooks()->filters['all']) ) {
+	if( isset(_gb_hooks()->filters['all']) ) {
 		_gb_hooks()->current_filter[] = $tag;
 		$all_args = func_get_args();
 		_gb_call_all_hook($all_args);
 	}
 
-	if ( !isset(_gb_hooks()->filters[$tag]) ) {
-		if ( isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters[$tag]) ) {
+		if( isset(_gb_hooks()->filters['all']) )
 			array_pop(_gb_hooks()->current_filter);
 		return;
 	}
 
-	if ( !isset(_gb_hooks()->filters['all']) )
+	if( !isset(_gb_hooks()->filters['all']) )
 		_gb_hooks()->current_filter[] = $tag;
 
 	// Sort
-	if ( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
+	if( !isset( _gb_hooks()->merged_filters[ $tag ] ) ) {
 		ksort(_gb_hooks()->filters[$tag]);
 		_gb_hooks()->merged_filters[ $tag ] = true;
 	}
@@ -638,7 +638,7 @@ function do_action_ref_array($tag, $args) {
 
 	do {
 		foreach( (array) current(_gb_hooks()->filters[$tag]) as $the_ )
-			if ( !is_null($the_['function']) )
+			if( !is_null($the_['function']) )
 				call_user_func_array($the_['function'], array_slice($args, 0, (int) $the_['accepted_args']));
 
 	} while ( next(_gb_hooks()->filters[$tag]) !== false );

@@ -7,7 +7,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -188,13 +188,13 @@ class GB_Locale {
 		$this->number_format['decimal_point'] = ('number_format_decimal_point' == $trans) ? '.' : $trans;
 
 		// Set text direction.
-		if ( isset( $GLOBALS['text_direction'] ) )
+		if( isset( $GLOBALS['text_direction'] ) )
 			$this->text_direction = $GLOBALS['text_direction'];
 		/* translators: 'rtl' or 'ltr'. This sets the text direction for GeniBase. */
 		elseif ( 'rtl' == _x( 'ltr', 'text direction' ) )
 			$this->text_direction = 'rtl';
 
-		if ( 'rtl' === $this->text_direction && strpos( $GLOBALS['gb_version'], '-src' ) ) {
+		if( 'rtl' === $this->text_direction && strpos( $GLOBALS['gb_version'], '-src' ) ) {
 			$this->text_direction = 'ltr';
 			add_action( 'all_admin_notices', array( $this, 'rtl_src_admin_notice' ) );
 		}

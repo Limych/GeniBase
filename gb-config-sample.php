@@ -4,7 +4,7 @@
  */
 
 // Запрещено непосредственное исполнение этого скрипта
-if(empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
+if( empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
 
 
 

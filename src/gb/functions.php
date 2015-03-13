@@ -9,7 +9,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -28,16 +28,16 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
  * @return int 0 means nothing is wrong, greater than 0 means something was wrong.
  */
 function validate_file( $file, $allowed_files = '' ) {
-	if ( false !== strpos( $file, '..' ) )
+	if( false !== strpos( $file, '..' ) )
 		return 1;
 
-	if ( false !== strpos( $file, './' ) )
+	if( false !== strpos( $file, './' ) )
 		return 1;
 
-	if ( ! empty( $allowed_files ) && ! in_array( $file, $allowed_files ) )
+	if( ! empty( $allowed_files ) && ! in_array( $file, $allowed_files ) )
 		return 3;
 
-	if (':' == substr( $file, 1, 1 ) )
+	if( ':' == substr( $file, 1, 1 ) )
 		return 2;
 
 	return 0;
@@ -97,7 +97,7 @@ function number_format_i18n($number, $decimals = 0){
  *                      of individual calls.
  */
 function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pretty = true ) {
-	if ( version_compare( PHP_VERSION, '5.2.5', '>=' ) )
+	if( version_compare( PHP_VERSION, '5.2.5', '>=' ) )
 		$trace = debug_backtrace( false );
 	else
 		$trace = debug_backtrace();
@@ -107,15 +107,15 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 	$skip_frames++; // skip this function
 
 	foreach ( $trace as $call ) {
-		if ( $skip_frames > 0 ) {
+		if( $skip_frames > 0 ) {
 			$skip_frames--;
 		} elseif ( isset( $call['class'] ) ) {
-			if ( $check_class && $ignore_class == $call['class'] )
+			if( $check_class && $ignore_class == $call['class'] )
 				continue; // Filter out calls
 
 			$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
 		} else {
-			if ( in_array( $call['function'], array( 'do_action', 'apply_filters' ) ) ) {
+			if( in_array( $call['function'], array( 'do_action', 'apply_filters' ) ) ) {
 				$caller[] = "{$call['function']}('{$call['args'][0]}')";
 			} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
 				$caller[] = $call['function'] . "('" . str_replace( array( GB_CONTENT_DIR, ABSPATH ) , '', $call['args'][0] ) . "')";
@@ -124,7 +124,7 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 			}
 		}
 	}
-	if ( $pretty )
+	if( $pretty )
 		return join( ', ', array_reverse( $caller ) );
 	else
 		return $caller;
@@ -139,7 +139,7 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
  * @return mixed Unserialized data can be any type.
  */
 function maybe_unserialize( $original ) {
-	if ( is_serialized( $original ) ) // don't attempt to unserialize data that wasn't serialized going in
+	if( is_serialized( $original ) ) // don't attempt to unserialize data that wasn't serialized going in
 		return @unserialize( $original );
 	return $original;
 }
@@ -158,41 +158,41 @@ function maybe_unserialize( $original ) {
  */
 function is_serialized( $data, $strict = true ) {
 	// if it isn't a string, it isn't serialized.
-	if(!is_string($data))
+	if( !is_string($data))
 		return false;
 
 	$data = trim( $data );
-	if ( 'N;' == $data ) {
+	if( 'N;' == $data ) {
 		return true;
 	}
-	if ( strlen( $data ) < 4 ) {
+	if( strlen( $data ) < 4 ) {
 		return false;
 	}
-	if ( ':' !== $data[1] ) {
+	if( ':' !== $data[1] ) {
 		return false;
 	}
-	if ( $strict ) {
+	if( $strict ) {
 		$lastc = substr( $data, -1 );
-		if ( ';' !== $lastc && '}' !== $lastc ) {
+		if( ';' !== $lastc && '}' !== $lastc ) {
 			return false;
 		}
 	} else {
 		$semicolon = strpos( $data, ';' );
 		$brace     = strpos( $data, '}' );
 		// Either ; or } must exist.
-		if ( false === $semicolon && false === $brace )
+		if( false === $semicolon && false === $brace )
 			return false;
 		// But neither must be in the first X characters.
-		if ( false !== $semicolon && $semicolon < 3 )
+		if( false !== $semicolon && $semicolon < 3 )
 			return false;
-		if ( false !== $brace && $brace < 4 )
+		if( false !== $brace && $brace < 4 )
 			return false;
 	}
 	$token = $data[0];
 	switch ( $token ) {
 		case 's' :
-			if ( $strict ) {
-				if ( '"' !== substr( $data, -2, 1 ) ) {
+			if( $strict ) {
+				if( '"' !== substr( $data, -2, 1 ) ) {
 					return false;
 				}
 			} elseif ( false === strpos( $data, '"' ) ) {
@@ -220,7 +220,7 @@ function is_serialized( $data, $strict = true ) {
  * @return mixed A scalar data
  */
 function maybe_serialize($data){
-	if(is_array($data) || is_object($data))
+	if( is_array($data) || is_object($data))
 		return serialize($data);
 
 	return $data;
@@ -239,7 +239,7 @@ function maybe_serialize($data){
  */
 function gb_parse_str( $string, &$array ) {
 	parse_str( $string, $array );
-	if ( get_magic_quotes_gpc() )
+	if( get_magic_quotes_gpc() )
 		$array = stripslashes_deep( $array );
 	/**
 	 * Filter the array of variables derived from a parsed string.
@@ -264,14 +264,14 @@ function gb_parse_str( $string, &$array ) {
  * @return array Merged user defined values with defaults.
  */
 function gb_parse_args( $args, $defaults = '' ) {
-	if ( is_object( $args ) )
+	if( is_object( $args ) )
 		$r = get_object_vars( $args );
 	elseif ( is_array( $args ) )
 	$r =& $args;
 	else
 		gb_parse_str( $args, $r );
 
-	if ( is_array( $defaults ) )
+	if( is_array( $defaults ) )
 		return array_merge( $defaults, $r );
 	return $r;
 }
@@ -289,7 +289,7 @@ function get_status_header_desc($code){
 
 	$code = absint( $code );
 
-	if ( !isset( $gb_header_to_desc ) ) {
+	if( !isset( $gb_header_to_desc ) ) {
 		$gb_header_to_desc = array(
 				100 => 'Continue',
 				101 => 'Switching Protocols',
@@ -354,7 +354,7 @@ function get_status_header_desc($code){
 		);
 	}
 
-	if ( isset( $gb_header_to_desc[$code] ) )
+	if( isset( $gb_header_to_desc[$code] ) )
 		return $gb_header_to_desc[$code];
 	else
 		return '';
@@ -372,15 +372,15 @@ function get_status_header_desc($code){
 function status_header( $code ) {
 	$description = get_status_header_desc( $code );
 
-	if ( empty( $description ) )
+	if( empty( $description ) )
 		return;
 
 	$protocol = $_SERVER['SERVER_PROTOCOL'];
-	if ( 'HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol )
+	if( 'HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol )
 		$protocol = 'HTTP/1.0';
 	$status_header = "$protocol $code $description";
 
-	if(function_exists('apply_filters')){
+	if( function_exists('apply_filters')){
 		/**
 		 * Filter an HTTP status header.
 		 *
@@ -414,7 +414,7 @@ function get_nocache_headers() {
 		'Pragma' => 'no-cache',
 	);
 
-	if(function_exists('apply_filters')){
+	if( function_exists('apply_filters')){
 		/**
 		 * Filter the cache-controlling headers.
 		 *
@@ -453,13 +453,13 @@ function nocache_headers() {
 	unset( $headers['Last-Modified'] );
 
 	// In PHP 5.3+, make sure we are not sending a Last-Modified header.
-	if ( function_exists( 'header_remove' ) ) {
+	if( function_exists( 'header_remove' ) ) {
 		@header_remove( 'Last-Modified' );
 	} else {
 		// In PHP 5.2, send an empty Last-Modified header, but only as a
 		// last resort to override a header already sent. #WP23021
 		foreach ( headers_list() as $header ) {
-			if ( 0 === stripos( $header, 'Last-Modified' ) ) {
+			if( 0 === stripos( $header, 'Last-Modified' ) ) {
 				$headers['Last-Modified'] = '';
 				break;
 			}
@@ -503,14 +503,14 @@ function nocache_headers() {
  */
 function gb_die( $message = '', $title = '', $args = array() ) {
 
-	if ( is_int( $args ) ) {
+	if( is_int( $args ) ) {
 		$args = array( 'response' => $args );
 	} elseif ( is_int( $title ) ) {
 		$args  = array( 'response' => $title );
 		$title = '';
 	}
 
-	if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+	if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 		/**
 		 * Filter callback for killing WordPress execution for AJAX requests.
 		 *
@@ -564,10 +564,10 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 
 	$have_gettext = function_exists('__');
 
-	if(function_exists( 'is_gb_error' ) && is_gb_error( $message ) ) {
-		if ( empty( $title ) ) {
+	if( function_exists( 'is_gb_error' ) && is_gb_error( $message ) ) {
+		if( empty( $title ) ) {
 			$error_data = $message->get_error_data();
-			if ( is_array( $error_data ) && isset( $error_data['title'] ) )
+			if( is_array( $error_data ) && isset( $error_data['title'] ) )
 				$title = $error_data['title'];
 		}
 		$errors = $message->get_error_messages();
@@ -586,23 +586,23 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		$message = "<p>$message</p>";
 	}
 
-	if ( isset( $r['back_link'] ) && $r['back_link'] ) {
+	if( isset( $r['back_link'] ) && $r['back_link'] ) {
 		$back_text = $have_gettext? __('&laquo; Back') : '&laquo; Back';
 		$message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
 	}
 
-// 	if ( ! did_action( 'admin_head' ) ) :
-	if ( !headers_sent() ) {
+// 	if( ! did_action( 'admin_head' ) ) :
+	if( !headers_sent() ) {
 		status_header($r['response']);
 		nocache_headers();
 		header( 'Content-Type: text/html; charset=utf-8' );
 	}
 
-	if ( empty($title) )
+	if( empty($title) )
 		$title = $have_gettext ? __('GeniBase Error') : 'GeniBase Error';
 
 	$text_direction = 'ltr';
-	if ( isset($r['text_direction']) && 'rtl' == $r['text_direction'] )
+	if( isset($r['text_direction']) && 'rtl' == $r['text_direction'] )
 		$text_direction = 'rtl';
 	elseif ( function_exists( 'is_rtl' ) && is_rtl() )
 	$text_direction = 'rtl';
@@ -610,7 +610,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 <!DOCTYPE html>
 <!-- IE bug fix: always pad the error page with enough characters such that it is greater than 512 bytes, even after gzip compression abcdefghijklmnopqrstuvwxyz1234567890aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz11223344556677889900abacbcbdcdcededfefegfgfhghgihihjijikjkjlklkmlmlnmnmononpopoqpqprqrqsrsrtstsubcbcdcdedefefgfabcadefbghicjkldmnoepqrfstugvwxhyz1i234j567k890laabmbccnddeoeffpgghqhiirjjksklltmmnunoovppqwqrrxsstytuuzvvw0wxx1yyz2z113223434455666777889890091abc2def3ghi4jkl5mno6pqr7stu8vwx9yz11aab2bcc3dd4ee5ff6gg7hh8ii9j0jk1kl2lmm3nnoo4p5pq6qrr7ss8tt9uuvv0wwx1x2yyzz13aba4cbcb5dcdc6dedfef8egf9gfh0ghg1ihi2hji3jik4jkj5lkl6kml7mln8mnm9ono
 -->
-<html xmlns="http://www.w3.org/1999/xhtml" <?php if ( function_exists( 'language_attributes' ) && function_exists( 'is_rtl' ) ) language_attributes(); else echo "dir='$text_direction'"; ?>>
+<html xmlns="http://www.w3.org/1999/xhtml" <?php if( function_exists( 'language_attributes' ) && function_exists( 'is_rtl' ) ) language_attributes(); else echo "dir='$text_direction'"; ?>>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><?php echo $title ?></title>
@@ -710,7 +710,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		 	box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.5 );
 		}
 
-		<?php if ( 'rtl' == $text_direction ) : ?>
+		<?php if( 'rtl' == $text_direction ) : ?>
 		body { font-family: Tahoma, Arial; }
 		<?php endif; ?>
 	</style>
@@ -742,7 +742,7 @@ function _xmlrpc_gb_die_handler( $message, $title = '', $args = array() ) {
 
 	$r = gb_parse_args($args, $defaults);
 
-	if ( $gb_xmlrpc_server ) {
+	if( $gb_xmlrpc_server ) {
 		$error = new IXR_Error( $r['response'] , $message);
 		$gb_xmlrpc_server->output( $error->getXml() );
 	}
@@ -760,7 +760,7 @@ function _xmlrpc_gb_die_handler( $message, $title = '', $args = array() ) {
  * @param string $message Optional. Response to print. Default empty.
  */
 function _ajax_gb_die_handler( $message = '' ) {
-	if ( is_scalar( $message ) )
+	if( is_scalar( $message ) )
 		die( (string) $message );
 	die( '0' );
 }
@@ -776,7 +776,7 @@ function _ajax_gb_die_handler( $message = '' ) {
  * @param string $message Optional. Response to print. Default empty.
  */
 function _scalar_gb_die_handler( $message = '' ) {
-	if ( is_scalar( $message ) )
+	if( is_scalar( $message ) )
 		die( (string) $message );
 	die();
 }
@@ -794,7 +794,7 @@ function _scalar_gb_die_handler( $message = '' ) {
 function gb_allowed_protocols() {
 	static $protocols;
 
-	if ( empty( $protocols ) ) {
+	if( empty( $protocols ) ) {
 		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp' );
 
 		/**
@@ -821,15 +821,15 @@ function gb_allowed_protocols() {
  * @return array
  */
 function parse_query($uri = false){
-	if($uri === false)
+	if( $uri === false)
 		$uri = $_SERVER['REQUEST_URI'];
 
-	if ( $frag = strstr( $uri, '#' ) )
+	if( $frag = strstr( $uri, '#' ) )
 		$uri = substr( $uri, 0, -strlen( $frag ) );
 	else
 		$frag = '';
 	
-	if ( 0 === stripos( $uri, 'http://' ) ) {
+	if( 0 === stripos( $uri, 'http://' ) ) {
 		$protocol = 'http://';
 		$uri = substr( $uri, 7 );
 	} elseif ( 0 === stripos( $uri, 'https://' ) ) {
@@ -839,7 +839,7 @@ function parse_query($uri = false){
 		$protocol = '';
 	}
 	
-	if ( strpos( $uri, '?' ) !== false ) {
+	if( strpos( $uri, '?' ) !== false ) {
 		list( $base, $query ) = explode( '?', $uri, 2 );
 		$base .= '?';
 	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
@@ -873,13 +873,13 @@ function parse_query($uri = false){
  */
 function add_query_arg() {
 	$args = func_get_args();
-	if ( is_array( $args[0] ) ) {
-		if ( count( $args ) < 2 || false === $args[1] )
+	if( is_array( $args[0] ) ) {
+		if( count( $args ) < 2 || false === $args[1] )
 			$uri = $_SERVER['REQUEST_URI'];
 		else
 			$uri = $args[1];
 	} else {
-		if ( count( $args ) < 3 || false === $args[2] )
+		if( count( $args ) < 3 || false === $args[2] )
 			$uri = $_SERVER['REQUEST_URI'];
 		else
 			$uri = $args[2];
@@ -889,7 +889,7 @@ function add_query_arg() {
 
 	gb_parse_str( $query, $qs );
 	$qs = urlencode_deep( $qs ); // this re-URL-encodes things that were already in the query string
-	if ( is_array( $args[0] ) ) {
+	if( is_array( $args[0] ) ) {
 		$kayvees = $args[0];
 		$qs = array_merge( $qs, $kayvees );
 	} else {
@@ -897,7 +897,7 @@ function add_query_arg() {
 	}
 
 	foreach ( $qs as $k => $v ) {
-		if ( $v === false )
+		if( $v === false )
 			unset( $qs[$k] );
 	}
 
@@ -919,7 +919,7 @@ function add_query_arg() {
  * @return string New URL query string.
  */
 function remove_query_arg($key, $uri = false){
-	if ( is_array( $key ) ) { // removing multiple keys
+	if( is_array( $key ) ) { // removing multiple keys
 		foreach ( $key as $k )
 			$query = add_query_arg( $k, false, $uri);
 		return $query;
@@ -968,18 +968,18 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 	$ret = array();
 
 	foreach ( (array) $data as $k => $v ) {
-		if ( $urlencode)
+		if( $urlencode)
 			$k = urlencode($k);
-		if ( is_int($k) && $prefix != null )
+		if( is_int($k) && $prefix != null )
 			$k = $prefix.$k;
-		if ( !empty($key) )
+		if( !empty($key) )
 			$k = $key . '%5B' . $k . '%5D';
-		if ( $v === null )
+		if( $v === null )
 			continue;
 		elseif ( $v === FALSE )
 		$v = '0';
 
-		if ( is_array($v) || is_object($v) )
+		if( is_array($v) || is_object($v) )
 			array_push($ret,_http_build_query($v, '', $sep, $k, $urlencode));
 		elseif ( $urlencode )
 		array_push($ret, $k.'='.urlencode($v));
@@ -987,7 +987,7 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 			array_push($ret, $k.'='.$v);
 	}
 
-	if ( null === $sep )
+	if( null === $sep )
 		$sep = ini_get('arg_separator.output');
 
 	return implode($sep, $ret);
@@ -1002,45 +1002,43 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
  * @return boolean	TRUE if user is a robot.
  */
 function is_bot_user($is_first_visited_page = TRUE) {
-	$is_bot = FALSE;
+// 	if( is_user_logged_in()){	// TODO: users
+// 		return false;
 
-// 	if(!is_user_logged_in()){	// TODO: users
-		// XML RPC requests are probably from cybernetic beasts
-		if(!$is_bot && defined('XMLRPC_REQUEST') && XMLRPC_REQUEST)
-			$is_bot = TRUE;
+	// XML RPC requests are probably from cybernetic beasts
+	if( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST )
+		return true;
 
-		if(!$is_bot && !empty($_SERVER['HTTP_USER_AGENT'])){
-			// the user agent could be google bot, bing bot or some other bot,  one would hope real user agents do not have the
-			// string 'bot|spider|crawler|preview' in them, there are bots that don't do us the kindness of identifying themselves as such,
-			// check for the user being logged in in a real user is using a bot to access content from our site
-			$bot_agent_strings = array('alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider',
-					'bingbot', 'bot', 'chtml generic', 'crawler', 'fastmobilecrawl', 'feedfetcher-google',
-					'firefly', 'froogle', 'gigabot', 'googlebot', 'googlebot-mobile', 'heritrix',
-					'ia_archiver', 'infoseek', 'irlbot', 'jumpbot', 'lycos', 'mail.ru', 'mediapartners',
-					'mediobot', 'motionbot', 'mshots', 'msnbot', 'openbot', 'php', 'preview',
-					'pss-webkit-request', 'pythumbnail', 'robot', 'scooter', 'slurp', 'snapbot',
-					'spider', 'stackrambler', 'taptubot', 'technoratisnoop', 'teleport', 'teoma',
-					'twiceler', 'webalta', 'wget', 'wordpress', 'yahooseeker', 'yahooysmcm', 'yammybot', );
-// 			$bot_agent_strings = apply_filters('bot_user_agents', $bot_agent_strings);	// TODO: actions
-			foreach($bot_agent_strings as $bot){
-				if(stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false){
-					$is_bot = TRUE;
-					break;
-				}
-			}
+	if( !empty($_SERVER['HTTP_USER_AGENT']) ){
+		// the user agent could be google bot, bing bot or some other bot,  one would hope real user agents do not have the
+		// string 'bot|spider|crawler|preview' in them, there are bots that don't do us the kindness of identifying themselves as such,
+		// check for the user being logged in in a real user is using a bot to access content from our site
+		$bot_agent_strings = array('alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider',
+				'bingbot', 'bot', 'chtml generic', 'crawler', 'fastmobilecrawl', 'feedfetcher-google',
+				'firefly', 'froogle', 'gigabot', 'googlebot', 'googlebot-mobile', 'heritrix',
+				'ia_archiver', 'infoseek', 'irlbot', 'jumpbot', 'lycos', 'mail.ru', 'mediapartners',
+				'mediobot', 'motionbot', 'mshots', 'msnbot', 'openbot', 'php', 'preview',
+				'pss-webkit-request', 'pythumbnail', 'robot', 'scooter', 'slurp', 'snapbot',
+				'spider', 'stackrambler', 'taptubot', 'technoratisnoop', 'teleport', 'teoma',
+				'twiceler', 'webalta', 'wget', 'wordpress', 'yahooseeker', 'yahooysmcm', 'yammybot', );
+		$bot_agent_strings = apply_filters('bot_user_agents', $bot_agent_strings);
+		foreach($bot_agent_strings as $bot){
+			if( stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false)
+				return true;
 		}
-		
-		if(!$is_bot && !$is_first_visited_page){
-			// Common bots don't save cookies
-			// TODO: Add check for saving cookies
+	}
+	
+	if( !$is_first_visited_page ){
+		// Common bots don't send referers
+		if( !isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER']) )
+			return true;
 
-			// Common bots don't send referers
-			if(!$is_bot && (!isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER'])))
-				$is_bot = TRUE;
-		}
-// 	}	// TODO: users
+		// Common bots don't save cookies
+		if( !isset($_COOKIE[GB_COOKIE_USERID]) && 0 == strncmp(site_url(), $_SERVER['HTTP_REFERER'], strlen(site_url())) )
+			return true;
+	}
 
-	return $is_bot;
+	return false;
 }
 
 /**
@@ -1051,10 +1049,10 @@ function is_bot_user($is_first_visited_page = TRUE) {
  * @return bool True if SSL, false if not used.
  */
 function is_ssl() {
-	if ( isset($_SERVER['HTTPS']) ) {
-		if ( 'on' == strtolower($_SERVER['HTTPS']) )
+	if( isset($_SERVER['HTTPS']) ) {
+		if( 'on' == strtolower($_SERVER['HTTPS']) )
 			return true;
-		if ( '1' == $_SERVER['HTTPS'] )
+		if( '1' == $_SERVER['HTTPS'] )
 			return true;
 	} elseif ( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
 		return true;
@@ -1087,7 +1085,7 @@ function force_ssl_login( $force = null ) {
 function force_ssl_admin( $force = null ) {
 	static $forced = false;
 
-	if ( !is_null( $force ) ) {
+	if( !is_null( $force ) ) {
 		$old_forced = $forced;
 		$forced = $force;
 		return $old_forced;
@@ -1096,16 +1094,67 @@ function force_ssl_admin( $force = null ) {
 	return $forced;
 }
 
-if(!function_exists('mb_ucfirst')){
-	/**
-	 * Make a string's first character uppercase (Multibyte version)
-	 *
-	 * @since	1.0.0
-	 *
-	 * @param	string	$str	The input string
-	 * @return	string		The resilting string.
-	 */
-	function mb_ucfirst($str){
-		return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
+if( !function_exists('mb_ucfirst')):
+/**
+ * Make a string's first character uppercase (Multibyte version)
+ *
+ * @since	1.0.0
+ *
+ * @param	string	$str	The input string
+ * @return	string		The resilting string.
+ */
+function mb_ucfirst($str){
+	return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
+}
+endif;
+
+/**
+ * Guess the URL for the site.
+ *
+ * Will remove gb-admin links to retrieve only return URLs not in the gb-admin
+ * directory.
+ *
+ * @since 2.1.1
+ *
+ * @return string The guessed URL.
+ */
+function gb_guess_url() {
+	if( defined('GB_SITEURL') && '' != GB_SITEURL ){
+		$url = GB_SITEURL;
+	}else{
+		$abspath_fix = str_replace('\\', '/', BASE_DIR);
+		$script_filename_dir = dirname( $_SERVER['SCRIPT_FILENAME'] );
+
+		// The request is for the admin
+		if( strpos($_SERVER['REQUEST_URI'], 'gb-admin') !== false ) {
+			$path = preg_replace('#/(gb-admin/.*)#i', '', $_SERVER['REQUEST_URI'] );
+
+			// The request is for a file in BASE_DIR
+		}elseif( $script_filename_dir . '/' == $abspath_fix ){
+			// Strip off any file/query params in the path
+			$path = preg_replace('#/[^/]*$#i', '', $_SERVER['PHP_SELF']);
+
+		}else{
+			if( false !== strpos($_SERVER['SCRIPT_FILENAME'], $abspath_fix) ){
+				// Request is hitting a file inside ABSPATH
+				$directory = str_replace(BASE_DIR, '', $script_filename_dir);
+				// Strip off the sub directory, and any file/query paramss
+				$path = preg_replace('#/' . preg_quote($directory, '#') . '/[^/]*$#i', '' , $_SERVER['REQUEST_URI']);
+
+			}elseif( false !== strpos($abspath_fix, $script_filename_dir) ){
+				// Request is hitting a file above ABSPATH
+				$subdirectory = substr($abspath_fix, strpos($abspath_fix, $script_filename_dir) + strlen($script_filename_dir));
+				// Strip off any file/query params from the path, appending the sub directory to the install
+				$path = preg_replace('#/[^/]*$#i', '' , $_SERVER['REQUEST_URI']) . $subdirectory;
+
+			}else{
+				$path = $_SERVER['REQUEST_URI'];
+			}
+		}
+
+		$schema = is_ssl() ? 'https://' : 'http://'; // set_url_scheme() is not defined yet
+		$url = $schema . $_SERVER['HTTP_HOST'] . $path;
 	}
+
+	return rtrim($url, '/');
 }

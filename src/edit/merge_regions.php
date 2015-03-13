@@ -14,12 +14,12 @@ $max_id = $r[0];
 html_header('');
 
 // Применение изменений
-if(isset($_POST['reg_from'])){
+if( isset($_POST['reg_from'])){
 	$reg_from = gbdb()->get_row('SELECT id, parent_id, region FROM ?_dic_regions WHERE id = ?id', array('id' => $_POST['reg_from']));
 	$reg_to = gbdb()->get_row('SELECT id, region FROM ?_dic_regions WHERE id = ?id', array('id' => $_POST['reg_to']));
 	
-	if($reg_from && $reg_to){
-		if(!GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
+	if( $reg_from && $reg_to){
+		if( !GB_DEBUG){	// В режиме отладки реальных изменений в базе не производим
 			gbdb()->set_row('?_persons', array('region_id' => $reg_to['id']),
 					array('region_id' => $reg_from['id']));
 			gbdb()->query('DELETE FROM ?_dic_regions WHERE `id` = ?id', $reg_from);

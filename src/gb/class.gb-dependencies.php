@@ -14,7 +14,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -105,7 +105,7 @@ class GB_Dependencies {
 		$this->all_deps( $handles );
 
 		foreach( $this->to_do as $key => $handle ) {
-			if ( !in_array($handle, $this->done, true) && isset($this->registered[$handle]) ) {
+			if( !in_array($handle, $this->done, true) && isset($this->registered[$handle]) ) {
 
 				/*
 				 * A single item may alias a set of items, by having dependencies,
@@ -116,7 +116,7 @@ class GB_Dependencies {
 				 *
 				 * The src property is false.
 				 */
-				if ( ! $this->registered[$handle]->src ) {
+				if( ! $this->registered[$handle]->src ) {
 					$this->done[] = $handle;
 					continue;
 				}
@@ -127,7 +127,7 @@ class GB_Dependencies {
 				 *
 				 * Unset the item from the to_do array.
 				 */
-				if ( $this->do_item( $handle, $group ) )
+				if( $this->do_item( $handle, $group ) )
 					$this->done[] = $handle;
 
 				unset( $this->to_do[$key] );
@@ -165,7 +165,7 @@ class GB_Dependencies {
 	 * @return bool True on success, false on failure.
 	 */
 	public function all_deps( $handles, $recursion = false, $group = false ) {
-		if ( !$handles = (array) $handles )
+		if( !$handles = (array) $handles )
 			return false;
 
 		foreach ( $handles as $handle ) {
@@ -173,33 +173,33 @@ class GB_Dependencies {
 			$handle = $handle_parts[0];
 			$queued = in_array($handle, $this->to_do, true);
 
-			if ( in_array($handle, $this->done, true) ) // Already done
+			if( in_array($handle, $this->done, true) ) // Already done
 				continue;
 
 			$moved = $this->set_group( $handle, $recursion, $group );
 
-			if ( $queued && !$moved ) // already queued and in the right group
+			if( $queued && !$moved ) // already queued and in the right group
 				continue;
 
 			$keep_going = true;
-			if ( !isset($this->registered[$handle]) )
+			if( !isset($this->registered[$handle]) )
 				$keep_going = false; // Item doesn't exist.
 			elseif ( $this->registered[$handle]->deps && array_diff($this->registered[$handle]->deps, array_keys($this->registered)) )
 				$keep_going = false; // Item requires dependencies that don't exist.
 			elseif ( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true, $group ) )
 				$keep_going = false; // Item requires dependencies that don't exist.
 
-			if ( ! $keep_going ) { // Either item or its dependencies don't exist.
-				if ( $recursion )
+			if( ! $keep_going ) { // Either item or its dependencies don't exist.
+				if( $recursion )
 					return false; // Abort this branch.
 				else
 					continue; // We're at the top level. Move on to the next one.
 			}
 
-			if ( $queued ) // Already grabbed it and its dependencies.
+			if( $queued ) // Already grabbed it and its dependencies.
 				continue;
 
-			if ( isset($handle_parts[1]) )
+			if( isset($handle_parts[1]) )
 				$this->args[$handle] = $handle_parts[1];
 
 			$this->to_do[] = $handle;
@@ -224,7 +224,7 @@ class GB_Dependencies {
 	 * @return bool True on success, false on failure.
 	 */
 	public function add( $handle, $src, $deps = array(), $ver = false, $args = null ) {
-		if ( isset($this->registered[$handle]) )
+		if( isset($this->registered[$handle]) )
 			return false;
 		$this->registered[$handle] = new _GB_Dependency( $handle, $src, $deps, $ver, $args );
 		return true;
@@ -244,7 +244,7 @@ class GB_Dependencies {
 	 * @return bool True on success, false on failure.
 	 */
 	public function add_data( $handle, $key, $value ) {
-		if ( !isset( $this->registered[$handle] ) )
+		if( !isset( $this->registered[$handle] ) )
 			return false;
 
 		return $this->registered[$handle]->add_data( $key, $value );
@@ -263,10 +263,10 @@ class GB_Dependencies {
 	 * @return mixed Extra item data (string), false otherwise.
 	 */
 	public function get_data( $handle, $key ) {
-		if ( !isset( $this->registered[$handle] ) )
+		if( !isset( $this->registered[$handle] ) )
 			return false;
 
-		if ( !isset( $this->registered[$handle]->extra[$key] ) )
+		if( !isset( $this->registered[$handle]->extra[$key] ) )
 			return false;
 
 		return $this->registered[$handle]->extra[$key];
@@ -302,9 +302,9 @@ class GB_Dependencies {
 	public function enqueue( $handles ) {
 		foreach ( (array) $handles as $handle ) {
 			$handle = explode('?', $handle);
-			if ( !in_array($handle[0], $this->queue) && isset($this->registered[$handle[0]]) ) {
+			if( !in_array($handle[0], $this->queue) && isset($this->registered[$handle[0]]) ) {
 				$this->queue[] = $handle[0];
-				if ( isset($handle[1]) )
+				if( isset($handle[1]) )
 					$this->args[$handle[0]] = $handle[1];
 			}
 		}
@@ -325,7 +325,7 @@ class GB_Dependencies {
 		foreach ( (array) $handles as $handle ) {
 			$handle = explode('?', $handle);
 			$key = array_search($handle[0], $this->queue);
-			if ( false !== $key ) {
+			if( false !== $key ) {
 				unset($this->queue[$key]);
 				unset($this->args[$handle[0]]);
 			}
@@ -343,11 +343,11 @@ class GB_Dependencies {
 	 */
 	protected function recurse_deps( $queue, $handle ) {
 		foreach ( $queue as $queued ) {
-			if ( ! isset( $this->registered[ $queued ] ) ) {
+			if( ! isset( $this->registered[ $queued ] ) ) {
 				continue;
 			}
 
-			if ( in_array( $handle, $this->registered[ $queued ]->deps ) ) {
+			if( in_array( $handle, $this->registered[ $queued ]->deps ) ) {
 				return true;
 			} elseif ( $this->recurse_deps( $this->registered[ $queued ]->deps, $handle ) ) {
 				return true;
@@ -370,13 +370,13 @@ class GB_Dependencies {
 	public function query( $handle, $list = 'registered' ) {
 		switch ( $list ) {
 			case 'registered' :
-				if ( isset( $this->registered[ $handle ] ) )
+				if( isset( $this->registered[ $handle ] ) )
 					return $this->registered[ $handle ];
 				return false;
 
 			case 'enqueued' :
 			case 'queue' :
-				if ( in_array( $handle, $this->queue ) ) {
+				if( in_array( $handle, $this->queue ) ) {
 					return true;
 				}
 				return $this->recurse_deps( $this->queue, $handle );
@@ -404,12 +404,12 @@ class GB_Dependencies {
 	public function set_group( $handle, $recursion, $group ) {
 		$group = (int) $group;
 
-		if ( $recursion )
+		if( $recursion )
 			$group = min($this->group, $group);
 		else
 			$this->group = $group;
 
-		if ( isset($this->groups[$handle]) && $this->groups[$handle] <= $group )
+		if( isset($this->groups[$handle]) && $this->groups[$handle] <= $group )
 			return false;
 
 		$this->groups[$handle] = $group;
@@ -490,7 +490,7 @@ class _GB_Dependency {
 	 */
 	public function __construct() {
 		@list( $this->handle, $this->src, $this->deps, $this->ver, $this->args ) = func_get_args();
-		if ( ! is_array($this->deps) )
+		if( ! is_array($this->deps) )
 			$this->deps = array();
 	}
 
@@ -505,7 +505,7 @@ class _GB_Dependency {
 	 * @return bool False if not scalar, true otherwise.
 	 */
 	public function add_data( $name, $data ) {
-		if ( !is_scalar($name) )
+		if( !is_scalar($name) )
 			return false;
 		$this->extra[$name] = $data;
 		return true;

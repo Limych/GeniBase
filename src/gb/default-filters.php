@@ -22,6 +22,7 @@ add_action('gb_head',				'gb_enqueue_scripts',		 1	);
 // add_action('gb_head',				'locale_stylesheet'				);
 add_action('gb_head',				'gb_print_styles',			 8	);
 add_action('gb_head',				'gb_print_head_scripts',	 9	);
+add_action('gb_head',				'rel_canonical'					);
 add_action('gb_footer',				'gb_print_footer_scripts',	20	);
 add_action('gb_print_footer_scripts',	'_gb_footer_scripts'		);
 // add_action('shutdown',				'gb_ob_end_flush_all',		 1	);

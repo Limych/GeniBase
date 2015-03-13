@@ -11,7 +11,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -27,19 +27,19 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 function gb_check_invalid_utf8($string, $strip = false){
 	$string = (string) $string;
 
-	if(0 === strlen($string))	return '';
+	if( 0 === strlen($string))	return '';
 
 	// Check for support for utf8 in the installed PCRE library once and store the result in a static
 	static $utf8_pcre;
-	if(!isset($utf8_pcre))		$utf8_pcre = @preg_match('/^./u', 'a');
+	if( !isset($utf8_pcre))		$utf8_pcre = @preg_match('/^./u', 'a');
 	// We can't demand utf8 in the PCRE installation, so just return the string in those cases
-	if(!$utf8_pcre)		return $string;
+	if( !$utf8_pcre)		return $string;
 
 	// preg_match fails when it encounters invalid UTF8 in $string
-	if(1 === @preg_match('/^./us', $string))		return $string;
+	if( 1 === @preg_match('/^./us', $string))		return $string;
 
 	// Attempt to strip the bad chars if requested (not recommended)
-	if($strip && function_exists('iconv'))		return iconv('utf-8', 'utf-8', $string);
+	if( $strip && function_exists('iconv'))		return iconv('utf-8', 'utf-8', $string);
 
 	return '';
 }
@@ -61,13 +61,13 @@ function gb_check_invalid_utf8($string, $strip = false){
 function gb_specialchars_decode($string, $quote_style = ENT_NOQUOTES){
 	$string = (string) $string;
 
-	if(0 === strlen($string))		return '';
+	if( 0 === strlen($string))		return '';
 
 	// Don't bother if there are no entities - saves a lot of processing
-	if(strpos($string, '&') === false)		return $string;
+	if( strpos($string, '&') === false)		return $string;
 
 	// Match the previous behaviour of _gb_specialchars() when the $quote_style is not an accepted value
-	if(empty($quote_style))
+	if( empty($quote_style))
 		$quote_style = ENT_NOQUOTES;
 	elseif(!in_array($quote_style, array(0, 2, 3, 'single', 'double'), true))
 		$quote_style = ENT_QUOTES;
@@ -80,7 +80,7 @@ function gb_specialchars_decode($string, $quote_style = ENT_NOQUOTES){
 	$others = array('&lt;'   => '<', '&#060;'  => '<', '&gt;'   => '>', '&#062;'  => '>', '&amp;'  => '&', '&#038;'  => '&', '&#x26;' => '&');
 	$others_preg = array('/&#0*60;/'  => '&#060;', '/&#0*62;/'  => '&#062;', '/&#0*38;/'  => '&#038;', '/&#x0*26;/i' => '&#x26;');
 
-	if($quote_style === ENT_QUOTES){
+	if( $quote_style === ENT_QUOTES){
 		$translation = array_merge($single, $double, $others);
 		$translation_preg = array_merge($single_preg, $double_preg, $others_preg);
 	}elseif($quote_style === ENT_COMPAT || $quote_style === 'double'){
@@ -121,13 +121,13 @@ function gb_specialchars_decode($string, $quote_style = ENT_NOQUOTES){
 function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false, $double_encode = false){
 	$string = (string) $string;
 
-	if(0 === strlen($string))		return '';
+	if( 0 === strlen($string))		return '';
 
 	// Don't bother if there are no specialchars — saves some processing
-	if(!preg_match('/[&<>"\']/', $string))		return $string;
+	if( !preg_match('/[&<>"\']/', $string))		return $string;
 
 	// Account for the previous behaviour of the function when the $quote_style is not an accepted value
-	if(empty($quote_style))
+	if( empty($quote_style))
 		$quote_style = ENT_NOQUOTES;
 	elseif(!in_array($quote_style, array(0, 2, 3, 'single', 'double'), TRUE))
 		$quote_style = ENT_QUOTES;
@@ -135,14 +135,14 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 	$charset = 'UTF-8';
 	$_quote_style = $quote_style;
 
-	if($quote_style === 'double'){
+	if( $quote_style === 'double'){
 		$quote_style = ENT_COMPAT;
 		$_quote_style = ENT_COMPAT;
 	}elseif($quote_style === 'single')
 		$quote_style = ENT_NOQUOTES;
 
 	// Handle double encoding ourselves
-	if($double_encode)
+	if( $double_encode)
 		$string = @htmlspecialchars($string, $quote_style, $charset);
 	else {
 		// Decode &amp; into &
@@ -161,7 +161,7 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 	}
 
 	// Backwards compatibility
-	if('single' === $_quote_style)
+	if( 'single' === $_quote_style)
 		$string = str_replace("'", '&#039;', $string);
 
 	return $string;
@@ -270,7 +270,7 @@ function esc_js( $text ) {
 function esc_url( $url, $protocols = null, $_context = 'display' ) {
 	$original_url = $url;
 
-	if ( '' == $url )
+	if( '' == $url )
 		return $url;
 	$url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff]|i', '', $url);
 	$strip = array('%0d', '%0a', '%0D', '%0A');
@@ -280,24 +280,24 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 	 * presume it needs http:// appended (unless a relative
 	 * link starting with /, # or ? or a php file).
 	*/
-	if ( strpos($url, ':') === false && ! in_array( $url[0], array( '/', '#', '?' ) ) &&
+	if( strpos($url, ':') === false && ! in_array( $url[0], array( '/', '#', '?' ) ) &&
 			! preg_match('/^[a-z0-9-]+?\.php/i', $url) )
 				$url = 'http://' . $url;
 
 	// Replace ampersands and single quotes only when displaying.
-	if ( 'display' == $_context ) {
+	if( 'display' == $_context ) {
 		$url = gb_kses_normalize_entities( $url );
 		$url = str_replace( '&amp;', '&#038;', $url );
 		$url = str_replace( "'", '&#039;', $url );
 	}
 
-	if ( '/' === $url[0] ) {
+	if( '/' === $url[0] ) {
 		$good_protocol_url = $url;
 	} else {
-		if ( ! is_array( $protocols ) )
+		if( ! is_array( $protocols ) )
 			$protocols = gb_allowed_protocols();
 		$good_protocol_url = gb_kses_bad_protocol( $url, $protocols );
-		if ( strtolower( $good_protocol_url ) != strtolower( $url ) )
+		if( strtolower( $good_protocol_url ) != strtolower( $url ) )
 			return '';
 	}
 

@@ -10,7 +10,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -34,7 +34,7 @@ if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b
 function get_locale() {
 	global $locale;
 
-	if(isset($locale)){
+	if( isset($locale)){
 		/**
 		 * Filter GeniBase install's locale ID.
 		 *
@@ -43,12 +43,12 @@ function get_locale() {
 // 		return apply_filters('locale', $locale);
 	}
 
-	if(defined('GB_LOCAL_PACKAGE'))		$locale = GB_LOCAL_PACKAGE;
+	if( defined('GB_LOCAL_PACKAGE'))		$locale = GB_LOCAL_PACKAGE;
 
 	// GB_LANG was defined in gb-config.
-	if(defined('GB_LANG'))		$locale = GB_LANG;
+	if( defined('GB_LANG'))		$locale = GB_LANG;
 
-	if(empty($locale))		$locale = 'en_US';
+	if( empty($locale))		$locale = 'en_US';
 
 	/** This filter is documented in gb/l10n.php */
 // 	return apply_filters( 'locale', $locale );
@@ -96,7 +96,7 @@ function translate($text, $domain = 'default'){
  */
 function before_last_bar($string){
 	$last_bar = strrpos($string, '|');
-	if(false == $last_bar)
+	if( false == $last_bar)
 		return $string;
 	else
 		return substr($string, 0, $last_bar);
@@ -395,10 +395,10 @@ function _nx_noop( $singular, $plural, $context, $domain = null ) {
  * @return string Either $single or $plural translated text.
  */
 function translate_nooped_plural( $nooped_plural, $count, $domain = 'default' ) {
-	if ( $nooped_plural['domain'] )
+	if( $nooped_plural['domain'] )
 		$domain = $nooped_plural['domain'];
 
-	if ( $nooped_plural['context'] )
+	if( $nooped_plural['context'] )
 		return _nx( $nooped_plural['singular'], $nooped_plural['plural'], $count, $nooped_plural['context'], $domain );
 	else
 		return _n( $nooped_plural['singular'], $nooped_plural['plural'], $count, $domain );
@@ -433,7 +433,7 @@ function load_textdomain( $domain, $mofile ) {
 	 */
 // 	$plugin_override = apply_filters( 'override_load_textdomain', false, $domain, $mofile );
 
-// 	if ( true == $plugin_override ) {
+// 	if( true == $plugin_override ) {
 // 		return true;
 // 	}
 
@@ -457,12 +457,12 @@ function load_textdomain( $domain, $mofile ) {
 	 */
 // 	$mofile = apply_filters( 'load_textdomain_mofile', $mofile, $domain );
 
-	if ( !is_readable( $mofile ) ) return false;
+	if( !is_readable( $mofile ) ) return false;
 
 	$mo = new MO();
-	if ( !$mo->import_from_file( $mofile ) ) return false;
+	if( !$mo->import_from_file( $mofile ) ) return false;
 
-	if ( isset( $l10n[$domain] ) )
+	if( isset( $l10n[$domain] ) )
 		$mo->merge_with( $l10n[$domain] );
 
 	$l10n[$domain] = &$mo;
@@ -491,7 +491,7 @@ function unload_textdomain( $domain ) {
 	 */
 // 	$plugin_override = apply_filters( 'override_unload_textdomain', false, $domain );
 
-// 	if ( $plugin_override )
+// 	if( $plugin_override )
 // 		return true;
 
 	/**
@@ -503,7 +503,7 @@ function unload_textdomain( $domain ) {
 	 */
 // 	do_action( 'unload_textdomain', $domain );
 
-	if ( isset( $l10n[$domain] ) ) {
+	if( isset( $l10n[$domain] ) ) {
 		unset( $l10n[$domain] );
 		return true;
 	}
@@ -525,7 +525,7 @@ function unload_textdomain( $domain ) {
  * @return bool Whether the textdomain was loaded.
  */
 function load_default_textdomain( $locale = null ) {
-	if ( null === $locale )
+	if( null === $locale )
 		$locale = get_locale();
 
 	// Unload previously loaded strings so we can switch translations.
@@ -533,7 +533,7 @@ function load_default_textdomain( $locale = null ) {
 
 	$return = load_textdomain( 'default', GB_LANG_DIR . "/$locale.mo" );
 
-// 	if ( /* is_admin() || */ defined( 'GB_INSTALLING' ) || ( defined( 'GB_REPAIRING' ) && GB_REPAIRING ) )
+// 	if( /* is_admin() || */ defined( 'GB_INSTALLING' ) || ( defined( 'GB_REPAIRING' ) && GB_REPAIRING ) )
 // 		load_textdomain( 'default', GB_LANG_DIR . "/admin-$locale.mo" );
 
 	return $return;
@@ -551,7 +551,7 @@ function load_default_textdomain( $locale = null ) {
  */
 function get_translations_for_domain( $domain ) {
 	global $l10n;
-	if ( !isset( $l10n[$domain] ) ) {
+	if( !isset( $l10n[$domain] ) ) {
 		$l10n[$domain] = new NOOP_Translations;
 	}
 	return $l10n[$domain];
@@ -586,7 +586,7 @@ function get_available_languages( $dir = null ) {
 
 	foreach( (array)glob( ( is_null( $dir) ? GB_LANG_DIR : $dir ) . '/*.mo' ) as $lang_file ) {
 		$lang_file = basename($lang_file, '.mo');
-// 		if ( 0 !== strpos( $lang_file, 'continents-cities' ) && 0 !== strpos( $lang_file, 'ms-' ) &&
+// 		if( 0 !== strpos( $lang_file, 'continents-cities' ) && 0 !== strpos( $lang_file, 'ms-' ) &&
 // 			0 !== strpos( $lang_file, 'admin-' ))
 			$languages[] = $lang_file;
 	}
@@ -606,39 +606,39 @@ function get_available_languages( $dir = null ) {
  * @return array Array of language data.
  */
 function gb_get_installed_translations( $type ) {
-	if ( $type !== 'themes' && $type !== 'plugins' && $type !== 'core' )
+	if( $type !== 'themes' && $type !== 'plugins' && $type !== 'core' )
 		return array();
 
 	$dir = 'core' === $type ? '' : "/$type";
 
-	if ( ! is_dir( GB_LANG_DIR ) )
+	if( ! is_dir( GB_LANG_DIR ) )
 		return array();
 
-	if ( $dir && ! is_dir( GB_LANG_DIR . $dir ) )
+	if( $dir && ! is_dir( GB_LANG_DIR . $dir ) )
 		return array();
 
 	$files = scandir( GB_LANG_DIR . $dir );
-	if ( ! $files )
+	if( ! $files )
 		return array();
 
 	$language_data = array();
 
 	foreach ( $files as $file ) {
-		if ( '.' === $file[0] || is_dir( $file ) ) {
+		if( '.' === $file[0] || is_dir( $file ) ) {
 			continue;
 		}
-		if ( substr( $file, -3 ) !== '.po' ) {
+		if( substr( $file, -3 ) !== '.po' ) {
 			continue;
 		}
-		if ( ! preg_match( '/(?:(.+)-)?([A-Za-z_]{2,6}).po/', $file, $match ) ) {
+		if( ! preg_match( '/(?:(.+)-)?([A-Za-z_]{2,6}).po/', $file, $match ) ) {
 			continue;
 		}
-		if ( ! in_array( substr( $file, 0, -3 ) . '.mo', $files ) )  {
+		if( ! in_array( substr( $file, 0, -3 ) . '.mo', $files ) )  {
 			continue;
 		}
 
 		list( , $textdomain, $language ) = $match;
-		if ( '' === $textdomain ) {
+		if( '' === $textdomain ) {
 			$textdomain = 'default';
 		}
 		$language_data[ $textdomain ][ $language ] = gb_get_pomo_file_data( GB_LANG_DIR . "$dir/$file" );

@@ -11,7 +11,7 @@
  */
 
 // Direct execution forbidden for this script
-if(!defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
 
@@ -45,15 +45,15 @@ class ww1_solders_set extends ww1_records_set{
 
 		$this->records = array();
 		foreach ($data as $row){
-			if($row['religion'] == '(иное)')
+			if( $row['religion'] == '(иное)')
 				$row['religion'] = gbdb()->get_cell('SELECT religion FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
-			if($row['marital'] == '(иное)')
+			if( $row['marital'] == '(иное)')
 				$row['marital'] = gbdb()->get_cell('SELECT marital FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
-			if($row['reason'] == '(иное)')
+			if( $row['reason'] == '(иное)')
 				$row['reason'] = gbdb()->get_cell('SELECT reason FROM ?_persons_raw WHERE `id` = ?id',
 						array('id' => $row['id']));
 			
@@ -71,10 +71,10 @@ class ww1_solders_set extends ww1_records_set{
 	 */
 	private function _show_report($brief_fields, $detailed_fields){
 		$max_pg = max(1, ceil($this->records_cnt / Q_LIMIT));
-		if($this->page > $max_pg)	$this->page = $max_pg;
+		if( $this->page > $max_pg)	$this->page = $max_pg;
 
 		$brief_fields_cnt = count($brief_fields);
-		if(false !== ($show_detailed = !empty($detailed_fields))){
+		if( false !== ($show_detailed = !empty($detailed_fields))){
 			gb_enqueue_script('ww1-records', '/gb/js/ww1-records.js', array('jquery'));
 		}
 	
@@ -85,7 +85,7 @@ class ww1_solders_set extends ww1_records_set{
 		print '<table id="report" class="report responsive-table"><thead><tr><th scope="col">№ <nobr>п/п</nobr></th>';
 		foreach(array_values($brief_fields) as $val)
 			print "<th scope='col'>" . esc_html($val) . "</th>";
-		if($show_detailed)
+		if( $show_detailed)
 			print "<th class='no-print'></th>";
 		print "</tr></thead><tbody>";
 		$even = 0;
@@ -99,10 +99,10 @@ class ww1_solders_set extends ww1_records_set{
 			foreach($brief_fields as $key => $title){
 				// TODO: gettext
 				$val = $row[$key] ? esc_html($row[$key]) : '(не&nbsp;указано)';
-				if(substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
+				if( substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
 				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $val . "</td>\n";
 			}
-			if($show_detailed){
+			if( $show_detailed){
 				print "<td class='rt-hide no-print'><div class='arrow'></div></td>\n";
 
 				print "</tr><tr class='detailed h" . ($even ? ' even' : ' odd') . "'>\n";
@@ -112,11 +112,11 @@ class ww1_solders_set extends ww1_records_set{
 			<table>
 <?php
 				foreach($detailed_fields as $key => $val){
-					if(!isset($row[$key]))	continue;
+					if( !isset($row[$key]))	continue;
 					$text = esc_html($row[$key]);
-					if($key == 'source'){
-						if(!empty($row['source_url'])){
-							if($row['source_pg'] > 0){
+					if( $key == 'source'){
+						if( !empty($row['source_url'])){
+							if( $row['source_pg'] > 0){
 								// TODO: gettext
 								$text = '<a href="' . str_replace('{pg}', (int) ($row['source_pg'] + $row['source_pg_corr']), $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
 							}else{
@@ -129,22 +129,22 @@ class ww1_solders_set extends ww1_records_set{
 						}
 					}
 
-					if(!empty($text)){
+					if( !empty($text)){
 						print "<tr>\n";
-						if($key == 'comments')					
+						if( $key == 'comments')					
 							print "<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
 						else {
 							print "<th>" . $val . ":</th>\n";
 							// TODO: gettext
 							$text = $text ? $text : '(не&nbsp;указано)';
-							if(substr($text, 0, 1) === '(')	$text = "<span class='na'>$text</span>";
+							if( substr($text, 0, 1) === '(')	$text = "<span class='na'>$text</span>";
 							print "<td>" . $text . "</td>\n";
 						}
 						print "</tr>\n";
 					}
 				}
 				print "</table></td></tr>";
-			}	// if($show_detailed)
+			}	// if( $show_detailed)
 		}	// foreach($this->records)
 ?>
 </tbody></table>
@@ -169,7 +169,7 @@ class ww1_solders_set extends ww1_records_set{
 	 * @see ww1_records_set::show_report()
 	 */
 	function show_report($brief_fields = NULL, $detailed_fields = array()){
-		if($this->records_cnt){
+		if( $this->records_cnt){
 			// TODO: gettext
 			print '<p class="align-center">Всего найдено ' . format_num($this->records_cnt, ' запись.', ' записи.', ' записей.') . '</p>';
 			$this->_show_report($brief_fields, $detailed_fields);
@@ -188,6 +188,6 @@ class ww1_solders_set extends ww1_records_set{
 		<div class="nb">Система постоянно пополняется новыми материалами и, возможно, необходимая Вам информация будет добавлена в&nbsp;неё через некоторое время.</div></li>
 </ol></div>
 <?php
-		} // if($this->records_cnt)
+		} // if( $this->records_cnt)
 	}
 }
