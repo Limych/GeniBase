@@ -1,0 +1,198 @@
+# Translation of GeniBase in Russian
+# This file is distributed under the same license as the GeniBase package.
+msgid ""
+msgstr ""
+"Project-Id-Version: GeniBase\n"
+"POT-Creation-Date: 2015-03-14 02:38+0300\n"
+"PO-Revision-Date: 2015-03-14 02:48+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.7.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
+"esc_html__;esc_html_e;esc_html_x:1,2c;esc_html_ex:1,2c;esc_attr__;esc_attr_e;"
+"esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: gb*\n"
+
+#: class.ww1-database.php:216 index.php:49
+msgctxt "Field name"
+msgid "Surname"
+msgstr "Фамилия"
+
+#: class.ww1-database.php:217 index.php:50
+msgctxt "Field name"
+msgid "Other names"
+msgstr "Имя, Отчество"
+
+#: class.ww1-database.php:218
+msgctxt "Field name"
+msgid "Place of residence"
+msgstr "Место жительства"
+
+#: inc.php:41
+msgctxt "HTML-page title"
+msgid "The First World War, 1914&ndash;1918"
+msgstr "Первая мировая война, 1914&ndash;1918 гг."
+
+#: inc.php:52
+msgctxt "Project title in header"
+msgid "The First World War, <nobr>1914&ndash;1918</nobr>"
+msgstr "Первая мировая война, <nobr>1914&ndash;1918 гг.</nobr>"
+
+#: inc.php:53
+msgid "The project of Union of Revival of Pedigree Traditions"
+msgstr "Проект Союза Возрождений Родословных Традиций (СВРТ)"
+
+#: inc.php:67
+msgid "Statistic"
+msgstr "Статистика"
+
+#: inc.php:68
+msgid "Guestbook"
+msgstr "Гостевая книга"
+
+#: inc.php:69
+msgid "Discussion about the project"
+msgstr "Обсуждение проекта"
+
+#: inc.php:70
+msgid "Project team"
+msgstr "Команда проекта"
+
+#: inc.php:274 inc.php:277
+#, php-format
+msgid "Currently the database contains %s record."
+msgid_plural "Currently the database contains %s records."
+msgstr[0] "На&nbsp;данный момент в&nbsp;базе содержится %s запись."
+msgstr[1] "На&nbsp;данный момент в&nbsp;базе содержится %s записи."
+msgstr[2] "На&nbsp;данный момент в&nbsp;базе содержится %s записей."
+
+#: inc.php:279
+#, php-format
+msgid " Of these, %s record is now available for search."
+msgid_plural " Of these, %s records is now available for search."
+msgstr[0] " Из них %s запись доступна для поиска."
+msgstr[1] " Из них %s записи доступны для поиска."
+msgstr[2] " Из них %s записей доступно для поиска."
+
+#: index.php:19 index.php:26
+msgid "Search person"
+msgstr "Поиск персоны"
+
+#: index.php:21
+#, php-format
+msgid "Search \"%s\""
+msgstr "Поиск «%s»"
+
+#: index.php:27
+msgid "Advanced search"
+msgstr "Расширенный поиск"
+
+#: index.php:30
+msgctxt "Button name"
+msgid "Search"
+msgstr "Искать"
+
+#: index.php:33
+msgid ""
+"The system automatically trying to expand your request, in view of possible "
+"errors in spelling and abbreviations of names. Partial matches are displayed "
+"at the end of the list and highlighted by color."
+msgstr ""
+"Система автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных "
+"ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий. Неполные "
+"совпадения выводятся в&nbsp;конце списка и&nbsp;выделяются цветом."
+
+#: index.php:34
+msgid ""
+"<strong>Please note:</strong> during the First World War there were no "
+"modern republics and regions&nbsp;&mdash; were provinces and districts of "
+"the Russian Empire, the boundaries of which are often different from the "
+"boundaries of the modern territores. Place names are indicated as of the "
+"date of the war."
+msgstr ""
+"<strong>Обратите внимание:</strong> во&nbsp;времена Первой мировой войны "
+"не&nbsp;было современных республик и&nbsp;областей&nbsp;&mdash; были "
+"губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются "
+"от&nbsp;границ современных территорий. Названия мест указываются по&nbsp;"
+"состоянию на&nbsp;даты войны."
+
+#: index.php:35
+#, php-format
+msgid ""
+"If you do not have Russian keyboard, you can type text in "
+"transliteration&nbsp;&mdash; it will be automatically encoded in Russian "
+"letters. <a href=\"%s\">See the conversion table.</a>"
+msgstr ""
+"Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;"
+"транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;"
+"русские буквы. <a href=\"%s\">См. таблицу перекодировки.</a>"
+
+#: index.php:51
+msgctxt "Field name"
+msgid "Province, Uezd, Volost, Place"
+msgstr "Губерния, Уезд, Волость, Нас.пункт"
+
+#: index.php:54
+msgctxt "Field name"
+msgid "Military rank"
+msgstr "Воинское звание"
+
+#: index.php:55
+msgctxt "Field name"
+msgid "Religion"
+msgstr "Вероисповедание"
+
+#: index.php:56
+msgctxt "Field name"
+msgid "Marital status"
+msgstr "Семейное положение"
+
+#: index.php:57
+msgctxt "Field name"
+msgid "Event"
+msgstr "Событие"
+
+#: index.php:58
+msgctxt "Field name"
+msgid "Event date"
+msgstr "Дата события"
+
+#: index.php:59
+msgctxt "Field name"
+msgid "Military unit"
+msgstr "Место службы"
+
+#: index.php:60
+msgctxt "Field name"
+msgid "Place of event"
+msgstr "Место события"
+
+#: index.php:61
+msgctxt "Field name"
+msgid "Title/Class"
+msgstr "Титул/Сословие"
+
+#: index.php:62
+msgctxt "Field name"
+msgid "Additional info"
+msgstr "Доп. информация"
+
+#: index.php:63
+msgctxt "Field name"
+msgid "Birthdate"
+msgstr "Дата рождения"
+
+#: index.php:64
+msgctxt "Field name"
+msgid "Source"
+msgstr "Источник"

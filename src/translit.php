@@ -1,5 +1,6 @@
 <?php
-require_once('gb/gb.php');	// Общие функции системы
+require_once('gb/gb.php');	// Load GeniBase
+require_once('inc.php');	// Основной подключаемый файл-заплатка
 
 html_header('Таблица перекодировки транслита');
 ?>

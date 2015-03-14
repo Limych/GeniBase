@@ -10,9 +10,75 @@
  */
 
 // Direct execution forbidden for this script
-if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1 )	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
+
+/**
+ * Negotiate client's preferred locale.
+ *
+ * This function negotiates the clients preferred locale based on its Accept-Language HTTP header.
+ *
+ * @since	2.1.1
+ *
+ * @param array $supported	Array containing the supported languages as values
+ * @return string|false	The negotiated language or the default language (i.e. first array entry)
+ * 						if none match. Or false if $supported is empty.
+ */
+function gb_negotiate_client_locale($supported){
+	// Convert locale names to language names
+	foreach ($supported as $key => $val)
+		$supported[$key] = str_replace('_', '-', $val);
+
+	// Initially set to default language (or false if $supported is empty).
+	$lang = reset($supported);
+	if( !$lang )	return false;
+
+	if( function_exists('http_negotiate_language') ){
+		$lang = http_negotiate_language($supported);
+
+	}elseif( isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])
+			&& preg_match_all('#([^;,]+)(;[^,0-9]*([0-9\.]+)[^,]*)?#i',
+					strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER) ){
+		$prefered_languages = array();
+		$priority = 1.0;
+		foreach($matches as $match) {
+			if( !isset($match[3]) ){
+				$pr = $priority;
+				$priority -= 0.001;
+			} else {
+				$pr = floatval($match[3]);
+			}
+			$prefered_languages[$match[1]] = $pr;
+			$l = strtok($match[1], '-');
+			if( $l != $match[1]
+					&& (!isset($prefered_languages[$l]) || $prefered_languages[$l] > $priority) ){
+				$prefered_languages[$match[1]] = $priority;
+				$priority -= 0.001;
+			}
+		}
+		arsort($prefered_languages, SORT_NUMERIC);
+
+		$priority = 0;
+		foreach ($supported as $language){
+			$l = strtolower($language);
+			if( $prefered_languages[$l] > $priority ){
+				$lang = $language;
+				$priority = $prefered_languages[$l];
+			}
+
+			$language = strtok($language, '-');
+			$l = strtolower($language);
+			if( $l != $language && $prefered_languages[$l] > $priority ){
+				$lang = $language;
+				$priority = $prefered_languages[$l];
+			}
+		}
+	}
+
+	// Convert selected language name to locale name
+	return str_replace('-', '_', $lang);
+}
 
 /**
  * Get the current locale.
@@ -27,6 +93,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  * The process to get the locale should only be done once, but the locale will
  * always be filtered using the 'locale' hook.
  *
+ * @since 2.1.1	GB_LANG can contain multiple locales (separated by commas)
  * @since 2.0.0
  *
  * @return string The locale of the blog or from the 'locale' hook.
@@ -34,25 +101,29 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 function get_locale() {
 	global $locale;
 
-	if( isset($locale)){
+	if( isset($locale) ){
 		/**
 		 * Filter GeniBase install's locale ID.
+		 * 
+		 * @since	2.1.1
 		 *
 		 * @param string $locale The locale ID.
 		 */
-// 		return apply_filters('locale', $locale);
+		return apply_filters('locale', $locale);
 	}
+	
+	@header('Vary: Accept-Language');
 
-	if( defined('GB_LOCAL_PACKAGE'))		$locale = GB_LOCAL_PACKAGE;
+	if( defined('GB_LOCAL_PACKAGE') )		$locale = GB_LOCAL_PACKAGE;
 
 	// GB_LANG was defined in gb-config.
-	if( defined('GB_LANG'))		$locale = GB_LANG;
+	if( defined('GB_LANG') )
+		$locale = gb_negotiate_client_locale(preg_split('/[^\w\-]+/si', GB_LANG, -1, PREG_SPLIT_NO_EMPTY));
 
-	if( empty($locale))		$locale = 'en_US';
+	if( empty($locale) )		$locale = 'en_US';
 
 	/** This filter is documented in gb/l10n.php */
-// 	return apply_filters( 'locale', $locale );
-	return $locale;
+	return apply_filters('locale', $locale);
 }
 
 /**
@@ -74,13 +145,14 @@ function translate($text, $domain = 'default'){
 
 	/**
 	 * Filter text with its translation.
+	 * 
+	 * @since	2.1.1
 	 *
 	 * @param string $translations Translated text.
 	 * @param string $text         Text to translate.
 	 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	return apply_filters('gettext', $translations, $text, $domain);
-	return $translations;
+	return apply_filters('gettext', $translations, $text, $domain);
 }
 
 /**
@@ -120,14 +192,15 @@ function translate_with_context($text, $context, $domain = 'default'){
 	$translations = $translations->translate($text, $context);
 	/**
 	 * Filter text with its translation based on context information.
+	 * 
+	 * @since	2.1.1
 	 *
 	 * @param string $translations Translated text.
 	 * @param string $text         Text to translate.
 	 * @param string $context      Context information for the translators.
 	 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	return apply_filters('gettext_with_context', $translations, $text, $context, $domain);
-	return $translations;
+	return apply_filters('gettext_with_context', $translations, $text, $context, $domain);
 }
 
 /**
@@ -241,7 +314,7 @@ function _x( $text, $context, $domain = 'default' ) {
  * @return string Translated context string without pipe.
  */
 function _ex( $text, $context, $domain = 'default' ) {
-	echo _x( $text, $context, $domain );
+	echo translate_with_context($text, $context, $domain);
 }
 
 /**
@@ -255,7 +328,21 @@ function _ex( $text, $context, $domain = 'default' ) {
  * @return string Translated text
  */
 function esc_attr_x( $text, $context, $domain = 'default' ) {
-	return esc_attr( translate_with_context( $text, $context, $domain ) );
+	return esc_attr(translate_with_context($text, $context, $domain));
+}
+
+/**
+ * Display translated string with gettext context, and escapes it for safe use in an attribute.
+ *
+ * @since 2.1.1
+ *
+ * @param string $text    Text to translate.
+ * @param string $context Context information for the translators.
+ * @param string $domain  Optional. Text domain. Unique identifier for retrieving translated strings.
+ * @return string Translated text
+ */
+function esc_attr_ex( $text, $context, $domain = 'default' ) {
+	echo esc_attr(translate_with_context($text, $context, $domain));
 }
 
 /**
@@ -268,8 +355,22 @@ function esc_attr_x( $text, $context, $domain = 'default' ) {
  * @param string $domain  Optional. Text domain. Unique identifier for retrieving translated strings.
  * @return string Translated text.
  */
-function esc_html_x( $text, $context, $domain = 'default' ) {
+function esc_html_x($text, $context, $domain = 'default') {
 	return esc_html( translate_with_context( $text, $context, $domain ) );
+}
+
+/**
+ * Display translated string with gettext context, and escapes it for safe use in HTML output.
+ *
+ * @since 2.1.1
+ *
+ * @param string $text    Text to translate.
+ * @param string $context Context information for the translators.
+ * @param string $domain  Optional. Text domain. Unique identifier for retrieving translated strings.
+ * @return string Translated text.
+ */
+function esc_html_ex($text, $context, $domain = 'default') {
+	echo esc_html(translate_with_context($text, $context, $domain));
 }
 
 /**
@@ -297,7 +398,7 @@ function _n( $single, $plural, $number, $domain = 'default' ) {
 	/**
 	 * Filter text with its translation when plural option is available.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param string $translation Translated text.
 	 * @param string $single      The text that will be used if $number is 1.
@@ -305,8 +406,7 @@ function _n( $single, $plural, $number, $domain = 'default' ) {
 	 * @param string $number      The number to compare against to use either $single or $plural.
 	 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	return apply_filters( 'ngettext', $translation, $single, $plural, $number, $domain );
-	return $translation;
+	return apply_filters('ngettext', $translation, $single, $plural, $number, $domain);
 }
 
 /**
@@ -329,7 +429,7 @@ function _nx($single, $plural, $number, $context, $domain = 'default') {
 	/**
 	 * Filter text with its translation while plural option and context are available.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param string $translation Translated text.
 	 * @param string $single      The text that will be used if $number is 1.
@@ -338,8 +438,7 @@ function _nx($single, $plural, $number, $context, $domain = 'default') {
 	 * @param string $context     Context information for the translators.
 	 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	return apply_filters( 'ngettext_with_context', $translation, $single, $plural, $number, $context, $domain );
-	return $translation;
+	return apply_filters('ngettext_with_context', $translation, $single, $plural, $number, $context, $domain);
 }
 
 /**
@@ -425,45 +524,42 @@ function load_textdomain( $domain, $mofile ) {
 	/**
 	 * Filter text domain and/or MO file path for loading translations.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param bool   $override Whether to override the text domain. Default false.
 	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
 	 * @param string $mofile   Path to the MO file.
 	 */
-// 	$plugin_override = apply_filters( 'override_load_textdomain', false, $domain, $mofile );
-
-// 	if( true == $plugin_override ) {
-// 		return true;
-// 	}
+	if( apply_filters('override_load_textdomain', false, $domain, $mofile) )
+		return true;
 
 	/**
 	 * Fires before the MO translation file is loaded.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
 	 * @param string $mofile Path to the .mo file.
 	 */
-// 	do_action( 'load_textdomain', $domain, $mofile );
+	do_action('load_textdomain', $domain, $mofile);
 
 	/**
 	 * Filter MO file path for loading translations for a specific text domain.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param string $mofile Path to the MO file.
 	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	$mofile = apply_filters( 'load_textdomain_mofile', $mofile, $domain );
+	$mofile = apply_filters('load_textdomain_mofile', $mofile, $domain);
 
-	if( !is_readable( $mofile ) ) return false;
+	if( !is_readable($mofile) )		return false;
 
 	$mo = new MO();
-	if( !$mo->import_from_file( $mofile ) ) return false;
+	if( !$mo->import_from_file($mofile) )	return false;
 
-	if( isset( $l10n[$domain] ) )
-		$mo->merge_with( $l10n[$domain] );
+	if( isset($l10n[$domain]) )
+		$mo->merge_with($l10n[$domain]);
 
 	$l10n[$domain] = &$mo;
 
@@ -484,27 +580,25 @@ function unload_textdomain( $domain ) {
 	/**
 	 * Filter the text domain for loading translation.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param bool   $override Whether to override unloading the text domain. Default false.
 	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	$plugin_override = apply_filters( 'override_unload_textdomain', false, $domain );
-
-// 	if( $plugin_override )
-// 		return true;
+	if( apply_filters('override_unload_textdomain', false, $domain) )
+		return true;
 
 	/**
 	 * Fires before the text domain is unloaded.
 	 *
-	 * @since 2.0.0
+	 * @since	2.1.1
 	 *
 	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
 	 */
-// 	do_action( 'unload_textdomain', $domain );
+	do_action('unload_textdomain', $domain);
 
-	if( isset( $l10n[$domain] ) ) {
-		unset( $l10n[$domain] );
+	if( isset($l10n[$domain]) ) {
+		unset($l10n[$domain]);
 		return true;
 	}
 
@@ -529,10 +623,11 @@ function load_default_textdomain( $locale = null ) {
 		$locale = get_locale();
 
 	// Unload previously loaded strings so we can switch translations.
-	unload_textdomain( 'default' );
+	unload_textdomain('default');
 
-	$return = load_textdomain( 'default', GB_LANG_DIR . "/$locale.mo" );
+	$return = load_textdomain('default', GB_LANG_DIR . "/$locale.mo");
 
+	// TODO: admin
 // 	if( /* is_admin() || */ defined( 'GB_INSTALLING' ) || ( defined( 'GB_REPAIRING' ) && GB_REPAIRING ) )
 // 		load_textdomain( 'default', GB_LANG_DIR . "/admin-$locale.mo" );
 
@@ -565,9 +660,9 @@ function get_translations_for_domain( $domain ) {
  * @param string $domain Text domain. Unique identifier for retrieving translated strings.
  * @return bool Whether there are translations.
  */
-function is_textdomain_loaded( $domain ) {
+function is_textdomain_loaded($domain) {
 	global $l10n;
-	return isset( $l10n[$domain] );
+	return isset($l10n[$domain]);
 }
 
 /**

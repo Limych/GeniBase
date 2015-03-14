@@ -1,5 +1,6 @@
 <?php
-require_once('gb/gb.php');	// Общие функции системы
+require_once('gb/gb.php');	// Load GeniBase
+require_once('inc.php');	// Основной подключаемый файл-заплатка
 
 $dbase = new ww1_database_solders(Q_EXTENDED);
 

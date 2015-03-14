@@ -213,9 +213,9 @@ class ww1_database_solders extends ww1_database {
 
 			// Выводим html-поля
 			$fields = array(
-					'surname'	=> 'Фамилия',
-					'name'		=> 'Имя Отчество',
-					'place'		=> 'Место жительства',
+					'surname'	=> _x('Surname', 'Field name', WW1_TXTDOM),
+					'name'		=> _x('Other names', 'Field name', WW1_TXTDOM),
+					'place'		=> _x('Place of residence', 'Field name', WW1_TXTDOM),
 			);
 			foreach($fields as $key => $val){
 				print "<div class='field'>" .

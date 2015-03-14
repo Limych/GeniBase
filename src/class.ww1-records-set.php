@@ -75,7 +75,7 @@ class ww1_solders_set extends ww1_records_set{
 
 		$brief_fields_cnt = count($brief_fields);
 		if( false !== ($show_detailed = !empty($detailed_fields))){
-			gb_enqueue_script('ww1-records', '/gb/js/ww1-records.js', array('jquery'));
+			gb_enqueue_script('ww1-records', site_url('/js/ww1-records.js'), array('jquery'));
 		}
 	
 		// Формируем пагинатор

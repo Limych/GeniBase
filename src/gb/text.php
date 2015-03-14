@@ -209,28 +209,6 @@ add_filter('make_metakeys', 'gb_metascript');
 
 
 /**
- * Функция форматирования числа и вывода сопровождающего слова в правильном склонении
- * @deprecated
- */
-function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
-	$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', number_format($number, 0, ',', ' '));
-
-	if( !empty($tail_1)){
-		if( $tail_2 == Null)	$tail_2 = $tail_1;
-		if( $tail_5 == Null)	$tail_5 = $tail_2;
-
-		$sng = intval($number) % 10;
-		$dec = intval($number) % 100 - $sng;
-		$formatted .=
-		($dec == 10 ? $tail_5 :
-				($sng == 1 ? $tail_1 :
-						($sng >= 2 && $sng <= 4 ? $tail_2 : $tail_5)));
-	}
-
-	return $formatted;
-}	// function format_num
-
-/**
  * Функция нормирования русского текста.
  * 
  * @param	string	$text	Исходный текст для нормирования.

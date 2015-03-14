@@ -6,7 +6,7 @@
  */
 define('DOING_CRON', true);
 
-require_once('gb/gb.php');	// Общие функции системы
+require_once('gb/gb.php');	// Load GeniBase
 
 /**
  * Формализация и публикация записей

@@ -69,16 +69,17 @@ function number_format_i18n($number, $decimals = 0){
 	$formatted = number_format($number, absint($decimals),
 			$gb_locale->number_format['decimal_point'],
 			$gb_locale->number_format['thousands_sep'] );
-
+	if( ' ' === $gb_locale->number_format['thousands_sep'] )
+		$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', $formatted);
+	
 	/**
 	 * Filter the number formatted based on the locale.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.1
 	 *
 	 * @param string $formatted Converted number in string format.
 	*/
-// 	return apply_filters('number_format_i18n', $formatted);
-	return $formatted;
+	return apply_filters('number_format_i18n', $formatted);
 }
 
 /**

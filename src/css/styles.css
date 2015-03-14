@@ -293,14 +293,3 @@ td.level_5	{	padding-left: 7em;	}
 		font-style: italic;
 	}
 }/**/
-
-
-
-/*** Responsive Forms Patch ***/
-/* Narrow PC screen */
-@media print, (min-width: 42em)	{
-	.responsive-form div.fieldset > label,
-	.responsive-form div.field > label	{
-		width: 30%;
-	}
-}
