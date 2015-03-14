@@ -241,13 +241,13 @@ function db_update(){
 	// … по религиям, семейным положениям, событиям
 	foreach(explode(' ', 'religion marital reason') as $key){
 		$result = gbdb()->get_column('SELECT `id` FROM ?@table ORDER BY `update_datetime` ASC LIMIT 1',
-				array('@table' => "dic_$key"));
+				array('@table' => "dic_{$key}s"));
 		foreach($result as $row){
 			gbdb()->query('UPDATE LOW_PRIORITY ?@table SET ?#field_cnt =' .
 					' ( SELECT COUNT(*) FROM ?_persons WHERE ?#field_id = ?id ),' .
 					' `update_datetime` = NOW() WHERE `id` = ?id',
 					array(
-							'@table'		=> "dic_$key",
+							'@table'		=> "dic_{$key}s",
 							'#field_cnt'	=> "{$key}_cnt",
 							'#field_id'		=> "{$key}_id",
 							'id'	=> $row['id'],

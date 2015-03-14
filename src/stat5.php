@@ -87,7 +87,7 @@ function dic_stat($caption, $field_title, $field){
 				$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table' .
 						' WHERE ?#field_cnt != 0 ORDER BY ?#field',
 						array(
-							'@table'		=> "dic_{$field}",
+							'@table'		=> "dic_{$field}s",
 							'#field'		=> $field,
 							'#field_cnt'	=> "{$field}_cnt",
 						), TRUE);
@@ -118,7 +118,7 @@ function dic_stat($caption, $field_title, $field){
 	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table' .
 			' WHERE ?#field_cnt != 0 ORDER BY ?#field',
 			array(
-				'@table'		=> "dic_${field}",
+				'@table'		=> "dic_${field}s",
 				'#field'		=> $field,
 				'#field_cnt'	=> "{$field}_cnt",
 			), TRUE);

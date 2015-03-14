@@ -128,7 +128,7 @@ $dic_sources = $dic_rank = array();
 //
 $dic_religions = gbdb()->get_column('SELECT id, religion FROM ?_dic_religions ORDER BY religion', array(), TRUE);
 $dic_maritals = gbdb()->get_column('SELECT id, marital FROM ?_dic_maritals ORDER BY marital', array(), TRUE);
-$dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_rank ORDER BY rank', array(), TRUE);
+$dic_rank = gbdb()->get_column('SELECT id, rank FROM ?_dic_ranks ORDER BY rank', array(), TRUE);
 //
 $dic_reasons = gbdb()->get_column('SELECT id, reason FROM ?_dic_reasons where event_type IN ("Потери", "Награждение") ORDER BY event_type, reason', array(), TRUE);
 //
