@@ -118,7 +118,7 @@ function _gb_filter_build_unique_id($tag, $function, $priority) {
 	if( is_object($function) ) {
 		// Closures are currently implemented as objects
 		$function = array( $function, '' );
-	} else {
+	}else{
 		$function = (array) $function;
 	}
 
@@ -126,7 +126,7 @@ function _gb_filter_build_unique_id($tag, $function, $priority) {
 		// Object Class Calling
 		if( function_exists('spl_object_hash') ) {
 			return spl_object_hash($function[0]) . $function[1];
-		} else {
+		}else{
 			$obj_idx = get_class($function[0]).$function[1];
 			if( !isset($function[0]->gb_filter_id) ) {
 				if( false === $priority )
@@ -134,13 +134,13 @@ function _gb_filter_build_unique_id($tag, $function, $priority) {
 				$obj_idx .= isset(_gb_hooks()->filters[$tag][$priority]) ? count((array)_gb_hooks()->filters[$tag][$priority]) : $filter_id_count;
 				$function[0]->gb_filter_id = $filter_id_count;
 				++$filter_id_count;
-			} else {
+			}else{
 				$obj_idx .= $function[0]->gb_filter_id;
 			}
 
 			return $obj_idx;
 		}
-	} else if( is_string($function[0]) ) {
+	}else if( is_string($function[0]) ) {
 		// Static Calling
 		return $function[0] . '::' . $function[1];
 	}

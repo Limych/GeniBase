@@ -25,12 +25,12 @@ class TracGitHubIssues {
 				if( file_exists($file)) {
 					register_shutdown_function(array('TracGitHubIssues', 'usingLocalCache'));
 					$issues = explode(' ', file_get_contents($file));
-				} else {
+				}else{
 					register_shutdown_function(array('TracGitHubIssues', 'forcingKnownBugs'));
 					self::$trac_cache[$repos_uri] = array();
 					return true;	// Assume the ticket is closed, which means it gets run.
 				}
-			} else {
+			}else{
 				$issues = json_decode($issues, TRUE);
 				foreach ($issues as $key => $val) {
 					$issues[$key] = $val['number'];

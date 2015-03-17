@@ -123,7 +123,7 @@ class ww1_solders_set extends ww1_records_set{
 							}else{
 								$text = sprintf(__('<a href="%1$s" target="_blank">“%2$s”</a>', WW1_TXTDOM), $url, $text);
 							}
-						} elseif( $row['source_pg'] > 0 ){
+						}elseif( $row['source_pg'] > 0 ){
 							$text = sprintf(__('“%1$s”, pg.%2$s', WW1_TXTDOM), $text, $row['source_pg']);
 						}else{
 							$text = sprintf(__('“%s”', WW1_TXTDOM), $text);
@@ -134,7 +134,7 @@ class ww1_solders_set extends ww1_records_set{
 						print "<tr>\n";
 						if( $key == 'comments' )					
 							print "<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
-						else {
+						else{
 							print "<th>" . $val . ":</th>\n";
 							$text = $text ? $text : __('(not&nbsp;specified)', WW1_TXTDOM);
 							if( substr($text, 0, 1) === '(' )

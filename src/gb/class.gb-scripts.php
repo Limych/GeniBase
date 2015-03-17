@@ -122,7 +122,7 @@ class GB_Scripts extends GB_Dependencies {
 				$this->concat .= "$handle,";
 				$this->concat_version .= "$handle$ver";
 				return true;
-			} else {
+			}else{
 				$this->ext_handles .= "$handle,";
 				$this->ext_version .= "$handle$ver";
 			}
@@ -157,7 +157,7 @@ class GB_Scripts extends GB_Dependencies {
 
 		if( $this->do_concat ) {
 			$this->print_html .= $tag;
-		} else {
+		}else{
 			echo $tag;
 		}
 

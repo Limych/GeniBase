@@ -183,7 +183,7 @@ class Gettext_Translations extends Translations {
 			$nplurals = (int)$matches[1];
 			$expression = trim($this->parenthesize_plural_exression($matches[2]));
 			return array($nplurals, $expression);
-		} else {
+		}else{
 			return array(2, 'n != 1');
 		}
 	}

@@ -143,7 +143,7 @@ class PO extends Gettext_Translations {
 						$previous_is_backslash = true;
 					else
 						$unpoified .= $char;
-				} else {
+				}else{
 					$previous_is_backslash = false;
 					$unpoified .= isset($escapes[$char])? $escapes[$char] : $char;
 				}
@@ -205,7 +205,7 @@ class PO extends Gettext_Translations {
 		if( !$entry->is_plural) {
 			$translation = empty($entry->translations)? '' : $entry->translations[0];
 			$po[] = 'msgstr '.PO::poify($translation);
-		} else {
+		}else{
 			$po[] = 'msgid_plural '.PO::poify($entry->plural);
 			$translations = empty($entry->translations)? array('', '') : $entry->translations;
 			foreach($translations as $i => $translation) {
@@ -228,7 +228,7 @@ class PO extends Gettext_Translations {
 			if( !$res) break;
 			if( $res['entry']->singular == '') {
 				$this->set_headers($this->make_headers($res['entry']->translations[0]));
-			} else {
+			}else{
 				$this->add_entry($res['entry']);
 			}
 		}
@@ -261,11 +261,11 @@ class PO extends Gettext_Translations {
 				if( feof($f)) {
 					if( $is_final($context))
 						break;
-					elseif (!$context) // we haven't read a line and eof came
+					elseif(!$context) // we haven't read a line and eof came
 						return null;
 					else
 						return false;
-				} else {
+				}else{
 					return false;
 				}
 			}
@@ -284,7 +284,7 @@ class PO extends Gettext_Translations {
 				}
 				// add comment
 				$this->add_comment_to_entry($entry, $line);
-			} elseif (preg_match('/^msgctxt\s+(".*")/', $line, $m)) {
+			}elseif(preg_match('/^msgctxt\s+(".*")/', $line, $m)) {
 				if( $is_final($context)) {
 					PO::read_line($f, 'put-back');
 					$lineno--;
@@ -295,7 +295,7 @@ class PO extends Gettext_Translations {
 				}
 				$context = 'msgctxt';
 				$entry->context .= PO::unpoify($m[1]);
-			} elseif (preg_match('/^msgid\s+(".*")/', $line, $m)) {
+			}elseif(preg_match('/^msgid\s+(".*")/', $line, $m)) {
 				if( $is_final($context)) {
 					PO::read_line($f, 'put-back');
 					$lineno--;
@@ -306,27 +306,27 @@ class PO extends Gettext_Translations {
 				}
 				$context = 'msgid';
 				$entry->singular .= PO::unpoify($m[1]);
-			} elseif (preg_match('/^msgid_plural\s+(".*")/', $line, $m)) {
+			}elseif(preg_match('/^msgid_plural\s+(".*")/', $line, $m)) {
 				if( $context != 'msgid') {
 					return false;
 				}
 				$context = 'msgid_plural';
 				$entry->is_plural = true;
 				$entry->plural .= PO::unpoify($m[1]);
-			} elseif (preg_match('/^msgstr\s+(".*")/', $line, $m)) {
+			}elseif(preg_match('/^msgstr\s+(".*")/', $line, $m)) {
 				if( $context != 'msgid') {
 					return false;
 				}
 				$context = 'msgstr';
 				$entry->translations = array(PO::unpoify($m[1]));
-			} elseif (preg_match('/^msgstr\[(\d+)\]\s+(".*")/', $line, $m)) {
+			}elseif(preg_match('/^msgstr\[(\d+)\]\s+(".*")/', $line, $m)) {
 				if( $context != 'msgid_plural' && $context != 'msgstr_plural') {
 					return false;
 				}
 				$context = 'msgstr_plural';
 				$msgstr_index = $m[1];
 				$entry->translations[$m[1]] = PO::unpoify($m[2]);
-			} elseif (preg_match('/^".*"$/', $line)) {
+			}elseif(preg_match('/^".*"$/', $line)) {
 				$unpoified = PO::unpoify($line);
 				switch ($context) {
 					case 'msgid':
@@ -342,7 +342,7 @@ class PO extends Gettext_Translations {
 					default:
 						return false;
 				}
-			} else {
+			}else{
 				return false;
 			}
 		}
@@ -386,11 +386,11 @@ class PO extends Gettext_Translations {
 		$comment = trim(substr($po_comment_line, 2));
 		if( '#:' == $first_two) {
 			$entry->references = array_merge($entry->references, preg_split('/\s+/', $comment));
-		} elseif ('#.' == $first_two) {
+		}elseif('#.' == $first_two) {
 			$entry->extracted_comments = trim($entry->extracted_comments . "\n" . $comment);
-		} elseif ('#,' == $first_two) {
+		}elseif('#,' == $first_two) {
 			$entry->flags = array_merge($entry->flags, preg_split('/,\s*/', $comment));
-		} else {
+		}else{
 			$entry->translator_comments = trim($entry->translator_comments . "\n" . $comment);
 		}
 	}

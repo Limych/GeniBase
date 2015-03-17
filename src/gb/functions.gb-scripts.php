@@ -144,6 +144,7 @@ function gb_deregister_script( $handle ) {
 	 * Do not allow accidental or negligent de-registering of critical scripts in the admin.
 	 * Show minimal remorse if the correct hook is used.
 	 */
+	// TODO: gb_deregister_script()
 /*	$current_filter = current_filter();
 	if( ( is_admin() && 'admin_enqueue_scripts' !== $current_filter ) ||
 		( 'gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== $current_filter )

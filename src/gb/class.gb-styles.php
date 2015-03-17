@@ -102,7 +102,7 @@ class GB_Styles extends GB_Dependencies {
 			if( is_bool( $obj->extra['rtl'] ) || 'replace' === $obj->extra['rtl'] ) {
 				$suffix = isset( $obj->extra['suffix'] ) ? $obj->extra['suffix'] : '';
 				$rtl_href = str_replace( "{$suffix}.css", "-rtl{$suffix}.css", $this->_css_href( $obj->src , $ver, "$handle-rtl" ));
-			} else {
+			}else{
 				$rtl_href = $this->_css_href( $obj->extra['rtl'], $ver, "$handle-rtl" );
 			}
 
@@ -111,7 +111,7 @@ class GB_Styles extends GB_Dependencies {
 
 			if( $obj->extra['rtl'] === 'replace' ) {
 				$tag = $rtl_tag;
-			} else {
+			}else{
 				$tag .= $rtl_tag;
 			}
 		}
@@ -124,7 +124,7 @@ class GB_Styles extends GB_Dependencies {
 			$this->print_html .= $tag;
 			if( $inline_style = $this->print_inline_style( $handle, false ) )
 				$this->print_html .= sprintf( "<style id='%s-inline-css' type='text/css'>\n%s\n</style>\n", esc_attr( $handle ), $inline_style );
-		} else {
+		}else{
 			echo $tag;
 			$this->print_inline_style( $handle );
 		}

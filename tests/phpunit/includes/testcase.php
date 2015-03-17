@@ -19,14 +19,14 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 // 		$this->factory = new GB_UnitTest_Factory();
 		$this->clean_up_global_scope();
 		$this->start_transaction();
-// 		add_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
+		add_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
 	}
 
 	function tearDown() {
-// 		gbdb()->query('ROLLBACK');
-// 		remove_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
-// 		remove_filter('query', array($this, '_drop_temporary_tables'));
-// 		remove_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
+		gbdb()->query('ROLLBACK');
+		remove_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
+		remove_filter('query', array($this, '_drop_temporary_tables'));
+		remove_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
 	}
 	
 	function clean_up_global_scope() {
@@ -34,10 +34,10 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 	
 	function start_transaction() {
-// 		gbdb()->query('SET autocommit = 0');
-// 		gbdb()->query('START TRANSACTION');
-// 		add_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
-// 		add_filter('query', array($this, '_drop_temporary_tables'));
+		gbdb()->query('SET autocommit = 0');
+		gbdb()->query('START TRANSACTION');
+		add_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
+		add_filter('query', array($this, '_drop_temporary_tables'));
 	}
 	
 	function _create_temporary_tables($queries) {

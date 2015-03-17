@@ -109,7 +109,7 @@ class NotGettexted {
 						if( !is_null($register_action)) call_user_func($register_action, $current_string, $current_comment_id, $current_string_line);
 						continue;
 					}
-				} else if( T_CONSTANT_ENCAPSED_STRING == $id) {
+				}else if( T_CONSTANT_ENCAPSED_STRING == $id) {
 					if( $this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_WHITESPACE_AFTER) {
 						eval('$current_string='.$text.';');
 						$this->logmsg('string', $current_string);
@@ -117,7 +117,7 @@ class NotGettexted {
 						$result .= call_user_func($string_action, $token, $current_string);
 						continue;
 					}
-				} else if( T_WHITESPACE == $id) {
+				}else if( T_WHITESPACE == $id) {
 					if( $this->STAGE_START_COMMENT <= $stage && $stage < $this->STAGE_STRING) {
 						$stage = $this->STAGE_WHITESPACE_BEFORE;
 						$this->logmsg('whitespace before');

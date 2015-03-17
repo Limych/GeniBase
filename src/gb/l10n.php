@@ -46,7 +46,7 @@ function gb_negotiate_client_locale($supported){
 			if( !isset($match[3]) ){
 				$pr = $priority;
 				$priority -= 0.001;
-			} else {
+			}else{
 				$pr = floatval($match[3]);
 			}
 			$prefered_languages[$match[1]] = $pr;

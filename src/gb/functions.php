@@ -110,17 +110,17 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 	foreach ( $trace as $call ) {
 		if( $skip_frames > 0 ) {
 			$skip_frames--;
-		} elseif ( isset( $call['class'] ) ) {
+		}elseif( isset( $call['class'] ) ) {
 			if( $check_class && $ignore_class == $call['class'] )
 				continue; // Filter out calls
 
 			$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
-		} else {
+		}else{
 			if( in_array( $call['function'], array( 'do_action', 'apply_filters' ) ) ) {
 				$caller[] = "{$call['function']}('{$call['args'][0]}')";
-			} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
+			}elseif( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
 				$caller[] = $call['function'] . "('" . str_replace( array( GB_CONTENT_DIR, ABSPATH ) , '', $call['args'][0] ) . "')";
-			} else {
+			}else{
 				$caller[] = $call['function'];
 			}
 		}
@@ -177,7 +177,7 @@ function is_serialized( $data, $strict = true ) {
 		if( ';' !== $lastc && '}' !== $lastc ) {
 			return false;
 		}
-	} else {
+	}else{
 		$semicolon = strpos( $data, ';' );
 		$brace     = strpos( $data, '}' );
 		// Either ; or } must exist.
@@ -196,7 +196,7 @@ function is_serialized( $data, $strict = true ) {
 				if( '"' !== substr( $data, -2, 1 ) ) {
 					return false;
 				}
-			} elseif ( false === strpos( $data, '"' ) ) {
+			}elseif( false === strpos( $data, '"' ) ) {
 				return false;
 			}
 			// or else fall through
@@ -245,11 +245,11 @@ function gb_parse_str( $string, &$array ) {
 	/**
 	 * Filter the array of variables derived from a parsed string.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param array $array The array populated with variables.
 	*/
-// 	$array = apply_filters( 'gb_parse_str', $array );
+	$array = apply_filters( 'gb_parse_str', $array );
 }
 
 /**
@@ -267,7 +267,7 @@ function gb_parse_str( $string, &$array ) {
 function gb_parse_args( $args, $defaults = '' ) {
 	if( is_object( $args ) )
 		$r = get_object_vars( $args );
-	elseif ( is_array( $args ) )
+	elseif( is_array( $args ) )
 	$r =& $args;
 	else
 		gb_parse_str( $args, $r );
@@ -385,7 +385,7 @@ function status_header( $code ) {
 		/**
 		 * Filter an HTTP status header.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @param string $status_header HTTP status header.
 		 * @param int    $code          HTTP status code.
@@ -419,7 +419,7 @@ function get_nocache_headers() {
 		/**
 		 * Filter the cache-controlling headers.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @see gb_get_nocache_headers()
 		 *
@@ -456,7 +456,7 @@ function nocache_headers() {
 	// In PHP 5.3+, make sure we are not sending a Last-Modified header.
 	if( function_exists( 'header_remove' ) ) {
 		@header_remove( 'Last-Modified' );
-	} else {
+	}else{
 		// In PHP 5.2, send an empty Last-Modified header, but only as a
 		// last resort to override a header already sent. #WP23021
 		foreach ( headers_list() as $header ) {
@@ -506,7 +506,7 @@ function gb_die( $message = '', $title = '', $args = array() ) {
 
 	if( is_int( $args ) ) {
 		$args = array( 'response' => $args );
-	} elseif ( is_int( $title ) ) {
+	}elseif( is_int( $title ) ) {
 		$args  = array( 'response' => $title );
 		$title = '';
 	}
@@ -515,32 +515,31 @@ function gb_die( $message = '', $title = '', $args = array() ) {
 		/**
 		 * Filter callback for killing WordPress execution for AJAX requests.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @param callback $function Callback function name.
 		 */
-// 		$function = apply_filters( 'gb_die_ajax_handler', '_ajax_gb_die_handler' );
-		$function = '_ajax_gb_die_handler';
-	} elseif ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+		$function = apply_filters( 'gb_die_ajax_handler', '_ajax_gb_die_handler' );
+
+	}elseif( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
 		/**
 		 * Filter callback for killing WordPress execution for XML-RPC requests.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @param callback $function Callback function name.
 		 */
-// 		$function = apply_filters( 'gb_die_xmlrpc_handler', '_xmlrpc_gb_die_handler' );
-		$function = '_xmlrpc_gb_die_handler';
-	} else {
+		$function = apply_filters( 'gb_die_xmlrpc_handler', '_xmlrpc_gb_die_handler' );
+
+	}else{
 		/**
 		 * Filter callback for killing WordPress execution for all non-AJAX, non-XML-RPC requests.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @param callback $function Callback function name.
 		 */
-// 		$function = apply_filters( 'gb_die_handler', '_default_gb_die_handler' );
-		$function = '_default_gb_die_handler';
+		$function = apply_filters( 'gb_die_handler', '_default_gb_die_handler' );
 	}
 
 	call_user_func( $function, $message, $title, $args );
@@ -583,7 +582,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 				$message = "<ul>\n\t\t<li>" . join( "</li>\n\t\t<li>", $errors ) . "</li>\n\t</ul>";
 				break;
 		}
-	} elseif ( is_string( $message ) ) {
+	}elseif( is_string( $message ) ) {
 		$message = "<p>$message</p>";
 	}
 
@@ -592,8 +591,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		$message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
 	}
 
-// 	if( !did_action( 'admin_head' ) ) :
-	if( !headers_sent() ) {
+	if( !did_action( 'admin_head' ) ) :
 		status_header($r['response']);
 		nocache_headers();
 		header( 'Content-Type: text/html; charset=utf-8' );
@@ -605,7 +603,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 	$text_direction = 'ltr';
 	if( isset($r['text_direction']) && 'rtl' == $r['text_direction'] )
 		$text_direction = 'rtl';
-	elseif ( function_exists( 'is_rtl' ) && is_rtl() )
+	elseif( function_exists( 'is_rtl' ) && is_rtl() )
 	$text_direction = 'rtl';
 	?>
 <!DOCTYPE html>
@@ -717,7 +715,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 	</style>
 </head>
 <body id="error-page">
-<?php //endif; // ! did_action( 'admin_head' ) ?>
+<?php endif; // ! did_action( 'admin_head' ) ?>
 	<?php echo $message; ?>
 </body>
 </html>
@@ -801,11 +799,11 @@ function gb_allowed_protocols() {
 		/**
 		 * Filter the list of protocols allowed in HTML attributes.
 		 *
-		 * @since	2.0.0
+		 * @since	2.1.0
 		 *
 		 * @param array $protocols Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
 		*/
-// 		$protocols = apply_filters( 'kses_allowed_protocols', $protocols );
+		$protocols = apply_filters( 'kses_allowed_protocols', $protocols );
 	}
 
 	return $protocols;
@@ -833,20 +831,20 @@ function parse_query($uri = false){
 	if( 0 === stripos( $uri, 'http://' ) ) {
 		$protocol = 'http://';
 		$uri = substr( $uri, 7 );
-	} elseif ( 0 === stripos( $uri, 'https://' ) ) {
+	}elseif( 0 === stripos( $uri, 'https://' ) ) {
 		$protocol = 'https://';
 		$uri = substr( $uri, 8 );
-	} else {
+	}else{
 		$protocol = '';
 	}
 	
 	if( strpos( $uri, '?' ) !== false ) {
 		list( $base, $query ) = explode( '?', $uri, 2 );
 		$base .= '?';
-	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
+	}elseif( $protocol || strpos( $uri, '=' ) === false ) {
 		$base = $uri . '?';
 		$query = '';
-	} else {
+	}else{
 		$base = '';
 		$query = $uri;
 	}
@@ -879,7 +877,7 @@ function add_query_arg() {
 			$uri = $_SERVER['REQUEST_URI'];
 		else
 			$uri = $args[1];
-	} else {
+	}else{
 		if( count( $args ) < 3 || false === $args[2] )
 			$uri = $_SERVER['REQUEST_URI'];
 		else
@@ -893,7 +891,7 @@ function add_query_arg() {
 	if( is_array( $args[0] ) ) {
 		$kayvees = $args[0];
 		$qs = array_merge( $qs, $kayvees );
-	} else {
+	}else{
 		$qs[ $args[0] ] = $args[1];
 	}
 
@@ -977,12 +975,12 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 			$k = $key . '%5B' . $k . '%5D';
 		if( $v === null )
 			continue;
-		elseif ( $v === FALSE )
+		elseif( $v === FALSE )
 		$v = '0';
 
 		if( is_array($v) || is_object($v) )
 			array_push($ret,_http_build_query($v, '', $sep, $k, $urlencode));
-		elseif ( $urlencode )
+		elseif( $urlencode )
 		array_push($ret, $k.'='.urlencode($v));
 		else
 			array_push($ret, $k.'='.$v);
@@ -1055,7 +1053,7 @@ function is_ssl() {
 			return true;
 		if( '1' == $_SERVER['HTTPS'] )
 			return true;
-	} elseif ( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
+	}elseif( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
 		return true;
 	}
 	return false;

@@ -184,9 +184,9 @@ class GB_Dependencies {
 			$keep_going = true;
 			if( !isset($this->registered[$handle]) )
 				$keep_going = false; // Item doesn't exist.
-			elseif ( $this->registered[$handle]->deps && array_diff($this->registered[$handle]->deps, array_keys($this->registered)) )
+			elseif( $this->registered[$handle]->deps && array_diff($this->registered[$handle]->deps, array_keys($this->registered)) )
 				$keep_going = false; // Item requires dependencies that don't exist.
-			elseif ( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true, $group ) )
+			elseif( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true, $group ) )
 				$keep_going = false; // Item requires dependencies that don't exist.
 
 			if( !$keep_going ) { // Either item or its dependencies don't exist.
@@ -349,7 +349,7 @@ class GB_Dependencies {
 
 			if( in_array( $handle, $this->registered[ $queued ]->deps ) ) {
 				return true;
-			} elseif ( $this->recurse_deps( $this->registered[ $queued ]->deps, $handle ) ) {
+			}elseif( $this->recurse_deps( $this->registered[ $queued ]->deps, $handle ) ) {
 				return true;
 			}
 		}

@@ -191,7 +191,7 @@ class GB_Locale {
 		if( isset( $GLOBALS['text_direction'] ) )
 			$this->text_direction = $GLOBALS['text_direction'];
 		/* translators: 'rtl' or 'ltr'. This sets the text direction for GeniBase. */
-		elseif ( 'rtl' == _x( 'ltr', 'text direction' ) )
+		elseif( 'rtl' == _x( 'ltr', 'text direction' ) )
 			$this->text_direction = 'rtl';
 
 		if( 'rtl' === $this->text_direction && strpos( $GLOBALS['gb_version'], '-src' ) ) {

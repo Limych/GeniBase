@@ -17,6 +17,7 @@
  */
 
 // Actions
+// TODO: actions
 // add_action('gb_head',				'_gb_render_title_tag',		 1	);
 add_action('gb_head',				'gb_enqueue_scripts',		 1	);
 // add_action('gb_head',				'locale_stylesheet'				);

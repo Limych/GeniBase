@@ -325,14 +325,14 @@ class GB_DBase	{
 				? $result
 				: implode(', ', $result);
 	
-		}elseif (is_string($value)){
+		}elseif(is_string($value)){
 			$this->connect();
 			return '"' . $this->db->real_escape_string($value) . '"';
 	
-		}elseif (is_numeric($value))
+		}elseif(is_numeric($value))
 			return ($value == intval($value)) ? intval($value) : rtrim(sprintf('%F', $value), '0');
 	
-		elseif (is_null($value))
+		elseif(is_null($value))
 			return 'NULL';
 	
 		else
@@ -609,7 +609,7 @@ class GB_DBase	{
 		if( $get_assoc) {
 			while ($row = $result->fetch_row())
 				$data[$row{0}] = $row[1];
-		} else {
+		}else{
 			while ($row = $result->fetch_row())
 				$data[] = $row[0];
 		}
@@ -665,7 +665,7 @@ class GB_DBase	{
 		if( $key_col){
 			while ($row = $result->fetch_assoc())
 				$data[$row{$key_col}] = $row;
-		} else {
+		}else{
 			while ($row = $result->fetch_assoc())
 				$data[] = $row;
 		}
@@ -759,7 +759,7 @@ class GB_DBase	{
 		if( !$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
 		elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
 		elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
-		else {
+		else{
 			$this->print_error("Unknown mode '$mode'");
 			return FALSE;
 		}
@@ -828,7 +828,7 @@ class GB_DBase	{
 
 			return $query;
 			
-		} elseif ($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
+		}elseif($mode == self::MODE_DUPLICATE) {	// INSERT … ON DUPLICATE KEY UPDATE
 			$append = is_string(key($unique_key));
 			// $append: если массив $unique_key ассоциативный,
 			// значит, в них данные для уникальных полей —
@@ -842,7 +842,7 @@ class GB_DBase	{
 				// Все данные для ON DUPLICATE KEY UPDATE есть в $data
 				$all_data = array_merge($data, $unique_key);
 				$data_to_update = $data;
-			} else {
+			}else{
 				$all_data = $data;
 				$data_to_update = array_diff_key(		// В $unique_key переданы имена полей,
 					$data,								// которые необходимо исключить

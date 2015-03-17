@@ -67,7 +67,7 @@ class POMO_Reader {
 	function substr($string, $start, $length) {
 		if( $this->is_overloaded) {
 			return mb_substr($string, $start, $length, 'ascii');
-		} else {
+		}else{
 			return substr($string, $start, $length);
 		}
 	}
@@ -79,7 +79,7 @@ class POMO_Reader {
 	function strlen($string) {
 		if( $this->is_overloaded) {
 			return mb_strlen($string, 'ascii');
-		} else {
+		}else{
 			return strlen($string);
 		}
 	}
@@ -96,7 +96,7 @@ class POMO_Reader {
 			for ($i = 0; $i < $length; $i += $chunk_size)
 				$out[] = $this->substr($string, $i, $chunk_size);
 			return $out;
-		} else {
+		}else{
 			return str_split( $string, $chunk_size );
 		}
 	}

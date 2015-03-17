@@ -3,7 +3,7 @@
 /**
  * @group actions
  */
-class Tests_Actions_Callbacks extends WP_UnitTestCase {
+class Tests_Actions_Callbacks extends GB_UnitTestCase {
 	function test_callback_representations() {
 		$tag = __FUNCTION__;
 

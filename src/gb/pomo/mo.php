@@ -132,9 +132,9 @@ class MO extends Gettext_Translations {
 		$magic_big = ((int) - 569244523) & 0xFFFFFFFF;
 		if( $magic_little == $magic || $magic_little_64 == $magic) {
 			return 'little';
-		} else if( $magic_big == $magic) {
+		}else if( $magic_big == $magic) {
 			return 'big';
-		} else {
+		}else{
 			return false;
 		}
 	}
@@ -216,7 +216,7 @@ class MO extends Gettext_Translations {
 
 			if( '' === $original) {
 				$this->set_headers($this->make_headers($translation));
-			} else {
+			}else{
 				$entry = &$this->make_entry($original, $translation);
 				$this->entries[$entry->key()] = &$entry;
 			}

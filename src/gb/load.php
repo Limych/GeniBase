@@ -69,7 +69,7 @@ function gb_fix_server_vars() {
 		// IIS Isapi_Rewrite
 		else if( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
 			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
-		} else {
+		}else{
 			// Use ORIG_PATH_INFO if there is no PATH_INFO
 			if( !isset( $_SERVER['PATH_INFO'] ) && isset( $_SERVER['ORIG_PATH_INFO'] ) )
 				$_SERVER['PATH_INFO'] = $_SERVER['ORIG_PATH_INFO'];
@@ -141,8 +141,8 @@ function gb_load_translations_early() {
 		return;
 	$loaded = true;
 
-// 	if( function_exists( 'did_action' ) && did_action( 'init' ) )
-// 		return;
+	if( function_exists( 'did_action' ) && did_action( 'init' ) )
+		return;
 
 	// Translation and localization
 	require_once(GB_CORE_DIR . '/pomo/mo.php');
@@ -370,14 +370,14 @@ function gb_debug_mode() {
 
 		if( GB_DEBUG_DISPLAY )
 			ini_set( 'display_errors', 1 );
-		elseif ( null !== GB_DEBUG_DISPLAY )
+		elseif( null !== GB_DEBUG_DISPLAY )
 			ini_set( 'display_errors', 0 );
 
 		if( GB_DEBUG_LOG ) {
 			ini_set( 'log_errors', 1 );
 			ini_set( 'error_log', GB_CONTENT_DIR . '/debug.log' );
 		}
-	} else {
+	}else{
 		error_reporting( E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR );
 	}
 	if( defined( 'XMLRPC_REQUEST' ) )

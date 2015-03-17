@@ -497,7 +497,7 @@ if( !CUSTOM_TAGS ) {
 	);
 
 	$allowedposttags = array_map( '_gb_add_global_attributes', $allowedposttags );
-} else {
+}else{
 	$allowedtags = gb_kses_array_lc( $allowedtags );
 	$allowedposttags = gb_kses_array_lc( $allowedposttags );
 }
@@ -548,45 +548,39 @@ function gb_kses_allowed_html( $context = '' ) {
 		/**
 		 * Filter HTML elements allowed for a given context.
 		 *
-		 * @since 2.0.0
+		 * @since 2.1.0
 		 *
 		 * @param string $tags    Allowed tags, attributes, and/or entities.
 		 * @param string $context Context to judge allowed tags by. Allowed values are 'post',
 		 *                        'data', 'strip', 'entities', 'explicit', or the name of a filter.
 		 */
-// 		return apply_filters( 'gb_kses_allowed_html', $context, 'explicit' );
-		return $context;
+		return apply_filters( 'gb_kses_allowed_html', $context, 'explicit' );
 	}
 
 	switch ( $context ) {
 		case 'post':
 			/** This filter is documented in gb/kses.php */
-// 			return apply_filters( 'gb_kses_allowed_html', $allowedposttags, $context );
-			return $allowedposttags;
-			break;
+			return apply_filters( 'gb_kses_allowed_html', $allowedposttags, $context );
+
 		case 'user_description':
 		case 'pre_user_description':
 			$tags = $allowedtags;
 			$tags['a']['rel'] = true;
 			/** This filter is documented in gb/kses.php */
-// 			return apply_filters( 'gb_kses_allowed_html', $tags, $context );
-			return $tags;
-			break;
+ 			return apply_filters( 'gb_kses_allowed_html', $tags, $context );
+
 		case 'strip':
 			/** This filter is documented in gb/kses.php */
-// 			return apply_filters( 'gb_kses_allowed_html', array(), $context );
-			return array();
-			break;
+			return apply_filters( 'gb_kses_allowed_html', array(), $context );
+
 		case 'entities':
 			/** This filter is documented in gb/kses.php */
-// 			return apply_filters( 'gb_kses_allowed_html', $allowedentitynames, $context);
-			return $allowedentitynames;
-			break;
+			return apply_filters( 'gb_kses_allowed_html', $allowedentitynames, $context);
+
 		case 'data':
 		default:
 			/** This filter is documented in gb/kses.php */
-// 			return apply_filters( 'gb_kses_allowed_html', $allowedtags, $context );
-			return $allowedtags;
+			return apply_filters( 'gb_kses_allowed_html', $allowedtags, $context );
 	}
 }
 
@@ -607,13 +601,13 @@ function gb_kses_hook( $string, $allowed_html, $allowed_protocols ) {
 	/**
 	 * Filter content to be run through kses.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param string $string            Content to run through kses.
 	 * @param array  $allowed_html      Allowed HTML elements.
 	 * @param array  $allowed_protocols Allowed protocol in links.
 	 */
-// 	$string = apply_filters( 'pre_kses', $string, $allowed_html, $allowed_protocols );
+	$string = apply_filters( 'pre_kses', $string, $allowed_html, $allowed_protocols );
 	return $string;
 }
 
@@ -783,7 +777,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 			$attr2 .= ' '.$arreach['whole'];
 		# there are no checks
 
-		} else {
+		}else{
 			# there are some checks
 			$ok = true;
 			foreach ($current as $currkey => $currval) {
@@ -1246,7 +1240,7 @@ function gb_kses_normalize_entities2($matches) {
 	if( valid_unicode($i)) {
 		$i = str_pad(ltrim($i,'0'), 3, '0', STR_PAD_LEFT);
 		$i = "&#$i;";
-	} else {
+	}else{
 		$i = "&amp;#$i;";
 	}
 
@@ -1345,8 +1339,7 @@ function gb_filter_kses( $data ) {
  * @return string Filtered content
  */
 function gb_kses_data( $data ) {
-// 	return gb_kses( $data , current_filter() );
-	return gb_kses( $data , '' );
+	return gb_kses( $data , current_filter() );
 }
 
 /**
@@ -1464,6 +1457,7 @@ function kses_init() {
 		kses_init_filters();
 }
 
+// TODO: actions
 // add_action('init', 'kses_init');
 // add_action('set_current_user', 'kses_init');
 
@@ -1514,7 +1508,7 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 		$found = false;
 		if( strpos( $css_item, ':' ) === false ) {
 			$found = true;
-		} else {
+		}else{
 			$parts = explode( ':', $css_item );
 			if( in_array( trim( $parts[0] ), $allowed_attr ) )
 				$found = true;

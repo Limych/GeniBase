@@ -192,7 +192,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 			$raw[$key] = preg_replace_callback('/\b\w+(?:-\w+)\b/uS', function ($matches){
 				return mb_ucfirst($matches[0]);
 			}, $raw[$key]);
-		}else {
+		}else{
 			// Первую букву в верхний регистр
 			$raw[$key] = mb_ucfirst($raw[$key]);
 		}
@@ -273,7 +273,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 				));
 		if( $res)
 			$raw['region_id'] = $res;
-		else {
+		else{
 			$raw['region_id'] = gbdb()->set_row('?_dic_regions', array(
 				'parent_id'	=> $raw['region_id'],
 				'title'		=> $raw['uyezd'] . ' ',

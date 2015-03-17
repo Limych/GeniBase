@@ -38,14 +38,14 @@ function get_option( $option, $default = false ) {
 	 * Passing a truthy value to the filter will short-circuit retrieving
 	 * the option value, returning the passed value instead.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param bool|mixed $pre_option Value to return instead of the option value.
 	 *                               Default false to skip it.
 	 */
-// 	$pre = apply_filters( 'pre_option_' . $option, false );
-// 	if( false !== $pre )
-// 		return $pre;
+	$pre = apply_filters( 'pre_option_' . $option, false );
+	if( false !== $pre )
+		return $pre;
 
 	if( defined('GB_SETUP_CONFIG'))
 		return false;
@@ -59,8 +59,7 @@ function get_option( $option, $default = false ) {
 			$value = $row['option_value'];
 		else{
 			/** This filter is documented in gb/option.php */
-// 			return apply_filters( 'default_option_' . $option, $default );
-			return $default;
+			return apply_filters( 'default_option_' . $option, $default );
 		}
 
 	}else{
@@ -72,13 +71,12 @@ function get_option( $option, $default = false ) {
 			 *
 			 * The dynamic portion of the hook name, `$option`, refers to the option name.
 			 *
-			 * @since 2.0.0
+			 * @since 2.1.0
 			 *
 			 * @param mixed $default The default value to return if the option does not exist
 			 *                       in the database.
 			 */
-// 			return apply_filters( 'default_option_' . $option, $default );
-			return $default;
+			return apply_filters( 'default_option_' . $option, $default );
 		}
 
 		$alloptions = gb_load_alloptions();
@@ -99,8 +97,7 @@ function get_option( $option, $default = false ) {
 					gb_cache_set('notoptions', $notoptions, 'options');
 
 					/** This filter is documented in gb/option.php */
-// 					return apply_filters( 'default_option_' . $option, $default );
-					return $default;
+					return apply_filters( 'default_option_' . $option, $default );
 				}
 			}
 		}
@@ -118,13 +115,12 @@ function get_option( $option, $default = false ) {
 	 *
 	 * The dynamic portion of the hook name, `$option`, refers to the option name.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param mixed $value Value of the option. If stored serialized, it will be
 	 *                     unserialized prior to being returned.
 	 */
-// 	return apply_filters( 'option_' . $option, maybe_unserialize( $value ) );
-	return maybe_unserialize($value);
+	return apply_filters( 'option_' . $option, maybe_unserialize( $value ) );
 }
 
 /**
@@ -300,7 +296,7 @@ function update_option( $option, $value ) {
 		if( isset( $alloptions[$option] ) ) {
 			$alloptions[ $option ] = $serialized_value;
 			gb_cache_set( 'alloptions', $alloptions, 'options' );
-		} else {
+		}else{
 			gb_cache_set( $option, $serialized_value, 'options' );
 		}
 	}
@@ -395,7 +391,7 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 			$alloptions = gb_load_alloptions();
 			$alloptions[ $option ] = $serialized_value;
 			gb_cache_set( 'alloptions', $alloptions, 'options' );
-		} else {
+		}else{
 			gb_cache_set( $option, $serialized_value, 'options' );
 		}
 	}
@@ -471,7 +467,7 @@ function delete_option( $option ) {
 				unset( $alloptions[$option] );
 				gb_cache_set( 'alloptions', $alloptions, 'options' );
 			}
-		} else {
+		}else{
 			gb_cache_delete( $option, 'options' );
 		}
 	}
@@ -524,7 +520,7 @@ function delete_transient( $transient ) {
 
 	if( gb_using_ext_object_cache() ) {
 		$result = gb_cache_delete( $transient, 'transient' );
-	} else {
+	}else{
 		$option_timeout = '_transient_timeout_' . $transient;
 		$option = '_transient_' . $transient;
 		$result = delete_option( $option );
@@ -580,7 +576,7 @@ function get_transient( $transient ) {
 
 	if( gb_using_ext_object_cache() ) {
 		$value = gb_cache_get( $transient, 'transient' );
-	} else {
+	}else{
 		$transient_option = '_transient_' . $transient;
 		if( !defined( 'GB_INSTALLING' ) ) {
 			// If option is not in alloptions, it is not autoloaded and thus has a timeout
@@ -643,7 +639,7 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 
 	if( gb_using_ext_object_cache() ) {
 		$result = gb_cache_set( $transient, $value, 'transient', $expiration );
-	} else {
+	}else{
 		$transient_timeout = '_transient_timeout_' . $transient;
 		$transient = '_transient_' . $transient;
 		if( false === get_option( $transient ) ) {
@@ -653,7 +649,7 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 				add_option( $transient_timeout, time() + $expiration, '', 'no' );
 			}
 			$result = add_option( $transient, $value, '', $autoload );
-		} else {
+		}else{
 			// If expiration is requested, but the transient has no timeout option,
 			// delete, then re-create transient rather than update.
 			$update = true;
@@ -663,7 +659,7 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 					add_option( $transient_timeout, time() + $expiration, '', 'no' );
 					$result = add_option( $transient, $value, '', 'no' );
 					$update = false;
-				} else {
+				}else{
 					update_option( $transient_timeout, time() + $expiration );
 				}
 			}

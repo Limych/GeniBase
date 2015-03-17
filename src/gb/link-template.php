@@ -140,9 +140,9 @@ function set_url_scheme( $url, $scheme = null ) {
 
 	if( !$scheme ) {
 		$scheme = is_ssl() ? 'https' : 'http';
-	} elseif ( $scheme === 'admin' || $scheme === 'login' || $scheme === 'login_post' || $scheme === 'rpc' ) {
+	}elseif( $scheme === 'admin' || $scheme === 'login' || $scheme === 'login_post' || $scheme === 'rpc' ) {
 		$scheme = is_ssl() || force_ssl_admin() ? 'https' : 'http';
-	} elseif ( $scheme !== 'http' && $scheme !== 'https' && $scheme !== 'relative' ) {
+	}elseif( $scheme !== 'http' && $scheme !== 'https' && $scheme !== 'relative' ) {
 		$scheme = is_ssl() ? 'https' : 'http';
 	}
 
@@ -154,7 +154,7 @@ function set_url_scheme( $url, $scheme = null ) {
 		$url = ltrim( preg_replace( '#^\w+://[^/]*#', '', $url ) );
 		if( $url !== '' && $url[0] === '/' )
 			$url = '/' . ltrim($url , "/ \t\n\r\0\x0B" );
-	} else {
+	}else{
 		$url = preg_replace( '#^\w+://#', $scheme . '://', $url );
 	}
 

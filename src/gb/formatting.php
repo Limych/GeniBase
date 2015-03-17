@@ -144,7 +144,7 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 	// Handle double encoding ourselves
 	if( $double_encode)
 		$string = @htmlspecialchars($string, $quote_style, $charset);
-	else {
+	else{
 		// Decode &amp; into &
 		$string = gb_specialchars_decode($string, $_quote_style);
 
@@ -184,13 +184,12 @@ function esc_attr($text) {
 	 * Text passed to esc_attr() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-// 	return apply_filters('escape_attribute', $safe_text, $text);
-	return $safe_text;
+	return apply_filters('escape_attribute', $safe_text, $text);
 }
 
 /**
@@ -210,13 +209,12 @@ function esc_html($text){
 	 * Text passed to esc_html() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-// 	return apply_filters('escape_html', $safe_text, $text);
-	return $safe_text;
+	return apply_filters('escape_html', $safe_text, $text);
 }
 
 /**
@@ -243,13 +241,12 @@ function esc_js( $text ) {
 	 * Text passed to esc_js() is stripped of invalid or special characters,
 	 * and properly slashed for output.
 	 *
-	 * @since 2.0.0
+	 * @since 2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-// 	return apply_filters( 'js_escape', $safe_text, $text );
-	return $safe_text;
+	return apply_filters( 'js_escape', $safe_text, $text );
 }
 
 /**
@@ -293,7 +290,7 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 
 	if( '/' === $url[0] ) {
 		$good_protocol_url = $url;
-	} else {
+	}else{
 		if( !is_array( $protocols ) )
 			$protocols = gb_allowed_protocols();
 		$good_protocol_url = gb_kses_bad_protocol( $url, $protocols );
@@ -304,14 +301,13 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 	/**
 	 * Filter a string cleaned and escaped for output as a URL.
 	 *
-	 * @since 2.3.0
+	 * @since 2.1.0
 	 *
 	 * @param string $good_protocol_url The cleaned URL to be returned.
 	 * @param string $original_url      The URL prior to cleaning.
 	 * @param string $_context          If 'display', replace ampersands and single quotes only.
 	 */
-// 	return apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
-	return $good_protocol_url;
+	return apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
 }
 
 /**
