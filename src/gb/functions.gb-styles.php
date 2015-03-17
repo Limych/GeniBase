@@ -27,7 +27,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 function _gb_styles(){
 	static $gb_styles;
 	if( !is_a($gb_styles, 'GB_Styles')){
-// 		if( ! did_action( 'init' ) )
+// 		if( !did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 	

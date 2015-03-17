@@ -294,7 +294,7 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 	if( '/' === $url[0] ) {
 		$good_protocol_url = $url;
 	} else {
-		if( ! is_array( $protocols ) )
+		if( !is_array( $protocols ) )
 			$protocols = gb_allowed_protocols();
 		$good_protocol_url = gb_kses_bad_protocol( $url, $protocols );
 		if( strtolower( $good_protocol_url ) != strtolower( $url ) )

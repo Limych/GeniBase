@@ -83,7 +83,7 @@ function gb_fix_server_vars() {
 			}
 
 			// Append the query string if it exists and isn't null
-			if( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+			if( !empty( $_SERVER['QUERY_STRING'] ) ) {
 				$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
 			}
 		}
@@ -178,7 +178,7 @@ function gb_load_translations_early() {
 		if( @is_dir( GB_CORE_DIR . '/languages' ) )
 			$locations[] = GB_CORE_DIR . '/languages';
 
-		if( ! $locations )
+		if( !$locations )
 			break;
 
 		$locations = array_unique( $locations );
@@ -286,7 +286,7 @@ function gb_check_php_mysql_versions() {
 		die( sprintf( __( 'Your server is running PHP version %1$s but GeniBase %2$s requires at least %3$s.' ), $php_version, GB_VERSION, GB_PHP_REQUIRED ) );
 	}
 
-	if( ! extension_loaded( 'mysql' ) && ! extension_loaded( 'mysqli' ) ) {
+	if( !extension_loaded( 'mysql' ) && ! extension_loaded( 'mysqli' ) ) {
 		gb_load_translations_early();
 		header( 'Content-Type: text/html; charset=utf-8' );
 		die( __( 'Your PHP installation appears to be missing the MySQL extension which is required by GeniBase.' ) );

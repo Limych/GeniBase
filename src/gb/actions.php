@@ -532,7 +532,7 @@ function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) 
  * @return null Will return null if $tag does not exist in _gb_hooks()->filters array.
  */
 function do_action($tag, $arg = '') {
-	if( ! isset(_gb_hooks()->actions[$tag]) )
+	if( !isset(_gb_hooks()->actions[$tag]) )
 		_gb_hooks()->actions[$tag] = 1;
 	else
 		_gb_hooks()->actions[$tag]++;
@@ -588,7 +588,7 @@ function do_action($tag, $arg = '') {
  * @return int The number of times action hook $tag is fired.
  */
 function did_action($tag) {
-	if( ! isset( _gb_hooks()->actions[ $tag ] ) )
+	if( !isset( _gb_hooks()->actions[ $tag ] ) )
 		return 0;
 
 	return _gb_hooks()->actions[$tag];
@@ -607,7 +607,7 @@ function did_action($tag) {
  * @return null Will return null if `$tag` does not exist in `_gb_hooks()->filters` array.
  */
 function do_action_ref_array($tag, $args) {
-	if( ! isset(_gb_hooks()->actions[$tag]) )
+	if( !isset(_gb_hooks()->actions[$tag]) )
 		_gb_hooks()->actions[$tag] = 1;
 	else
 		_gb_hooks()->actions[$tag]++;

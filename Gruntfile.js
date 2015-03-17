@@ -256,7 +256,7 @@ module.exports = function(grunt) {
 					var index, dir = grunt.option( 'dir' );
 
 					// Don't filter when no target folder is specified
-					if( ! dir ) {
+					if( !dir ) {
 						return true;
 					}
 

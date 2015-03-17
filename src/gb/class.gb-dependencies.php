@@ -116,7 +116,7 @@ class GB_Dependencies {
 				 *
 				 * The src property is false.
 				 */
-				if( ! $this->registered[$handle]->src ) {
+				if( !$this->registered[$handle]->src ) {
 					$this->done[] = $handle;
 					continue;
 				}
@@ -189,7 +189,7 @@ class GB_Dependencies {
 			elseif ( $this->registered[$handle]->deps && !$this->all_deps( $this->registered[$handle]->deps, true, $group ) )
 				$keep_going = false; // Item requires dependencies that don't exist.
 
-			if( ! $keep_going ) { // Either item or its dependencies don't exist.
+			if( !$keep_going ) { // Either item or its dependencies don't exist.
 				if( $recursion )
 					return false; // Abort this branch.
 				else
@@ -343,7 +343,7 @@ class GB_Dependencies {
 	 */
 	protected function recurse_deps( $queue, $handle ) {
 		foreach ( $queue as $queued ) {
-			if( ! isset( $this->registered[ $queued ] ) ) {
+			if( !isset( $this->registered[ $queued ] ) ) {
 				continue;
 			}
 
@@ -490,7 +490,7 @@ class _GB_Dependency {
 	 */
 	public function __construct() {
 		@list( $this->handle, $this->src, $this->deps, $this->ver, $this->args ) = func_get_args();
-		if( ! is_array($this->deps) )
+		if( !is_array($this->deps) )
 			$this->deps = array();
 	}
 

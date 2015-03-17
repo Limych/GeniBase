@@ -286,7 +286,7 @@ function update_option( $option, $value ) {
 	do_action( 'update_option', $option, $old_value, $value );
 
 	$result = $wpdb->update( $wpdb->options, array( 'option_value' => $serialized_value ), array( 'option_name' => $option ) );
-	if( ! $result )
+	if( !$result )
 		return false;
 
 	$notoptions = gb_cache_get( 'notoptions', 'options' );
@@ -295,7 +295,7 @@ function update_option( $option, $value ) {
 		gb_cache_set( 'notoptions', $notoptions, 'options' );
 	}
 
-	if( ! defined( 'GB_INSTALLING' ) ) {
+	if( !defined( 'GB_INSTALLING' ) ) {
 		$alloptions = gb_load_alloptions();
 		if( isset( $alloptions[$option] ) ) {
 			$alloptions[ $option ] = $serialized_value;
@@ -387,10 +387,10 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	do_action( 'add_option', $option, $value );
 
 	$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb->options` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `option_name` = VALUES(`option_name`), `option_value` = VALUES(`option_value`), `autoload` = VALUES(`autoload`)", $option, $serialized_value, $autoload ) );
-	if( ! $result )
+	if( !$result )
 		return false;
 
-	if( ! defined( 'GB_INSTALLING' ) ) {
+	if( !defined( 'GB_INSTALLING' ) ) {
 		if( 'yes' == $autoload ) {
 			$alloptions = gb_load_alloptions();
 			$alloptions[ $option ] = $serialized_value;
@@ -464,7 +464,7 @@ function delete_option( $option ) {
 	do_action( 'delete_option', $option );
 
 	$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option ) );
-	if( ! defined( 'GB_INSTALLING' ) ) {
+	if( !defined( 'GB_INSTALLING' ) ) {
 		if( 'yes' == $row->autoload ) {
 			$alloptions = gb_load_alloptions();
 			if( is_array( $alloptions ) && isset( $alloptions[$option] ) ) {
@@ -582,7 +582,7 @@ function get_transient( $transient ) {
 		$value = gb_cache_get( $transient, 'transient' );
 	} else {
 		$transient_option = '_transient_' . $transient;
-		if( ! defined( 'GB_INSTALLING' ) ) {
+		if( !defined( 'GB_INSTALLING' ) ) {
 			// If option is not in alloptions, it is not autoloaded and thus has a timeout
 			$alloptions = gb_load_alloptions();
 			if( !isset( $alloptions[$transient_option] ) ) {
@@ -595,7 +595,7 @@ function get_transient( $transient ) {
 			}
 		}
 
-		if( ! isset( $value ) )
+		if( !isset( $value ) )
 			$value = get_option( $transient_option );
 	}
 

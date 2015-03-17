@@ -706,14 +706,14 @@ function gb_get_installed_translations( $type ) {
 
 	$dir = 'core' === $type ? '' : "/$type";
 
-	if( ! is_dir( GB_LANG_DIR ) )
+	if( !is_dir( GB_LANG_DIR ) )
 		return array();
 
 	if( $dir && ! is_dir( GB_LANG_DIR . $dir ) )
 		return array();
 
 	$files = scandir( GB_LANG_DIR . $dir );
-	if( ! $files )
+	if( !$files )
 		return array();
 
 	$language_data = array();
@@ -725,10 +725,10 @@ function gb_get_installed_translations( $type ) {
 		if( substr( $file, -3 ) !== '.po' ) {
 			continue;
 		}
-		if( ! preg_match( '/(?:(.+)-)?([A-Za-z_]{2,6}).po/', $file, $match ) ) {
+		if( !preg_match( '/(?:(.+)-)?([A-Za-z_]{2,6}).po/', $file, $match ) ) {
 			continue;
 		}
-		if( ! in_array( substr( $file, 0, -3 ) . '.mo', $files ) )  {
+		if( !in_array( substr( $file, 0, -3 ) . '.mo', $files ) )  {
 			continue;
 		}
 

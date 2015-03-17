@@ -34,7 +34,7 @@ function validate_file( $file, $allowed_files = '' ) {
 	if( false !== strpos( $file, './' ) )
 		return 1;
 
-	if( ! empty( $allowed_files ) && ! in_array( $file, $allowed_files ) )
+	if( !empty( $allowed_files ) && ! in_array( $file, $allowed_files ) )
 		return 3;
 
 	if( ':' == substr( $file, 1, 1 ) )
@@ -592,7 +592,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		$message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
 	}
 
-// 	if( ! did_action( 'admin_head' ) ) :
+// 	if( !did_action( 'admin_head' ) ) :
 	if( !headers_sent() ) {
 		status_header($r['response']);
 		nocache_headers();

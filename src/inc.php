@@ -39,7 +39,7 @@ function html_header($title, $do_index = TRUE){
 	<meta name="viewport" content="width=device-width, user-scalable=no" />
 	<meta name='robots' content='<?php print $robots; ?>' />
 
-	<title><?php echo esc_html($title); ?>&nbsp;&mdash; <?php esc_html_ex('The First World War, 1914&ndash;1918', 'HTML-page title', WW1_TXTDOM); ?></title>
+	<title><?php echo esc_html($title); ?>&nbsp;- <?php esc_html_ex('The First World War, 1914&ndash;1918', 'HTML-page title', WW1_TXTDOM); ?></title>
 
 	<link rel="icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />

@@ -139,7 +139,7 @@ class GB_Scripts extends GB_Dependencies {
 		/** This filter is documented in gb/class.gb-scripts.php */
 		$src = esc_url( apply_filters( 'script_loader_src', $src, $handle ) );
 
-		if( ! $src )
+		if( !$src )
 			return true;
 
 		$tag = "<script type='text/javascript' src='$src'></script>\n";
@@ -213,7 +213,7 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function all_deps( $handles, $recursion = false, $group = false ) {
 		$r = parent::all_deps( $handles, $recursion );
-		if( ! $recursion ) {
+		if( !$recursion ) {
 			/**
 			 * Filter the list of script dependencies left to print.
 			 *
@@ -237,7 +237,7 @@ class GB_Scripts extends GB_Dependencies {
 	}
 
 	public function in_default_dir( $src ) {
-		if( ! $this->default_dirs ) {
+		if( !$this->default_dirs ) {
 			return true;
 		}
 

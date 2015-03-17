@@ -137,12 +137,12 @@ class GB_Styles extends GB_Dependencies {
 	 * @param string $code
 	 */
 	public function add_inline_style( $handle, $code ) {
-		if( ! $code ) {
+		if( !$code ) {
 			return false;
 		}
 
 		$after = $this->get_data( $handle, 'after' );
-		if( ! $after ) {
+		if( !$after ) {
 			$after = array();
 		}
 
@@ -165,7 +165,7 @@ class GB_Styles extends GB_Dependencies {
 
 		$output = implode( "\n", $output );
 
-		if( ! $echo ) {
+		if( !$echo ) {
 			return $output;
 		}
 
@@ -227,7 +227,7 @@ class GB_Styles extends GB_Dependencies {
 	 * @return bool
 	 */
 	public function in_default_dir($src) {
-		if( ! $this->default_dirs )
+		if( !$this->default_dirs )
 			return true;
 
 		foreach ( (array) $this->default_dirs as $test ) {

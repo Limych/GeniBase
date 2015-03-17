@@ -46,14 +46,14 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  *
  * @since 2.0.0
  */
-if( ! defined( 'CUSTOM_TAGS' ) )
+if( !defined( 'CUSTOM_TAGS' ) )
 	define( 'CUSTOM_TAGS', false );
 
 // Ensure that these variables are added to the global namespace
 // (e.g. if using namespaces / autoload in the current PHP environment).
 global $allowedposttags, $allowedtags, $allowedentitynames;
 
-if( ! CUSTOM_TAGS ) {
+if( !CUSTOM_TAGS ) {
 	/**
 	 * Kses global for default allowable HTML tags.
 	 *
@@ -707,10 +707,10 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 	$elem = $matches[2];
 	$attrlist = $matches[3];
 
-	if( ! is_array( $allowed_html ) )
+	if( !is_array( $allowed_html ) )
 		$allowed_html = gb_kses_allowed_html( $allowed_html );
 
-	if( ! isset($allowed_html[strtolower($elem)]) )
+	if( !isset($allowed_html[strtolower($elem)]) )
 		return '';
 	# They are using a not allowed HTML element
 
@@ -741,7 +741,7 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
 function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 	# Is there a closing XHTML slash at the end of the attributes?
 
-	if( ! is_array( $allowed_html ) )
+	if( !is_array( $allowed_html ) )
 		$allowed_html = gb_kses_allowed_html( $allowed_html );
 
 	$xhtml_slash = '';
@@ -749,7 +749,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 		$xhtml_slash = ' /';
 
 	# Are any attributes allowed at all for this element?
-	if( ! isset($allowed_html[strtolower($element)]) || count($allowed_html[strtolower($element)]) == 0 )
+	if( !isset($allowed_html[strtolower($element)]) || count($allowed_html[strtolower($element)]) == 0 )
 		return "<$element$xhtml_slash>";
 
 	# Split it
@@ -761,7 +761,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 
 	$allowed_attr = $allowed_html[strtolower($element)];
 	foreach ($attrarr as $arreach) {
-		if( ! isset( $allowed_attr[strtolower($arreach['name'])] ) )
+		if( !isset( $allowed_attr[strtolower($arreach['name'])] ) )
 			continue; # the attribute is not allowed
 
 		$current = $allowed_attr[strtolower($arreach['name'])];
@@ -779,7 +779,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 			$arreach['whole'] = str_replace( $orig_value, $value, $arreach['whole'] );
 		}
 
-		if( ! is_array($current) ) {
+		if( !is_array($current) ) {
 			$attr2 .= ' '.$arreach['whole'];
 		# there are no checks
 
@@ -787,7 +787,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
 			# there are some checks
 			$ok = true;
 			foreach ($current as $currkey => $currval) {
-				if( ! gb_kses_check_attr_val($arreach['value'], $arreach['vless'], $currkey, $currval) ) {
+				if( !gb_kses_check_attr_val($arreach['value'], $arreach['vless'], $currkey, $currval) ) {
 					$ok = false;
 					break;
 				}

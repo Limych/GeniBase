@@ -221,28 +221,28 @@ function gb_cookie_constants() {
 	 * @since 2.0.0
 	 */
 	// TODO: users
-// 	if ( !defined('PASS_COOKIE') )
+// 	if( !defined('PASS_COOKIE') )
 // 		define('PASS_COOKIE', 'wordpresspass_' . GB_COOKIE_HASH);
 
 	/**
 	 * @since 2.5.0
 	 */
 	// TODO: users
-// 	if ( !defined('AUTH_COOKIE') )
+// 	if( !defined('AUTH_COOKIE') )
 // 		define('AUTH_COOKIE', 'wordpress_' . GB_COOKIE_HASH);
 
 	/**
 	 * @since 2.6.0
 	 */
 	// TODO: users
-// 	if ( !defined('SECURE_AUTH_COOKIE') )
+// 	if( !defined('SECURE_AUTH_COOKIE') )
 // 		define('SECURE_AUTH_COOKIE', 'wordpress_sec_' . GB_COOKIE_HASH);
 
 	/**
 	 * @since 2.6.0
 	 */
 	// TODO: users
-// 	if ( !defined('LOGGED_IN_COOKIE') )
+// 	if( !defined('LOGGED_IN_COOKIE') )
 // 		define('LOGGED_IN_COOKIE', 'wordpress_logged_in_' . GB_COOKIE_HASH);
 
 	/**
@@ -256,14 +256,14 @@ function gb_cookie_constants() {
 	 * @since 2.6.0
 	*/
 	// TODO: admin
-// 	if ( !defined('ADMIN_COOKIE_PATH') )
+// 	if( !defined('ADMIN_COOKIE_PATH') )
 // 		define( 'ADMIN_COOKIE_PATH', SITECOOKIEPATH . 'wp-admin' );
 
 	/**
 	 * @since 2.6.0
 	*/
 	// TODO: plugins
-// 	if ( !defined('PLUGINS_COOKIE_PATH') )
+// 	if( !defined('PLUGINS_COOKIE_PATH') )
 // 		define( 'PLUGINS_COOKIE_PATH', preg_replace('|https?://[^/]+|i', '', WP_PLUGIN_URL)  );
 
 	/**

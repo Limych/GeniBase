@@ -93,7 +93,7 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	function knownGBBug( $ticket_id ) {
 		if( GB_TESTS_FORCE_KNOWN_BUGS || in_array( $ticket_id, self::$forced_tickets ) )
 			return;
-		if( ! TracGitHubIssues::isTicketClosed( GB_GITHUB_REPOS, $ticket_id ) )
+		if( !TracGitHubIssues::isTicketClosed( GB_GITHUB_REPOS, $ticket_id ) )
 			$this->markTestSkipped( sprintf( 'GeniBase Issue #%d is not fixed', $ticket_id ) );
 	}
 

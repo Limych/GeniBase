@@ -236,7 +236,7 @@ class PO extends Gettext_Translations {
 		if( false === $res ) {
 			return false;
 		}
-		if( ! $this->headers && ! $this->entries ) {
+		if( !$this->headers && ! $this->entries ) {
 			return false;
 		}
 		return true;

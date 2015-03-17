@@ -6,7 +6,7 @@
 
 
 $config_file_path = dirname( dirname( __FILE__ ) );
-if( ! file_exists( $config_file_path . '/gb-tests-config.php' ) ) {
+if( !file_exists( $config_file_path . '/gb-tests-config.php' ) ) {
 	// Support the config file from the root of the develop repository.
 	if( basename( $config_file_path ) === 'phpunit' && basename( dirname( $config_file_path ) ) === 'tests' )
 		$config_file_path = dirname( dirname( $config_file_path ) );
@@ -27,7 +27,7 @@ require_once $config_file_path;
 
 define( 'DIR_TESTDATA', dirname( __FILE__ ) . '/../data' );
 
-if( ! defined( 'GB_TESTS_FORCE_KNOWN_BUGS' ) )
+if( !defined( 'GB_TESTS_FORCE_KNOWN_BUGS' ) )
 	define( 'GB_TESTS_FORCE_KNOWN_BUGS', false );
 
 // Cron tries to make an HTTP request to the blog, which always fails, because tests are run in CLI mode only

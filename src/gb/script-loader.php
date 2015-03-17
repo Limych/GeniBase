@@ -310,19 +310,19 @@ function script_concat_settings() {
 
 	$compressed_output = (ini_get('zlib.output_compression') || 'ob_gzhandler' == ini_get('output_handler'));
 
-	if( ! isset($concatenate_scripts) ) {
+	if( !isset($concatenate_scripts) ) {
 		$concatenate_scripts = defined('CONCATENATE_SCRIPTS') ? CONCATENATE_SCRIPTS : true;
 		if( /*!is_admin() ||*/ ( defined('GB_SCRIPT_DEBUG') && GB_SCRIPT_DEBUG ) )
 			$concatenate_scripts = false;
 	}
 
-	if( ! isset($compress_scripts) ) {
+	if( !isset($compress_scripts) ) {
 		$compress_scripts = defined('COMPRESS_SCRIPTS') ? COMPRESS_SCRIPTS : true;
 		if( $compress_scripts && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output ) )
 			$compress_scripts = false;
 	}
 
-	if( ! isset($compress_css) ) {
+	if( !isset($compress_css) ) {
 		$compress_css = defined('COMPRESS_CSS') ? COMPRESS_CSS : true;
 		if( $compress_css && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output ) )
 			$compress_css = false;

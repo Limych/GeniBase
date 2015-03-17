@@ -421,10 +421,10 @@ class GB_Object_Cache {
 		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if( ! $this->_exists( $key, $group ) )
+		if( !$this->_exists( $key, $group ) )
 			return false;
 
-		if( ! is_numeric( $this->cache[ $group ][ $key ] ) )
+		if( !is_numeric( $this->cache[ $group ][ $key ] ) )
 			$this->cache[ $group ][ $key ] = 0;
 
 		$offset = (int) $offset;
@@ -457,7 +457,7 @@ class GB_Object_Cache {
 		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if( ! $this->_exists( $key, $group ) )
+		if( !$this->_exists( $key, $group ) )
 			return false;
 
 		unset( $this->cache[$group][$key] );
@@ -532,10 +532,10 @@ class GB_Object_Cache {
 		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$key = $this->blog_prefix . $key;
 
-		if( ! $this->_exists( $key, $group ) )
+		if( !$this->_exists( $key, $group ) )
 			return false;
 
-		if( ! is_numeric( $this->cache[ $group ][ $key ] ) )
+		if( !is_numeric( $this->cache[ $group ][ $key ] ) )
 			$this->cache[ $group ][ $key ] = 0;
 
 		$offset = (int) $offset;
@@ -568,7 +568,7 @@ class GB_Object_Cache {
 		if( $this->multisite && ! isset( $this->global_groups[ $group ] ) )
 			$id = $this->blog_prefix . $key;
 
-		if( ! $this->_exists( $id, $group ) )
+		if( !$this->_exists( $id, $group ) )
 			return false;
 
 		return $this->set( $key, $data, $group, (int) $expire );
@@ -585,7 +585,7 @@ class GB_Object_Cache {
 
 		// Clear out non-global caches since the blog ID has changed.
 		foreach ( array_keys( $this->cache ) as $group ) {
-			if( ! isset( $this->global_groups[ $group ] ) )
+			if( !isset( $this->global_groups[ $group ] ) )
 				unset( $this->cache[ $group ] );
 		}
 	}
