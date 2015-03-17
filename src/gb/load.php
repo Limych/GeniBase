@@ -149,6 +149,9 @@ function gb_load_translations_early() {
 	require_once(GB_CORE_DIR . '/l10n.php');
 	require_once(GB_CORE_DIR . '/locale.php');
 
+	// General libraries
+	require_once(GB_CORE_DIR . '/actions.php');
+
 	$locales = $locations = array();
 	while ( true ) {
 		if( defined('GB_LANG')){

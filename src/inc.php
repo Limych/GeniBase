@@ -61,16 +61,15 @@ function html_header($title, $do_index = TRUE){
  * Вывод хвостовой части страницы
  */
 function html_footer(){
-	// TODO: gettext
 ?>
 <footer>
 	<p style="text-align: center; margin-top: 3em" class="no-print">
 		<a href="<?php print site_url('/stat.php'); ?>"><?php _e('Statistic', WW1_TXTDOM);?></a>
 		| <a href="<?php print site_url('/guestbook/'); ?>"><?php _e('Guestbook', WW1_TXTDOM);?></a> 
 		| <a href="http://forum.svrt.ru/index.php?showforum=127" target="_blank"><?php _e('Discussion about the project', WW1_TXTDOM);?></a>
-		| <a href="<?php print site_url('/crue.php'); ?>"><?php _e('Project crew', WW1_TXTDOM);?></a>
+		| <a href="<?php print site_url('/crew.php'); ?>"><?php _e('Project crew', WW1_TXTDOM);?></a>
 	</p>
-	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
+	<p class="copyright"><strong><?php _e('Please note:', WW1_TXTDOM);?></strong> <?php _e('This lists are placed in the public domain for non-commercial research only. The use of this lists for commercial purposes without the express consent of the lists owners and the project participants is prohibited.', WW1_TXTDOM);?></p>
 <?php if( GB_DEBUG): ?>
 	<p><small>Statistic: <?php
 		print(timer_stop(0, 3) . 's');
@@ -353,8 +352,7 @@ function load_check(){
 		@header("$protocol 503 Service Unavailable", true, 503);
 		@header('Retry-After: 600000');
 		html_header('Доступ приостановлен', FALSE);
-		// TODO: gettext
-		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>Вы перегружаете систему и были заблокированы на некоторое время. Сделайте перерыв…</div>";
+		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>" . __('You are overload the database and have been blocked for some time. Please, take a break...', WW1_TXTDOM) . "</div>";
 		html_footer();
 		die();
 

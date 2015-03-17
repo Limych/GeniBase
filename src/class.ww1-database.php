@@ -281,7 +281,6 @@ class ww1_database_solders extends ww1_database {
 								"<label for='q_$key'>$val:</label>" .
 								"<div>" .
 									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-									// TODO: gettext
 									"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>" . __('also search for similar surnames', WW1_TXTDOM) . "</label></div>" .
 								"</div>" .
 								"</div>\n";
@@ -293,7 +292,6 @@ class ww1_database_solders extends ww1_database {
 								"<label for='q_$key'>$val:</label>" .
 								"<div>" .
 									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-									// TODO: gettext
 									"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->name_ext ? "" : " checked='checked'") . " /> <label for='q_name_ext'>" . __('also search for abbreviations of names', WW1_TXTDOM) . "</label></div>" .
 								"</div>" .
 								"</div>\n";

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-03-17 11:41+0300\n"
+"POT-Creation-Date: 2015-03-17 19:55+0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -101,84 +101,160 @@ msgctxt "Field name"
 msgid "Record ID"
 msgstr ""
 
-#: class.ww1-database.php:285
+#: class.ww1-database.php:284
 msgid "also search for similar surnames"
 msgstr ""
 
-#: class.ww1-database.php:297
+#: class.ww1-database.php:295
 msgid "also search for abbreviations of names"
 msgstr ""
 
-#: class.ww1-database.php:306
+#: class.ww1-database.php:304
 msgctxt "Date from … to …"
 msgid "from "
 msgstr ""
 
-#: class.ww1-database.php:307
+#: class.ww1-database.php:305
 msgctxt "Date from … to …"
 msgid "to "
 msgstr ""
 
-#: class.ww1-records-set.php:86
+#: class.ww1-records-set.php:85
 msgctxt "Table header “Item number”"
 msgid "No."
 msgstr ""
 
-#: class.ww1-records-set.php:158
+#: class.ww1-records-set.php:97
+msgid "(surname is not&nbsp;specified)"
+msgstr ""
+
+#: class.ww1-records-set.php:98
+msgid "(name is not&nbsp;specified)"
+msgstr ""
+
+#: class.ww1-records-set.php:101 class.ww1-records-set.php:139
+msgid "(not&nbsp;specified)"
+msgstr ""
+
+#: class.ww1-records-set.php:122
+#, php-format
+msgid "<a href=\"%1$s\" target=\"_blank\">“%2$s”</a>, pg.%3$s"
+msgstr ""
+
+#: class.ww1-records-set.php:124
+#, php-format
+msgid "<a href=\"%1$s\" target=\"_blank\">“%2$s”</a>"
+msgstr ""
+
+#: class.ww1-records-set.php:127
+#, php-format
+msgid "“%1$s”, pg.%2$s"
+msgstr ""
+
+#: class.ww1-records-set.php:129
+#, php-format
+msgid "“%s”"
+msgstr ""
+
+#: class.ww1-records-set.php:156
 msgid ""
 "By clicking on the line that you are interested in, you will see an "
 "additional information."
 msgstr ""
 
-#: class.ww1-records-set.php:159
+#: class.ww1-records-set.php:157
 msgid ""
 "You can navigate through the pages of search results by using the keys <span "
 "class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">→</span> and <span class="
 "\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">←</span>"
 msgstr ""
 
-#: class.ww1-records-set.php:160
+#: class.ww1-records-set.php:158
 msgid ""
 "Many records have links to electronic copies of sources on which the "
 "database is created."
 msgstr ""
 
-#: class.ww1-records-set.php:161
+#: class.ww1-records-set.php:159
 msgid ""
 "Usually when searching system automatically searches for similar-sounding "
 "names or spelling variations. All of these findings are displayed at the end "
 "of the list and highlighted."
 msgstr ""
 
-#: class.ww1-records-set.php:166
+#: class.ww1-records-set.php:164 inc.php:72
 msgid "Please note:"
 msgstr ""
 
-#: class.ww1-records-set.php:176
+#: class.ww1-records-set.php:174
 #, php-format
 msgid "Found %s record."
 msgid_plural "Found %s records."
 msgstr[0] ""
 msgstr[1] ""
 
-#: class.ww1-records-set.php:180
+#: class.ww1-records-set.php:178
 msgid "Unfortunately, nothing found."
 msgstr ""
 
-#: class.ww1-records-set.php:183
+#: class.ww1-records-set.php:180
 msgid "What to do now?"
 msgstr ""
 
-#: class.ww1-records-set.php:185
+#: class.ww1-records-set.php:182
 msgid "Try to search for different spellings for names and places."
 msgstr ""
 
-#: crue.php:5 crue.php:8 inc.php:71
+#: class.ww1-records-set.php:183
+msgid ""
+"The lists initially were handwritten. In situation of war. Some of them are "
+"made by not very literate clerks. The various errors could been added during "
+"their writing, printing in typography and during modern digitizing by "
+"volunteers;"
+msgstr ""
+
+#: class.ww1-records-set.php:184
+msgid "Remove one search criteria and repeat search."
+msgstr ""
+
+#: class.ww1-records-set.php:185
+msgid ""
+"Perhaps, some information not to added to database completely by some reason;"
+msgstr ""
+
+#: class.ww1-records-set.php:186
+msgid "Wait for one-two weeks and repeat you search."
+msgstr ""
+
+#: class.ww1-records-set.php:187
+msgid ""
+"Our database is constantly updated with new materials. Perhaps, we will add "
+"information that you search;"
+msgstr ""
+
+#: crew.php:5 crew.php:7 inc.php:70
 msgid "Project crew"
 msgstr ""
 
-#: crue.php:7 stat.php:7
+#: crew.php:6 stat.php:7
 msgid "&laquo;&nbsp;Back to search"
+msgstr ""
+
+#: crew.php:9
+msgid "Project management"
+msgstr ""
+
+#: crew.php:12
+msgid "Preparation of electronic version of the lists"
+msgstr ""
+
+#: crew.php:29
+msgid "Programming"
+msgstr ""
+
+#: crew.php:34
+#, php-format
+msgid "Do you want to <a href=\"%s\" target=\"_blank\">join us? Welcome!</a>"
 msgstr ""
 
 #: extsearch.php:19 index.php:19 index.php:26
@@ -294,31 +370,44 @@ msgstr ""
 msgid "The project of Union of Revival of Pedigree Traditions"
 msgstr ""
 
-#: inc.php:68 stat.php:5
+#: inc.php:67 stat.php:5
 msgid "Statistic"
 msgstr ""
 
-#: inc.php:69
+#: inc.php:68
 msgid "Guestbook"
 msgstr ""
 
-#: inc.php:70
+#: inc.php:69
 msgid "Discussion about the project"
 msgstr ""
 
-#: inc.php:275 inc.php:278
+#: inc.php:72
+msgid ""
+"This lists are placed in the public domain for non-commercial research only. "
+"The use of this lists for commercial purposes without the express consent of "
+"the lists owners and the project participants is prohibited."
+msgstr ""
+
+#: inc.php:274 inc.php:277
 #, php-format
 msgid "Currently the database contains %s record."
 msgid_plural "Currently the database contains %s records."
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc.php:280
+#: inc.php:279
 #, php-format
 msgid " Of these, %s record is now available for search."
 msgid_plural " Of these, %s records is now available for search."
 msgstr[0] ""
 msgstr[1] ""
+
+#: inc.php:355
+msgid ""
+"You are overload the database and have been blocked for some time. Please, "
+"take a break..."
+msgstr ""
 
 #: index.php:27
 msgid "Advanced search"

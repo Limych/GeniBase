@@ -82,7 +82,6 @@ class ww1_solders_set extends ww1_records_set{
 		// Формируем пагинатор
 		$pag = paginator($this->page, $max_pg);
 		print $pag;	// Вывод пагинатора
-		// TODO: gettext
 		print '<table id="report" class="report responsive-table"><thead><tr><th scope="col">' . _x('No.', 'Table header “Item number”', WW1_TXTDOM) . '</th>';
 		foreach(array_values($brief_fields) as $val)
 			print "<th scope='col'>" . esc_html($val) . "</th>";
@@ -94,12 +93,12 @@ class ww1_solders_set extends ww1_records_set{
 		foreach($this->records as $row){
 			$even = 1-$even;
 			print "<tr class='brief" . ($even ? ' even' : ' odd') . " id_" . $row['id'] . (!isset($row['fused_match']) || empty($row['fused_match']) ? '' : ' nonstrict-match') . "'>\n";
-			// TODO: gettext
-			$details = '. ' . ($row['surname'] ? $row['surname'] : '<span class="na">(фамилия не указана)</span>') . ', ' . ($row['name'] ? $row['name'] : '<span class="na">(имя не указано)</span>'); 
+			$details = '. ' . ($row['surname'] ? $row['surname'] : '<span class="na">' .
+					__('(surname is not&nbsp;specified)', WW1_TXTDOM) . '</span>') . ', ' .
+					($row['name'] ? $row['name'] : '<span class="na">' . __('(name is not&nbsp;specified)', WW1_TXTDOM) . '</span>'); 
 			print "<td scope='row' class='align-right'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
 			foreach($brief_fields as $key => $title){
-				// TODO: gettext
-				$val = $row[$key] ? esc_html($row[$key]) : '(не&nbsp;указано)';
+				$val = $row[$key] ? esc_html($row[$key]) : __('(not&nbsp;specified)', WW1_TXTDOM);
 				if( substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
 				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $val . "</td>\n";
 			}
@@ -118,16 +117,16 @@ class ww1_solders_set extends ww1_records_set{
 					$text = esc_html($row[$key]);
 					if( $key == 'source' ){
 						if( !empty($row['source_url']) ){
+							$url = str_replace('{pg}', (int) ($row['source_pg'] + $row['source_pg_corr']), $row['source_url']);
 							if( $row['source_pg'] > 0 ){
-								// TODO: gettext
-								$text = '<a href="' . str_replace('{pg}', (int) ($row['source_pg'] + $row['source_pg_corr']), $row['source_url']) . '" target="_blank">«' . $text . '»</a>, стр.' . $row['source_pg'];
+								$text = sprintf(__('<a href="%1$s" target="_blank">“%2$s”</a>, pg.%3$s', WW1_TXTDOM), $url, $text, $row['source_pg']);
 							}else{
-								// TODO: gettext
-								$text = '<a href="' . $row['source_url'] . '" target="_blank">«' . $text . '»</a>';
+								$text = sprintf(__('<a href="%1$s" target="_blank">“%2$s”</a>', WW1_TXTDOM), $url, $text);
 							}
-						} else{
-							// TODO: gettext
-							$text = '«' . $text . '», стр.' . $row['source_pg'];
+						} elseif( $row['source_pg'] > 0 ){
+							$text = sprintf(__('“%1$s”, pg.%2$s', WW1_TXTDOM), $text, $row['source_pg']);
+						}else{
+							$text = sprintf(__('“%s”', WW1_TXTDOM), $text);
 						}
 					}
 
@@ -137,8 +136,7 @@ class ww1_solders_set extends ww1_records_set{
 							print "<td colspan='2' class='comments'>" . $row[$key] . "</td>\n";
 						else {
 							print "<th>" . $val . ":</th>\n";
-							// TODO: gettext
-							$text = $text ? $text : '(не&nbsp;указано)';
+							$text = $text ? $text : __('(not&nbsp;specified)', WW1_TXTDOM);
 							if( substr($text, 0, 1) === '(' )
 								$text = "<span class='na'>$text</span>";
 							print "<td>" . $text . "</td>\n";
@@ -178,16 +176,15 @@ class ww1_solders_set extends ww1_records_set{
 			$this->_show_report($brief_fields, $detailed_fields);
 		}else{
 			print '<p class="align-center">' . _('Unfortunately, nothing found.', WW1_TXTDOM) . '</p>';
-			// TODO: gettext
 ?>
 <div class="notfound"><p><?php _e('What to do now?', WW1_TXTDOM); ?></p>
 <ol>
 	<li><?php _e('Try to search for different spellings for names and places.', WW1_TXTDOM); ?>
-		<div class="nb">Изначально списки писались от-руки в&nbsp;условиях войны и&nbsp;не&nbsp;всегда очень грамотными писарями. Во&nbsp;время их написания, набора в&nbsp;типографии и&nbsp;во&nbsp;время оцифровки их волонтёрами могли закрасться различные ошибки;</div></li>
-	<li>Повторить поиск, исключив один из&nbsp;критериев.
-		<div class="nb">Возможно, искомые Вами данные по&nbsp;какой-то причине занесены в&nbsp;систему не&nbsp;полностью;</div></li>
-	<li>Подождать неделю-другую и повторить поиск.
-		<div class="nb">Система постоянно пополняется новыми материалами и, возможно, необходимая Вам информация будет добавлена в&nbsp;неё через некоторое время.</div></li>
+		<div class="nb"><?php _e('The lists initially were handwritten. In situation of war. Some of them are made by not very literate clerks. The various errors could been added during their writing, printing in typography and during modern digitizing by volunteers;', WW1_TXTDOM);?></div></li>
+	<li><?php _e('Remove one search criteria and repeat search.', WW1_TXTDOM); ?>
+		<div class="nb"><?php _e('Perhaps, some information not to added to database completely by some reason;', WW1_TXTDOM);?></div></li>
+	<li><?php _e('Wait for one-two weeks and repeat you search.', WW1_TXTDOM); ?>
+		<div class="nb"><?php _e('Our database is constantly updated with new materials. Perhaps, we will add information that you search;', WW1_TXTDOM);?></div></li>
 </ol></div>
 <?php
 		} // if( $this->records_cnt)

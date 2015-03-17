@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-03-17 11:41+0300\n"
-"PO-Revision-Date: 2015-03-17 11:41+0300\n"
+"POT-Creation-Date: 2015-03-17 19:55+0300\n"
+"PO-Revision-Date: 2015-03-17 19:55+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru_RU\n"
@@ -102,30 +102,62 @@ msgctxt "Field name"
 msgid "Record ID"
 msgstr "ID записи"
 
-#: class.ww1-database.php:285
+#: class.ww1-database.php:284
 msgid "also search for similar surnames"
 msgstr "также искать похожие фамилии"
 
-#: class.ww1-database.php:297
+#: class.ww1-database.php:295
 msgid "also search for abbreviations of names"
 msgstr "также искать сокращения имён"
 
-#: class.ww1-database.php:306
+#: class.ww1-database.php:304
 msgctxt "Date from … to …"
 msgid "from "
 msgstr "с "
 
-#: class.ww1-database.php:307
+#: class.ww1-database.php:305
 msgctxt "Date from … to …"
 msgid "to "
 msgstr "по "
 
-#: class.ww1-records-set.php:86
+#: class.ww1-records-set.php:85
 msgctxt "Table header “Item number”"
 msgid "No."
 msgstr "№ <nobr>п/п</nobr>"
 
-#: class.ww1-records-set.php:158
+#: class.ww1-records-set.php:97
+msgid "(surname is not&nbsp;specified)"
+msgstr "(фамилия не&nbsp;указана)"
+
+#: class.ww1-records-set.php:98
+msgid "(name is not&nbsp;specified)"
+msgstr "(имя не&nbsp;указано)"
+
+#: class.ww1-records-set.php:101 class.ww1-records-set.php:139
+msgid "(not&nbsp;specified)"
+msgstr "(не&nbsp;указано)"
+
+#: class.ww1-records-set.php:122
+#, php-format
+msgid "<a href=\"%1$s\" target=\"_blank\">“%2$s”</a>, pg.%3$s"
+msgstr "<a href=\"%1$s\" target=\"_blank\">«%2$s»</a>, стр.%3$s"
+
+#: class.ww1-records-set.php:124
+#, php-format
+msgid "<a href=\"%1$s\" target=\"_blank\">“%2$s”</a>"
+msgstr "<a href=\"%1$s\" target=\"_blank\">«%2$s»</a>"
+
+#: class.ww1-records-set.php:127
+#, php-format
+msgid "“%1$s”, pg.%2$s"
+msgstr "«%1$s», стр.%2$s"
+
+#: class.ww1-records-set.php:129
+#, php-format
+msgid "“%s”"
+msgstr "«%1$s»"
+
+#: class.ww1-records-set.php:156
 msgid ""
 "By clicking on the line that you are interested in, you will see an "
 "additional information."
@@ -133,7 +165,7 @@ msgstr ""
 "По клику на строке интересной Вам записи открывается дополнительная "
 "информация."
 
-#: class.ww1-records-set.php:159
+#: class.ww1-records-set.php:157
 msgid ""
 "You can navigate through the pages of search results by using the keys <span "
 "class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">→</span> and <span class="
@@ -143,7 +175,7 @@ msgstr ""
 "<span class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">→</span> и <span "
 "class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">←</span>."
 
-#: class.ww1-records-set.php:160
+#: class.ww1-records-set.php:158
 msgid ""
 "Many records have links to electronic copies of sources on which the "
 "database is created."
@@ -151,7 +183,7 @@ msgstr ""
 "Многие записи снабжены ссылками на электронные копии источников, по которым "
 "создавалась эта база данных."
 
-#: class.ww1-records-set.php:161
+#: class.ww1-records-set.php:159
 msgid ""
 "Usually when searching system automatically searches for similar-sounding "
 "names or spelling variations. All of these findings are displayed at the end "
@@ -161,11 +193,11 @@ msgstr ""
 "написанию варианты фамилий. Все такие находки показываются в конце списка и "
 "выделяются цветом."
 
-#: class.ww1-records-set.php:166
+#: class.ww1-records-set.php:164 inc.php:72
 msgid "Please note:"
 msgstr "Обратите внимание:"
 
-#: class.ww1-records-set.php:176
+#: class.ww1-records-set.php:174
 #, php-format
 msgid "Found %s record."
 msgid_plural "Found %s records."
@@ -173,25 +205,79 @@ msgstr[0] "Найдена %s запись."
 msgstr[1] "Найдены %s записи."
 msgstr[2] "Найдено %s записей."
 
-#: class.ww1-records-set.php:180
+#: class.ww1-records-set.php:178
 msgid "Unfortunately, nothing found."
 msgstr "Увы, ничего не найдено."
 
-#: class.ww1-records-set.php:183
+#: class.ww1-records-set.php:180
 msgid "What to do now?"
 msgstr "Что же теперь делать?"
 
-#: class.ww1-records-set.php:185
+#: class.ww1-records-set.php:182
 msgid "Try to search for different spellings for names and places."
 msgstr "Попробуйте разные близкие варианты написания имён, фамилий, мест."
 
-#: crue.php:5 crue.php:8 inc.php:71
+#: class.ww1-records-set.php:183
+msgid ""
+"The lists initially were handwritten. In situation of war. Some of them are "
+"made by not very literate clerks. The various errors could been added during "
+"their writing, printing in typography and during modern digitizing by "
+"volunteers;"
+msgstr ""
+"Изначально списки писались от-руки в&nbsp;условиях войны и&nbsp;не&nbsp;"
+"всегда очень грамотными писарями. Во&nbsp;время их написания, набора в&nbsp;"
+"типографии и&nbsp;во&nbsp;время оцифровки их волонтёрами могли закрасться "
+"различные ошибки;"
+
+#: class.ww1-records-set.php:184
+msgid "Remove one search criteria and repeat search."
+msgstr "Повторить поиск, исключив один из&nbsp;критериев."
+
+#: class.ww1-records-set.php:185
+msgid ""
+"Perhaps, some information not to added to database completely by some reason;"
+msgstr ""
+"Возможно, искомые Вами данные по&nbsp;какой-то причине занесены в&nbsp;"
+"систему не&nbsp;полностью;"
+
+#: class.ww1-records-set.php:186
+msgid "Wait for one-two weeks and repeat you search."
+msgstr "Подождать неделю-другую и повторить поиск."
+
+#: class.ww1-records-set.php:187
+msgid ""
+"Our database is constantly updated with new materials. Perhaps, we will add "
+"information that you search;"
+msgstr ""
+"Система постоянно пополняется новыми материалами и, возможно, необходимая "
+"Вам информация будет добавлена в&nbsp;неё через некоторое время."
+
+#: crew.php:5 crew.php:7 inc.php:70
 msgid "Project crew"
 msgstr "Команда проекта"
 
-#: crue.php:7 stat.php:7
+#: crew.php:6 stat.php:7
 msgid "&laquo;&nbsp;Back to search"
 msgstr "&laquo;&nbsp;Назад к&nbsp;поиску"
+
+#: crew.php:9
+msgid "Project management"
+msgstr "Руководство проектом"
+
+#: crew.php:12
+msgid "Preparation of electronic version of the lists"
+msgstr "Подготовка электронных версий списков"
+
+#: crew.php:29
+msgid "Programming"
+msgstr "Программирование"
+
+#: crew.php:34
+#, php-format
+msgid "Do you want to <a href=\"%s\" target=\"_blank\">join us? Welcome!</a>"
+msgstr ""
+"Хотите <a href=\"%s\" target=\"_blank\">присоединиться к проекту? Добро "
+"пожаловать!</a>"
 
 #: extsearch.php:19 index.php:19 index.php:26
 msgid "Search person"
@@ -323,19 +409,31 @@ msgstr "Первая мировая война, <nobr>1914&ndash;1918 гг.</nob
 msgid "The project of Union of Revival of Pedigree Traditions"
 msgstr "Проект Союза Возрождений Родословных Традиций (СВРТ)"
 
-#: inc.php:68 stat.php:5
+#: inc.php:67 stat.php:5
 msgid "Statistic"
 msgstr "Статистика"
 
-#: inc.php:69
+#: inc.php:68
 msgid "Guestbook"
 msgstr "Гостевая книга"
 
-#: inc.php:70
+#: inc.php:69
 msgid "Discussion about the project"
 msgstr "Обсуждение проекта"
 
-#: inc.php:275 inc.php:278
+#: inc.php:72
+msgid ""
+"This lists are placed in the public domain for non-commercial research only. "
+"The use of this lists for commercial purposes without the express consent of "
+"the lists owners and the project participants is prohibited."
+msgstr ""
+"Обработанные списки размещаются в свободном доступе только для "
+"некоммерческих исследований. Использование обработанных списков в "
+"коммерческих целях запрещено без получения Вами явного согласия "
+"правообладателя источника информации, СВРТ и участников проекта, "
+"осуществлявших обработку и систематизацию списков."
+
+#: inc.php:274 inc.php:277
 #, php-format
 msgid "Currently the database contains %s record."
 msgid_plural "Currently the database contains %s records."
@@ -343,13 +441,21 @@ msgstr[0] "На&nbsp;данный момент в&nbsp;базе содержит
 msgstr[1] "На&nbsp;данный момент в&nbsp;базе содержится %s записи."
 msgstr[2] "На&nbsp;данный момент в&nbsp;базе содержится %s записей."
 
-#: inc.php:280
+#: inc.php:279
 #, php-format
 msgid " Of these, %s record is now available for search."
 msgid_plural " Of these, %s records is now available for search."
 msgstr[0] " Из них %s запись доступна для поиска."
 msgstr[1] " Из них %s записи доступны для поиска."
 msgstr[2] " Из них %s записей доступно для поиска."
+
+#: inc.php:355
+msgid ""
+"You are overload the database and have been blocked for some time. Please, "
+"take a break..."
+msgstr ""
+"Вы перегружаете систему и&nbsp;были заблокированы на&nbsp;некоторое время. "
+"Сделайте перерыв…"
 
 #: index.php:27
 msgid "Advanced search"
@@ -425,3 +531,6 @@ msgstr "Распределение по вероисповеданиям"
 #: stat.php:70
 msgid "Distribution by marital status"
 msgstr "Распределение по семейному положению"
+
+#~ msgid "Do you want to <a href=\"%s\" target=\"_blank\">join us? Welcome!"
+#~ msgstr "Хотите <a href=\"%s\" target=\"_blank\">join us? Welcome!"
