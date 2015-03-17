@@ -18,14 +18,14 @@ if( $dbase->have_query){
 if( empty($squery) )
 	$title = __('Search person', WW1_TXTDOM);
 else
-	$title = sprintf(__('Search "%s"', WW1_TXTDOM), $squery);
+	$title = sprintf(__('Search “%s”', WW1_TXTDOM), $squery);
 html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
 	<h2><?php _e('Search person', WW1_TXTDOM); ?></h2>
 	<p class="small align-right"><a href="/extsearch.php"><?php _e('Advanced search', WW1_TXTDOM)?></a></p>
-	<div class='fields'><?php $dbase->search_form(); ?></div>
+	<?php $dbase->search_form(); ?>
 	<div class="buttons">
 		<button class="search" type="submit"><?php _ex('Search', 'Button name', WW1_TXTDOM)?></button>
 	</div>
@@ -46,22 +46,22 @@ if( $dbase->have_query){
 
 	// Выводим результаты в html
 	$brief_fields = array(
-		'surname'	=> _x('Surname', 'Field name', WW1_TXTDOM),
-		'name'		=> _x('Other names', 'Field name', WW1_TXTDOM),
-		'place'		=> _x('Province, Uezd, Volost, Place', 'Field name', WW1_TXTDOM),
+		'surname'	=> _x('Surname',						'Field name', WW1_TXTDOM),
+		'name'		=> _x('Other names',					'Field name', WW1_TXTDOM),
+		'place'		=> _x('Province, Uezd, Volost, Place',	'Field name', WW1_TXTDOM),
 	);
 	$detailed_fields = array(
-		'rank'				=> _x('Military rank', 'Field name', WW1_TXTDOM),
-		'religion'			=> _x('Religion', 'Field name', WW1_TXTDOM),
-		'marital'			=> _x('Marital status', 'Field name', WW1_TXTDOM),
-		'reason'			=> _x('Event', 'Field name', WW1_TXTDOM),
-		'date'				=> _x('Event date', 'Field name', WW1_TXTDOM),
-		'military_unit'		=> _x('Military unit', 'Field name', WW1_TXTDOM),
-		'place_of_event'	=> _x('Place of event', 'Field name', WW1_TXTDOM),
-		'estate_or_title'	=> _x('Title/Class', 'Field name', WW1_TXTDOM),
-		'additional_info'	=> _x('Additional info', 'Field name', WW1_TXTDOM),
-		'birthdate'			=> _x('Birthdate', 'Field name', WW1_TXTDOM),
-		'source'			=> _x('Source', 'Field name', WW1_TXTDOM),
+		'rank'				=> _x('Military rank',		'Field name', WW1_TXTDOM),
+		'religion'			=> _x('Religion',			'Field name', WW1_TXTDOM),
+		'marital'			=> _x('Marital status',		'Field name', WW1_TXTDOM),
+		'reason'			=> _x('Event',				'Field name', WW1_TXTDOM),
+		'date'				=> _x('Event date',			'Field name', WW1_TXTDOM),
+		'military_unit'		=> _x('Military unit',		'Field name', WW1_TXTDOM),
+		'place_of_event'	=> _x('Place of event',		'Field name', WW1_TXTDOM),
+		'estate_or_title'	=> _x('Title/Class',		'Field name', WW1_TXTDOM),
+		'additional_info'	=> _x('Additional info',	'Field name', WW1_TXTDOM),
+		'birthdate'			=> _x('Birthdate',			'Field name', WW1_TXTDOM),
+		'source'			=> _x('Source',				'Field name', WW1_TXTDOM),
 		'comments'			=> '',
 	);
 	$report->show_report($brief_fields, $detailed_fields);
@@ -76,6 +76,9 @@ foreach ($res as $key => $row){
 	if( empty($row['query']))	$row['query'] = '.';
 	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
 }
-if( $res)	print "<p class='lastq align-center no-print'>Некоторые последние поисковые запросы в систему: " . implode(', ', $res) . "</p>\n";
+if( $res ){
+	print "<p class='lastq align-center no-print'>" . __('Some last search queries:', WW1_TXTDOM) .
+			' ' . implode(', ', $res) . "</p>\n";
+}
 
 html_footer();

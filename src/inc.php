@@ -68,7 +68,7 @@ function html_footer(){
 		<a href="<?php print site_url('/stat.php'); ?>"><?php _e('Statistic', WW1_TXTDOM);?></a>
 		| <a href="<?php print site_url('/guestbook/'); ?>"><?php _e('Guestbook', WW1_TXTDOM);?></a> 
 		| <a href="http://forum.svrt.ru/index.php?showforum=127" target="_blank"><?php _e('Discussion about the project', WW1_TXTDOM);?></a>
-		| <a href="<?php print site_url('/crue.php'); ?>"><?php _e('Project team', WW1_TXTDOM);?></a>
+		| <a href="<?php print site_url('/crue.php'); ?>"><?php _e('Project crew', WW1_TXTDOM);?></a>
 	</p>
 	<p class="copyright"><strong>Обратите внимание:</strong> Обработанные списки размещаются в свободном доступе только для некоммерческих исследований. Использование обработанных списков в коммерческих целях запрещено без получения Вами явного согласия правообладателя источника информации, СВРТ и участников проекта, осуществлявших обработку и систематизацию списков.</p>
 <?php if( GB_DEBUG): ?>
@@ -392,3 +392,48 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 
 	return $formatted;
 }	// function format_num
+
+/**
+ * Функция расширения поискового запроса по именам
+ */
+function expand_names($names){
+	$names = preg_split('/\s+/uS', strtr(mb_strtoupper($names), 'Ё', 'Е'));
+	$have_name = false;
+	foreach($names as $key => $n){
+		$exp = array($n);
+		if( preg_match('/\b\w+(ВНА|[ВМТ]ИЧ|[МТ]ИЧНА|ИН|[ОЕ]В(Н?А)?)\b/uS', $n)){
+			// Это отчество
+			$n2 = preg_replace('/НА$/uS', 'А', preg_replace('/ИЧ$/uS', '', $n));
+			if( $n != $n2)
+				$exp[] = $n2;
+
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` IN (?keys)' .
+					' AND `is_patronimic` = 1', array('keys' => $exp));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
+
+			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+
+		}elseif(!$have_name){
+			// Это имя
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key' .
+					' AND `is_patronimic` = 0', array('key' => $n));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
+
+			$names[$key] = '^(' . implode('|', array_unique($exp)) . ')[[:>:]]';
+			$have_name = true;
+
+		}else{
+			// Это непонятно что
+			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key',
+					array('key' => $n));
+			foreach ($result as $tmp)
+				$exp = array_merge($exp, explode(' ', $tmp));
+
+			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
+		}
+	}
+	// print "<!-- "; var_export($names); print " -->";	// TODO: Remove this?
+	return $names;
+} // function expand_names

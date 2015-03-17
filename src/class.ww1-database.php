@@ -208,6 +208,12 @@ class ww1_database_solders extends ww1_database {
 	 * Генерация html-формы поиска.
 	 */
 	function search_form(){
+		// Выводим предупреждение, что поиск производится только на русском
+		if( get_locale() !== 'ru_RU' ){
+			print '<p class="nb">' . __('<strong>Please note:</strong> We have translated the interface in English, but we can not translate the whole database. Unfortunately, the search for information you still need to do in Russian.', WW1_TXTDOM) . "</p>\n";
+		}
+
+		print "<div class='fields'>";
 		if( $this->query_mode == Q_SIMPLE){
 			// Простой режим поиска ******************************************
 
@@ -223,101 +229,105 @@ class ww1_database_solders extends ww1_database {
 						"<div><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
 						"</div>\n";
 			}
-			return;
-		}
 
-		// Расширенный режим поиска **************************************
-		$dics = array();
-
-		// Получаем список всех вариантов значений воиских званий
-		$dics['rank'] = gbdb()->get_column('SELECT DISTINCT rank, rank FROM ?_persons WHERE rank != ""' .
-				' ORDER BY rank', array(), TRUE);
-
-		// Получаем список всех вариантов значений вероисповеданий
-		$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religions' .
-				' WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
-
-		// Получаем список всех вариантов значений семейных положений
-		$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_maritals' .
-				' WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
-
-		// Получаем список всех вариантов значений событий
-		$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reasons WHERE reason_cnt != 0' .
-				' ORDER BY reason', array(), TRUE);
-
-		// Получаем список всех вариантов значений типов источников
-		$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_types WHERE source_type_cnt != 0' .
-				' ORDER BY source_type', array(), TRUE);
-
-		// Выводим html-поля
-		static $fields = array(
-				'surname'	=> 'Фамилия',
-				'name'		=> 'Имя Отчество',
-				'rank'		=> 'Воинское звание',
-				'religion'	=> 'Вероисповедание',
-				'marital'	=> 'Семейное положение',
-				'region'	=> 'Губерния, уезд, волость',
-				'place'		=> 'Волость/Нас.пункт',
-				'reason'	=> 'Событие',
-				'date'		=> 'Дата события',
-				'source_type'	=> 'Тип источника',
-				'source_nr'		=> 'Номер источника',
-				'source_pg'	=> 'Страница источника',
-				'id'		=> 'ID записи',
-		);
-		foreach($fields as $key => $val){
-			switch($key){
-				case 'surname':
-					// Текстовые поля
-					print "<div class='fieldset'>" .
-							"<label for='q_$key'>$val:</label>" .
-							"<div>" .
-								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>искать похожие фамилии</label></div>" .
-							"</div>" .
-							"</div>\n";
-					break;
-
-				case 'name':
-					// Текстовые поля
-					print "<div class='fieldset'>" .
-							"<label for='q_$key'>$val:</label>" .
-							"<div>" .
-								"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-								// TODO: gettext
-								"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->name_ext ? "" : " checked='checked'") . " /> <label for='q_name_ext'>искать сокращения имён</label></div>" .
-							"</div>" .
-							"</div>\n";
-					break;
-
-				case 'date':
-					// Поля дат
-					print "<div class='field'>" .
-							"<label for='q_$key'>$val:</label>" .
-							"<div><nobr>c <input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr> " .
-								"<nobr>по <input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr></div>" .
-							"</div>\n";
-					break;
-
-				default:
-					if( in_array($key, $this->dictionary_fields)){		// Списковые поля
-						print "<div class='field'>" .
+		}else{
+			// Расширенный режим поиска **************************************
+			$dics = array();
+	
+			// Получаем список всех вариантов значений воиских званий
+			$dics['rank'] = gbdb()->get_column('SELECT DISTINCT rank, rank FROM ?_persons WHERE rank != ""' .
+					' ORDER BY rank', array(), TRUE);
+	
+			// Получаем список всех вариантов значений вероисповеданий
+			$dics['religion'] = gbdb()->get_column('SELECT id, religion FROM ?_dic_religions' .
+					' WHERE religion_cnt != 0 ORDER BY religion',  array(), TRUE);
+	
+			// Получаем список всех вариантов значений семейных положений
+			$dics['marital'] = gbdb()->get_column('SELECT id, marital FROM ?_dic_maritals' .
+					' WHERE marital_cnt != 0 ORDER BY marital', array(), TRUE);
+	
+			// Получаем список всех вариантов значений событий
+			$dics['reason'] = gbdb()->get_column('SELECT id, reason FROM ?_dic_reasons WHERE reason_cnt != 0' .
+					' ORDER BY reason', array(), TRUE);
+	
+			// Получаем список всех вариантов значений типов источников
+			$dics['source_type'] = gbdb()->get_column('SELECT id, source_type FROM ?_dic_source_types WHERE source_type_cnt != 0' .
+					' ORDER BY source_type', array(), TRUE);
+	
+			// Выводим html-поля
+			static $fields;
+			if( !is_array($fields) ){
+				$fields = array(
+					'surname'		=> _x('Surname',				'Field name', WW1_TXTDOM),
+					'name'			=> _x('Other names',			'Field name', WW1_TXTDOM),
+					'rank'			=> _x('Military rank',			'Field name', WW1_TXTDOM),
+					'religion'		=> _x('Religion',				'Field name', WW1_TXTDOM),
+					'marital'		=> _x('Marital status',			'Field name', WW1_TXTDOM),
+					'region'		=> _x('Province, Uezd, Volost',	'Field name', WW1_TXTDOM),
+					'place'			=> _x('Volost/Place',			'Field name', WW1_TXTDOM),
+					'reason'		=> _x('Event',					'Field name', WW1_TXTDOM),
+					'date'			=> _x('Event date',				'Field name', WW1_TXTDOM),
+					'source_type'	=> _x('Source type',			'Field name', WW1_TXTDOM),
+					'source_nr'		=> _x('Source number',			'Field name', WW1_TXTDOM),
+					'source_pg'		=> _x('Source page',			'Field name', WW1_TXTDOM),
+					'id'			=> _x('Record ID',				'Field name', WW1_TXTDOM),
+				);
+			}
+			foreach($fields as $key => $val){
+				switch($key){
+					case 'surname':
+						// Текстовые поля
+						print "<div class='fieldset'>" .
 								"<label for='q_$key'>$val:</label>" .
-								"<div><select id='q_$key' name='${key}[]' multiple='multiple' size='5'>";
-						foreach($dics[$key] as $k => $v)
-							print "<option value='" . esc_attr($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . esc_html($v) . "</option>";
-						print "</select></div></div>\n";
-
-					}else{	// Текстовые поля
-						print "<div class='field'>" .
-								"<label for='q_$key'>$val:</label>" .
-								"<div><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+								"<div>" .
+									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+									// TODO: gettext
+									"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>" . __('also search for similar surnames', WW1_TXTDOM) . "</label></div>" .
+								"</div>" .
 								"</div>\n";
-					}
-					break;
-			}	// switch
-		} // foreach $fields
+						break;
+	
+					case 'name':
+						// Текстовые поля
+						print "<div class='fieldset'>" .
+								"<label for='q_$key'>$val:</label>" .
+								"<div>" .
+									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+									// TODO: gettext
+									"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->name_ext ? "" : " checked='checked'") . " /> <label for='q_name_ext'>" . __('also search for abbreviations of names', WW1_TXTDOM) . "</label></div>" .
+								"</div>" .
+								"</div>\n";
+						break;
+	
+					case 'date':
+						// Поля дат
+						print "<div class='field'>" .
+								"<label for='q_$key'>$val:</label>" .
+								"<div><nobr>" . _x('from ', 'Date from … to …', WW1_TXTDOM) . "<input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr> " .
+									"<nobr>" . _x('to ', 'Date from … to …', WW1_TXTDOM) . "<input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr></div>" .
+								"</div>\n";
+						break;
+	
+					default:
+						if( in_array($key, $this->dictionary_fields)){		// Списковые поля
+							print "<div class='field'>" .
+									"<label for='q_$key'>$val:</label>" .
+									"<div><select id='q_$key' name='${key}[]' multiple='multiple' size='5'>";
+							foreach($dics[$key] as $k => $v)
+								print "<option value='" . esc_attr($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . esc_html($v) . "</option>";
+							print "</select></div></div>\n";
+	
+						}else{	// Текстовые поля
+							print "<div class='field'>" .
+									"<label for='q_$key'>$val:</label>" .
+									"<div><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
+									"</div>\n";
+						}
+						break;
+				}	// switch
+			} // foreach $fields
+		}
+		print "</div>\n";
 	}	// function
 
 		

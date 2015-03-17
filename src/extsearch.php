@@ -15,49 +15,52 @@ if( $dbase->have_query){
 	log_event($report->records_cnt);
 }
 
-html_header('Поиск ' . (empty($squery) ? 'персоны' : '"' . esc_html($squery) . '"'),
-		($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
+if( empty($squery) )
+	$title = __('Search person', WW1_TXTDOM);
+else
+	$title = sprintf(__('Search “%s”', WW1_TXTDOM), $squery);
+html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
-	<h2>Форма расширенного поиска</h2>
-	<p class="small align-right"><a href="#help">Инструкция по использованию</a> | <a href="/">Упрощённый поиск</a></p>
-	<div class='fields'><?php $dbase->search_form(); ?></div>
+	<h2><?php _e('Advanced search person', WW1_TXTDOM); ?></h2>
+	<p class="small align-right"><a href="#help"><?php _e('Search instruction', WW1_TXTDOM)?></a> | <a href="/"><?php _e('Simple search', WW1_TXTDOM)?></a></p>
+	<?php $dbase->search_form(); ?>
 	<div class="buttons">
-		<button class="search" type="submit">Искать</button>
+		<button class="search" type="submit"><?php _ex('Search', 'Button name', WW1_TXTDOM)?></button>
 	</div>
 	<div id="help">
-	<p class="nb">Фонетический поиск по фамилиям учитывает близость произношения разных звуков. Изначально списки были рукописными и часто писались «со слов», потому одна и та же фамилия может в списках быть записана очень по-разному.</p>
-	<p class="nb">Расширение поиска по именам автоматически добавляет в результаты поиска наиболее часто встречающиеся варианты сокращённых записей имени и/или отчества. Неполные совпадения выводятся в&nbsp;конце списка и&nbsp;выделяются цветом.</p>
-	<p class="nb">Во всех текстовых полях можно использовать метасимволы: «?» (вопрос)&nbsp;— заменяет один любой символ, «*» (звёздочка)&nbsp;— заменяет один и&nbsp;более любых символов. При использовании метасимволов фонетический поиск и расширение поиска не действуют.</p>
-	<p class="nb">Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;русские буквы. <a href="/translit.php">Таблица перекодировки</a>.</p>
-	<p class="nb">В списках можно выбирать или отменять выбор по&nbsp;нескольку значений. Для этого кликайте мышью держа зажатой клавишу «Ctrl» («Command» для Mac).</p>
-	<p class="nb">В полях «Номер источника», «Страница источника» и&nbsp;«ID записи» можно перечислять по&nbsp;нескольку значений через запятую или пробел.</p>
+	<p class="nb"><?php _e('The searching by surname process can be automatically expanded with using the similar surnames. The lists of persons were initially handwritten, and written as it was heard, therefore the same surname in the lists can be put differently.', WW1_TXTDOM);?></p>
+	<p class="nb"><?php _e('The searching by name process can be automatically expanded with using the name common abbreviations and shortcuts. Partial matches are displayed at the end of the list and highlighted by color.', WW1_TXTDOM);?></p>
+	<p class="nb"><?php _e('In every text fields you can use wildcard characters: “?” (question)&nbsp;&mdash; matches any single character, “*” (asterisk)&nbsp;&mdash; matches a one or more characters of any kind. If you use wildcard characters, automatic expanding of the search does not work.', WW1_TXTDOM);?></p>
+	<p class="nb"><?php printf(__('If you do not have Russian keyboard, you can type text in transliteration&nbsp;&mdash; it will be automatically encoded in Russian letters. <a href="%s">See the conversion table.</a>', WW1_TXTDOM), site_url('/translit.php'));?></p>
+	<p class="nb"><?php _e('In the lists you can select or deselect several values. To do this, click the mouse while holding down “Ctrl” key (“Command” key for Mac).', WW1_TXTDOM);?></p>
+	<p class="nb"><?php _e('In the fields “Source number”, “Source page” and “Record ID” you can list several values separated by commas or spaces.', WW1_TXTDOM);?></p>
 	</div>
 </form>
 <?php
 if( $dbase->have_query){
 	// Определяем, какие поля будут выводиться в поле краткой информации, а какие в подробной
 	$brief_fields = array(
-		'surname'	=> 'Фамилия',
-		'name'		=> 'Имя Отчество',
+		'surname'	=> _x('Surname',		'Field name', WW1_TXTDOM),
+		'name'		=> _x('Other names',	'Field name', WW1_TXTDOM),
 	);
 	$detailed_fields = array(
-		'rank'		=> 'Воинское звание',
-		'religion'	=> 'Вероисповедание',
-		'marital'	=> 'Семейное положение',
-		'region'	=> 'Губерния, Уезд, Волость',
-		'place'		=> 'Волость/Нас.пункт',
-		'reason'	=> 'Событие',
-		'date'		=> 'Дата события',
-		'military_unit'		=> 'Место службы',
-		'place_of_event'	=> 'Место события',
-		'estate_or_title'	=> 'Титул/сословие',
-		'additional_info'	=> 'Доп. инф-ция',
-		'birthdate'	=> 'Дата рождения',
-		'source'	=> 'Источник',
-		'id'		=> 'ID записи',
-		'comments'	=> '',	// Place it always last
+		'rank'				=> _x('Military rank',			'Field name', WW1_TXTDOM),
+		'religion'			=> _x('Religion',				'Field name', WW1_TXTDOM),
+		'marital'			=> _x('Marital status',			'Field name', WW1_TXTDOM),
+		'region'			=> _x('Province, Uezd, Volost',	'Field name', WW1_TXTDOM),
+		'place'				=> _x('Volost/Place',			'Field name', WW1_TXTDOM),
+		'reason'			=> _x('Event',					'Field name', WW1_TXTDOM),
+		'date'				=> _x('Event date',				'Field name', WW1_TXTDOM),
+		'military_unit'		=> _x('Military unit',			'Field name', WW1_TXTDOM),
+		'place_of_event'	=> _x('Place of event',			'Field name', WW1_TXTDOM),
+		'estate_or_title'	=> _x('Title/Class',			'Field name', WW1_TXTDOM),
+		'additional_info'	=> _x('Additional info',		'Field name', WW1_TXTDOM),
+		'birthdate'			=> _x('Birthdate',				'Field name', WW1_TXTDOM),
+		'source'			=> _x('Source',					'Field name', WW1_TXTDOM),
+		'id'				=> _x('Record ID',				'Field name', WW1_TXTDOM),
+		'comments'			=> '',	// Place it always last
 	);
 	$tmp = array();
 	foreach(array_keys($detailed_fields) as $key){

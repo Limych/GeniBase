@@ -2,20 +2,20 @@
 require_once('gb/gb.php');	// Load GeniBase
 require_once('inc.php');	// Основной подключаемый файл-заплатка
 
-html_header('Статистика');
+html_header(__('Statistic', WW1_TXTDOM));
 ?>
-<p><a href="/">« Вернуться к поиску</a></p>
-<h1>Общая статистика по базе данных</h1>
+<p><a href="/"><?php _e('&laquo;&nbsp;Back to search', WW1_TXTDOM); ?></a></p>
+<h1><?php _e('Common database statistic', WW1_TXTDOM); ?></h1>
 
 <?php
 show_records_stat();
 ?>
 
 <table class="stat">
-	<caption>Распределение по&nbsp;регионам Российской Империи</caption>
+	<caption><?php _e('Distribution by regions of Russian Empire', WW1_TXTDOM);?></caption>
 <thead><tr>
-	<th>Губерния, Уезд</th>
-	<th>Записей</th>
+	<th><?php _ex('Province, Uezd', 'Field name', WW1_TXTDOM); ?></th>
+	<th><?php _e('Records count', WW1_TXTDOM); ?></th>
 </tr></thead><tbody>
 <?php
 $even = 0;
@@ -24,10 +24,10 @@ region_stat();
 </tbody></table>
 
 <table class="stat">
-	<caption>Распределение по&nbsp;воинским званиям</caption>
+	<caption><?php _e('Distribution by military rank', WW1_TXTDOM);?></caption>
 <thead><tr>
-	<th>Воинское звание</th>
-	<th>Записей</th>
+	<th><?php _ex('Military rank', 'Field name', WW1_TXTDOM); ?></th>
+	<th><?php _e('Records count', WW1_TXTDOM); ?></th>
 </tr></thead><tbody>
 <?php
 $even = 0;
@@ -42,11 +42,11 @@ foreach ($result as $row){
 </tbody></table>
 
 <table class="stat">
-	<caption>Распределение по&nbsp;событиям</caption>
+	<caption><?php _e('Distribution by events', WW1_TXTDOM);?></caption>
 <thead><tr>
-	<th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Тип&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-	<th>Название события</th>
-	<th>Записей</th>
+	<th><?php _ex('Event type', 'Field name', WW1_TXTDOM); ?></th>
+	<th><?php _ex('Event', 'Field name', WW1_TXTDOM); ?></th>
+	<th><?php _e('Records count', WW1_TXTDOM); ?></th>
 </tr></thead><tbody>
 <?php
 $even = 0;
@@ -66,8 +66,8 @@ foreach ($result as $row){
 </tbody></table>
 
 <?php
-dic_stat('Распределение по&nbsp;вероисповеданию', 'Вероисповедание', 'religion');
-dic_stat('Распределение по&nbsp;семейному положению', 'Семейное положение', 'marital');
+dic_stat(__('Distribution by religion', WW1_TXTDOM), _x('Religion', 'Field name', WW1_TXTDOM), 'religion');
+dic_stat(__('Distribution by marital status', WW1_TXTDOM), _x('Marital status', 'Field name', WW1_TXTDOM), 'marital');
 ?>
 
 
@@ -96,7 +96,7 @@ function dic_stat($caption, $field_title, $field){
 	<caption><?php print $caption; ?></caption>
 <thead><tr>
 	<th><?php print $field_title; ?></th>
-	<th>Записей</th>
+	<th><?php _e('Records count', WW1_TXTDOM); ?></th>
 </tr></thead><tbody>
 <?php
 	$result = gbdb()->get_column('SELECT ?#field, ?#field_cnt FROM ?@table' .

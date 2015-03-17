@@ -1,18 +1,17 @@
-# Translation of GeniBase in Russian
+# Translation of GeniBase in German
 # This file is distributed under the same license as the GeniBase package.
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
 "POT-Creation-Date: 2015-03-17 11:41+0300\n"
-"PO-Revision-Date: 2015-03-17 11:41+0300\n"
+"PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: ru_RU\n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.7.4\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../\n"
@@ -34,104 +33,102 @@ msgstr ""
 #: index.php:49
 msgctxt "Field name"
 msgid "Surname"
-msgstr "Фамилия"
+msgstr ""
 
 #: class.ww1-database.php:223 class.ww1-database.php:262 extsearch.php:46
 #: index.php:50
 msgctxt "Field name"
 msgid "Other names"
-msgstr "Имя, Отчество"
+msgstr ""
 
 #: class.ww1-database.php:224
 msgctxt "Field name"
 msgid "Place of residence"
-msgstr "Место жительства"
+msgstr ""
 
 #: class.ww1-database.php:263 extsearch.php:49 index.php:54 stat.php:29
 msgctxt "Field name"
 msgid "Military rank"
-msgstr "Воинское звание"
+msgstr ""
 
 #: class.ww1-database.php:264 extsearch.php:50 index.php:55 stat.php:69
 msgctxt "Field name"
 msgid "Religion"
-msgstr "Вероисповедание"
+msgstr ""
 
 #: class.ww1-database.php:265 extsearch.php:51 index.php:56 stat.php:70
 msgctxt "Field name"
 msgid "Marital status"
-msgstr "Семейное положение"
+msgstr ""
 
 #: class.ww1-database.php:266 extsearch.php:52
 msgctxt "Field name"
 msgid "Province, Uezd, Volost"
-msgstr "Губерния, Уезд, Волость"
+msgstr ""
 
 #: class.ww1-database.php:267 extsearch.php:53
 msgctxt "Field name"
 msgid "Volost/Place"
-msgstr "Волость/Нас.пункт"
+msgstr ""
 
 #: class.ww1-database.php:268 extsearch.php:54 index.php:57 stat.php:48
 msgctxt "Field name"
 msgid "Event"
-msgstr "Событие"
+msgstr ""
 
 #: class.ww1-database.php:269 extsearch.php:55 index.php:58
 msgctxt "Field name"
 msgid "Event date"
-msgstr "Дата события"
+msgstr ""
 
 #: class.ww1-database.php:270
 msgctxt "Field name"
 msgid "Source type"
-msgstr "Тип источника"
+msgstr ""
 
 #: class.ww1-database.php:271
 msgctxt "Field name"
 msgid "Source number"
-msgstr "Номер источника"
+msgstr ""
 
 #: class.ww1-database.php:272
 msgctxt "Field name"
 msgid "Source page"
-msgstr "Стр. источника"
+msgstr ""
 
 #: class.ww1-database.php:273 extsearch.php:62
 msgctxt "Field name"
 msgid "Record ID"
-msgstr "ID записи"
+msgstr ""
 
 #: class.ww1-database.php:285
 msgid "also search for similar surnames"
-msgstr "также искать похожие фамилии"
+msgstr ""
 
 #: class.ww1-database.php:297
 msgid "also search for abbreviations of names"
-msgstr "также искать сокращения имён"
+msgstr ""
 
 #: class.ww1-database.php:306
 msgctxt "Date from … to …"
 msgid "from "
-msgstr "с "
+msgstr ""
 
 #: class.ww1-database.php:307
 msgctxt "Date from … to …"
 msgid "to "
-msgstr "по "
+msgstr ""
 
 #: class.ww1-records-set.php:86
 msgctxt "Table header “Item number”"
 msgid "No."
-msgstr "№ <nobr>п/п</nobr>"
+msgstr ""
 
 #: class.ww1-records-set.php:158
 msgid ""
 "By clicking on the line that you are interested in, you will see an "
 "additional information."
 msgstr ""
-"По клику на строке интересной Вам записи открывается дополнительная "
-"информация."
 
 #: class.ww1-records-set.php:159
 msgid ""
@@ -139,17 +136,12 @@ msgid ""
 "class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">→</span> and <span class="
 "\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">←</span>"
 msgstr ""
-"Вы можете перемещаться по страницам результатов поиска, используя клавиши "
-"<span class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">→</span> и <span "
-"class=\"kbdKey\">Ctrl</span>+<span class=\"kbdKey\">←</span>."
 
 #: class.ww1-records-set.php:160
 msgid ""
 "Many records have links to electronic copies of sources on which the "
 "database is created."
 msgstr ""
-"Многие записи снабжены ссылками на электронные копии источников, по которым "
-"создавалась эта база данных."
 
 #: class.ww1-records-set.php:161
 msgid ""
@@ -157,67 +149,63 @@ msgid ""
 "names or spelling variations. All of these findings are displayed at the end "
 "of the list and highlighted."
 msgstr ""
-"Обычно при поиске система автоматически ищет близкие по звучанию или "
-"написанию варианты фамилий. Все такие находки показываются в конце списка и "
-"выделяются цветом."
 
 #: class.ww1-records-set.php:166
 msgid "Please note:"
-msgstr "Обратите внимание:"
+msgstr ""
 
 #: class.ww1-records-set.php:176
 #, php-format
 msgid "Found %s record."
 msgid_plural "Found %s records."
-msgstr[0] "Найдена %s запись."
-msgstr[1] "Найдены %s записи."
-msgstr[2] "Найдено %s записей."
+msgstr[0] ""
+msgstr[1] ""
 
 #: class.ww1-records-set.php:180
 msgid "Unfortunately, nothing found."
-msgstr "Увы, ничего не найдено."
+msgstr ""
 
 #: class.ww1-records-set.php:183
 msgid "What to do now?"
-msgstr "Что же теперь делать?"
+msgstr ""
 
 #: class.ww1-records-set.php:185
 msgid "Try to search for different spellings for names and places."
-msgstr "Попробуйте разные близкие варианты написания имён, фамилий, мест."
+msgstr ""
 
 #: crue.php:5 crue.php:8 inc.php:71
 msgid "Project crew"
-msgstr "Команда проекта"
+msgstr ""
 
 #: crue.php:7 stat.php:7
 msgid "&laquo;&nbsp;Back to search"
-msgstr "&laquo;&nbsp;Назад к&nbsp;поиску"
+msgstr ""
 
 #: extsearch.php:19 index.php:19 index.php:26
 msgid "Search person"
-msgstr "Поиск персоны"
+msgstr ""
 
 #: extsearch.php:21 index.php:21
 #, php-format
 msgid "Search “%s”"
-msgstr "Поиск «%s»"
+msgstr ""
 
 #: extsearch.php:26
 msgid "Advanced search person"
-msgstr "Расширенный поиск"
+msgstr ""
 
 #: extsearch.php:27
 msgid "Search instruction"
-msgstr "Инструкции по поиску"
+msgstr ""
 
 #: extsearch.php:27
 msgid "Simple search"
-msgstr "Упрощённый поиск"
+msgstr ""
 
 #: extsearch.php:30 index.php:30
 msgctxt "Button name"
 msgid "Search"
-msgstr "Искать"
+msgstr ""
 
 #: extsearch.php:33
 msgid ""
@@ -226,9 +214,6 @@ msgid ""
 "written as it was heard, therefore the same surname in the lists can be put "
 "differently."
 msgstr ""
-"Поиск по фамилиям может автоматически искать близкие фамилии. Изначально "
-"списки были рукописными и часто писались «со слов», потому одна и та же "
-"фамилия может в списках быть записана очень по-разному."
 
 #: extsearch.php:34
 msgid ""
@@ -236,9 +221,6 @@ msgid ""
 "name common abbreviations and shortcuts. Partial matches are displayed at "
 "the end of the list and highlighted by color."
 msgstr ""
-"Поиск по именам может автоматически добавлять в результаты наиболее часто "
-"встречающиеся варианты сокращённых записей имени и/или отчества. Неполные "
-"совпадения выводятся в конце списка и выделяются цветом."
 
 #: extsearch.php:35
 msgid ""
@@ -247,10 +229,6 @@ msgid ""
 "one or more characters of any kind. If you use wildcard characters, "
 "automatic expanding of the search does not work."
 msgstr ""
-"Во всех текстовых полях можно использовать метасимволы: «?» (вопрос)&nbsp;"
-"&mdash; заменяет один любой символ, «*» (звёздочка)&nbsp;&mdash; заменяет "
-"один и более любых символов. При использовании метасимволов фонетический "
-"поиск и расширение поиска не действуют."
 
 #: extsearch.php:36 index.php:35
 #, php-format
@@ -259,101 +237,92 @@ msgid ""
 "transliteration&nbsp;&mdash; it will be automatically encoded in Russian "
 "letters. <a href=\"%s\">See the conversion table.</a>"
 msgstr ""
-"Если у&nbsp;вас нет русской клавиатуры, вы&nbsp;можете набирать текст в&nbsp;"
-"транслите&nbsp;&mdash; он&nbsp;будет автоматически перекодирован в&nbsp;"
-"русские буквы. <a href=\"%s\">См. таблицу перекодировки.</a>"
 
 #: extsearch.php:37
 msgid ""
 "In the lists you can select or deselect several values. To do this, click "
 "the mouse while holding down “Ctrl” key (“Command” key for Mac)."
 msgstr ""
-"В списках можно выбирать или отменять выбор по нескольку значений. Для этого "
-"кликайте мышью держа зажатой клавишу «Ctrl» («Command» для Mac)."
 
 #: extsearch.php:38
 msgid ""
 "In the fields “Source number”, “Source page” and “Record ID” you can list "
 "several values separated by commas or spaces."
 msgstr ""
-"В полях «Номер источника», «Страница источника» и «ID записи» можно "
-"перечислять по нескольку значений через запятую или пробел."
 
 #: extsearch.php:56 index.php:59
 msgctxt "Field name"
 msgid "Military unit"
-msgstr "Место службы"
+msgstr ""
 
 #: extsearch.php:57 index.php:60
 msgctxt "Field name"
 msgid "Place of event"
-msgstr "Место события"
+msgstr ""
 
 #: extsearch.php:58 index.php:61
 msgctxt "Field name"
 msgid "Title/Class"
-msgstr "Титул/Сословие"
+msgstr ""
 
 #: extsearch.php:59 index.php:62
 msgctxt "Field name"
 msgid "Additional info"
-msgstr "Доп. информация"
+msgstr ""
 
 #: extsearch.php:60 index.php:63
 msgctxt "Field name"
 msgid "Birthdate"
-msgstr "Дата рождения"
+msgstr ""
 
 #: extsearch.php:61 index.php:64
 msgctxt "Field name"
 msgid "Source"
-msgstr "Источник"
+msgstr ""
 
 #: inc.php:42
 msgctxt "HTML-page title"
 msgid "The First World War, 1914&ndash;1918"
-msgstr "Первая мировая война, 1914&ndash;1918 гг."
+msgstr ""
 
 #: inc.php:53
 msgctxt "Project title in header"
 msgid "The First World War, <nobr>1914&ndash;1918</nobr>"
-msgstr "Первая мировая война, <nobr>1914&ndash;1918 гг.</nobr>"
+msgstr ""
 
 #: inc.php:54
 msgid "The project of Union of Revival of Pedigree Traditions"
-msgstr "Проект Союза Возрождений Родословных Традиций (СВРТ)"
+msgstr ""
 
 #: inc.php:68 stat.php:5
 msgid "Statistic"
-msgstr "Статистика"
+msgstr ""
 
 #: inc.php:69
 msgid "Guestbook"
-msgstr "Гостевая книга"
+msgstr ""
 
 #: inc.php:70
 msgid "Discussion about the project"
-msgstr "Обсуждение проекта"
+msgstr ""
 
 #: inc.php:275 inc.php:278
 #, php-format
 msgid "Currently the database contains %s record."
 msgid_plural "Currently the database contains %s records."
-msgstr[0] "На&nbsp;данный момент в&nbsp;базе содержится %s запись."
-msgstr[1] "На&nbsp;данный момент в&nbsp;базе содержится %s записи."
-msgstr[2] "На&nbsp;данный момент в&nbsp;базе содержится %s записей."
+msgstr[0] ""
+msgstr[1] ""
 
 #: inc.php:280
 #, php-format
 msgid " Of these, %s record is now available for search."
 msgid_plural " Of these, %s records is now available for search."
-msgstr[0] " Из них %s запись доступна для поиска."
-msgstr[1] " Из них %s записи доступны для поиска."
-msgstr[2] " Из них %s записей доступно для поиска."
+msgstr[0] ""
+msgstr[1] ""
 
 #: index.php:27
 msgid "Advanced search"
-msgstr "Расширенный поиск"
+msgstr ""
 
 #: index.php:33
 msgid ""
@@ -361,9 +330,6 @@ msgid ""
 "errors in spelling and abbreviations of names. Partial matches are displayed "
 "at the end of the list and highlighted by color."
 msgstr ""
-"Система автоматически пытается расширить Ваш запрос с&nbsp;учётом возможных "
-"ошибок и&nbsp;сокращений в&nbsp;написании имён и&nbsp;фамилий. Неполные "
-"совпадения выводятся в&nbsp;конце списка и&nbsp;выделяются цветом."
 
 #: index.php:34
 msgid ""
@@ -373,55 +339,50 @@ msgid ""
 "boundaries of the modern territores. Place names are indicated as of the "
 "date of the war."
 msgstr ""
-"<strong>Обратите внимание:</strong> во&nbsp;времена Первой мировой войны "
-"не&nbsp;было современных республик и&nbsp;областей&nbsp;&mdash; были "
-"губернии и&nbsp;уезды Российской Империи, границы которых часто отличаются "
-"от&nbsp;границ современных территорий. Названия мест указываются по&nbsp;"
-"состоянию на&nbsp;даты войны."
 
 #: index.php:51
 msgctxt "Field name"
 msgid "Province, Uezd, Volost, Place"
-msgstr "Губерния, Уезд, Волость, Нас.пункт"
+msgstr ""
 
 #: index.php:80
 msgid "Some last search queries:"
-msgstr "Некоторые последние поисковые запросы:"
+msgstr ""
 
 #: stat.php:8
 msgid "Common database statistic"
-msgstr "Общая статистика по базе данных"
+msgstr ""
 
 #: stat.php:15
 msgid "Distribution by regions of Russian Empire"
-msgstr "Распределение по регионам Российской Империи"
+msgstr ""
 
 #: stat.php:17
 msgctxt "Field name"
 msgid "Province, Uezd"
-msgstr "Провинция, Уезд"
+msgstr ""
 
 #: stat.php:18 stat.php:30 stat.php:49 stat.php:99
 msgid "Records count"
-msgstr "Записей"
+msgstr ""
 
 #: stat.php:27
 msgid "Distribution by military rank"
-msgstr "Распределение по воинским званиям"
+msgstr ""
 
 #: stat.php:45
 msgid "Distribution by events"
-msgstr "Распределение по событиям"
+msgstr ""
 
 #: stat.php:47
 msgctxt "Field name"
 msgid "Event type"
-msgstr "Тип события"
+msgstr ""
 
 #: stat.php:69
 msgid "Distribution by religion"
-msgstr "Распределение по вероисповеданиям"
+msgstr ""
 
 #: stat.php:70
 msgid "Distribution by marital status"
-msgstr "Распределение по семейному положению"
+msgstr ""

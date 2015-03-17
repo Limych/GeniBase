@@ -2,10 +2,10 @@
 require_once('gb/gb.php');	// Load GeniBase
 require_once('inc.php');	// Основной подключаемый файл-заплатка
 
-html_header('Команда проекта');
+html_header(__('Project crew', WW1_TXTDOM));
 ?>
-<p><a href="/">« Вернуться к поиску</a></p>
-<h1>Команда проекта</h1>
+<p><a href="/"><?php _e('&laquo;&nbsp;Back to search', WW1_TXTDOM); ?></a></p>
+<h1><?php _e('Project crew', WW1_TXTDOM); ?></h1>
 <p class="crue"><strong>Общее руководство проектом:</strong>
 	<span class="name">Николай Чернухин</span>
 </p>
