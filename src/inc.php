@@ -295,7 +295,7 @@ function show_records_stat(){
  */
 function log_event($records_found = 0){
 	// Skip logging if debug mode
-	if( GB_DEBUG)	return;
+	if( GB_DEBUG )	return;
 
 	// Удаляем пустые параметры
 	$url = preg_replace_callback('/(?<=\?)(.*)(?=\#|$)/uS', function($matches){
@@ -305,7 +305,7 @@ function log_event($records_found = 0){
 	}, $_SERVER['REQUEST_URI']);
 
 		if( gbdb()->get_cell('SELECT 1 FROM ?_logs WHERE `url` = ?url AND `datetime` >= NOW() - INTERVAL 3 HOUR',
-				array('url' => $url)))
+				array('url' => $url)) )
 					return;
 
 				$tmp = trim(get_request_attr('region') . ' ' . get_request_attr('place'));
@@ -315,6 +315,7 @@ function log_event($records_found = 0){
 				$timetotal = microtime(true) - $gb_timer['start'];
 				gbdb()->set_row('?_logs', array(
 						'query'		=> $squery,
+						'uid'		=> is_bot_user(FALSE) ? '' : gb_userid(),
 						'is_robot'	=> is_bot_user(FALSE),
 						'url'		=> $url,
 						'records_found'	=> $records_found,

@@ -2,12 +2,12 @@
 /**
  * The GeniBase version string.
  */
-define('GB_VERSION', '2.2.0');
+define('GB_VERSION', '2.2.1');
 
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.
  */
-define('GB_DB_VERSION', 9);
+define('GB_DB_VERSION', 10);
 
 /**
  * Required PHP version.

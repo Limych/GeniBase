@@ -504,14 +504,14 @@ function nocache_headers() {
  */
 function gb_die( $message = '', $title = '', $args = array() ) {
 
-	if( is_int( $args ) ) {
+	if( is_int($args) ){
 		$args = array( 'response' => $args );
-	}elseif( is_int( $title ) ) {
+	}elseif( is_int($title) ){
 		$args  = array( 'response' => $title );
 		$title = '';
 	}
 
-	if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+	if( defined('DOING_AJAX') && DOING_AJAX ){
 		/**
 		 * Filter callback for killing WordPress execution for AJAX requests.
 		 *
@@ -521,7 +521,7 @@ function gb_die( $message = '', $title = '', $args = array() ) {
 		 */
 		$function = apply_filters( 'gb_die_ajax_handler', '_ajax_gb_die_handler' );
 
-	}elseif( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+	}elseif( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ){
 		/**
 		 * Filter callback for killing WordPress execution for XML-RPC requests.
 		 *
@@ -564,8 +564,8 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 
 	$have_gettext = function_exists('__');
 
-	if( function_exists( 'is_gb_error' ) && is_gb_error( $message ) ) {
-		if( empty( $title ) ) {
+	if( function_exists('is_gb_error') && is_gb_error($message) ){
+		if( empty($title) ){
 			$error_data = $message->get_error_data();
 			if( is_array( $error_data ) && isset( $error_data['title'] ) )
 				$title = $error_data['title'];
@@ -582,7 +582,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 				$message = "<ul>\n\t\t<li>" . join( "</li>\n\t\t<li>", $errors ) . "</li>\n\t</ul>";
 				break;
 		}
-	}elseif( is_string( $message ) ) {
+	}elseif( is_string($message) ){
 		$message = "<p>$message</p>";
 	}
 
@@ -591,11 +591,11 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		$message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
 	}
 
-	if( !did_action( 'admin_head' ) ) :
-		status_header($r['response']);
-		nocache_headers();
-		header( 'Content-Type: text/html; charset=utf-8' );
-	}
+// 	if( !did_action( 'admin_head' ) ):	// TODO: action admin_head
+
+	status_header($r['response']);
+	nocache_headers();
+	header( 'Content-Type: text/html; charset=utf-8' );
 
 	if( empty($title) )
 		$title = $have_gettext ? __('GeniBase Error') : 'GeniBase Error';
@@ -715,7 +715,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 	</style>
 </head>
 <body id="error-page">
-<?php endif; // ! did_action( 'admin_head' ) ?>
+<?php //endif; // ! did_action( 'admin_head' ) // TODO: action admin_head ?>
 	<?php echo $message; ?>
 </body>
 </html>
@@ -741,10 +741,11 @@ function _xmlrpc_gb_die_handler( $message, $title = '', $args = array() ) {
 
 	$r = gb_parse_args($args, $defaults);
 
-	if( $gb_xmlrpc_server ) {
-		$error = new IXR_Error( $r['response'] , $message);
-		$gb_xmlrpc_server->output( $error->getXml() );
-	}
+	// TODO: XMLRPC
+// 	if( $gb_xmlrpc_server ) {
+// 		$error = new IXR_Error( $r['response'] , $message);
+// 		$gb_xmlrpc_server->output( $error->getXml() );
+// 	}
 	die();
 }
 
@@ -759,9 +760,9 @@ function _xmlrpc_gb_die_handler( $message, $title = '', $args = array() ) {
  * @param string $message Optional. Response to print. Default empty.
  */
 function _ajax_gb_die_handler( $message = '' ) {
-	if( is_scalar( $message ) )
-		die( (string) $message );
-	die( '0' );
+	if( is_scalar($message) )
+		die((string) $message);
+	die('0');
 }
 
 /**
@@ -775,8 +776,8 @@ function _ajax_gb_die_handler( $message = '' ) {
  * @param string $message Optional. Response to print. Default empty.
  */
 function _scalar_gb_die_handler( $message = '' ) {
-	if( is_scalar( $message ) )
-		die( (string) $message );
+	if( is_scalar($message) )
+		die((string) $message);
 	die();
 }
 
@@ -793,8 +794,9 @@ function _scalar_gb_die_handler( $message = '' ) {
 function gb_allowed_protocols() {
 	static $protocols;
 
-	if( empty( $protocols ) ) {
-		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp' );
+	if( empty($protocols) ){
+		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher',
+				'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp' );
 
 		/**
 		 * Filter the list of protocols allowed in HTML attributes.
@@ -803,7 +805,7 @@ function gb_allowed_protocols() {
 		 *
 		 * @param array $protocols Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
 		*/
-		$protocols = apply_filters( 'kses_allowed_protocols', $protocols );
+		$protocols = apply_filters('kses_allowed_protocols', $protocols);
 	}
 
 	return $protocols;
@@ -820,28 +822,28 @@ function gb_allowed_protocols() {
  * @return array
  */
 function parse_query($uri = false){
-	if( $uri === false)
+	if( $uri === false )
 		$uri = $_SERVER['REQUEST_URI'];
 
-	if( $frag = strstr( $uri, '#' ) )
-		$uri = substr( $uri, 0, -strlen( $frag ) );
+	if( $frag = strstr($uri, '#') )
+		$uri = substr($uri, 0, -strlen($frag));
 	else
 		$frag = '';
 	
-	if( 0 === stripos( $uri, 'http://' ) ) {
+	if( 0 === stripos($uri, 'http://') ){
 		$protocol = 'http://';
-		$uri = substr( $uri, 7 );
-	}elseif( 0 === stripos( $uri, 'https://' ) ) {
+		$uri = substr($uri, 7);
+	}elseif( 0 === stripos($uri, 'https://') ){
 		$protocol = 'https://';
-		$uri = substr( $uri, 8 );
+		$uri = substr($uri, 8);
 	}else{
 		$protocol = '';
 	}
 	
-	if( strpos( $uri, '?' ) !== false ) {
-		list( $base, $query ) = explode( '?', $uri, 2 );
+	if( strpos($uri, '?') !== false ){
+		list($base, $query) = explode('?', $uri, 2);
 		$base .= '?';
-	}elseif( $protocol || strpos( $uri, '=' ) === false ) {
+	}elseif( $protocol || strpos($uri, '=') === false ){
 		$base = $uri . '?';
 		$query = '';
 	}else{
@@ -1048,12 +1050,12 @@ function is_bot_user($is_first_visited_page = TRUE) {
  * @return bool True if SSL, false if not used.
  */
 function is_ssl() {
-	if( isset($_SERVER['HTTPS']) ) {
+	if( isset($_SERVER['HTTPS']) ){
 		if( 'on' == strtolower($_SERVER['HTTPS']) )
 			return true;
 		if( '1' == $_SERVER['HTTPS'] )
 			return true;
-	}elseif( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
+	}elseif( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ){
 		return true;
 	}
 	return false;
@@ -1070,7 +1072,7 @@ function is_ssl() {
  * @return bool True if forced, false if not forced.
  */
 function force_ssl_login( $force = null ) {
-	return force_ssl_admin( $force );
+	return force_ssl_admin($force);
 }
 
 /**
@@ -1084,7 +1086,7 @@ function force_ssl_login( $force = null ) {
 function force_ssl_admin( $force = null ) {
 	static $forced = false;
 
-	if( !is_null( $force ) ) {
+	if( !is_null($force) ){
 		$old_forced = $forced;
 		$forced = $force;
 		return $old_forced;
@@ -1093,7 +1095,7 @@ function force_ssl_admin( $force = null ) {
 	return $forced;
 }
 
-if( !function_exists('mb_ucfirst')):
+if( !function_exists('mb_ucfirst') ):
 /**
  * Make a string's first character uppercase (Multibyte version)
  *
