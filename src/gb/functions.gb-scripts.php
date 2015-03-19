@@ -21,20 +21,21 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  *
  * @since	2.0.0
  * @access	private
+ * 
+ * @global GB_Scripts $gb_scripts The GB_Scripts object.
  *
  * @return	GB_Scripts	The GB_Scripts object for printing styles.
  */
 function _gb_scripts(){
-	static $gb_scripts;
-	if( !is_a($gb_scripts, 'GB_Scripts')){
+	if( !isset($GLOBALS['gb_scripts']) || !is_a($GLOBALS['gb_scripts'], 'GB_Scripts') ){
 		// TODO: _doing_it_wrong()
 // 		if( !did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 
-		$gb_scripts = new GB_Scripts();
+		$GLOBALS['gb_scripts'] = new GB_Scripts();
 	}
-	return $gb_scripts;
+	return $GLOBALS['gb_scripts'];
 }
 
 /**
@@ -227,4 +228,25 @@ function gb_dequeue_script( $handle ) {
  */
 function gb_script_is( $handle, $list = 'enqueued' ) {
 	return (bool) _gb_scripts()->query( $handle, $list );
+}
+
+/**
+ * Add metadata to a script.
+ *
+ * Works only if the script has already been added.
+ *
+ * Possible values for $key and $value:
+ * 'conditional' string Comments for IE 6, lte IE 7, etc.
+ *
+ * @see GB_Dependency::add_data()
+ *
+ * @since	2.2.2
+ *
+ * @param string $handle Name of the script.
+ * @param string $key    Name of data point for which we're storing a value.
+ * @param mixed  $value  String containing the data to be added.
+ * @return bool True on success, false on failure.
+ */
+function gb_script_add_data( $handle, $key, $value ){
+	return _gb_scripts()->add_data( $handle, $key, $value );
 }

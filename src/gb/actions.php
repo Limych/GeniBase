@@ -214,29 +214,29 @@ function has_filter($tag, $function_to_check = false) {
 	// Don't reset the internal array pointer
 	$filters = _gb_hooks()->filters;
 
-	$has = !empty($filters);
+	$has = !empty($filters) && isset($filters[$tag]);
 
 	// Make sure at least one priority has a filter callback
-	if( $has){
+	if( $has ){
 		$exists = false;
 		foreach($filters[$tag] as $callbacks){
-			if( !empty($callbacks)){
+			if( !empty($callbacks) ){
 				$exists = true;
 				break;
 			}
 		}
-		if( !$exists)
+		if( !$exists )
 			$has = false;
 	}
 
-	if( false === $function_to_check || false == $has)
+	if( false === $function_to_check || false == $has )
 		return $has;
 
-	if( !$idx = _gb_filter_build_unique_id($tag, $function_to_check, false))
+	if( !$idx = _gb_filter_build_unique_id($tag, $function_to_check, false) )
 		return false;
 
-	foreach((array) array_keys($filters) as $priority){
-		if( isset($filters[$tag][$priority][$idx]))
+	foreach((array) array_keys($filters[$tag]) as $priority){
+		if( isset($filters[$tag][$priority][$idx]) )
 			return $priority;
 	}
 

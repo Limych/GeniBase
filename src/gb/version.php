@@ -2,7 +2,7 @@
 /**
  * The GeniBase version string.
  */
-define('GB_VERSION', '2.2.1');
+define('GB_VERSION', '2.2.2');
 
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.

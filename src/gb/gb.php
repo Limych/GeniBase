@@ -64,6 +64,7 @@ gb_debug_mode();
 
 // Load early GeniBase files.
 require_once(GB_CORE_DIR . '/functions.php');
+require_once(GB_CORE_DIR . '/class.gb-error.php');
 require_once(GB_CORE_DIR . '/actions.php');
 require_once(GB_CORE_DIR . '/pomo/mo.php');
 require_once(GB_CORE_DIR . '/class.gb-dbase.php');

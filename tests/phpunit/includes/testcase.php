@@ -4,6 +4,12 @@ require_once dirname ( __FILE__ ) . '/trac.php';
 
 class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	protected static $forced_tickets = array ();
+
+	protected $expected_deprecated = array();
+	protected $caught_deprecated = array();
+
+	protected $expected_doing_it_wrong = array();
+	protected $caught_doing_it_wrong = array();
 	
 	/**
 	 * @var GB_UnitTest_Factory
@@ -18,7 +24,9 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 		ini_set('display_errors', 1);
 // 		$this->factory = new GB_UnitTest_Factory();
 		$this->clean_up_global_scope();
+
 		$this->start_transaction();
+		$this->expectDeprecated();
 		add_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
 	}
 
@@ -117,5 +125,94 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 		}
 		$tmp_dir = realpath( $dir );
 		return tempnam( $tmp_dir, 'gbunit' );
+	}
+
+	function expectDeprecated() {
+		$annotations = $this->getAnnotations();
+		foreach ( array( 'class', 'method' ) as $depth ) {
+			if ( ! empty( $annotations[ $depth ]['expectedDeprecated'] ) )
+				$this->expected_deprecated = array_merge( $this->expected_deprecated, $annotations[ $depth ]['expectedDeprecated'] );
+			if ( ! empty( $annotations[ $depth ]['expectedIncorrectUsage'] ) )
+				$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $annotations[ $depth ]['expectedIncorrectUsage'] );
+		}
+		add_action( 'deprecated_function_run', array( $this, 'deprecated_function_run' ) );
+		add_action( 'deprecated_argument_run', array( $this, 'deprecated_function_run' ) );
+		add_action( 'doing_it_wrong_run', array( $this, 'doing_it_wrong_run' ) );
+		add_action( 'deprecated_function_trigger_error', '__return_false' );
+		add_action( 'deprecated_argument_trigger_error', '__return_false' );
+		add_action( 'doing_it_wrong_trigger_error',      '__return_false' );
+	}
+
+	function expectedDeprecated() {
+		$errors = array();
+
+		$not_caught_deprecated = array_diff( $this->expected_deprecated, $this->caught_deprecated );
+		foreach ( $not_caught_deprecated as $not_caught ) {
+			$errors[] = "Failed to assert that $not_caught triggered a deprecated notice";
+		}
+
+		$unexpected_deprecated = array_diff( $this->caught_deprecated, $this->expected_deprecated );
+		foreach ( $unexpected_deprecated as $unexpected ) {
+			$errors[] = "Unexpected deprecated notice for $unexpected";
+		}
+
+		$not_caught_doing_it_wrong = array_diff( $this->expected_doing_it_wrong, $this->caught_doing_it_wrong );
+		foreach ( $not_caught_doing_it_wrong as $not_caught ) {
+			$errors[] = "Failed to assert that $not_caught triggered an incorrect usage notice";
+		}
+
+		$unexpected_doing_it_wrong = array_diff( $this->caught_doing_it_wrong, $this->expected_doing_it_wrong );
+		foreach ( $unexpected_doing_it_wrong as $unexpected ) {
+			$errors[] = "Unexpected incorrect usage notice for $unexpected";
+		}
+
+		if ( ! empty( $errors ) ) {
+			$this->fail( implode( "\n", $errors ) );
+		}
+	}
+
+	/**
+	 * Detect post-test failure conditions.
+	 *
+	 * We use this method to detect expectedDeprecated and expectedIncorrectUsage annotations.
+	 *
+	 * @since	2.2.2
+	 */
+	protected function assertPostConditions() {
+		$this->expectedDeprecated();
+	}
+
+	/**
+	 * Declare an expected `_deprecated_function()` or `_deprecated_argument()` call from within a test.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $deprecated Name of the function, method, class, or argument that is deprecated. Must match
+	 *                           first parameter of the `_deprecated_function()` or `_deprecated_argument()` call.
+	 */
+	public function setExpectedDeprecated( $deprecated ) {
+		array_push($this->expected_deprecated, $deprecated);
+	}
+
+	/**
+	 * Declare an expected `_doing_it_wrong()` call from within a test.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $deprecated Name of the function, method, or class that appears in the first argument of the
+	 *                           source `_doing_it_wrong()` call.
+	 */
+	public function setExpectedIncorrectUsage( $doing_it_wrong ) {
+		array_push($this->expected_doing_it_wrong, $doing_it_wrong);
+	}
+
+	function deprecated_function_run( $function ) {
+		if( !in_array($function, $this->caught_deprecated) )
+			$this->caught_deprecated[] = $function;
+	}
+
+	function doing_it_wrong_run( $function ) {
+		if( !in_array($function, $this->caught_doing_it_wrong) )
+			$this->caught_doing_it_wrong[] = $function;
 	}
 }

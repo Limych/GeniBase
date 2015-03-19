@@ -21,20 +21,21 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  *
  * @since	2.0.0
  * @access	private
+ *
+ * @global GB_Styles $gb_styles The GB_Styles object.
  * 
  * @return	GB_Styles	The GB_Styles object for printing styles.
  */
 function _gb_styles(){
-	static $gb_styles;
-	if( !is_a($gb_styles, 'GB_Styles')){
+	if( !isset($GLOBALS['gb_styles']) || !is_a($GLOBALS['gb_styles'], 'GB_Styles') ){
 		// TODO: _doing_it_wrong()
 // 		if( !did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 	
-		$gb_styles = new GB_Styles();
+		$GLOBALS['gb_styles'] = new GB_Styles();
 	}
-	return $gb_styles;
+	return $GLOBALS['gb_styles'];
 }
 
 /**
@@ -82,7 +83,7 @@ function gb_print_styles($handles = false) {
  */
 function gb_add_inline_style( $handle, $data ) {
 	if( false !== stripos($data, '</style>')){
-		_doing_it_wrong(__FUNCTION__, __('Do not pass style tags to gb_add_inline_style().'));
+		_doing_it_wrong(__FUNCTION__, __('Do not pass style tags to gb_add_inline_style().'), '2.0');
 		$data = trim(preg_replace('#<style[^>]*>(.*)</style>#is', '$1', $data));
 	}
 

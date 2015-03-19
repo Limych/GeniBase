@@ -1159,3 +1159,308 @@ function gb_guess_url() {
 
 	return rtrim($url, '/');
 }
+
+/**
+ * Mark a function as deprecated and inform when it has been used.
+ *
+ * There is a hook deprecated_function_run that will be called that can be used
+ * to get the backtrace up to what file and function called the deprecated
+ * function.
+ *
+ * The current behavior is to trigger a user error if GB_DEBUG is true.
+ *
+ * This function is to be used in every function that is deprecated.
+ *
+ * @since	2.2.2
+ * @access private
+ *
+ * @param string $function    The function that was called.
+ * @param string $version     The version of GeniBase that deprecated the function.
+ * @param string $replacement Optional. The function that should have been called. Default null.
+ */
+function _deprecated_function( $function, $version, $replacement = null ) {
+
+	/**
+	 * Fires when a deprecated function is called.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $function    The function that was called.
+	 * @param string $replacement The function that should have been called.
+	 * @param string $version     The version of GeniBase that deprecated the function.
+	 */
+	do_action( 'deprecated_function_run', $function, $replacement, $version );
+
+	/**
+	 * Filter whether to trigger an error for deprecated functions.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param bool $trigger Whether to trigger the error for deprecated functions. Default true.
+	*/
+	if( GB_DEBUG && apply_filters( 'deprecated_function_trigger_error', true ) ) {
+		if( function_exists( '__' ) ) {
+			if( ! is_null( $replacement ) )
+				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $function, $version, $replacement ) );
+			else
+				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version ) );
+		} else {
+			if( ! is_null( $replacement ) )
+				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', $function, $version, $replacement ) );
+			else
+				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version ) );
+		}
+	}
+}
+
+/**
+ * Mark a file as deprecated and inform when it has been used.
+ *
+ * There is a hook deprecated_file_included that will be called that can be used
+ * to get the backtrace up to what file and function included the deprecated
+ * file.
+ *
+ * The current behavior is to trigger a user error if GB_DEBUG is true.
+ *
+ * This function is to be used in every file that is deprecated.
+ *
+ * @since	2.2.2
+ * @access private
+ *
+ * @param string $file        The file that was included.
+ * @param string $version     The version of GeniBase that deprecated the file.
+ * @param string $replacement Optional. The file that should have been included based on ABSPATH.
+ *                            Default null.
+ * @param string $message     Optional. A message regarding the change. Default empty.
+ */
+function _deprecated_file( $file, $version, $replacement = null, $message = '' ) {
+
+	/**
+	 * Fires when a deprecated file is called.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $file        The file that was called.
+	 * @param string $replacement The file that should have been included based on ABSPATH.
+	 * @param string $version     The version of GeniBase that deprecated the file.
+	 * @param string $message     A message regarding the change.
+	 */
+	do_action( 'deprecated_file_included', $file, $replacement, $version, $message );
+
+	/**
+	 * Filter whether to trigger an error for deprecated files.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param bool $trigger Whether to trigger the error for deprecated files. Default true.
+	*/
+	if( GB_DEBUG && apply_filters( 'deprecated_file_trigger_error', true ) ) {
+		$message = empty( $message ) ? '' : ' ' . $message;
+		if( function_exists( '__' ) ) {
+			if( ! is_null( $replacement ) )
+				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $file, $version, $replacement ) . $message );
+			else
+				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $file, $version ) . $message );
+		} else {
+			if( ! is_null( $replacement ) )
+				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', $file, $version, $replacement ) . $message );
+			else
+				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', $file, $version ) . $message );
+		}
+	}
+}
+/**
+ * Mark a function argument as deprecated and inform when it has been used.
+ *
+ * This function is to be used whenever a deprecated function argument is used.
+ * Before this function is called, the argument must be checked for whether it was
+ * used by comparing it to its default value or evaluating whether it is empty.
+ * For example:
+ *
+ *     if( ! empty( $deprecated ) ) {
+ *         _deprecated_argument( __FUNCTION__, '3.0' );
+ *     }
+ *
+ *
+ * There is a hook deprecated_argument_run that will be called that can be used
+ * to get the backtrace up to what file and function used the deprecated
+ * argument.
+ *
+ * The current behavior is to trigger a user error if GB_DEBUG is true.
+ *
+ * @since	2.2.2
+ * @access private
+ *
+ * @param string $function The function that was called.
+ * @param string $version  The version of GeniBase that deprecated the argument used.
+ * @param string $message  Optional. A message regarding the change. Default null.
+ */
+function _deprecated_argument( $function, $version, $message = null ) {
+
+	/**
+	 * Fires when a deprecated argument is called.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $function The function that was called.
+	 * @param string $message  A message regarding the change.
+	 * @param string $version  The version of GeniBase that deprecated the argument used.
+	 */
+	do_action( 'deprecated_argument_run', $function, $message, $version );
+
+	/**
+	 * Filter whether to trigger an error for deprecated arguments.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param bool $trigger Whether to trigger the error for deprecated arguments. Default true.
+	*/
+	if( GB_DEBUG && apply_filters( 'deprecated_argument_trigger_error', true ) ) {
+		if( function_exists( '__' ) ) {
+			if( ! is_null( $message ) )
+				trigger_error( sprintf( __('%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s! %3$s'), $function, $version, $message ) );
+			else
+				trigger_error( sprintf( __('%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version ) );
+		} else {
+			if( ! is_null( $message ) )
+				trigger_error( sprintf( '%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s! %3$s', $function, $version, $message ) );
+			else
+				trigger_error( sprintf( '%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version ) );
+		}
+	}
+}
+
+/**
+ * Mark something as being incorrectly called.
+ *
+ * There is a hook doing_it_wrong_run that will be called that can be used
+ * to get the backtrace up to what file and function called the deprecated
+ * function.
+ *
+ * The current behavior is to trigger a user error if GB_DEBUG is true.
+ *
+ * @since	2.2.2
+ * @access private
+ *
+ * @param string $function The function that was called.
+ * @param string $message  A message explaining what has been done incorrectly.
+ * @param string $version  The version of GeniBase where the message was added.
+ */
+function _doing_it_wrong( $function, $message, $version ) {
+
+	/**
+	 * Fires when the given function is being used incorrectly.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param string $function The function that was called.
+	 * @param string $message  A message explaining what has been done incorrectly.
+	 * @param string $version  The version of GeniBase where the message was added.
+	 */
+	do_action( 'doing_it_wrong_run', $function, $message, $version );
+
+	/**
+	 * Filter whether to trigger an error for _doing_it_wrong() calls.
+	 *
+	 * @since	2.2.2
+	 *
+	 * @param bool $trigger Whether to trigger the error for _doing_it_wrong() calls. Default true.
+	*/
+	if( GB_DEBUG && apply_filters( 'doing_it_wrong_trigger_error', true ) ) {
+		if( function_exists( '__' ) ) {
+			$version = is_null( $version ) ? '' : sprintf( __( '(This message was added in version %s.)' ), $version );
+			// TODO Debugging link
+// 			$message .= ' ' . __( 'Please see <a href="http://codex.wordpress.org/Debugging_in_GeniBase">Debugging in GeniBase</a> for more information.' );
+			trigger_error( sprintf( __( '%1$s was called <strong>incorrectly</strong>. %2$s %3$s' ), $function, $message, $version ) );
+		} else {
+			$version = is_null( $version ) ? '' : sprintf( '(This message was added in version %s.)', $version );
+			// TODO Debugging link
+// 			$message .= ' Please see <a href="http://codex.wordpress.org/Debugging_in_GeniBase">Debugging in GeniBase</a> for more information.';
+			trigger_error( sprintf( '%1$s was called <strong>incorrectly</strong>. %2$s %3$s', $function, $message, $version ) );
+		}
+	}
+}
+
+/**
+ * Returns true.
+ *
+ * Useful for returning true to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @see __return_false()
+ *
+ * @return bool True.
+ */
+function __return_true() {
+	return true;
+}
+
+/**
+ * Returns false.
+ *
+ * Useful for returning false to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @see __return_true()
+ *
+ * @return bool False.
+ */
+function __return_false() {
+	return false;
+}
+
+/**
+ * Returns 0.
+ *
+ * Useful for returning 0 to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @return int 0.
+ */
+function __return_zero() {
+	return 0;
+}
+
+/**
+ * Returns an empty array.
+ *
+ * Useful for returning an empty array to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @return array Empty array.
+ */
+function __return_empty_array() {
+	return array();
+}
+
+/**
+ * Returns null.
+ *
+ * Useful for returning null to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @return null Null value.
+ */
+function __return_null() {
+	return null;
+}
+
+/**
+ * Returns an empty string.
+ *
+ * Useful for returning an empty string to filters easily.
+ *
+ * @since	2.2.2
+ *
+ * @see __return_null()
+ *
+ * @return string Empty string.
+ */
+function __return_empty_string() {
+	return '';
+}

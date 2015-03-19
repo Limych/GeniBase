@@ -97,15 +97,24 @@ class GB_Scripts extends GB_Dependencies {
 		if( false === $group && in_array($handle, $this->in_footer, true) )
 			$this->in_footer = array_diff( $this->in_footer, (array) $handle );
 
-		if( null === $this->registered[$handle]->ver )
+		$obj = $this->registered[$handle];
+
+		if( null === $obj->ver )
 			$ver = '';
 		else
-			$ver = $this->registered[$handle]->ver ? $this->registered[$handle]->ver : $this->default_version;
+			$ver = $obj->ver ? $obj->ver : $this->default_version;
 
 		if( isset($this->args[$handle]) )
 			$ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
 
-		$src = $this->registered[$handle]->src;
+		$src = $obj->src;
+		$cond_before = $cond_after = '';
+		$conditional = isset( $obj->extra['conditional'] ) ? $obj->extra['conditional'] : '';
+
+		if( $conditional ){
+			$cond_before = "<!--[if {$conditional}]>\n";
+			$cond_after = "<![endif]-->\n";
+		}
 
 		if( $this->do_concat ) {
 			/**
@@ -128,8 +137,17 @@ class GB_Scripts extends GB_Dependencies {
 			}
 		}
 
+		$has_conditional_data = $conditional && $this->get_data($handle, 'data');
+		
+		if( $has_conditional_data )
+			echo $cond_before;
+		
 		$this->print_extra_script( $handle );
-		if( !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
+	
+		if( $has_conditional_data )
+			echo $cond_after;
+
+		if( !preg_match('|^(https?:)?//|', $src) && !( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
 			$src = $this->base_url . $src;
 		}
 
@@ -142,7 +160,7 @@ class GB_Scripts extends GB_Dependencies {
 		if( !$src )
 			return true;
 
-		$tag = "<script type='text/javascript' src='$src'></script>\n";
+		$tag = "{$cond_before}<script type='text/javascript' src='$src'></script>\n{$cond_after}";
 
 		/** 
 		 * Filter the HTML script tag of an enqueued script.
