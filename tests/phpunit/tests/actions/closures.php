@@ -5,7 +5,7 @@
  *
  * @group actions
  */
-class Tests_Actions_Closures extends WP_UnitTestCase {
+class Tests_Actions_Closures extends GB_UnitTestCase {
 	function test_action_closure() {
 		$tag = 'test_action_closure';
 		$closure = function($a, $b) { $GLOBALS[$a] = $b;};
