@@ -485,28 +485,30 @@ class ww1_database_solders extends ww1_database {
 		}
 
 		$data = $ids_part = array();
-		if( !empty($ids))
+		if( !empty($ids) )
 			$ids_part = array_slice($ids, ($this->page - 1) * Q_LIMIT, Q_LIMIT);
-		if( !empty($ids_part)){
+		if( !empty($ids_part) ){
 			// Получаем текущую порцию результатов для вывода в таблицу
 			$result = gbdb()->get_table('SELECT p.*, ' . $q_fused_match .
 					' AS fused_match FROM ?_v_persons AS p WHERE p.id IN (?ids)',
 					array('ids' => $ids_part), 'id');
 			//
 			// Дополняем данные новыми (неформализуемыми) полями
-			if( !empty($result)){
-				$add_fields = gbdb()->get_row('SELECT military_unit, place_of_event, estate_or_title,' .
+			if( !empty($result) ){
+				$add_fields = gbdb()->get_table('SELECT id, military_unit, place_of_event, estate_or_title,' .
 						' additional_info, birthdate FROM ?_persons_raw WHERE id IN (?ids)',
-						array('ids' => $ids_part));
-				if( is_array($add_fields))	array_merge($result, array_filter($add_fields));
+						array('ids' => $ids_part), 'id');
 				
-				foreach ($ids_part as $id)
+				foreach ($ids_part as $id){
+					if( is_array($add_fields) && !empty($add_fields[$id]) )
+						$result[$id] = array_merge($result[$id], array_filter($add_fields[$id]));
 					$data[$id] = $result[$id];
+				}
 			}
 		}
 		$report = new ww1_solders_set($this->page, $data, count($ids));
 
-		if( defined('GB_DEBUG_SQL_PROF')) {
+		if( defined('GB_DEBUG_SQL_PROF') ) {
 			print("\n<!-- SQL-Profile:\n");
 			$total = 0;
 			$result = gbdb()->get_column('SHOW PROFILE', array(), TRUE);
