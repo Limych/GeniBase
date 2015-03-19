@@ -175,7 +175,7 @@ class ww1_solders_set extends ww1_records_set{
 					$this->records_cnt, WW1_TXTDOM), number_format_i18n($this->records_cnt)) . '</p>';
 			$this->_show_report($brief_fields, $detailed_fields);
 		}else{
-			print '<p class="align-center">' . _('Unfortunately, nothing found.', WW1_TXTDOM) . '</p>';
+			print '<p class="align-center">' . __('Unfortunately, nothing found.', WW1_TXTDOM) . '</p>';
 ?>
 <div class="notfound"><p><?php _e('What to do now?', WW1_TXTDOM); ?></p>
 <ol>
