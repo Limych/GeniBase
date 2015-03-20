@@ -130,9 +130,9 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	function expectDeprecated() {
 		$annotations = $this->getAnnotations();
 		foreach ( array( 'class', 'method' ) as $depth ) {
-			if ( ! empty( $annotations[ $depth ]['expectedDeprecated'] ) )
+			if( ! empty( $annotations[ $depth ]['expectedDeprecated'] ) )
 				$this->expected_deprecated = array_merge( $this->expected_deprecated, $annotations[ $depth ]['expectedDeprecated'] );
-			if ( ! empty( $annotations[ $depth ]['expectedIncorrectUsage'] ) )
+			if( ! empty( $annotations[ $depth ]['expectedIncorrectUsage'] ) )
 				$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $annotations[ $depth ]['expectedIncorrectUsage'] );
 		}
 		add_action( 'deprecated_function_run', array( $this, 'deprecated_function_run' ) );
@@ -166,7 +166,7 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 			$errors[] = "Unexpected incorrect usage notice for $unexpected";
 		}
 
-		if ( ! empty( $errors ) ) {
+		if( ! empty( $errors ) ) {
 			$this->fail( implode( "\n", $errors ) );
 		}
 	}

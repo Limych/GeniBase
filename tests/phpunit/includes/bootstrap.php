@@ -46,9 +46,9 @@ $PHP_SELF = $GLOBALS['PHP_SELF'] = $_SERVER['PHP_SELF'] = '/index.php';
 
 // system( GB_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) );
 
-/*require_once dirname( __FILE__ ) . '/functions.php';
+require_once dirname( __FILE__ ) . '/functions.php';
 
-$GLOBALS['_gb_die_disabled'] = false;
+/*$GLOBALS['_gb_die_disabled'] = false;
 // Allow tests to override gb_die
 tests_add_filter( 'gb_die_handler', '_gb_die_handler_filter' );
 

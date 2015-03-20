@@ -8,7 +8,7 @@ class Tests_Dependencies_Styles extends GB_UnitTestCase {
 
 	function setUp() {
 		parent::setUp();
-		if ( empty( $GLOBALS['gb_styles'] ) )
+		if( empty( $GLOBALS['gb_styles'] ) )
 			$GLOBALS['gb_styles'] = null;
 		$this->old_gb_styles = $GLOBALS['gb_styles'];
 		remove_action( 'gb_default_styles', 'gb_default_styles' );

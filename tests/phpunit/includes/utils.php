@@ -48,21 +48,21 @@ class MockAction {
 	}
 
 	function current_filter() {
-		if (is_callable('current_filter'))
+		if(is_callable('current_filter'))
 			return current_filter();
 		global $wp_actions;
 		return end($wp_actions);
 	}
 
 	function action($arg) {
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 		$args = func_get_args();
 		$this->events[] = array('action' => __FUNCTION__, 'tag'=>$this->current_filter(), 'args'=>$args);
 		return $arg;
 	}
 
 	function action2($arg) {
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 
 		$args = func_get_args();
 		$this->events[] = array('action' => __FUNCTION__, 'tag'=>$this->current_filter(), 'args'=>$args);
@@ -70,7 +70,7 @@ class MockAction {
 	}
 
 	function filter($arg) {
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 
 		$args = func_get_args();
 		$this->events[] = array('filter' => __FUNCTION__, 'tag'=>$this->current_filter(), 'args'=>$args);
@@ -78,7 +78,7 @@ class MockAction {
 	}
 
 	function filter2($arg) {
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 
 		$args = func_get_args();
 		$this->events[] = array('filter' => __FUNCTION__, 'tag'=>$this->current_filter(), 'args'=>$args);
@@ -86,7 +86,7 @@ class MockAction {
 	}
 
 	function filter_append($arg) {
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 
 		$args = func_get_args();
 		$this->events[] = array('filter' => __FUNCTION__, 'tag'=>$this->current_filter(), 'args'=>$args);
@@ -95,7 +95,7 @@ class MockAction {
 
 	function filterall($tag, $arg=NULL) {
 		// this one doesn't return the result, so it's safe to use with the new 'all' filter
-		if ($this->debug) dmp(__FUNCTION__, $this->current_filter());
+		if($this->debug) dmp(__FUNCTION__, $this->current_filter());
 
 		$args = func_get_args();
 		$this->events[] = array('filter' => __FUNCTION__, 'tag'=>$tag, 'args'=>array_slice($args, 1));
@@ -108,10 +108,10 @@ class MockAction {
 
 	// return a count of the number of times the action was called since the last reset
 	function get_call_count($tag='') {
-		if ($tag) {
+		if($tag) {
 			$count = 0;
 			foreach ($this->events as $e)
-				if ($e['action'] == $tag)
+				if($e['action'] == $tag)
 					++$count;
 				return $count;
 		}

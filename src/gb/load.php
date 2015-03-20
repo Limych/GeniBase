@@ -172,8 +172,8 @@ function gb_load_translations_early() {
 // 		if( defined( 'GB_CONTENT_DIR' ) && @is_dir( GB_CONTENT_DIR . '/languages' ) )
 // 			$locations[] = GB_CONTENT_DIR . '/languages';
 
-// 		if( @is_dir( ABSPATH . 'gb-content/languages' ) )
-// 			$locations[] = ABSPATH . 'gb-content/languages';
+// 		if( @is_dir( BASE_DIR . 'gb-content/languages' ) )
+// 			$locations[] = BASE_DIR . 'gb-content/languages';
 
 		if( @is_dir( GB_CORE_DIR . '/languages' ) )
 			$locations[] = GB_CORE_DIR . '/languages';

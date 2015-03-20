@@ -119,7 +119,7 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 			if( in_array( $call['function'], array( 'do_action', 'apply_filters' ) ) ) {
 				$caller[] = "{$call['function']}('{$call['args'][0]}')";
 			}elseif( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
-				$caller[] = $call['function'] . "('" . str_replace( array( GB_CONTENT_DIR, ABSPATH ) , '', $call['args'][0] ) . "')";
+				$caller[] = $call['function'] . "('" . str_replace( array( GB_CONTENT_DIR, BASE_DIR ) , '', $call['args'][0] ) . "')";
 			}else{
 				$caller[] = $call['function'];
 			}
@@ -1137,13 +1137,13 @@ function gb_guess_url() {
 
 		}else{
 			if( false !== strpos($_SERVER['SCRIPT_FILENAME'], $abspath_fix) ){
-				// Request is hitting a file inside ABSPATH
+				// Request is hitting a file inside BASE_DIR
 				$directory = str_replace(BASE_DIR, '', $script_filename_dir);
 				// Strip off the sub directory, and any file/query paramss
 				$path = preg_replace('#/' . preg_quote($directory, '#') . '/[^/]*$#i', '' , $_SERVER['REQUEST_URI']);
 
 			}elseif( false !== strpos($abspath_fix, $script_filename_dir) ){
-				// Request is hitting a file above ABSPATH
+				// Request is hitting a file above BASE_DIR
 				$subdirectory = substr($abspath_fix, strpos($abspath_fix, $script_filename_dir) + strlen($script_filename_dir));
 				// Strip off any file/query params from the path, appending the sub directory to the install
 				$path = preg_replace('#/[^/]*$#i', '' , $_SERVER['REQUEST_URI']) . $subdirectory;
@@ -1229,7 +1229,7 @@ function _deprecated_function( $function, $version, $replacement = null ) {
  *
  * @param string $file        The file that was included.
  * @param string $version     The version of GeniBase that deprecated the file.
- * @param string $replacement Optional. The file that should have been included based on ABSPATH.
+ * @param string $replacement Optional. The file that should have been included based on BASE_DIR.
  *                            Default null.
  * @param string $message     Optional. A message regarding the change. Default empty.
  */
@@ -1241,7 +1241,7 @@ function _deprecated_file( $file, $version, $replacement = null, $message = '' )
 	 * @since	2.2.2
 	 *
 	 * @param string $file        The file that was called.
-	 * @param string $replacement The file that should have been included based on ABSPATH.
+	 * @param string $replacement The file that should have been included based on BASE_DIR.
 	 * @param string $version     The version of GeniBase that deprecated the file.
 	 * @param string $message     A message regarding the change.
 	 */
