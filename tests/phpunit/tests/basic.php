@@ -38,7 +38,7 @@ class Tests_Basic extends GB_UnitTestCase {
 	function test_package_json() {
 		$package_json = file_get_contents(dirname(BASE_DIR) . '/package.json');
 		$package_json = json_decode($package_json, true);
-		$version = GB_VERSION;
+		list($version) = explode('-', GB_VERSION);
 		// package.json uses x.y.z, so fill cleaned $gb_version for .0 releases
 		while( substr_count($version, '.') < 2 )
 			$version .= '.0';
