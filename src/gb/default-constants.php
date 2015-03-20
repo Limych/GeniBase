@@ -9,13 +9,9 @@
  */
 
 // Direct execution forbidden for this script
-if( count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
+if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 
-
-// Запоминаем родительский каталог, как основу для всех подключаемых файлов системы
-if( !defined('BASE_DIR'))
-	define('BASE_DIR',	dirname(dirname(__FILE__)));	// no trailing slash, full paths only
 
 /**
  * Defines initial GeniBase constants
@@ -43,16 +39,6 @@ function gb_initial_constants() {
 		if( -1 != $current_limit && ( -1 == GB_MEMORY_LIMIT || $current_limit_int < $gb_limit_int ) )
 			@ini_set( 'memory_limit', GB_MEMORY_LIMIT );
 	}
-
-	/**
-	 * Allows for the core directory to be moved from the default location.
-	 * 
-	 * GB_CORE_URL is defined further down
-	 *
-	 * @since 2.0.0
-	 */
-	if( !defined('GB_CORE_DIR') )
-		define('GB_CORE_DIR',	BASE_DIR . '/gb');
 
 	/**
 	 * Allows for the core languages directory to be moved from the default location.

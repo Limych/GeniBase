@@ -8,31 +8,16 @@
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
 
-// Запрещено непосредственное исполнение этого скрипта
-if( count(get_included_files()) == 1 )	die('<b>ERROR:</b> Direct execution forbidden!');
-
-
-
-/***************************************************************************
- * Основной подключаемый файл системы
- */
-
-// Include system config
-if( !defined('GB_TESTING_MODE') ){	// … but not in testing mode
-	$base_dir = dirname(dirname(__FILE__));
-	if( !file_exists($base_dir . '/gb-config.php') )
-		die('<b>ERROR:</b> Unable to find configuration file!');
-	require_once($base_dir . '/gb-config.php');
-	unset($base_dir);
-}
-
-// Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
-require_once(dirname(__FILE__) . '/default-constants.php');
-gb_initial_constants();
+// Direct execution forbidden for this script
+if( !defined('GB_CORE_DIR') || count(get_included_files()) == 1)	die('<b>ERROR:</b> Direct execution forbidden!');
 
 // Include files required for initialization.
 require_once(GB_CORE_DIR . '/version.php');
+require_once(GB_CORE_DIR . '/default-constants.php');
 require_once(GB_CORE_DIR . '/load.php');
+
+// Set initial default constants including GB_MEMORY_LIMIT, GB_MAX_MEMORY_LIMIT, GB_DEBUG
+gb_initial_constants();
 
 // Check for the required PHP version and for the MySQL extension or a database drop-in.
 gb_check_php_mysql_versions();

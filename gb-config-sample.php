@@ -3,9 +3,6 @@
  * Настройки системы.
  */
 
-// Запрещено непосредственное исполнение этого скрипта
-if( empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(__FILE__)))	die('Direct execution forbidden!');
-
 
 
 /**
@@ -44,3 +41,18 @@ define('OVERLOAD_BAN_TIME',	60);	// На сколько минут блокир�
  * Параметры обновления индексов
  */
 define('IDX_EXPIRATION_DATE',	"2015-02-12");	// YYYY-MM-DD	Дата, созданные ранее которой индексы необходимо пересчитать
+
+
+
+/* That's all, stop editing! *********************************************************************/
+
+/** Absolute path to the root directory of this site. */
+if( !defined('BASE_DIR') )
+	define('BASE_DIR',	dirname(__FILE__));	// no trailing slash, full paths only
+
+/** Absolute path to the root directory of GeniBase core. */
+if( !defined('GB_CORE_DIR') )
+	define('GB_CORE_DIR',	BASE_DIR . '/gb');	// no trailing slash, full paths only
+
+/** Load GeniBase. */
+require_once(GB_CORE_DIR . '/gb.php');
