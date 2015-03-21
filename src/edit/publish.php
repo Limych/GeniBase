@@ -1,6 +1,6 @@
 <?php
-require_once('../gb/gb.php');	// Общие функции системы
-require_once(GB_CORE_DIR . '/publish.php');	// Функции формализации данных
+require_once('../gb-config.php');	// Load GeniBase
+require_once('functions.publish.php');	// Функции формализации данных
 
 
 
@@ -67,19 +67,19 @@ else
 			LIMIT 1');
 
 // Для отладки
-if( defined('P_DEBUG'))	print "\n\n======================================\n";
-if( defined('P_DEBUG'))	var_export($raw);
+if( defined('GB_DEBUG_PUBLISH'))	print "\n\n======================================\n";
+if( defined('GB_DEBUG_PUBLISH'))	var_export($raw);
 $pub = prepublish($raw, $have_trouble, $date_norm);
-if( defined('P_DEBUG'))	var_export($have_trouble);
-if( defined('P_DEBUG'))	var_export($pub);
+if( defined('GB_DEBUG_PUBLISH'))	var_export($have_trouble);
+if( defined('GB_DEBUG_PUBLISH'))	var_export($pub);
 
 // Если режим правки данных…
 if( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 
 	// Вычисляем вносимые изменения
-	if( defined('P_DEBUG'))	print "\n\n=== Edit ===================================\n";
+	if( defined('GB_DEBUG_PUBLISH'))	print "\n\n=== Edit ===================================\n";
 	$mod = array_diff_assoc($_POST[$_POST['mode']], $$_POST['mode']);
-	if( defined('P_DEBUG'))	var_export($mod);
+	if( defined('GB_DEBUG_PUBLISH'))	var_export($mod);
 	
 	switch($_POST['mode']){
 	case 'raw':
@@ -99,8 +99,8 @@ if( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mode'])){
 		$pub = prepublish_make_data($pub, $have_trouble);
 		break;
 	}
-if( defined('P_DEBUG'))	var_export($have_trouble);
-if( defined('P_DEBUG'))	var_export($pub);
+if( defined('GB_DEBUG_PUBLISH'))	var_export($have_trouble);
+if( defined('GB_DEBUG_PUBLISH'))	var_export($pub);
 }
 
 // Если формализация сейчас прошла успешно …

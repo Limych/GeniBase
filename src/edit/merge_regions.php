@@ -1,5 +1,5 @@
 <?php
-require_once('../gb/gb.php');	// Общие функции системы
+require_once('../gb-config.php');	// Load GeniBase
 
 
 

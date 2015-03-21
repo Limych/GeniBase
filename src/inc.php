@@ -1,4 +1,23 @@
 <?php
+
+// ** Лимиты ** //
+define('Q_LIMIT',	20);	// Лимит числа строк на одной странице результатов поиска
+define('P_LIMIT',	70);	// Лимит числа единовременно публикуемых записей
+
+define('OVERLOAD_BAN_TIME',	60);	// На сколько минут блокируется нарушитель, вызвавший перегрузку системы
+
+// ** Параметры обновления индексов ** //
+define('IDX_EXPIRATION_DATE',	"2015-02-12");	// YYYY-MM-DD	Дата, созданные ранее которой индексы необходимо пересчитать
+
+// ** Хранимый в базе период дат ** //
+define('MIN_DATE', '1913-01-01');
+define('MAX_DATE', '1920-12-31');
+
+// Индексировать только результаты поиска, в которых не более заданного числа строк
+define('MAX_RECORDS_INDEXATION', 2000);
+
+
+
 // Подключаем языковый файл проекта
 define('WW1_TXTDOM', '1914');
 load_textdomain(WW1_TXTDOM, BASE_DIR . '/languages/' . get_locale() . '.mo');
@@ -108,7 +127,7 @@ function publish_cron($force = false){
 		if( $tmp < 1)	return;
 	}
 
-	require_once(GB_CORE_DIR . '/publish.php');	// Функции формализации данных
+	require_once(BASE_DIR . '/edit/functions.publish.php');	// Функции формализации данных
 
 	// Делаем выборку записей для публикации
 	$drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft"' .

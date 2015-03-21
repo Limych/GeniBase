@@ -238,10 +238,10 @@ function maybe_serialize($data){
  * @param string $string The string to be parsed.
  * @param array $array Variables will be stored in this array.
  */
-function gb_parse_str( $string, &$array ) {
-	parse_str( $string, $array );
+function gb_parse_str($string, &$array) {
+	parse_str($string, $array);
 	if( get_magic_quotes_gpc() )
-		$array = stripslashes_deep( $array );
+		$array = stripslashes_deep($array);
 	/**
 	 * Filter the array of variables derived from a parsed string.
 	 *
@@ -249,7 +249,7 @@ function gb_parse_str( $string, &$array ) {
 	 *
 	 * @param array $array The array populated with variables.
 	*/
-	$array = apply_filters( 'gb_parse_str', $array );
+	$array = apply_filters('gb_parse_str', $array);
 }
 
 /**
@@ -265,15 +265,15 @@ function gb_parse_str( $string, &$array ) {
  * @return array Merged user defined values with defaults.
  */
 function gb_parse_args( $args, $defaults = '' ) {
-	if( is_object( $args ) )
-		$r = get_object_vars( $args );
-	elseif( is_array( $args ) )
-	$r =& $args;
+	if( is_object($args) )
+		$r = get_object_vars($args);
+	elseif( is_array($args) )
+		$r =& $args;
 	else
-		gb_parse_str( $args, $r );
+		gb_parse_str($args, $r);
 
-	if( is_array( $defaults ) )
-		return array_merge( $defaults, $r );
+	if( is_array($defaults) )
+		return array_merge($defaults, $r);
 	return $r;
 }
 
@@ -1199,16 +1199,17 @@ function _deprecated_function( $function, $version, $replacement = null ) {
 	 * @param bool $trigger Whether to trigger the error for deprecated functions. Default true.
 	*/
 	if( GB_DEBUG && apply_filters( 'deprecated_function_trigger_error', true ) ) {
+		$trace = debug_backtrace();
 		if( function_exists( '__' ) ) {
-			if( ! is_null( $replacement ) )
-				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $function, $version, $replacement ) );
+			if( !is_null( $replacement ) )
+				trigger_error(sprintf(__('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $function, $version, $replacement));
 			else
-				trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version ) );
+				trigger_error(sprintf(__('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version));
 		} else {
-			if( ! is_null( $replacement ) )
-				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', $function, $version, $replacement ) );
+			if( !is_null( $replacement ) )
+				trigger_error(sprintf('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', $function, $version, $replacement));
 			else
-				trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version ) );
+				trigger_error(sprintf('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version));
 		}
 	}
 }

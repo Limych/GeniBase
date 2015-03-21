@@ -14,7 +14,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  * Функции формализации и публикации записей
  */
 
-require_once(GB_CORE_DIR . '/class.ww1-database.php');
+require_once(BASE_DIR . '/class.ww1-database.php');
 
 /**
  * Функция нормирования дат
@@ -259,7 +259,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 		}
 
 		$tmp = trim(mb_strtolower($raw['reason']));
-// if( defined('P_DEBUG'))	var_export($tmp);	// TODO: Remove this?
+// if( defined('GB_DEBUG_PUBLISH'))	var_export($tmp);	// TODO: Remove this?
 		if( isset($reason_conts[$tmp]))
 			$raw['reason_id'] = $reason_conts[$tmp];
 	}
@@ -285,7 +285,7 @@ function prepublish($raw, &$have_trouble, &$date_norm){
 	prepublish_date($raw, $date_norm);
 
 	// Собираем данные для занесения в основную таблицу
-if( defined('P_DEBUG'))	var_export($raw);	// TODO: Remove this?
+if( defined('GB_DEBUG_PUBLISH'))	var_export($raw);	// TODO: Remove this?
 	return prepublish_make_data($raw, $have_trouble);
 } // function prepublish
 

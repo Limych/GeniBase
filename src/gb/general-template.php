@@ -181,6 +181,8 @@ function gb_footer() {
 /**
  * For internal use.
  * 
+ * @deprecated	2.2.2
+ * 
  * @access	private
  * @since	2.0.1
  * 
@@ -194,11 +196,15 @@ function _paginator_url($pg){
 /**
  * Функция формирования блока ссылок для перемещения между страницами.
  * 
+ * @deprecated	2.2.2
+ * 
  * @param	integer	$pg
  * @param	integer	$max_pg
  * @return	string
  */
 function paginator($pg, $max_pg){
+	_deprecated_function(__FUNCTION__, '2.2', 'paginate_links');
+
 	$pag = array();
 	
 	if( $pg > 1)	$pag[] = '<a href="' . _paginator_url($pg - 1) . '" class="prev">←</a>';
@@ -226,4 +232,207 @@ function paginator($pg, $max_pg){
 	if( $pg < $max_pg)	$pag[] = '<a href="' . _paginator_url($pg + 1) . '" class="next">→</a>';
 
 	return '<div class="paginator">' . implode(' ', $pag) . '</div>';
+}
+
+/**
+ * For internal use.
+ * 
+ * @access	private
+ * @since	2.2.2
+ * 
+ * @param int $page_num
+ * @param array $args	{@see paginate_links}
+ * @param string $class
+ * @param string $page_title
+ * @param string $format
+ * @return string
+ */
+function _paginate_link($page_num, $args, $class = '', $page_title = null, $format = null){
+	if( $format == null )
+		$format = $args['format'];
+	if( $page_title == null )
+		$page_title = $args['before_page_number'] . number_format_i18n($page_num) . $args['after_page_number'];
+	$link = str_replace('%_%', $format, $args['base']);
+	$link = str_replace('%#%', $page_num, $link);
+	if( $args['add_args'] )
+		$link = add_query_arg($args['add_args'], $link);
+	$link .= $args['add_fragment'];
+	
+	$rel = '';
+	if( $page_num == 1 )						$rel = 'first';
+	elseif( $page_num == $args['total'] )		$rel = 'last';
+	elseif( $page_num == $args['current'] - 1 )	$rel = 'prev';
+	elseif( $page_num == $args['current'] + 1 )	$rel = 'next';
+	
+	if( $rel )	$rel = ' rel="' . $rel . '"';
+
+	/**
+	 * Filter the paginated links for the given archive pages.
+	 *
+	 * @since 2.2.2
+	 *
+	 * @param string $link The paginated link URL.
+	 */
+	return '<a class="pagination' . ($class ? " $class" : '') . '" href="' .
+			esc_url(apply_filters('paginate_links', $link)) . '"' . $rel . '>' . $page_title . '</a>';
+}
+
+/**
+ * Retrieve paginated link for multipaged data blocks.
+ * 
+ * @since	2.2.2
+ * 
+ * @param string|array $args {
+ *		Optional. Array or string of arguments for generating paginated links for archives.
+ *
+ *		@type string $base			Base of the paginated url. Default empty.
+ *		@type string $format		Format for the pagination structure. Default empty.
+ *		@type int    $total			The total amount of pages. Default is the value WP_Query's
+ *									`max_num_pages` or 1.
+ *		@type int    $current		The current page number. Default is 'paged' query var or 1.
+ *		@type int    $end_size		How many numbers on either the start and the end list edges.
+ *									Default 1.
+ *		@type int    $tenth_size	How many numbers to either side of the current pages at
+ *									a distance of ten. Default 4.
+ *		@type int    $mid_size		How many numbers to either side of the current pages. Default 4.
+ *		@type bool   $prev_next		Whether to include the previous and next links in the list. Default true.
+ *		@type bool   $prev_text		The previous page text. Default '←'.
+ *		@type bool   $next_text		The next page text. Default '→'.
+ *		@type string $type			Controls format of the returned value. Possible values are 'plain',
+ *									'array' and 'list'. Default is 'plain'.
+ *		@type array  $add_args		An array of query args to add. Default false.
+ *		@type string $add_fragment	A string to append to each link. Default empty.
+ *		@type string $before_page_number	A string to appear before the page number. Default empty.
+ *		@type string $after_page_number		A string to append after the page number. Default empty.
+ * }
+ * @return array|string String of page links or array of page links.
+ */
+function paginate_links( $args = '' ) {
+	// Setting up default values based on the current URL.
+	$pagenum_link = html_entity_decode($_SERVER['REQUEST_URI']);
+	$url_parts    = explode('?', $pagenum_link);
+
+	// Get max pages and current page out of the current query, if available.
+	$total   = 1;
+	$current = isset($_REQUEST['pg']) ? intval($_REQUEST['pg']) : 1;
+
+	// Append the format placeholder to the base URL.
+	$pagenum_link = trailingslashit($url_parts[0]) . '%_%';
+
+	// URL base depends on permalink settings.
+	$format = '?pg=%#%';
+
+	$defaults = array(
+			'base'			=> $pagenum_link, // http://example.com/index.php%_% : %_% is replaced by format (below)
+			'format'		=> $format, // ?pg=%#% : %#% is replaced by the page number
+			'total'			=> $total,
+			'current'		=> $current,
+			'end_size'		=> 1,
+			'tenth_size'	=> 1,
+			'mid_size'		=> 4,
+			'prev_next'		=> true,
+			'prev_text'		=> '←',
+			'next_text'		=> '→',
+			'type'			=> 'plain',
+			'add_args'		=> array(), // array of query args to add
+			'add_fragment'	=> '',
+			'before_page_number'	=> '',
+			'after_page_number'		=> '',
+	);
+	
+	$args = gb_parse_args( $args, $defaults );
+
+	if( !is_array($args['add_args']) )
+		$args['add_args'] = array();
+
+	// Merge additional query vars found in the original URL into 'add_args' array.
+	if( isset($url_parts[1]) ){
+		foreach (gb_parse_args($url_parts[1]) as $key => $val)
+			if( !isset($args['add_args'][$key]) )
+				$args['add_args'][$key] = $val;
+	}
+
+	// Who knows what else people pass in $args
+	$total = (int) $args['total'];
+	if( $total < 2 )
+		return;
+
+	// Out of bounds?  Make it the default.
+	if( $args['end_size'] < 1 )		$args['end_size'] = 1;
+	if( $args['tenth_size'] < 0 )	$args['tenth_size'] = 1;
+	if( $args['mid_size'] < 0 )		$args['mid_size'] = 4;
+
+	$current  = (int) $args['current'];
+	$end_size = (int) $args['end_size'];
+	$tenth_size = (int) $args['tenth_size'];
+	$mid_size = (int) $args['mid_size'];
+
+	if( $current >= 2 ){
+		if( $args['prev_next'] ){
+			$page_links[] = _paginate_link($current - 1, $args, 'prev', $args['prev_text'],
+					($current == 2 ? '' : $args['format']));
+		}
+		for ($n = 1; $n <= $end_size; $n++)
+			$page_links[] = _paginate_link($n, $args);
+	}
+
+	if( $tenth_size && $current >= 11 + $end_size ){
+		if( $current == 11 + $end_size + $tenth_size )
+			$page_links[] = _paginate_link($current - 10 - $tenth_size, $args);
+		elseif( $current > 11 + $end_size + $tenth_size )
+			$page_links[] = '<span class="pagination dots">' . __( '&hellip;' ) . '</span>';
+
+		for ($n = max(1 + $end_size, $current - 9 - $tenth_size); $n <= $current - 10; $n++)
+			$page_links[] = _paginate_link($n, $args);
+	}
+
+	if( $current == 2 + $end_size + $mid_size )
+		$page_links[] = _paginate_link($current - $mid_size - 1, $args);
+	elseif( $current > 2 + $end_size + $mid_size )
+		$page_links[] = '<span class="pagination dots">' . __( '&hellip;' ) . '</span>';
+
+	for ($n = max(1 + $end_size, $current - $mid_size); $n < $current; $n++)
+		$page_links[] = _paginate_link($n, $args);
+	$page_links[] = '<span class="pagination current">' . $args['before_page_number'] .
+			number_format_i18n($current) . $args['after_page_number'] . '</span>';
+	for ($n = $current + 1; $n <= min($total - $end_size, $current + $mid_size); $n++)
+		$page_links[] = _paginate_link($n, $args);
+
+	if( $current == $total - 1 - $end_size - $mid_size )
+		$page_links[] = _paginate_link($current + $mid_size + 1, $args);
+	elseif( $current < $total - 1 - $end_size - $mid_size )
+		$page_links[] = '<span class="pagination dots">' . __( '&hellip;' ) . '</span>';
+
+	if( $tenth_size && $current <= $total - 9 - $end_size ){
+		for ($n = $current + 10; $n <= min($total - $end_size, $current + 9 + $tenth_size); $n++)
+			$page_links[] = _paginate_link($n, $args);
+
+		if( $current == $total - 10 - $tenth_size - $end_size )
+			$page_links[] = _paginate_link($current + 10 + $tenth_size, $args);
+		elseif( $current < $total - 10 - $tenth_size - $end_size )
+			$page_links[] = '<span class="pagination dots">' . __( '&hellip;' ) . '</span>';
+	}
+
+	if( $current <= $total - 1 ){
+		for ($n = $total - $end_size + 1; $n <= $total; $n++)
+			$page_links[] = _paginate_link($n, $args);
+		if( $args['prev_next'] && $current < $total )
+			$page_links[] = _paginate_link($current + 1, $args, 'next', $args['next_text']);
+	}
+
+	switch ($args['type']) {
+		case 'array' :
+			return $page_links;
+
+		case 'list' :
+			$r .= "<ul class='pagination'>\n\t<li>";
+			$r .= join("</li>\n\t<li>", $page_links);
+			$r .= "</li>\n</ul>\n";
+			break;
+
+		default :
+			$r = join("\n", $page_links);
+			break;
+	}
+	return $r;
 }

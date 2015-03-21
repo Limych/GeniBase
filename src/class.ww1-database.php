@@ -16,6 +16,8 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 
+if( !defined('GB_DEBUG_SQL_PROF') )		define('GB_DEBUG_SQL_PROF', false);
+
 /*
 CREATE VIEW `?_v_persons` AS SELECT
 	 `p`.`id`				AS `id`,
@@ -468,10 +470,10 @@ class ww1_database_solders extends ww1_database {
 		$from	= ' FROM ' . implode(', ', $from);
 		$where	= ' WHERE ' . implode(' AND ', $where);
 		$order	= empty($order) ? '' : (' ORDER BY ' . implode(', ', $order));
-		$query	= 'SELECT' . (!defined('GB_DEBUG_SQL_PROF') ? '' : ' SQL_NO_CACHE') . ' p.id' .
+		$query	= 'SELECT' . ( !GB_DEBUG_SQL_PROF ? '' : ' SQL_NO_CACHE' ) . ' p.id' .
 				$from . $where . $order;
 		
-		if( defined('GB_DEBUG_SQL_PROF'))
+		if( GB_DEBUG_SQL_PROF )
 			gbdb()->query('SET PROFILING=1');
 
 		$ids = false;
@@ -508,7 +510,7 @@ class ww1_database_solders extends ww1_database {
 		}
 		$report = new ww1_solders_set($this->page, $data, count($ids));
 
-		if( defined('GB_DEBUG_SQL_PROF') ) {
+		if( GB_DEBUG_SQL_PROF ){
 			print("\n<!-- SQL-Profile:\n");
 			$total = 0;
 			$result = gbdb()->get_column('SHOW PROFILE', array(), TRUE);

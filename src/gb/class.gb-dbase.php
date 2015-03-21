@@ -15,9 +15,6 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 
-// Инициализация режима отладки значением по умолчанию
-if( !defined('GB_DEBUG_SQL'))	define('GB_DEBUG_SQL', FALSE);
-
 /***************************************************************************
  * Класс работы с базой данных
  */
@@ -38,7 +35,7 @@ class GB_DBase	{
 	/**
 	 * Whether to show SQL/DB errors.
 	 *
-	 * Default behavior is to show errors if both GB_DEBUG, GB_DEBUG_SQL and GB_DEBUG_DISPLAY
+	 * Default behavior is to show errors if both GB_DEBUG and GB_DEBUG_DISPLAY
 	 * evaluated to true.
 	 *
 	 * @since	2.0.0
@@ -379,9 +376,6 @@ class GB_DBase	{
 			);
 		}
 		$regexp .= ')/';
-
-		// TODO: Remove this?
-// 		if( GB_DEBUG_SQL)	print("\n<!-- $regexp -->\n");
 			
 		$self = $this;
 		$query = preg_replace_callback(
@@ -486,24 +480,24 @@ class GB_DBase	{
 	public function print_error($error = ''){
 		global $GB_SQL_ERROR;
 	
-		if( !$error)	$error = $this->db->error;
+		if( !$error )	$error = $this->db->error;
 		$this->last_error = $error;
 		$GB_SQL_ERROR[] = array('query' => $this->last_query, 'error_str' => $error);
 	
-		if( $this->suppress_errors)
+		if( $this->suppress_errors )
 			return;
 	
 		gb_load_translations_early();
 	
-		if( $caller = $this->get_caller())
-			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s made by %3$s', $error, $this->last_query, $caller);
+		if( $caller = $this->get_caller() )
+			$error_str = sprintf('GeniBase database error "%1$s" for query %2$s made by %3$s', $error, $this->last_query, $caller);
 		else
-			$error_str = sprintf( 'GeniBase database error "%1$s" for query %2$s', $error, $this->last_query);
+			$error_str = sprintf('GeniBase database error "%1$s" for query %2$s', $error, $this->last_query);
 	
 		error_log($error_str);
 	
 		// Are we showing errors?
-		if( !$this->show_errors)
+		if( !$this->show_errors )
 			return;
 	
 		// If there is an error then take note of it
@@ -544,7 +538,7 @@ class GB_DBase	{
 
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if( GB_DEBUG_SQL)	gb_debug_info($query_sub, __CLASS__);
+		if( GB_DEBUG_DISPLAY )	gb_debug_info($query_sub, __CLASS__);
 		
 		// Remove any comments from query and trim space symbols.
 		$query_sub = trim($this->remove_comments($query_sub));
@@ -552,30 +546,30 @@ class GB_DBase	{
 		// Keep track of the last query for debug.
 		$this->last_query = $query_sub;
 
-		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES )
 			$time_start = microtime(true);
 
 		$result = @$this->db->query($query_sub);
 		$this->num_queries++;
 
-		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
+		if( defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES )
 			$this->queries[] = array($query_sub, microtime(true) - $time_start, $this->get_caller());
 
 		// If there is an error then take note of it.
-		if( $this->db->error){
+		if( $this->db->error ){
 			// Clear insert_id on a subsequent failed insert.
-			if( $this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub))
+			if( $this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub) )
 				$this->insert_id = 0;
 
 			$this->print_error();
 			return FALSE;
 		}
 
-		if( preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query)){
+		if( preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query) ){
 			$this->rows_affected = $this->db->affected_rows;
 
 			// Take note of the insert_id
-			if( preg_match('/^(INSERT|REPLACE)\s/usi', $query))
+			if( preg_match('/^(INSERT|REPLACE)\s/usi', $query) )
 				$this->insert_id = $this->db->insert_id;
 
 			// Return number of rows affected

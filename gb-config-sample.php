@@ -1,58 +1,53 @@
 <?php
 /**
- * Настройки системы.
+ * The base configurations of the GeniBase.
+ *
+ * This file has the following configurations: MySQL settings, Secret Keys,
+ * and BASE_DIR. You can get the MySQL settings from your web host.
+ *
+ * This file is used by the gb-config.php creation script during the
+ * installation. You don't have to use the web site, you can just copy this file
+ * to "gb-config.php" and fill in the values.
+ *
+ * @package GeniBase
  */
 
+// ** MySQL settings - You can get this info from your web host ** //
+/** MySQL hostname */
+define('DB_HOST',		'localhost');
 
+/** MySQL database username */
+define('DB_USER',		'your_username_here');
+
+/** MySQL database password */
+define('DB_PASSWORD',	'your_password_here');
+
+/** The name of the database for WordPress */
+define('DB_BASE',		'your_database_name_here');
+
+/** GeniBase Database Table prefix. */
+define('DB_PREFIX',		'gb_');	// Only numbers, letters, and underscores please!
 
 /**
- * Флаги режимов отладки
+ * For developers: GeniBase debugging mode.
+ *
+ * Uncomment this to enable the display of notices during development.
+ * It is strongly recommended that plugin and theme developers use GB_DEBUG
+ * in their development environments.
  */
-// define('GB_DEBUG',	TRUE);	// Общий режим отладки
-//
-// define('GB_DEBUG_SQL',	TRUE);	// Режим отладки SQL-запросов
-// define('GB_DEBUG_SQL_PROF',	TRUE);	// Режим профилирования SQL-запросов
-// define('P_DEBUG',	TRUE);	// Режим отладки сиситемы ручной публикации
+// define('GB_DEBUG', true);
 
 
 
-/**
- * Настройки подключения к базе данных
- */
-define('DB_HOST',		'localhost');				// URL MySQL-сервера
-define('DB_USER',		'yourusernamehere');		// Имя пользователя
-define('DB_PASSWORD',	'yourpasswordhere');		// Пароль
-define('DB_BASE',		'youremptytestdbnamehere');	// Имя базы данных
-define('DB_PREFIX',		'gb_');	// Префикс таблиц в базе. Only numbers, letters, and underscores please!
-
-/**
- * Лимиты
- */
-define('Q_LIMIT',	20);	// Лимит числа строк на одной странице результатов поиска
-define('P_LIMIT',	70);	// Лимит числа единовременно публикуемых записей
-
-
-
-define('OVERLOAD_BAN_TIME',	60);	// На сколько минут блокируется нарушитель, вызвавший перегрузку системы
-
-
-
-/**
- * Параметры обновления индексов
- */
-define('IDX_EXPIRATION_DATE',	"2015-02-12");	// YYYY-MM-DD	Дата, созданные ранее которой индексы необходимо пересчитать
-
-
-
-/* That's all, stop editing! *********************************************************************/
+/* That's all, stop editing! ***************************************************/
 
 /** Absolute path to the root directory of this site. */
 if( !defined('BASE_DIR') )
-	define('BASE_DIR',	dirname(__FILE__));	// no trailing slash, full paths only
+	define('BASE_DIR', dirname(__FILE__));
 
 /** Absolute path to the root directory of GeniBase core. */
 if( !defined('GB_CORE_DIR') )
-	define('GB_CORE_DIR',	BASE_DIR . '/gb');	// no trailing slash, full paths only
+	define('GB_CORE_DIR', BASE_DIR . '/gb');
 
 /** Load GeniBase. */
 require_once(GB_CORE_DIR . '/gb.php');

@@ -7,7 +7,7 @@ define('GB_VERSION', '2.2.2');
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.
  */
-define('GB_DB_VERSION', 10);
+define('GB_DB_VERSION', 11);
 
 /**
  * Required PHP version.
@@ -21,7 +21,7 @@ define('GB_MYSQL_REQUIRED',	'5.0');
 
 
 
-/*** Don't edit below this line *******************************************************/
+// ** Don't edit below this line ******************************************************* //
 
 // Add GeniBase version to headers
 @header("X-Generator: GeniBase/" . GB_VERSION . "\n");
