@@ -121,7 +121,7 @@ if( !function_exists('hash_equals') ):
  * This function was added in PHP 5.6.
  * It can leak the length of a string.
  *
- * @since 2.2.2
+ * @since	2.2.2
  *
  * @param string $a Expected string.
  * @param string $b Actual string.

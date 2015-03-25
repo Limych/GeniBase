@@ -18,7 +18,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 /**
  * Checks for invalid UTF8 in a string.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string The text which is to be checked.
  * @param boolean $strip Optional. Whether to attempt to strip out invalid UTF8. Default is false.
@@ -52,7 +52,7 @@ function gb_check_invalid_utf8($string, $strip = false){
  * $quote_style can be set to ENT_COMPAT to decode " entities,
  * or ENT_QUOTES to do both " and '. Default is ENT_NOQUOTES where no quotes are decoded.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string The text which is to be decoded.
  * @param mixed $quote_style Optional. Converts double quotes if set to ENT_COMPAT, both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES. Also compatible with old _gb_specialchars() values; converting single quotes if set to 'single', double if set to 'double' or both if otherwise set. Default is ENT_NOQUOTES.
@@ -109,7 +109,7 @@ function gb_specialchars_decode($string, $quote_style = ENT_NOQUOTES){
  * $quote_style can be set to ENT_COMPAT to encode " to
  * &quot;, or ENT_QUOTES to do both. Default is ENT_NOQUOTES where no quotes are encoded.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @param string $string The text which is to be encoded.
@@ -170,7 +170,7 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 /**
  * Escaping for HTML attributes.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $text
  * @return string
@@ -184,18 +184,18 @@ function esc_attr($text) {
 	 * Text passed to esc_attr() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-	return apply_filters('escape_attribute', $safe_text, $text);
+	return GB_Hooks::apply_filters('escape_attribute', $safe_text, $text);
 }
 
 /**
  * Escaping for HTML blocks.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $text
  * @return string
@@ -209,12 +209,12 @@ function esc_html($text){
 	 * Text passed to esc_html() is stripped of invalid or special characters
 	 * before output.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-	return apply_filters('escape_html', $safe_text, $text);
+	return GB_Hooks::apply_filters('escape_html', $safe_text, $text);
 }
 
 /**
@@ -224,7 +224,7 @@ function esc_html($text){
  * (in a tag attribute, for example onclick="..."). Note that the strings have to
  * be in single quotes. The filter 'js_escape' is also applied here.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $text The text to be escaped.
  * @return string Escaped text.
@@ -241,12 +241,12 @@ function esc_js( $text ) {
 	 * Text passed to esc_js() is stripped of invalid or special characters,
 	 * and properly slashed for output.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $safe_text The text after it has been escaped.
 	 * @param string $text      The text prior to being escaped.
 	 */
-	return apply_filters( 'js_escape', $safe_text, $text );
+	return GB_Hooks::apply_filters( 'js_escape', $safe_text, $text );
 }
 
 /**
@@ -256,7 +256,7 @@ function esc_js( $text ) {
  * (the default behaviour) ampersands are also replaced. The 'clean_url' filter
  * is applied to the returned cleaned URL.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols Optional. An array of acceptable protocols.
@@ -301,13 +301,13 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 	/**
 	 * Filter a string cleaned and escaped for output as a URL.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $good_protocol_url The cleaned URL to be returned.
 	 * @param string $original_url      The URL prior to cleaning.
 	 * @param string $_context          If 'display', replace ampersands and single quotes only.
 	 */
-	return apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
+	return GB_Hooks::apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
 }
 
 /**
@@ -317,7 +317,7 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
  * e.g. $subject = '%0%0%0DDD', $search ='%0D', $result ='' rather than the '%0%0DD' that
  * str_replace would return
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @param string|array $search The value being searched for, otherwise known as the needle. An array may be used to designate multiple needles.

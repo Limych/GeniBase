@@ -18,7 +18,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  *
  * @see gb_debug_mode()
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function gb_initial_constants() {
 	// set memory limits
@@ -43,7 +43,7 @@ function gb_initial_constants() {
 	/**
 	 * Allows for the core languages directory to be moved from the default location.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_LANG_DIR') )
 		define('GB_LANG_DIR',	GB_CORE_DIR . '/languages');
@@ -53,7 +53,7 @@ function gb_initial_constants() {
 	 * 
 	 * GB_CONTENT_URL is defined further down
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_CONTENT_DIR') )
 		define('GB_CONTENT_DIR', BASE_DIR . '/gb-content'); // no trailing slash, full paths only
@@ -63,7 +63,7 @@ function gb_initial_constants() {
 	 * 
 	 * GB_CONTENT_CACHE_URL is defined further down
 	 *
-	 * @since 2.1.1
+	 * @since	2.1.1
 	 */
 	if( !defined('GB_CONTENT_CACHE_DIR') )
 		define('GB_CONTENT_CACHE_DIR', GB_CONTENT_DIR . '/cache'); // no trailing slash, full paths only
@@ -73,7 +73,7 @@ function gb_initial_constants() {
 	 * 
 	 * Add define('GB_DEBUG', true); to gb-config.php to enable display of notices during development.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_DEBUG') )
 		define('GB_DEBUG', false);
@@ -85,7 +85,7 @@ function gb_initial_constants() {
 	 * setting for display_errors and not force errors to be displayed. Use false to force
 	 * display_errors off.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_DEBUG_DISPLAY') )
 		define( 'GB_DEBUG_DISPLAY', true );
@@ -95,7 +95,7 @@ function gb_initial_constants() {
 	 *
 	 * Add define('GB_DEBUG_LOG', true); to enable error logging to gb-content/debug.log.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_DEBUG_LOG') )
 		define('GB_DEBUG_LOG', false);
@@ -112,7 +112,7 @@ function gb_initial_constants() {
 /**
  * Defines plugin directory GeniBase constants
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function gb_plugin_constants() {
 	// Запоминаем текущий каталог, как корень сайта
@@ -126,7 +126,7 @@ function gb_plugin_constants() {
 	 * 
 	 * GB_CORE_DIR is defined further up
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_CORE_URL') )
 		define( 'GB_CORE_URL', BASE_URL . '/gb');
@@ -136,7 +136,7 @@ function gb_plugin_constants() {
 	 * 
 	 * GB_CONTENT_DIR is defined further up
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	if( !defined('GB_CONTENT_URL') )
 		define( 'GB_CONTENT_URL', BASE_URL . '/gb-content');
@@ -146,7 +146,7 @@ function gb_plugin_constants() {
 	 * 
 	 * GB_CONTENT_CACHE_DIR is defined further up
 	 *
-	 * @since 2.1.1
+	 * @since	2.1.1
 	 */
 	if( !defined('GB_CONTENT_CACHE_URL') )
 		define( 'GB_CONTENT_CACHE_URL', GB_CONTENT_URL . '/cache'); // full url
@@ -154,7 +154,7 @@ function gb_plugin_constants() {
 	/**
 	 * Allows for the plugins directory to be moved from the default location.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	// TODO: plugins
 // 	if( !defined('GB_PLUGIN_DIR') )
@@ -163,7 +163,7 @@ function gb_plugin_constants() {
 	/**
 	 * Allows for the plugins directory to be moved from the default location.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	// TODO: plugins
 // 	if( !defined('GB_PLUGIN_URL') )
@@ -173,13 +173,13 @@ function gb_plugin_constants() {
 /**
  * Defines cookie related GeniBase constants
  * 
- * @since 2.1.1
+ * @since	2.1.1
  */
 function gb_cookie_constants() {
 	/**
 	 * Used to guarantee unique hash cookies
 	 *
-	 * @since 2.1.1
+	 * @since	2.1.1
 	 */
 // 	if( !defined('GB_COOKIE_HASH') ){
 // 		$siteurl = BASE_URL;	// TODO: options
@@ -191,69 +191,75 @@ function gb_cookie_constants() {
 // 	}
 
 	/**
-	 * @since 2.1.1
+	 * @since	2.1.1
 	 */
 	if( !defined('GB_COOKIE_USERID') )
 		define('GB_COOKIE_USERID', 'gb_uid' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.1.1
+	 * @since	2.2.3
+	 */
+	if( !defined('GB_COOKIE_LANG') )
+		define('GB_COOKIE_LANG', 'gb_lang' . GB_COOKIE_HASH);
+
+	/**
+	 * @since	2.1.1
 	 */
 	// TODO: users
 // 	if( !defined('USER_COOKIE') )
 // 		define('USER_COOKIE', 'wordpressuser_' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	// TODO: users
 // 	if( !defined('PASS_COOKIE') )
 // 		define('PASS_COOKIE', 'wordpresspass_' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.5.0
+	 * @since	2.5.0
 	 */
 	// TODO: users
 // 	if( !defined('AUTH_COOKIE') )
 // 		define('AUTH_COOKIE', 'wordpress_' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.6.0
+	 * @since	2.6.0
 	 */
 	// TODO: users
 // 	if( !defined('SECURE_AUTH_COOKIE') )
 // 		define('SECURE_AUTH_COOKIE', 'wordpress_sec_' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.6.0
+	 * @since	2.6.0
 	 */
 	// TODO: users
 // 	if( !defined('LOGGED_IN_COOKIE') )
 // 		define('LOGGED_IN_COOKIE', 'wordpress_logged_in_' . GB_COOKIE_HASH);
 
 	/**
-	 * @since 2.1.1
+	 * @since	2.1.1
 	 */
 	if( !defined('GB_COOKIE_PATH') )
 		define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', site_url('/') ) );	// TODO: options
 // 		define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
 
 	/**
-	 * @since 2.6.0
+	 * @since	2.6.0
 	*/
 	// TODO: admin
 // 	if( !defined('ADMIN_COOKIE_PATH') )
 // 		define( 'ADMIN_COOKIE_PATH', SITECOOKIEPATH . 'wp-admin' );
 
 	/**
-	 * @since 2.6.0
+	 * @since	2.6.0
 	*/
 	// TODO: plugins
 // 	if( !defined('PLUGINS_COOKIE_PATH') )
 // 		define( 'PLUGINS_COOKIE_PATH', preg_replace('|https?://[^/]+|i', '', WP_PLUGIN_URL)  );
 
 	/**
-	 * @since 2.1.1
+	 * @since	2.1.1
 	*/
 	if( !defined('GB_COOKIE_DOMAIN') )
 		define('GB_COOKIE_DOMAIN', false);

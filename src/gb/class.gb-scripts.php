@@ -40,7 +40,7 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function __construct() {
 		$this->init();
-// 		add_action( 'init', array( $this, 'init' ), 0 );	// TODO: action init
+// 		GB_Hooks::add_action( 'init', array( $this, 'init' ), 0 );	// TODO: action init
 	}
 
 	public function init() {
@@ -51,7 +51,7 @@ class GB_Scripts extends GB_Dependencies {
 		 *
 		 * @param GB_Scripts &$this GB_Scripts instance, passed by reference.
 		 */
-		do_action_ref_array('gb_default_scripts', array(&$this));
+		GB_Hooks::do_action_ref_array('gb_default_scripts', array(&$this));
 	}
 
 	/**
@@ -125,7 +125,7 @@ class GB_Scripts extends GB_Dependencies {
 			 * @param string $src    Script loader source path.
 			 * @param string $handle Script handle.
 			 */
-			$srce = apply_filters( 'script_loader_src', $src, $handle );
+			$srce = GB_Hooks::apply_filters( 'script_loader_src', $src, $handle );
 			if( $this->in_default_dir($srce) ) {
 				$this->print_code .= $this->print_extra_script( $handle, false );
 				$this->concat .= "$handle,";
@@ -155,7 +155,7 @@ class GB_Scripts extends GB_Dependencies {
 			$src = add_query_arg('ver', $ver, $src);
 
 		/** This filter is documented in gb/class.gb-scripts.php */
-		$src = esc_url( apply_filters( 'script_loader_src', $src, $handle ) );
+		$src = esc_url( GB_Hooks::apply_filters( 'script_loader_src', $src, $handle ) );
 
 		if( !$src )
 			return true;
@@ -171,7 +171,7 @@ class GB_Scripts extends GB_Dependencies {
 		 * @param string $handle The script's registered handle.
 		 * @param string $src    The script's source URL.
 		 */
-		$tag = apply_filters( 'script_loader_tag', $tag, $handle, $src );
+		$tag = GB_Hooks::apply_filters( 'script_loader_tag', $tag, $handle, $src );
 
 		if( $this->do_concat ) {
 			$this->print_html .= $tag;
@@ -239,7 +239,7 @@ class GB_Scripts extends GB_Dependencies {
 			 *
 			 * @param array $to_do An array of script dependencies.
 			 */
-			$this->to_do = apply_filters('print_scripts_array', $this->to_do);
+			$this->to_do = GB_Hooks::apply_filters('print_scripts_array', $this->to_do);
 		}
 		return $r;
 	}

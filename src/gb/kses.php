@@ -44,7 +44,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  *
  * @see gb_kses_allowed_html()
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 if( !defined( 'CUSTOM_TAGS' ) )
 	define( 'CUSTOM_TAGS', false );
@@ -60,7 +60,7 @@ if( !CUSTOM_TAGS ) {
 	 * Can be override by using CUSTOM_TAGS constant.
 	 *
 	 * @global array $allowedposttags
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	$allowedposttags = array(
 		'address' => array(),
@@ -419,7 +419,7 @@ if( !CUSTOM_TAGS ) {
 	 * Kses allowed HTML elements.
 	 *
 	 * @global array $allowedtags
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	$allowedtags = array(
 		'a' => array(
@@ -515,7 +515,7 @@ if( !CUSTOM_TAGS ) {
  * covers all common link protocols, except for 'javascript' which should not
  * be allowed for untrusted users.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to filter through kses
  * @param array $allowed_html List of allowed HTML elements
@@ -535,7 +535,7 @@ function gb_kses( $string, $allowed_html, $allowed_protocols = array() ) {
 /**
  * Return a list of allowed tags and attributes for a given context.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $context The context for which to retrieve tags. Allowed values are
  *  post | strip | data | entities or the name of a field filter such as pre_user_description.
@@ -548,39 +548,39 @@ function gb_kses_allowed_html( $context = '' ) {
 		/**
 		 * Filter HTML elements allowed for a given context.
 		 *
-		 * @since 2.1.0
+		 * @since	2.1.0
 		 *
 		 * @param string $tags    Allowed tags, attributes, and/or entities.
 		 * @param string $context Context to judge allowed tags by. Allowed values are 'post',
 		 *                        'data', 'strip', 'entities', 'explicit', or the name of a filter.
 		 */
-		return apply_filters( 'gb_kses_allowed_html', $context, 'explicit' );
+		return GB_Hooks::apply_filters( 'gb_kses_allowed_html', $context, 'explicit' );
 	}
 
 	switch ( $context ) {
 		case 'post':
 			/** This filter is documented in gb/kses.php */
-			return apply_filters( 'gb_kses_allowed_html', $allowedposttags, $context );
+			return GB_Hooks::apply_filters( 'gb_kses_allowed_html', $allowedposttags, $context );
 
 		case 'user_description':
 		case 'pre_user_description':
 			$tags = $allowedtags;
 			$tags['a']['rel'] = true;
 			/** This filter is documented in gb/kses.php */
- 			return apply_filters( 'gb_kses_allowed_html', $tags, $context );
+ 			return GB_Hooks::apply_filters( 'gb_kses_allowed_html', $tags, $context );
 
 		case 'strip':
 			/** This filter is documented in gb/kses.php */
-			return apply_filters( 'gb_kses_allowed_html', array(), $context );
+			return GB_Hooks::apply_filters( 'gb_kses_allowed_html', array(), $context );
 
 		case 'entities':
 			/** This filter is documented in gb/kses.php */
-			return apply_filters( 'gb_kses_allowed_html', $allowedentitynames, $context);
+			return GB_Hooks::apply_filters( 'gb_kses_allowed_html', $allowedentitynames, $context);
 
 		case 'data':
 		default:
 			/** This filter is documented in gb/kses.php */
-			return apply_filters( 'gb_kses_allowed_html', $allowedtags, $context );
+			return GB_Hooks::apply_filters( 'gb_kses_allowed_html', $allowedtags, $context );
 	}
 }
 
@@ -590,7 +590,7 @@ function gb_kses_allowed_html( $context = '' ) {
  * There is currently only one kses WordPress hook and it is called here. All
  * parameters are passed to the hooks and expected to receive a string.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to filter through kses
  * @param array $allowed_html List of allowed HTML elements
@@ -601,20 +601,20 @@ function gb_kses_hook( $string, $allowed_html, $allowed_protocols ) {
 	/**
 	 * Filter content to be run through kses.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $string            Content to run through kses.
 	 * @param array  $allowed_html      Allowed HTML elements.
 	 * @param array  $allowed_protocols Allowed protocol in links.
 	 */
-	$string = apply_filters( 'pre_kses', $string, $allowed_html, $allowed_protocols );
+	$string = GB_Hooks::apply_filters( 'pre_kses', $string, $allowed_html, $allowed_protocols );
 	return $string;
 }
 
 /**
  * This function returns kses' version number.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @return string KSES Version Number
  */
@@ -627,7 +627,7 @@ function gb_kses_version() {
  *
  * It also matches stray ">" characters.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to filter
  * @param array $allowed_html Allowed HTML elements
@@ -644,7 +644,7 @@ function gb_kses_split( $string, $allowed_html, $allowed_protocols ) {
 /**
  * Callback for gb_kses_split.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  */
 function _gb_kses_split_callback( $match ) {
@@ -665,7 +665,7 @@ function _gb_kses_split_callback( $match ) {
  * completed, will be returned.
  *
  * @access private
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to filter
  * @param array $allowed_html Allowed HTML elements
@@ -724,7 +724,7 @@ function gb_kses_split2($string, $allowed_html, $allowed_protocols) {
  * is to check if the tag has a closing XHTML slash, and if it does, it puts one
  * in the returned code as well.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $element HTML element/tag
  * @param string $attr HTML attributes from HTML element to closing HTML element tag
@@ -809,7 +809,7 @@ function gb_kses_attr($element, $attr, $allowed_html, $allowed_protocols) {
  * from attribute values. It also reduces duplicate attributes by using the
  * attribute defined first (foo='bar' foo='baz' will result in foo='bar').
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $attr Attribute list from HTML element to closing HTML element tag
  * @param array $allowed_protocols Allowed protocols to keep
@@ -933,7 +933,7 @@ function gb_kses_hair($attr, $allowed_protocols) {
  * The currently implemented checks are "maxlen", "minlen", "maxval", "minval"
  * and "valueless".
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $value Attribute value
  * @param string $vless Whether the value is valueless. Use 'y' or 'n'
@@ -1007,7 +1007,7 @@ function gb_kses_check_attr_val($value, $vless, $checkname, $checkvalue) {
  * understand HTML entities. It does its work in a while loop, so it won't be
  * fooled by a string like "javascript:javascript:alert(57)".
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to filter bad protocols from
  * @param array $allowed_protocols Allowed protocols to keep
@@ -1033,7 +1033,7 @@ function gb_kses_bad_protocol($string, $allowed_protocols) {
  *
  * Also removes any instance of the '\0' string.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string
  * @return string
@@ -1052,7 +1052,7 @@ function gb_kses_no_null($string) {
  * other slashes alone. It's really weird, but the quoting from
  * preg_replace(//e) seems to require this.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string String to strip slashes
  * @return string Fixed string with quoted slashes
@@ -1064,7 +1064,7 @@ function gb_kses_stripslashes($string) {
 /**
  * Goes through an array and changes the keys to all lower case.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param array $inarray Unfiltered array
  * @return array Fixed array with all lowercase keys
@@ -1088,7 +1088,7 @@ function gb_kses_array_lc($inarray) {
 /**
  * Removes the HTML JavaScript entities found in early versions of Netscape 4.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string
  * @return string
@@ -1103,7 +1103,7 @@ function gb_kses_js_entities($string) {
  * The general plan is to remove everything to and including some whitespace,
  * but it deals with quotes and apostrophes as well.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string
  * @return string
@@ -1118,7 +1118,7 @@ function gb_kses_html_error($string) {
  * This function searches for URL protocols at the beginning of $string, while
  * handling whitespace and HTML entities.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to check for bad protocols
  * @param string $allowed_protocols Allowed protocols
@@ -1149,7 +1149,7 @@ function gb_kses_bad_protocol_once($string, $allowed_protocols, $count = 1 ) {
  * whitelist or not, and returns different data depending on the answer.
  *
  * @access private
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string URI scheme to check against the whitelist
  * @param string $allowed_protocols Allowed protocols
@@ -1180,7 +1180,7 @@ function gb_kses_bad_protocol_once2( $string, $allowed_protocols ) {
  * This function normalizes HTML entities. It will convert `AT&T` to the correct
  * `AT&amp;T`, `&#00058;` to `&#58;`, `&#XYZZY;` to `&amp;#XYZZY;` and so on.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to normalize entities
  * @return string Content with normalized entities
@@ -1205,7 +1205,7 @@ function gb_kses_normalize_entities($string) {
  * This function only accepts valid named entity references, which are finite,
  * case-sensitive, and highly scrutinized by HTML and XML validators.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param array $matches preg_replace_callback() matches array
  * @return string Correctly encoded entity
@@ -1227,7 +1227,7 @@ function gb_kses_named_entities($matches) {
  * values and nothing more for `&#number;` entities.
  *
  * @access private
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param array $matches preg_replace_callback() matches array
  * @return string Correctly encoded entity
@@ -1286,7 +1286,7 @@ function valid_unicode($i) {
  * It doesn't do anything with other entities like &auml;, but we don't
  * need them in the URL protocol whitelisting system anyway.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $string Content to change entities
  * @return string Content after decoded entities
@@ -1321,25 +1321,25 @@ function _gb_kses_decode_entities_chr_hexdec( $match ) {
 /**
  * Sanitize content with allowed HTML Kses rules.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $data Content to filter, expected to be escaped with slashes
  * @return string Filtered content
  */
 function gb_filter_kses( $data ) {
-	return addslashes( gb_kses( stripslashes( $data ), current_filter() ) );
+	return addslashes( gb_kses( stripslashes( $data ), GB_Hooks::current_filter() ) );
 }
 
 /**
  * Sanitize content with allowed HTML Kses rules.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $data Content to filter, expected to not be escaped
  * @return string Filtered content
  */
 function gb_kses_data( $data ) {
-	return gb_kses( $data , current_filter() );
+	return gb_kses( $data , GB_Hooks::current_filter() );
 }
 
 /**
@@ -1348,7 +1348,7 @@ function gb_kses_data( $data ) {
  * Post content refers to the page contents of the 'post' type and not $_POST
  * data from forms.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $data Post content to filter, expected to be escaped with slashes
  * @return string Filtered post content with allowed HTML tags and attributes intact.
@@ -1363,7 +1363,7 @@ function gb_filter_post_kses($data) {
  * Post content refers to the page contents of the 'post' type and not $_POST
  * data from forms.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $data Post content to filter
  * @return string Filtered post content with allowed HTML tags and attributes intact.
@@ -1375,7 +1375,7 @@ function gb_kses_post($data) {
 /**
  * Strips all of the HTML in the content.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $data Content to strip all HTML from
  * @return string Filtered content without any HTML
@@ -1393,22 +1393,22 @@ function gb_filter_nohtml_kses( $data ) {
  * The gb_filter_post_kses() function is added to the 'content_save_pre',
  * 'excerpt_save_pre', and 'content_filtered_save_pre' hooks.
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function kses_init_filters() {
 	// Normal filtering
-/*	add_filter('title_save_pre', 'gb_filter_kses');
+/*	GB_Hooks::add_filter('title_save_pre', 'gb_filter_kses');
 
 	// Comment filtering
 	if( current_user_can( 'unfiltered_html' ) )
-		add_filter( 'pre_comment_content', 'gb_filter_post_kses' );
+		GB_Hooks::add_filter( 'pre_comment_content', 'gb_filter_post_kses' );
 	else
-		add_filter( 'pre_comment_content', 'gb_filter_kses' );
+		GB_Hooks::add_filter( 'pre_comment_content', 'gb_filter_kses' );
 
 	// Post filtering
-	add_filter('content_save_pre', 'gb_filter_post_kses');
-	add_filter('excerpt_save_pre', 'gb_filter_post_kses');
-	add_filter('content_filtered_save_pre', 'gb_filter_post_kses');/**/
+	GB_Hooks::add_filter('content_save_pre', 'gb_filter_post_kses');
+	GB_Hooks::add_filter('excerpt_save_pre', 'gb_filter_post_kses');
+	GB_Hooks::add_filter('content_filtered_save_pre', 'gb_filter_post_kses');/**/
 }
 
 /**
@@ -1421,20 +1421,20 @@ function kses_init_filters() {
  * default). Also does not remove kses_init() function from 'set_current_user'
  * hook (priority is also default).
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function kses_remove_filters() {
 	// Normal filtering
-/*	remove_filter('title_save_pre', 'gb_filter_kses');
+/*	GB_Hooks::remove_filter('title_save_pre', 'gb_filter_kses');
 
 	// Comment filtering
-	remove_filter( 'pre_comment_content', 'gb_filter_post_kses' );
-	remove_filter( 'pre_comment_content', 'gb_filter_kses' );
+	GB_Hooks::remove_filter( 'pre_comment_content', 'gb_filter_post_kses' );
+	GB_Hooks::remove_filter( 'pre_comment_content', 'gb_filter_kses' );
 
 	// Post filtering
-	remove_filter('content_save_pre', 'gb_filter_post_kses');
-	remove_filter('excerpt_save_pre', 'gb_filter_post_kses');
-	remove_filter('content_filtered_save_pre', 'gb_filter_post_kses');/**/
+	GB_Hooks::remove_filter('content_save_pre', 'gb_filter_post_kses');
+	GB_Hooks::remove_filter('excerpt_save_pre', 'gb_filter_post_kses');
+	GB_Hooks::remove_filter('content_filtered_save_pre', 'gb_filter_post_kses');/**/
 }
 
 /**
@@ -1448,7 +1448,7 @@ function kses_remove_filters() {
  * to have Kses filter the content. If the user does not have unfiltered_html
  * capability, then Kses filters are added.
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function kses_init() {
 	kses_remove_filters();
@@ -1458,13 +1458,13 @@ function kses_init() {
 }
 
 // TODO: actions
-// add_action('init', 'kses_init');
-// add_action('set_current_user', 'kses_init');
+// GB_Hooks::add_action('init', 'kses_init');
+// GB_Hooks::add_action('set_current_user', 'kses_init');
 
 /**
  * Inline CSS filter
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function safecss_filter_attr( $css, $deprecated = '' ) {
 	if( !empty( $deprecated ) )
@@ -1481,11 +1481,11 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 	/**
 	 * Filter list of allowed CSS attributes.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param array $attr List of allowed CSS attributes.
 	 */
-	$allowed_attr = apply_filters( 'safe_style_css', array( 'text-align', 'margin', 'color', 'float',
+	$allowed_attr = GB_Hooks::apply_filters( 'safe_style_css', array( 'text-align', 'margin', 'color', 'float',
 	'border', 'background', 'background-color', 'border-bottom', 'border-bottom-color',
 	'border-bottom-style', 'border-bottom-width', 'border-collapse', 'border-color', 'border-left',
 	'border-left-color', 'border-left-style', 'border-left-width', 'border-right', 'border-right-color',
@@ -1526,7 +1526,7 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 /**
  * Helper function to add global attributes to a tag in the allowed html list.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @param array $value An array of attributes.

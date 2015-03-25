@@ -3,9 +3,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-03-17 11:31+0300\n"
-"PO-Revision-Date: 2015-03-17 11:31+0300\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2015-03-24 13:16+0300\n"
+"PO-Revision-Date: 2015-03-24 13:50+0300\n"
+"Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
@@ -18,27 +18,91 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
-"esc_html__;esc_html_e;esc_html_x:1,2c;esc_html_ex:1,2c;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
+"esc_html__;esc_html_e;esc_html_x:1,2c;esc_html_ex:1,2c;esc_attr__;esc_attr_e;"
+"esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: functions.gb-styles.php:84
+#: functions.gb-styles.php:86
 msgid "Do not pass style tags to gb_add_inline_style()."
-msgstr ""
+msgstr "Не добавляйте теги style к параметрам функции gb_add_inline_style()."
 
-#: functions.php:591
+#: functions.php:590
 msgid "&laquo; Back"
 msgstr "&laquo; Назад"
 
-#: functions.php:603
+#: functions.php:601
 msgid "GeniBase Error"
 msgstr "Ошибка GeniBase"
 
-#: load.php:242 load.php:255
+#: functions.php:1205
+#, php-format
+msgid ""
+"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
+"is <strong>deprecated</strong> since version %4$s! Use <code>%5$s()</code> "
+"instead."
+msgstr ""
+"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
+"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s! Используйте "
+"<code>%5$s()</code> вместо этого."
+
+#: functions.php:1207
+#, php-format
+msgid ""
+"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
+"is <strong>deprecated</strong> since version %4$s with no alternative "
+"available."
+msgstr ""
+"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
+"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s. Альтернативы "
+"не предусмотрены."
+
+#: functions.php:1262
+#, php-format
+msgid ""
+"%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead."
+msgstr ""
+
+#: functions.php:1264
+#, php-format
+msgid ""
+"%1$s is <strong>deprecated</strong> since version %2$s with no alternative "
+"available."
+msgstr ""
+
+#: functions.php:1322
+#, php-format
+msgid ""
+"%1$s was called with an argument that is <strong>deprecated</strong> since "
+"version %2$s! %3$s"
+msgstr ""
+
+#: functions.php:1324
+#, php-format
+msgid ""
+"%1$s was called with an argument that is <strong>deprecated</strong> since "
+"version %2$s with no alternative available."
+msgstr ""
+
+#: functions.php:1372
+#, php-format
+msgid "(This message was added in version %s.)"
+msgstr ""
+
+#: functions.php:1375
+#, php-format
+msgid "%1$s was called <strong>incorrectly</strong>. %2$s %3$s"
+msgstr ""
+
+#: general-template.php:383 general-template.php:392 general-template.php:404
+#: general-template.php:413
+msgid "&hellip;"
+msgstr "&hellip;"
+
+#: load.php:245 load.php:258
 msgid "Maintenance"
 msgstr "Техническое обслуживание"
 
-#: load.php:256
+#: load.php:259
 msgid ""
 "This website is currently under going maintenance and will be back online "
 "shortly. Thank you for your patience."
@@ -46,7 +110,7 @@ msgstr ""
 "Этот сайт сейчас находится на техническом обслуживании и будет доступен "
 "через некоторое время. Спасибо за Ваше терпение."
 
-#: load.php:283
+#: load.php:286
 #, php-format
 msgid ""
 "Your server is running PHP version %1$s but GeniBase %2$s requires at least "
@@ -55,7 +119,7 @@ msgstr ""
 "На сервере установлен PHP версии %1$s, однако для GeniBase %2$s требуется "
 "хотя бы %3$s."
 
-#: load.php:289
+#: load.php:292
 msgid ""
 "Your PHP installation appears to be missing the MySQL extension which is "
 "required by GeniBase."
@@ -284,7 +348,7 @@ msgstr "H:i"
 msgid "F j, Y g:i a"
 msgstr "d.m.Y H:i"
 
-#: option.php:142
+#: option.php:138
 #, php-format
 msgid "%s is a protected GB option and may not be modified"
 msgstr "%s защищённая опция GB и не может изменяться"

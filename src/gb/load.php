@@ -18,7 +18,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 /**
  * Turn register globals off.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @return null Will return null if register_globals PHP directive was disabled.
@@ -43,7 +43,7 @@ function gb_unregister_GLOBALS() {
 /**
  * Fix `$_SERVER` variables for various setups.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @global string $PHP_SELF The filename of the currently executing script,
@@ -108,7 +108,7 @@ function gb_fix_server_vars() {
  *
  * Instead, send the headers for a zero-length favicon and bail.
  *
- * @since 2.0.0
+ * @since	2.0.0
  */
 function gb_favicon_request(){
 	if( '/favicon.ico' == $_SERVER['REQUEST_URI'] ) {
@@ -128,7 +128,7 @@ function gb_favicon_request(){
  * the script will then terminate with an error, otherwise there is a risk
  * that a file can be double-included.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @global $gb_locale The GeniBase date and time locale object.
@@ -141,7 +141,7 @@ function gb_load_translations_early() {
 		return;
 	$loaded = true;
 
-	if( function_exists( 'did_action' ) && did_action( 'init' ) )
+	if( function_exists( 'GB_Hooks::did_action' ) && GB_Hooks::did_action( 'init' ) )
 		return;
 
 	// Translation and localization
@@ -150,7 +150,7 @@ function gb_load_translations_early() {
 	require_once(GB_CORE_DIR . '/locale.php');
 
 	// General libraries
-	require_once(GB_CORE_DIR . '/actions.php');
+	require_once(GB_CORE_DIR . '/class.gb-hooks.php');
 
 	$locales = $locations = array();
 	while ( true ) {
@@ -210,7 +210,7 @@ function gb_load_translations_early() {
  * The default message can be replaced by using a drop-in (maintenance_stub.php in
  * the GeniBase root directory).
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  */
 function gb_maintenance() {
@@ -275,7 +275,7 @@ function gb_maintenance() {
  *
  * Dies if requirements are not met.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  */
 function gb_check_php_mysql_versions() {
@@ -296,7 +296,7 @@ function gb_check_php_mysql_versions() {
 /**
  * Start the GeniBase micro-timer.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  *
  * @global float $gb_timer['start'] Unix timestamp set at the beginning of the page load.
@@ -310,7 +310,7 @@ function timer_start() {
 /**
  * Retrieve or display the time from the page start to when function is called.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @global float $gb_timer['start'] Seconds from when timer_start() is called.
  * @global float $gb_timer['end']   Seconds from when function is called.
@@ -361,7 +361,7 @@ function timer_stop($display = false, $precision = 3){
  *
  * Errors are never displayed for XML-RPC requests.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @access private
  */
 function gb_debug_mode() {
@@ -387,7 +387,7 @@ function gb_debug_mode() {
 /**
  * In debug mode display hidden debug reports.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param mixed	$var	Variable to be displayed
  * @param mixed	$ignore	Class name or backtrace levels count to be ignored in report

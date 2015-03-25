@@ -29,7 +29,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 function _gb_scripts(){
 	if( !isset($GLOBALS['gb_scripts']) || !is_a($GLOBALS['gb_scripts'], 'GB_Scripts') ){
 		// TODO: _doing_it_wrong()
-// 		if( !did_action( 'init' ) )
+// 		if( !GB_Hooks::did_action( 'init' ) )
 // 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.' ),
 // 				'<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>' ), '3.3' );
 
@@ -63,7 +63,7 @@ function gb_print_scripts( $handles = false ) {
 	 *
 	 * @since	2.1.0
 	 */
-	do_action('gb_print_scripts');
+	GB_Hooks::do_action('gb_print_scripts');
 
 	return _gb_scripts()->do_items( $handles );
 }
@@ -146,9 +146,9 @@ function gb_deregister_script( $handle ) {
 	 * Show minimal remorse if the correct hook is used.
 	 */
 	// TODO: gb_deregister_script()
-/*	$current_filter = current_filter();
-	if( ( is_admin() && 'admin_enqueue_scripts' !== $current_filter ) ||
-		( 'gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== $current_filter )
+/*	current_filter = GB_Hooks::current_filter();
+	if( ( is_admin() && 'admin_enqueue_scripts' !== current_filter ) ||
+		( 'gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== current_filter )
 	) {
 		$no = array(
 			'jquery', 'jquery-core', 'jquery-migrate', 'jquery-ui-core', 'jquery-ui-accordion',

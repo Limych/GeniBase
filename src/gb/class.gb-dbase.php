@@ -26,7 +26,7 @@ class GB_DBase	{
 	/**
 	 * Amount of queries made
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access private
 	 * @var int
 	 */
@@ -136,7 +136,7 @@ class GB_DBase	{
 	 * 		'?' — один любой символ;
 	 * 		'*' — один или несколько любых символов.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
 	 * @param string $full_word	FALSE, если надо искать по этой маске части слов
@@ -178,7 +178,7 @@ class GB_DBase	{
 	 * 		'?' — один любой символ;
 	 * 		'*' — один или несколько любых символов.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
 	 * @param string $full_text	FALSE, если надо искать по этой маске части данных
@@ -203,7 +203,7 @@ class GB_DBase	{
 	/**
 	 * Соединяемся с СУБД, выбираем базу данных.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	protected function connect(){
 		if( $this->db)	return;
@@ -227,7 +227,7 @@ class GB_DBase	{
 	/**
 	 * Добавление префикса к имени таблицы.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * 
 	 * @param string|array $table	Исходное имя таблицы
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
@@ -254,7 +254,7 @@ class GB_DBase	{
 	/**
 	 * Unescape table name.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * 
 	 * @param string $table	Escaped table name.
 	 * @return string	Unescaped table name.
@@ -266,7 +266,7 @@ class GB_DBase	{
 	/**
 	 * Экранирование имя поля.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string|array $field	Имя поля.
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
@@ -286,7 +286,7 @@ class GB_DBase	{
 	/**
 	 * Unescape fields names.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string|array $field	Escaped field name. Array of escaped fields names.
 	 * @return string|array	Unescaped field name. Array of unescaped fields names.
@@ -309,7 +309,7 @@ class GB_DBase	{
 	/**
 	 * Экранирование значения переменной, учитывая его тип.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $value	Значение переменной
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
@@ -344,7 +344,7 @@ class GB_DBase	{
 	 * Подстановка параметров: «?key» — подстановка данных, «?#key» — подстановка имени поля,
 	 * 		«?@key» — подстановка имени таблицы, «?_tablename» — добавление префикса перед именем таблицы
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * 
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
@@ -409,7 +409,7 @@ class GB_DBase	{
 	 * this function can be used to enable and disable showing of database
 	 * errors.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::hide_errors()
 	 *
 	 * @param bool $show Whether to show or hide errors
@@ -426,7 +426,7 @@ class GB_DBase	{
 	 *
 	 * By default database errors are not shown.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::show_errors()
 	 *
 	 * @return bool Whether showing of errors was active
@@ -443,7 +443,7 @@ class GB_DBase	{
 	 * By default database errors are suppressed, with a simple
 	 * call to this function they can be enabled.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::hide_errors()
 	 * 
 	 * @param bool $suppress Optional. New value. Defaults to true.
@@ -461,7 +461,7 @@ class GB_DBase	{
 	 * Searches up the list of functions until it reaches
 	 * the one that would most logically had called this method.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @return string The name of the calling function
 	 */
@@ -472,7 +472,7 @@ class GB_DBase	{
 	/**
 	 * Print SQL/DB error.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @global array $GB_SQL_ERROR Stores error information of query and error string
 	 *
 	 * @param string $error The error text to display
@@ -513,7 +513,7 @@ class GB_DBase	{
 	/**
 	 * Kill cached query results.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @return void
 	 */
 	public function flush() {
@@ -525,7 +525,7 @@ class GB_DBase	{
 	/**
 	 * Отправка запроса в MySQL и слежение за ошибками.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::prepare_query()
 	 *
 	 * @param string $query	SQL-запрос
@@ -538,7 +538,7 @@ class GB_DBase	{
 
 		$query_sub = $this->prepare_query($query, $substitutions);
 		
-		if( GB_DEBUG_DISPLAY )	gb_debug_info($query_sub, __CLASS__);
+		if( defined('GB_DEBUG_SQL') &&  GB_DEBUG_SQL )	gb_debug_info($query_sub, __CLASS__);
 		
 		// Remove any comments from query and trim space symbols.
 		$query_sub = trim($this->remove_comments($query_sub));
@@ -585,7 +585,7 @@ class GB_DBase	{
 	 * Получение результата запроса, который состоит из нескольких строк и одного
 	 * столбца.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query			SQL-запрос
@@ -618,7 +618,7 @@ class GB_DBase	{
 	 * Получения результата скалярного запроса (состоящего из одной строки и одной
 	 * ячейки в ней).
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query	SQL-запрос
@@ -641,7 +641,7 @@ class GB_DBase	{
 	 * Получение результата табличного запроса (состоящего из нескольких строк
 	 * и нескольких столбцов).
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
@@ -673,7 +673,7 @@ class GB_DBase	{
 	/**
 	 * Получение результата запроса, который состоит из одной строки.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_DBase::query()
 	 * 
 	 * @param string $query		SQL-запрос
@@ -695,7 +695,7 @@ class GB_DBase	{
 	/**
 	 * Константы режимов работы метода set_row.
 	 * 
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see	GB_DBase::set_row()
 	 */
 	const MODE_INSERT		= 'INSERT';
@@ -707,7 +707,7 @@ class GB_DBase	{
 	/**
 	 * Вставка в таблицу новых данных или обновление существующих.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $tablename	Имя обновляемой таблицы
 	 * @param array $data		Массив с данными для добавления
@@ -869,7 +869,7 @@ class GB_DBase	{
 	 *
 	 * {@internal Missing Long Description}}
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * 
 	 * @param string $queries
 	 * @return array
@@ -903,7 +903,7 @@ class GB_DBase	{
 	 *
 	 * {@internal Missing Long Description}}
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $query
 	 * @param bool	 $allow_deletions
@@ -1084,7 +1084,7 @@ class GB_DBase	{
 /**
  * Глобальная функция доступа к экземпляру класса GB_DBase.
  * 
- * @since 2.0.0
+ * @since	2.0.0
  * 
  * @return GB_DBase
  */

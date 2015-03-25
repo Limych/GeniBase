@@ -18,7 +18,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
  * Display information about the site.
  *
  * @see siteinfo() For possible values for the parameter.
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $show What to display.
  */
@@ -35,7 +35,7 @@ function siteinfo($show = ''){
  * 2. gburl - Site URI path to GeniBase.
  * 3. description - Secondary title
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $show Blog info to retrieve.
  * @param string $filter How to filter what is retrieved.
@@ -92,22 +92,22 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			/**
 			 * Filter the URL returned by get_siteinfo().
 			 *
-			 * @since 2.1.1
+			 * @since	2.1.1
 			 *
 			 * @param mixed $output The URL returned by siteinfo().
 			 * @param mixed $show   Type of information requested.
 			 */
-			$output = apply_filters( 'siteinfo_url', $output, $show );
+			$output = GB_Hooks::apply_filters( 'siteinfo_url', $output, $show );
 		}else{
 			/**
 			 * Filter the site information returned by get_siteinfo().
 			 *
-			 * @since 2.1.1
+			 * @since	2.1.1
 			 *
 			 * @param mixed $output The requested non-URL site information.
 			 * @param mixed $show   Type of information requested.
 			 */
-			$output = apply_filters( 'siteinfo', $output, $show );
+			$output = GB_Hooks::apply_filters( 'siteinfo', $output, $show );
 		}
 	}
 
@@ -120,7 +120,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
  * Builds up a set of html attributes containing the text direction and language
  * information for the page.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $doctype The type of html document (xhtml|html).
  */
@@ -143,11 +143,11 @@ function language_attributes($doctype = 'html') {
 	/**
 	 * Filter the language attributes for display in the html tag.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param string $output A space-separated list of language attributes.
 	*/
-	echo apply_filters('language_attributes', $output);
+	echo GB_Hooks::apply_filters('language_attributes', $output);
 }
 
 /**
@@ -161,7 +161,7 @@ function gb_head(){
 	 *
 	 * @since	2.1.0
 	 */
-	do_action('gb_head');
+	GB_Hooks::do_action('gb_head');
 }
 
 /**
@@ -175,7 +175,7 @@ function gb_footer() {
 	 *
 	 * @since	2.1.0
 	 */
-	do_action('gb_footer');
+	GB_Hooks::do_action('gb_footer');
 }
 
 /**
@@ -203,7 +203,7 @@ function _paginator_url($pg){
  * @return	string
  */
 function paginator($pg, $max_pg){
-	_deprecated_function(__FUNCTION__, '2.2', 'paginate_links');
+	_deprecated_function('2.2', 'paginate_links');
 
 	$pag = array();
 	
@@ -269,12 +269,12 @@ function _paginate_link($page_num, $args, $class = '', $page_title = null, $form
 	/**
 	 * Filter the paginated links for the given archive pages.
 	 *
-	 * @since 2.2.2
+	 * @since	2.2.2
 	 *
 	 * @param string $link The paginated link URL.
 	 */
 	return '<a class="pagination' . ($class ? " $class" : '') . '" href="' .
-			esc_url(apply_filters('paginate_links', $link)) . '"' . $rel . '>' . $page_title . '</a>';
+			esc_url(GB_Hooks::apply_filters('paginate_links', $link)) . '"' . $rel . '>' . $page_title . '</a>';
 }
 
 /**

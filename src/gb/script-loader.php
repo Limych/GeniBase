@@ -110,9 +110,9 @@ function gb_default_styles(&$styles) {
 function print_head_scripts() {
 	global $concatenate_scripts;
 
-	if( !did_action('gb_print_scripts')){
+	if( !GB_Hooks::did_action('gb_print_scripts')){
 		/** This action is documented in gb/functions.gb-scripts.php */
-		do_action('gb_print_scripts');
+		GB_Hooks::do_action('gb_print_scripts');
 	}
 
 	script_concat_settings();
@@ -127,7 +127,7 @@ function print_head_scripts() {
 	 *
 	 * @param bool $print Whether to print the head scripts. Default true.
 	*/
-	if( apply_filters('print_head_scripts', true))
+	if( GB_Hooks::apply_filters('print_head_scripts', true))
 		_print_scripts();
 
 	_gb_scripts()->reset();
@@ -155,7 +155,7 @@ function print_footer_scripts() {
 	 *
 	 * @param bool $print Whether to print the footer scripts. Default true.
 	*/
-	if( apply_filters('print_footer_scripts', true))
+	if( GB_Hooks::apply_filters('print_footer_scripts', true))
 		_print_scripts();
 
 	_gb_scripts()->reset();
@@ -198,9 +198,9 @@ function _print_scripts() {
  * @since	2.0.0
  */
 function gb_print_head_scripts() {
-	if( !did_action('gb_print_scripts')){
+	if( !GB_Hooks::did_action('gb_print_scripts')){
 		/** This action is documented in gb/functions.gb-scripts.php */
-		do_action( 'gb_print_scripts' );
+		GB_Hooks::do_action( 'gb_print_scripts' );
 	}
 
 	return print_head_scripts();
@@ -227,11 +227,11 @@ function gb_print_footer_scripts() {
 	 *
 	 * @since	2.1.0
 	 */
-	do_action( 'gb_print_footer_scripts' );
+	GB_Hooks::do_action( 'gb_print_footer_scripts' );
 }
 
 /**
- * Wrapper for do_action('gb_enqueue_scripts')
+ * Wrapper for GB_Hooks::do_action('gb_enqueue_scripts')
  *
  * Allows plugins to queue scripts for the front end using gb_enqueue_script().
  * Runs first in gb_head().
@@ -244,7 +244,7 @@ function gb_enqueue_scripts() {
 	 *
 	 * @since	2.1.0
 	 */
-	do_action('gb_enqueue_scripts');
+	GB_Hooks::do_action('gb_enqueue_scripts');
 }
 
 /**
@@ -266,7 +266,7 @@ function print_late_styles() {
 	 *
 	 * @param bool $print Whether to print the 'late' styles. Default true.
 	 */
-	if( apply_filters( 'print_late_styles', true ) )
+	if( GB_Hooks::apply_filters( 'print_late_styles', true ) )
 		_print_styles();
 
 	_gb_styles()->reset();
@@ -330,9 +330,9 @@ function script_concat_settings() {
 }
 
 // TODO: actions
-add_action('gb_default_scripts', 'gb_default_scripts');
-// add_filter( 'gb_print_scripts', 'gb_just_in_time_script_localization' );
-// add_filter( 'print_scripts_array', 'gb_prototype_before_jquery' );
+GB_Hooks::add_action('gb_default_scripts', 'gb_default_scripts');
+// GB_Hooks::add_filter( 'gb_print_scripts', 'gb_just_in_time_script_localization' );
+// GB_Hooks::add_filter( 'print_scripts_array', 'gb_prototype_before_jquery' );
 
-add_action('gb_default_styles', 'gb_default_styles');
-// add_filter( 'style_loader_src', 'gb_style_loader_src', 10, 2 );
+GB_Hooks::add_action('gb_default_styles', 'gb_default_styles');
+// GB_Hooks::add_filter( 'style_loader_src', 'gb_style_loader_src', 10, 2 );

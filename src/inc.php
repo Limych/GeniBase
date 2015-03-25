@@ -64,6 +64,7 @@ function html_header($title, $do_index = TRUE){
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />
 <?php gb_head(); ?>
 </head><body>
+	<?php lang_select(); ?>
 	<header>
 		<div class='logo'>
 			<a href="<?php print site_url(); ?>" tabindex="-2"><img src="<?php print site_url('/img/logo.jpg'); ?>" alt='' /></a>
@@ -74,6 +75,12 @@ function html_header($title, $do_index = TRUE){
 		</div>
 	</header>
 <?php
+
+	if( file_exists(BASE_DIR . '/info_msg.php')){
+		print "<section class='message'>";
+		require_once(BASE_DIR . '/info_msg.php');
+		print "</section>\n";
+	}
 }
 
 /**
@@ -383,8 +390,6 @@ function load_check(){
 	}
 }
 
-
-
 function get_request_attr($var, $default = ''){
 	return isset($_REQUEST[$var]) ? $_REQUEST[$var] : $default;
 }
@@ -394,6 +399,8 @@ function get_request_attr($var, $default = ''){
  * @deprecated
  */
 function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
+	_deprecated_function('2.0.0', '_n');
+
 	$formatted = number_format_i18n($number);
 
 	if( !empty($tail_1)){
@@ -409,7 +416,7 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null){
 	}
 
 	return $formatted;
-}	// function format_num
+} // function format_num()
 
 /**
  * Функция расширения поискового запроса по именам
@@ -452,6 +459,10 @@ function expand_names($names){
 			$names[$key] = '[[:<:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 		}
 	}
-	// print "<!-- "; var_export($names); print " -->";	// TODO: Remove this?
 	return $names;
-} // function expand_names
+} // function expand_names()
+
+function lang_select(){
+	$lang = mb_strtoupper(strtok(get_locale(), '_'));
+	print "<div class='language'>$lang</div>\n";
+}

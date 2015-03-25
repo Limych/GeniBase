@@ -27,14 +27,14 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 
 		$this->start_transaction();
 		$this->expectDeprecated();
-		add_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
+		GB_Hooks::add_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
 	}
 
 	function tearDown() {
 		gbdb()->query('ROLLBACK');
-		remove_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
-		remove_filter('query', array($this, '_drop_temporary_tables'));
-		remove_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
+		GB_Hooks::remove_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
+		GB_Hooks::remove_filter('query', array($this, '_drop_temporary_tables'));
+		GB_Hooks::remove_filter('gb_die_handler', array($this, 'get_gb_die_handler'));
 	}
 	
 	function clean_up_global_scope() {
@@ -44,8 +44,8 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 	function start_transaction() {
 		gbdb()->query('SET autocommit = 0');
 		gbdb()->query('START TRANSACTION');
-		add_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
-		add_filter('query', array($this, '_drop_temporary_tables'));
+		GB_Hooks::add_filter('dbdelta_create_queries', array($this, '_create_temporary_tables'));
+		GB_Hooks::add_filter('query', array($this, '_drop_temporary_tables'));
 	}
 	
 	function _create_temporary_tables($queries) {
@@ -135,12 +135,12 @@ class GB_UnitTestCase extends PHPUnit_Framework_TestCase {
 			if( ! empty( $annotations[ $depth ]['expectedIncorrectUsage'] ) )
 				$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $annotations[ $depth ]['expectedIncorrectUsage'] );
 		}
-		add_action( 'deprecated_function_run', array( $this, 'deprecated_function_run' ) );
-		add_action( 'deprecated_argument_run', array( $this, 'deprecated_function_run' ) );
-		add_action( 'doing_it_wrong_run', array( $this, 'doing_it_wrong_run' ) );
-		add_action( 'deprecated_function_trigger_error', '__return_false' );
-		add_action( 'deprecated_argument_trigger_error', '__return_false' );
-		add_action( 'doing_it_wrong_trigger_error',      '__return_false' );
+		GB_Hooks::add_action( 'deprecated_function_run', array( $this, 'deprecated_function_run' ) );
+		GB_Hooks::add_action( 'deprecated_argument_run', array( $this, 'deprecated_function_run' ) );
+		GB_Hooks::add_action( 'doing_it_wrong_run', array( $this, 'doing_it_wrong_run' ) );
+		GB_Hooks::add_action( 'deprecated_function_trigger_error', '__return_false' );
+		GB_Hooks::add_action( 'deprecated_argument_trigger_error', '__return_false' );
+		GB_Hooks::add_action( 'doing_it_wrong_trigger_error',      '__return_false' );
 	}
 
 	function expectedDeprecated() {

@@ -43,7 +43,7 @@ function make_metakeys($names){
 	 * 
 	 * @param	array	$names	Associative array of arrays of names.
 	 */
-	$metakeys = apply_filters('make_metakeys', $names);
+	$metakeys = GB_Hooks::apply_filters('make_metakeys', $names);
 
 	foreach($metakeys as $key => $val)
 		$metakeys[$key] = array_unique(array_map('mb_strtoupper', array_filter((array) $val)));
@@ -144,7 +144,7 @@ function gb_metaphone($metakeys){
 	}
 	return $metakeys;
 }
-add_filter('make_metakeys', 'gb_metaphone');
+GB_Hooks::add_filter('make_metakeys', 'gb_metaphone');
 
 /**
  * Функция вычисления письменного ключа русского слова.
@@ -204,7 +204,7 @@ function gb_metascript($metakeys){
 	}
 	return $metakeys;
 }
-add_filter('make_metakeys', 'gb_metascript');
+GB_Hooks::add_filter('make_metakeys', 'gb_metascript');
 
 
 

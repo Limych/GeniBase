@@ -11,7 +11,7 @@
 /**
  * Adds data to the cache, if the cache key doesn't already exist.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::add()
  *
@@ -35,7 +35,7 @@ function gb_cache_add( $key, $data, $group = '', $expire = 0 ) {
  * does not mean that plugins can't implement this function when they need to
  * make sure that the cache is cleaned up after WordPress no longer needs it.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @return bool Always returns True
  */
@@ -46,7 +46,7 @@ function gb_cache_close() {
 /**
  * Decrement numeric cache item's value
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::decr()
  *
@@ -64,7 +64,7 @@ function gb_cache_decr( $key, $offset = 1, $group = '' ) {
 /**
  * Removes the cache contents matching key and group.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::delete()
  *
@@ -81,7 +81,7 @@ function gb_cache_delete($key, $group = '') {
 /**
  * Removes all cache items.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::flush()
  *
@@ -96,7 +96,7 @@ function gb_cache_flush() {
 /**
  * Retrieves the cache contents from the cache by key and group.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::get()
  *
@@ -116,7 +116,7 @@ function gb_cache_get( $key, $group = '', $force = false, &$found = null ) {
 /**
  * Increment numeric cache item's value
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::incr()
  *
@@ -134,7 +134,7 @@ function gb_cache_incr( $key, $offset = 1, $group = '' ) {
 /**
  * Sets up Object Cache Global and assigns it.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @global GB_Object_Cache $gb_object_cache WordPress Object Cache
  */
 function gb_cache_init() {
@@ -144,7 +144,7 @@ function gb_cache_init() {
 /**
  * Replaces the contents of the cache with new data.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::replace()
  *
@@ -163,7 +163,7 @@ function gb_cache_replace( $key, $data, $group = '', $expire = 0 ) {
 /**
  * Saves the data to the cache.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @uses $gb_object_cache Object Cache Class
  * @see GB_Object_Cache::set()
@@ -185,7 +185,7 @@ function gb_cache_set( $key, $data, $group = '', $expire = 0 ) {
  *
  * This changes the blog id used to create keys in blog specific groups.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param int $blog_id Blog ID
  */
@@ -198,7 +198,7 @@ function gb_cache_switch_to_blog( $blog_id ) {
 /**
  * Adds a group or set of groups to the list of global groups.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string|array $groups A group or an array of groups to add
  */
@@ -211,7 +211,7 @@ function gb_cache_add_global_groups( $groups ) {
 /**
  * Adds a group or set of groups to the list of non-persistent groups.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string|array $groups A group or an array of groups to add
  */
@@ -232,11 +232,11 @@ function gb_cache_add_non_persistent_groups( $groups ) {
  * recommended outside of unit tests as the performance penality for using it is
  * high.
  *
- * @since 2.0.0
+ * @since	2.0.0
  * @deprecated 3.5.0
  */
 function gb_cache_reset() {
-	_deprecated_function( __FUNCTION__, '3.5' );
+	_deprecated_function('3.5');
 
 	global $gb_object_cache;
 
@@ -257,7 +257,7 @@ function gb_cache_reset() {
  *
  * @package WordPress
  * @subpackage Cache
- * @since 2.0.0
+ * @since	2.0.0
  */
 class GB_Object_Cache {
 
@@ -266,14 +266,14 @@ class GB_Object_Cache {
 	 *
 	 * @var array
 	 * @access private
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	private $cache = array();
 
 	/**
 	 * The amount of times the cache data was already stored in the cache.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access private
 	 * @var int
 	 */
@@ -284,7 +284,7 @@ class GB_Object_Cache {
 	 *
 	 * @var int
 	 * @access public
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	public $cache_misses = 0;
 
@@ -293,7 +293,7 @@ class GB_Object_Cache {
 	 *
 	 * @var array
 	 * @access protected
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	protected $global_groups = array();
 
@@ -302,14 +302,14 @@ class GB_Object_Cache {
 	 *
 	 * @var int
 	 * @access private
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	private $blog_prefix;
 
 	/**
 	 * Make private properties readable for backwards compatibility.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access public
 	 *
 	 * @param string $name Property to get.
@@ -322,7 +322,7 @@ class GB_Object_Cache {
 	/**
 	 * Make private properties settable for backwards compatibility.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access public
 	 *
 	 * @param string $name  Property to set.
@@ -336,7 +336,7 @@ class GB_Object_Cache {
 	/**
 	 * Make private properties checkable for backwards compatibility.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access public
 	 *
 	 * @param string $name Property to check if set.
@@ -349,7 +349,7 @@ class GB_Object_Cache {
 	/**
 	 * Make private properties un-settable for backwards compatibility.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @access public
 	 *
 	 * @param string $name Property to unset.
@@ -365,7 +365,7 @@ class GB_Object_Cache {
 	 * @uses GB_Object_Cache::set Sets the data after the checking the cache
 	 *		contents existence.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key What to call the contents in the cache
 	 * @param mixed $data The contents to store in the cache
@@ -393,7 +393,7 @@ class GB_Object_Cache {
 	/**
 	 * Sets the list of global groups.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param array $groups List of groups that are global.
 	 */
@@ -407,7 +407,7 @@ class GB_Object_Cache {
 	/**
 	 * Decrement numeric cache item's value
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key The cache key to increment
 	 * @param int $offset The amount by which to decrement the item's value. Default is 1.
@@ -442,7 +442,7 @@ class GB_Object_Cache {
 	 *
 	 * If the cache key does not exist in the group, then nothing will happen.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key What the contents in the cache are called
 	 * @param string $group Where the cache contents are grouped
@@ -467,7 +467,7 @@ class GB_Object_Cache {
 	/**
 	 * Clears the object cache of all data
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @return bool Always returns true
 	 */
@@ -486,7 +486,7 @@ class GB_Object_Cache {
 	 *
 	 * On failure, the number of cache misses will be incremented.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key What the contents in the cache are called
 	 * @param string $group Where the cache contents are grouped
@@ -518,7 +518,7 @@ class GB_Object_Cache {
 	/**
 	 * Increment numeric cache item's value
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key The cache key to increment
 	 * @param int $offset The amount by which to increment the item's value. Default is 1.
@@ -551,7 +551,7 @@ class GB_Object_Cache {
 	/**
 	 * Replace the contents in the cache, if contents already exist
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @see GB_Object_Cache::set()
 	 *
 	 * @param int|string $key What to call the contents in the cache
@@ -577,11 +577,11 @@ class GB_Object_Cache {
 	/**
 	 * Reset keys
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @deprecated 3.5.0
 	 */
 	public function reset() {
-		_deprecated_function( __FUNCTION__, '3.5', 'switch_to_blog()' );
+		_deprecated_function('3.5', 'switch_to_blog()');
 
 		// Clear out non-global caches since the blog ID has changed.
 		foreach ( array_keys( $this->cache ) as $group ) {
@@ -602,7 +602,7 @@ class GB_Object_Cache {
 	 * expire for each time a page is accessed and PHP finishes. The method is
 	 * more for cache plugins which use files.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int|string $key What to call the contents in the cache
 	 * @param mixed $data The contents to store in the cache
@@ -630,7 +630,7 @@ class GB_Object_Cache {
 	 * Gives the cache hits, and cache misses. Also prints every cached group,
 	 * key and the data.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 */
 	public function stats() {
 		echo "<p>";
@@ -649,7 +649,7 @@ class GB_Object_Cache {
 	 *
 	 * This changes the blog id used to create keys in blog specific groups.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param int $blog_id Blog ID
 	 */
@@ -661,7 +661,7 @@ class GB_Object_Cache {
 	/**
 	 * Utility function to determine whether a key exists in the cache.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @access protected
 	 * @param string $key
@@ -675,7 +675,7 @@ class GB_Object_Cache {
 	/**
 	 * Sets up object properties; PHP 5 style constructor
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 * @return null|GB_Object_Cache If cache is disabled, returns null.
 	 */
 	public function __construct() {
@@ -697,7 +697,7 @@ class GB_Object_Cache {
 	 *
 	 * Called upon object destruction, which should be when PHP ends.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @return bool True value. Won't be used by PHP
 	 */

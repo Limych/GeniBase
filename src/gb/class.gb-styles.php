@@ -44,7 +44,7 @@ class GB_Styles extends GB_Dependencies {
 		 *
 		 * @param GB_Styles &$this GB_Styles instance, passed by reference.
 		 */
-		do_action_ref_array('gb_default_styles', array(&$this));
+		GB_Hooks::do_action_ref_array('gb_default_styles', array(&$this));
 	}
 
 	/**
@@ -96,7 +96,7 @@ class GB_Styles extends GB_Dependencies {
 		 * @param string         The link tag for the enqueued style.
 		 * @param string $handle The style's registered handle.
 		 */
-		$tag = apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-css'$title href='$href' type='text/css' media='$media' />\n", $handle);
+		$tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-css'$title href='$href' type='text/css' media='$media' />\n", $handle);
 
 		if( 'rtl' === $this->text_direction && isset($obj->extra['rtl']) && $obj->extra['rtl'] ) {
 			if( is_bool( $obj->extra['rtl'] ) || 'replace' === $obj->extra['rtl'] ) {
@@ -107,7 +107,7 @@ class GB_Styles extends GB_Dependencies {
 			}
 
 			/** This filter is documented in gb/class.gb-styles.php */
-			$rtl_tag = apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-rtl-css'$title href='$rtl_href' type='text/css' media='$media' />\n", $handle);
+			$rtl_tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-rtl-css'$title href='$rtl_href' type='text/css' media='$media' />\n", $handle);
 
 			if( $obj->extra['rtl'] === 'replace' ) {
 				$tag = $rtl_tag;
@@ -196,7 +196,7 @@ class GB_Styles extends GB_Dependencies {
 			 *
 			 * @param array $to_do The list of enqueued styles about to be processed.
 			 */
-			$this->to_do = apply_filters( 'print_styles_array', $this->to_do );
+			$this->to_do = GB_Hooks::apply_filters( 'print_styles_array', $this->to_do );
 		}
 		return $r;
 	}
@@ -223,7 +223,7 @@ class GB_Styles extends GB_Dependencies {
 		 * @param string $src    The source URL of the enqueued style.
 		 * @param string $handle The style's registered handle.
 		 */
-		$src = apply_filters( 'style_loader_src', $src, $handle );
+		$src = GB_Hooks::apply_filters( 'style_loader_src', $src, $handle );
 
 		return esc_url( $src );
 	}

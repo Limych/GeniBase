@@ -56,7 +56,7 @@ tests_add_filter( 'gb_die_handler', '_gb_die_handler_filter' );
 // Used to activate themes, plugins, as well as  other settings.
 if( isset($GLOBALS['gb_tests_options'])) {
 	function gb_tests_options( $value ) {
-		$key = substr( current_filter(), strlen( 'pre_option_' ) );
+		$key = substr( GB_Hooks::current_filter(), strlen( 'pre_option_' ) );
 		return $GLOBALS['gb_tests_options'][$key];
 	}
 

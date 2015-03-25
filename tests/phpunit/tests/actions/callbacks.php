@@ -7,12 +7,12 @@ class Tests_Actions_Callbacks extends GB_UnitTestCase {
 	function test_callback_representations() {
 		$tag = __FUNCTION__;
 
-		$this->assertFalse( has_action( $tag ) );
+		$this->assertFalse( GB_Hooks::has_action( $tag ) );
 
-		add_action( $tag, array( 'Class', 'method' ) );
+		GB_Hooks::add_action( $tag, array( 'Class', 'method' ) );
 
-		$this->assertEquals( 10, has_action( $tag, array( 'Class', 'method' ) ) );
+		$this->assertEquals( 10, GB_Hooks::has_action( $tag, array( 'Class', 'method' ) ) );
 
-		$this->assertEquals( 10, has_action( $tag, 'Class::method' ) );
+		$this->assertEquals( 10, GB_Hooks::has_action( $tag, 'Class::method' ) );
 	}
 }

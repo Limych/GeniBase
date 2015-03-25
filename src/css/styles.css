@@ -42,11 +42,13 @@ li	{
 	margin-top: 0.75em;
 }
 
-form	{
+form,
+.message	{
 	max-width: 45em;
 	margin: 1em auto;
 	background-color: #FFE9BF;
-	padding: 1em 2em;
+	padding: 1em 2em 0.5em;
+	box-sizing: border-box;
 }
 form.editor	{
 	max-width: none;
@@ -113,6 +115,25 @@ form .modifyed	{
 	font-size: 85%;
 	text-align: center;
 	font-style: italic;
+}
+.message	{
+	text-align: center;
+	font-style: italic;
+}
+.language	{
+	border-radius: 50%;
+	border: solid black 3px;
+	padding: 0.35em;
+	text-align: center;
+	vertical-align: middle;
+	display: table-cell;
+	font-size: 85%;
+	font-weight: bold;
+	background: #EEE;
+	position: absolute;
+	right: 0;
+	top: 0;
+	margin: 0.5em;
 }
 
 

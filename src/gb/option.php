@@ -19,7 +19,7 @@
  *
  * If the option was serialized then it will be unserialized when it is returned.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $option Name of option to retrieve. Expected to not be SQL-escaped.
  * @param mixed $default Optional. Default value to return if the option does not exist.
@@ -38,12 +38,12 @@ function get_option( $option, $default = false ) {
 	 * Passing a truthy value to the filter will short-circuit retrieving
 	 * the option value, returning the passed value instead.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param bool|mixed $pre_option Value to return instead of the option value.
 	 *                               Default false to skip it.
 	 */
-	$pre = apply_filters( 'pre_option_' . $option, false );
+	$pre = GB_Hooks::apply_filters( 'pre_option_' . $option, false );
 	if( false !== $pre )
 		return $pre;
 
@@ -59,7 +59,7 @@ function get_option( $option, $default = false ) {
 			$value = $row['option_value'];
 		else{
 			/** This filter is documented in gb/option.php */
-			return apply_filters( 'default_option_' . $option, $default );
+			return GB_Hooks::apply_filters( 'default_option_' . $option, $default );
 		}
 
 	}else{
@@ -71,12 +71,12 @@ function get_option( $option, $default = false ) {
 			 *
 			 * The dynamic portion of the hook name, `$option`, refers to the option name.
 			 *
-			 * @since 2.1.0
+			 * @since	2.1.0
 			 *
 			 * @param mixed $default The default value to return if the option does not exist
 			 *                       in the database.
 			 */
-			return apply_filters( 'default_option_' . $option, $default );
+			return GB_Hooks::apply_filters( 'default_option_' . $option, $default );
 		}
 
 		$alloptions = gb_load_alloptions();
@@ -97,7 +97,7 @@ function get_option( $option, $default = false ) {
 					gb_cache_set('notoptions', $notoptions, 'options');
 
 					/** This filter is documented in gb/option.php */
-					return apply_filters( 'default_option_' . $option, $default );
+					return GB_Hooks::apply_filters( 'default_option_' . $option, $default );
 				}
 			}
 		}
@@ -115,12 +115,12 @@ function get_option( $option, $default = false ) {
 	 *
 	 * The dynamic portion of the hook name, `$option`, refers to the option name.
 	 *
-	 * @since 2.1.0
+	 * @since	2.1.0
 	 *
 	 * @param mixed $value Value of the option. If stored serialized, it will be
 	 *                     unserialized prior to being returned.
 	 */
-	return apply_filters( 'option_' . $option, maybe_unserialize( $value ) );
+	return GB_Hooks::apply_filters( 'option_' . $option, maybe_unserialize( $value ) );
 }
 
 /**
@@ -129,7 +129,7 @@ function get_option( $option, $default = false ) {
  * Will die if $option is in protected list. Protected options are 'alloptions'
  * and 'notoptions' options.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $option Option name.
  */
@@ -142,7 +142,7 @@ function gb_protect_special_option( $option ) {
 /**
  * Print option value after sanitizing for forms.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $option Option name.
  */
@@ -153,7 +153,7 @@ function form_option( $option ) {
 /**
  * Loads and caches all autoloaded options, if available or all options.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @return array List of all options.
  */
@@ -179,7 +179,7 @@ function gb_load_alloptions() {
 /**
  * Loads and caches certain often requested site options if is_multisite() and a persistent cache is not being used.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param int $site_id Optional site ID for which to query the options. Defaults to the current site.
  */
@@ -217,7 +217,7 @@ function gb_load_core_site_options( $site_id = null ) {
  * value, but you will not be able to set whether it is autoloaded. If you want
  * to set whether an option is autoloaded, then you need to use the add_option().
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $option Option name. Expected to not be SQL-escaped.
  * @param mixed $value Option value. Must be serializable if non-scalar. Expected to not be SQL-escaped.
@@ -243,23 +243,23 @@ function update_option( $option, $value ) {
 	 *
 	 * The dynamic portion of the hook name, `$option`, refers to the option name.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $value     The new, unserialized option value.
 	 * @param mixed $old_value The old option value.
 	 */
-	$value = apply_filters( 'pre_update_option_' . $option, $value, $old_value );
+	$value = GB_Hooks::apply_filters( 'pre_update_option_' . $option, $value, $old_value );
 
 	/**
 	 * Filter an option before its value is (maybe) serialized and updated.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed  $value     The new, unserialized option value.
 	 * @param string $option    Name of the option.
 	 * @param mixed  $old_value The old option value.
 	 */
-	$value = apply_filters( 'pre_update_option', $value, $option, $old_value );
+	$value = GB_Hooks::apply_filters( 'pre_update_option', $value, $option, $old_value );
 
 	// If the new and old values are the same, no need to update.
 	if( $value === $old_value )
@@ -273,13 +273,13 @@ function update_option( $option, $value ) {
 	/**
 	 * Fires immediately before an option value is updated.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $option    Name of the option to update.
 	 * @param mixed  $old_value The old option value.
 	 * @param mixed  $value     The new option value.
 	 */
-	do_action( 'update_option', $option, $old_value, $value );
+	GB_Hooks::do_action( 'update_option', $option, $old_value, $value );
 
 	$result = $wpdb->update( $wpdb->options, array( 'option_value' => $serialized_value ), array( 'option_name' => $option ) );
 	if( !$result )
@@ -306,23 +306,23 @@ function update_option( $option, $value ) {
 	 *
 	 * The dynamic portion of the hook name, `$option`, refers to the option name.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $old_value The old option value.
 	 * @param mixed $value     The new option value.
 	 */
-	do_action( "update_option_{$option}", $old_value, $value );
+	GB_Hooks::do_action( "update_option_{$option}", $old_value, $value );
 
 	/**
 	 * Fires after the value of an option has been successfully updated.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $option    Name of the updated option.
 	 * @param mixed  $old_value The old option value.
 	 * @param mixed  $value     The new option value.
 	 */
-	do_action( 'updated_option', $option, $old_value, $value );
+	GB_Hooks::do_action( 'updated_option', $option, $old_value, $value );
 	return true;
 }
 
@@ -338,7 +338,7 @@ function update_option( $option, $value ) {
  * aren't adding a protected WordPress option. Care should be taken to not name
  * options the same as the ones which are protected.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string         $option      Name of option to add. Expected to not be SQL-escaped.
  * @param mixed          $value       Optional. Option value. Must be serializable if non-scalar. Expected to not be SQL-escaped.
@@ -375,12 +375,12 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	/**
 	 * Fires before an option is added.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $option Name of the option to add.
 	 * @param mixed  $value  Value of the option.
 	 */
-	do_action( 'add_option', $option, $value );
+	GB_Hooks::do_action( 'add_option', $option, $value );
 
 	$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb->options` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `option_name` = VALUES(`option_name`), `option_value` = VALUES(`option_value`), `autoload` = VALUES(`autoload`)", $option, $serialized_value, $autoload ) );
 	if( !$result )
@@ -408,30 +408,30 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
 	 *
 	 * The dynamic portion of the hook name, `$option`, refers to the option name.
 	 *
-	 * @since 2.0.0 As "add_option_{$name}"
-	 * @since 2.0.0
+	 * @since	2.0.0 As "add_option_{$name}"
+	 * @since	2.0.0
 	 *
 	 * @param string $option Name of the option to add.
 	 * @param mixed  $value  Value of the option.
 	 */
-	do_action( "add_option_{$option}", $option, $value );
+	GB_Hooks::do_action( "add_option_{$option}", $option, $value );
 
 	/**
 	 * Fires after an option has been added.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $option Name of the added option.
 	 * @param mixed  $value  Value of the option.
 	 */
-	do_action( 'added_option', $option, $value );
+	GB_Hooks::do_action( 'added_option', $option, $value );
 	return true;
 }
 
 /**
  * Removes option by name. Prevents removal of protected WordPress options.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $option Name of option to remove. Expected to not be SQL-escaped.
  * @return bool True, if option is successfully deleted. False on failure.
@@ -453,11 +453,11 @@ function delete_option( $option ) {
 	/**
 	 * Fires immediately before an option is deleted.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $option Name of the option to delete.
 	 */
-	do_action( 'delete_option', $option );
+	GB_Hooks::do_action( 'delete_option', $option );
 
 	$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option ) );
 	if( !defined( 'GB_INSTALLING' ) ) {
@@ -478,20 +478,20 @@ function delete_option( $option ) {
 		 *
 		 * The dynamic portion of the hook name, `$option`, refers to the option name.
 		 *
-		 * @since 2.0.0
+		 * @since	2.0.0
 		 *
 		 * @param string $option Name of the deleted option.
 		 */
-		do_action( "delete_option_$option", $option );
+		GB_Hooks::do_action( "delete_option_$option", $option );
 
 		/**
 		 * Fires after an option has been deleted.
 		 *
-		 * @since 2.0.0
+		 * @since	2.0.0
 		 *
 		 * @param string $option Name of the deleted option.
 		 */
-		do_action( 'deleted_option', $option );
+		GB_Hooks::do_action( 'deleted_option', $option );
 		return true;
 	}
 	return false;
@@ -500,7 +500,7 @@ function delete_option( $option ) {
 /**
  * Delete a transient.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $transient Transient name. Expected to not be SQL-escaped.
  * @return bool true if successful, false otherwise
@@ -512,11 +512,11 @@ function delete_transient( $transient ) {
 	 *
 	 * The dynamic portion of the hook name, `$transient`, refers to the transient name.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param string $transient Transient name.
 	 */
-	do_action( 'delete_transient_' . $transient, $transient );
+	GB_Hooks::do_action( 'delete_transient_' . $transient, $transient );
 
 	if( gb_using_ext_object_cache() ) {
 		$result = gb_cache_delete( $transient, 'transient' );
@@ -533,11 +533,11 @@ function delete_transient( $transient ) {
 		/**
 		 * Fires after a transient is deleted.
 		 *
-		 * @since 2.0.0
+		 * @since	2.0.0
 		 *
 		 * @param string $transient Deleted transient name.
 		 */
-		do_action( 'deleted_transient', $transient );
+		GB_Hooks::do_action( 'deleted_transient', $transient );
 	}
 
 	return $result;
@@ -549,7 +549,7 @@ function delete_transient( $transient ) {
  * If the transient does not exist, does not have a value, or has expired,
  * then the return value will be false.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $transient Transient name. Expected to not be SQL-escaped.
  * @return mixed Value of transient.
@@ -564,13 +564,13 @@ function get_transient( $transient ) {
 	 * Passing a truthy value to the filter will effectively short-circuit retrieval
 	 * of the transient, returning the passed value instead.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $pre_transient The default value to return if the transient does not exist.
 	 *                             Any value other than false will short-circuit the retrieval
 	 *                             of the transient, and return the returned value.
 	 */
-	$pre = apply_filters( 'pre_transient_' . $transient, false );
+	$pre = GB_Hooks::apply_filters( 'pre_transient_' . $transient, false );
 	if( false !== $pre )
 		return $pre;
 
@@ -600,11 +600,11 @@ function get_transient( $transient ) {
 	 *
 	 * The dynamic portion of the hook name, `$transient`, refers to the transient name.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $value Value of transient.
 	 */
-	return apply_filters( 'transient_' . $transient, $value );
+	return GB_Hooks::apply_filters( 'transient_' . $transient, $value );
 }
 
 /**
@@ -613,7 +613,7 @@ function get_transient( $transient ) {
  * You do not need to serialize values. If the value needs to be serialized, then
  * it will be serialized before it is set.
  *
- * @since 2.0.0
+ * @since	2.0.0
  *
  * @param string $transient  Transient name. Expected to not be SQL-escaped. Must be
  *                           45 characters or fewer in length.
@@ -629,11 +629,11 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 	 *
 	 * The dynamic portion of the hook name, `$transient`, refers to the transient name.
 	 *
-	 * @since 2.0.0
+	 * @since	2.0.0
 	 *
 	 * @param mixed $value New value of transient.
 	 */
-	$value = apply_filters( 'pre_set_transient_' . $transient, $value );
+	$value = GB_Hooks::apply_filters( 'pre_set_transient_' . $transient, $value );
 
 	$expiration = (int) $expiration;
 
@@ -676,23 +676,23 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 		 *
 		 * The dynamic portion of the hook name, `$transient`, refers to the transient name.
 		 *
-		 * @since 2.0.0
+		 * @since	2.0.0
 		 *
 		 * @param mixed $value      Transient value.
 		 * @param int   $expiration Time until expiration in seconds. Default 0.
 		 */
-		do_action( 'set_transient_' . $transient, $value, $expiration );
+		GB_Hooks::do_action( 'set_transient_' . $transient, $value, $expiration );
 
 		/**
 		 * Fires after the value for a transient has been set.
 		 *
-		 * @since 2.0.0
+		 * @since	2.0.0
 		 *
 		 * @param string $transient  The name of the transient.
 		 * @param mixed  $value      Transient value.
 		 * @param int    $expiration Time until expiration in seconds. Default 0.
 		 */
-		do_action( 'setted_transient', $transient, $value, $expiration );
+		GB_Hooks::do_action( 'setted_transient', $transient, $value, $expiration );
 	}
 	return $result;
 }

@@ -11,14 +11,14 @@ class Tests_Dependencies_Styles extends GB_UnitTestCase {
 		if( empty( $GLOBALS['gb_styles'] ) )
 			$GLOBALS['gb_styles'] = null;
 		$this->old_gb_styles = $GLOBALS['gb_styles'];
-		remove_action( 'gb_default_styles', 'gb_default_styles' );
+		GB_Hooks::remove_action( 'gb_default_styles', 'gb_default_styles' );
 		$GLOBALS['gb_styles'] = new GB_Styles();
 		_gb_styles()->default_version = get_siteinfo( 'version' );
 	}
 
 	function tearDown() {
 		$GLOBALS['gb_styles'] = $this->old_gb_styles;
-		add_action( 'gb_default_styles', 'gb_default_styles' );
+		GB_Hooks::add_action( 'gb_default_styles', 'gb_default_styles' );
 		parent::tearDown();
 	}
 

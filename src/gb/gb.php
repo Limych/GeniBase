@@ -51,7 +51,7 @@ gb_debug_mode();
 require_once(GB_CORE_DIR . '/compat.php');
 require_once(GB_CORE_DIR . '/functions.php');
 require_once(GB_CORE_DIR . '/class.gb-error.php');
-require_once(GB_CORE_DIR . '/actions.php');
+require_once(GB_CORE_DIR . '/class.gb-hooks.php');
 require_once(GB_CORE_DIR . '/pomo/mo.php');
 require_once(GB_CORE_DIR . '/class.gb-dbase.php');
 
@@ -94,6 +94,6 @@ gb_userid(0 == rand(0, 99));
 /**
  * GeniBase Locale object for loading locale domain date and various strings.
  * @global object $gb_locale
- * @since 2.0.0
+ * @since	2.0.0
 */
 $GLOBALS['gb_locale'] = new GB_Locale();

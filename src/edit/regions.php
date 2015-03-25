@@ -1,5 +1,6 @@
 <?php
 require_once('../gb-config.php');	// Load GeniBase
+require_once('../inc.php');	// Основной подключаемый файл-заплатка
 
 html_header('Редактирование регионов');
 if( !isset($_POST['reg']) || empty($_POST['reg'])) {

@@ -9,14 +9,14 @@ class Tests_Dependencies_Scripts extends GB_UnitTestCase {
 	function setUp() {
 		parent::setUp();
 		$this->old_gb_scripts = isset( $GLOBALS['gb_scripts'] ) ? $GLOBALS['gb_scripts'] : null;
-		remove_action( 'gb_default_scripts', 'gb_default_scripts' );
+		GB_Hooks::remove_action( 'gb_default_scripts', 'gb_default_scripts' );
 		$GLOBALS['gb_scripts'] = new GB_Scripts();
 		_gb_scripts()->default_version = get_siteinfo( 'version' );
 	}
 
 	function tearDown() {
 		$GLOBALS['gb_scripts'] = $this->old_gb_scripts;
-		add_action( 'gb_default_scripts', 'gb_default_scripts' );
+		GB_Hooks::add_action( 'gb_default_scripts', 'gb_default_scripts' );
 		parent::tearDown();
 	}
 

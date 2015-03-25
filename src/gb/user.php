@@ -37,7 +37,7 @@ function gb_userid($renew_cookie = false){
 		 *
 		 * @param string $userid Just generated user ID
 		 */
-		$userid = apply_filters('gb_userid', $userid);
+		$userid = GB_Hooks::apply_filters('gb_userid', $userid);
 	}
 
 	if( $renew_cookie && $userid ){

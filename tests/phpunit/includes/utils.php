@@ -33,7 +33,7 @@ function get_echo($callable, $args = array()) {
 // helper class for testing code that involves actions and filters
 // typical use:
 // $ma = new MockAction();
-// add_action('foo', array(&$ma, 'action'));
+// GB_Hooks::add_action('foo', array(&$ma, 'action'));
 class MockAction {
 	var $events;
 	var $debug;
@@ -48,10 +48,9 @@ class MockAction {
 	}
 
 	function current_filter() {
-		if(is_callable('current_filter'))
-			return current_filter();
-		global $wp_actions;
-		return end($wp_actions);
+		if( class_exists('GB_Hooks') )
+			return GB_Hooks::current_filter();
+		return false;
 	}
 
 	function action($arg) {
@@ -134,4 +133,16 @@ class MockAction {
 			$out[] = $e['args'];
 		return $out;
 	}
+}
+
+function dmp() {
+	$args = func_get_args();
+
+	foreach ($args as $thing)
+		echo (is_scalar($thing) ? strval($thing) : var_export($thing, true)), "\n";
+}
+
+function dmp_filter($a) {
+	dmp($a);
+	return $a;
 }

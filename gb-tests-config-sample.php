@@ -2,6 +2,7 @@
 
 /* Path to the GeniBase codebase you'd like to test. Add a backslash in the end. */
 define('BASE_DIR', dirname( __FILE__ ) . '/src');
+define('GB_CORE_DIR', BASE_DIR . '/gb');
 
 // Force known bugs to be run.
 // Tests with an associated Trac ticket that is still open are normally skipped.
