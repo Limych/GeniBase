@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress 2.6-bleeding\n"
+"Project-Id-Version: GeniBase 2.6-bleeding\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 msgid "moon"
@@ -14,7 +14,7 @@ msgstr[1] "ztrut1"
 msgstr[2] "ztrut2"
 
 msgid ""
-"The first thing you need to do is tell Blogger to let WordPress access your "
+"The first thing you need to do is tell Blogger to let GeniBase access your "
 "account. You will be sent back here after providing authorization."
 msgstr "baba\n"
 "dyado"
@@ -41,7 +41,7 @@ msgstr[2] ""
 
 
 # baba
-#: wp-admin/x.php:111 baba:333
+#: gb-admin/x.php:111 baba:333
 #. translators: buuu
 #       brubru
 #, fuzzy
@@ -51,4 +51,3 @@ msgstr ""
 
 msgid "a\""
 msgstr ""
-

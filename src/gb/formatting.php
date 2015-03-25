@@ -311,6 +311,19 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 }
 
 /**
+ * Performs esc_url() for database usage.
+ *
+ * @since 2.2.3
+ *
+ * @param string $url The URL to be cleaned.
+ * @param array $protocols An array of acceptable protocols.
+ * @return string The cleaned URL.
+ */
+function esc_url_raw($url, $protocols = null) {
+	return esc_url($url, $protocols, 'db');
+}
+
+/**
  * Perform a deep string replace operation to ensure the values in $search are no longer present
  *
  * Repeats the replacement operation until it no longer replaces anything so as to remove "nested" values

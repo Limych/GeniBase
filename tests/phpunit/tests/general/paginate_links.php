@@ -7,23 +7,26 @@ class Tests_Paginate_Links extends GB_UnitTestCase {
 
 	function setUp() {
 		parent::setUp();
-		global $gb_rewrite;
+// TODO: rewrite
+// 		global $gb_rewrite;
 
-		$this->go_to( home_url( '/' ) );
+		$this->go_to(home_url('/' ));
 
-		$this->permalink_structure = $gb_rewrite->permalink_structure;
-		$gb_rewrite->set_permalink_structure( get_option( 'permalink_structure' ) );
+// TODO: rewrite
+// 		$this->permalink_structure = $gb_rewrite->permalink_structure;
+// 		$gb_rewrite->set_permalink_structure( get_option( 'permalink_structure' ) );
 	}
 
 	function tearDown() {
-		global $gb_rewrite;
-		$gb_rewrite->set_permalink_structure( $this->permalink_structure );
+// TODO: rewrite
+// 		global $gb_rewrite;
+// 		$gb_rewrite->set_permalink_structure( $this->permalink_structure );
 	}
 
 	function test_defaults() {
-		$page2 = get_pagenum_link( 2 );
-		$page3 = get_pagenum_link( 3 );
-		$page50 = get_pagenum_link( 50 );
+		$page2 = get_pagenum_link(2);
+		$page3 = get_pagenum_link(3);
+		$page50 = get_pagenum_link(50);
 
 		$expected =<<<EXPECTED
 <span class='pagination current'>1</span>
@@ -39,9 +42,9 @@ EXPECTED;
 	}
 
 	function test_format() {
-		$page2 = home_url( '/page/2/' );
-		$page3 = home_url( '/page/3/' );
-		$page50 = home_url( '/page/50/' );
+		$page2 = home_url('/page/2/');
+		$page3 = home_url('/page/3/');
+		$page50 = home_url('/page/50/');
 
 		$expected =<<<EXPECTED
 <span class='pagination current'>1</span>
@@ -100,16 +103,12 @@ EXPECTED;
 		$this->i18n_count += 1;
 	}
 
-	/**
-	 * @ticket 25735
-	 */
 	function test_paginate_links_number_format() {
 		$this->i18n_count = 0;
 		add_filter( 'number_format_i18n', array( $this, 'increment_i18n_count' ) );
 		paginate_links( array(
 			'total'     => 100,
 			'current'   => 50,
-			'show_all'  => false,
 			'prev_next' => true,
 			'end_size'  => 1,
 			'mid_size'  => 1,

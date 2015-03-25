@@ -309,7 +309,7 @@ function _paginate_link($page_num, $args, $class = '', $page_title = null, $form
  */
 function paginate_links( $args = '' ) {
 	// Setting up default values based on the current URL.
-	$pagenum_link = html_entity_decode($_SERVER['REQUEST_URI']);
+	$pagenum_link = html_entity_decode(get_pagenum_link());
 	$url_parts    = explode('?', $pagenum_link);
 
 	// Get max pages and current page out of the current query, if available.
@@ -320,8 +320,10 @@ function paginate_links( $args = '' ) {
 	$pagenum_link = trailingslashit($url_parts[0]) . '%_%';
 
 	// URL base depends on permalink settings.
-	$format = '?pg=%#%';
-
+	$format = '?pg=%#%';	// TODO: rewrite
+// 	$format  = $wp_rewrite->using_index_permalinks() && ! strpos( $pagenum_link, 'index.php' ) ? 'index.php/' : '';
+// 	$format .= $wp_rewrite->using_permalinks() ? user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' ) : '?paged=%#%';
+	
 	$defaults = array(
 			'base'			=> $pagenum_link, // http://example.com/index.php%_% : %_% is replaced by format (below)
 			'format'		=> $format, // ?pg=%#% : %#% is replaced by the page number

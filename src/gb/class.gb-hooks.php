@@ -274,7 +274,7 @@ class GB_Hooks {
 	 * @param mixed  $var   Additional variables passed to the functions hooked to `$tag`.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
-	function apply_filters( $tag, $value ) {
+	static function apply_filters( $tag, $value ) {
 		$args = array();
 	
 		// Do 'all' actions first.
@@ -329,7 +329,7 @@ class GB_Hooks {
 	 * @param array  $args The arguments supplied to the functions hooked to $tag.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
-	function apply_filters_ref_array($tag, $args) {
+	static function apply_filters_ref_array($tag, $args) {
 		// Do 'all' actions first
 		if( isset(self::$filters['all']) ) {
 			self::$current_filter[] = $tag;
@@ -384,7 +384,7 @@ class GB_Hooks {
 	 * @param int      $priority           Optional. The priority of the function. Default 10.
 	 * @return boolean Whether the function existed before it was removed.
 	 */
-	function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
+	static function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
 		$function_to_remove = self::_build_unique_id( $tag, $function_to_remove, $priority );
 	
 		$r = isset(self::$filters[ $tag ][ $priority ][ $function_to_remove ]);
@@ -412,7 +412,7 @@ class GB_Hooks {
 	 * @param int|bool $priority Optional. The priority number to remove. Default false.
 	 * @return bool True when finished.
 	 */
-	function remove_all_filters($tag, $priority = false) {
+	static function remove_all_filters($tag, $priority = false) {
 		if( isset(self::$filters[$tag]) ){
 			if( false === $priority )
 				self::$filters[$tag] = array();
@@ -433,7 +433,7 @@ class GB_Hooks {
 	 *
 	 * @return string Hook name of the current filter or action.
 	 */
-	function current_filter() {
+	static function current_filter() {
 		return end(self::$current_filter);
 	}
 
@@ -444,7 +444,7 @@ class GB_Hooks {
 	 *
 	 * @return string Hook name of the current action.
 	 */
-	function current_action() {
+	static function current_action() {
 		return self::current_filter();
 	}
 
@@ -468,7 +468,7 @@ class GB_Hooks {
 	 *                            checks if any filter is currently being run.
 	 * @return bool Whether the filter is currently in the stack.
 	 */
-	function doing_filter( $filter = null ) {
+	static function doing_filter( $filter = null ) {
 		if( null === $filter)
 			return !empty(self::$current_filter);
 	
@@ -484,7 +484,7 @@ class GB_Hooks {
 	 *                            if any action is currently being run.
 	 * @return bool Whether the action is currently in the stack.
 	 */
-	function doing_action($action = null) {
+	static function doing_action($action = null) {
 		return self::doing_filter($action);
 	}
 
@@ -508,7 +508,7 @@ class GB_Hooks {
 	 * @param int      $accepted_args   Optional. The number of arguments the function accept. Default 1.
 	 * @return bool Will always return true.
 	 */
-	function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
+	static function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
 		return self::add_filter($tag, $function_to_add, $priority, $accepted_args);
 	}
 
@@ -529,7 +529,7 @@ class GB_Hooks {
 	 *                    functions hooked to the action. Default empty.
 	 * @return null Will return null if $tag does not exist in GB_Hooks::$filters array.
 	 */
-	function do_action($tag, $arg = '') {
+	static function do_action($tag, $arg = '') {
 		if( !isset(self::$actions[$tag]) )
 			self::$actions[$tag] = 1;
 		else
@@ -585,7 +585,7 @@ class GB_Hooks {
 	 * @param string $tag The name of the action hook.
 	 * @return int The number of times action hook $tag is fired.
 	 */
-	function did_action($tag) {
+	static function did_action($tag) {
 		if( !isset(self::$actions[$tag]) )
 			return 0;
 	
@@ -604,7 +604,7 @@ class GB_Hooks {
 	 * @param array  $args The arguments supplied to the functions hooked to `$tag`.
 	 * @return null Will return null if `$tag` does not exist in `GB_Hooks::$filters` array.
 	 */
-	function do_action_ref_array($tag, $args) {
+	static function do_action_ref_array($tag, $args) {
 		if( !isset(self::$actions[$tag]) )
 			self::$actions[$tag] = 1;
 		else
@@ -660,7 +660,7 @@ class GB_Hooks {
 	 *                  that evaluates to false (e.g.) 0, so use the === operator for testing the
 	 *                  return value.
 	 */
-	function has_action($tag, $function_to_check = false) {
+	static function has_action($tag, $function_to_check = false) {
 		return self::has_filter($tag, $function_to_check);
 	}
 
@@ -678,7 +678,7 @@ class GB_Hooks {
 	 * @param int      $priority           Optional. The priority of the function. Default 10.
 	 * @return boolean Whether the function is removed.
 	 */
-	function remove_action( $tag, $function_to_remove, $priority = 10 ) {
+	static function remove_action( $tag, $function_to_remove, $priority = 10 ) {
 		return self::remove_filter( $tag, $function_to_remove, $priority );
 	}
 
@@ -691,7 +691,7 @@ class GB_Hooks {
 	 * @param int|bool $priority The priority number to remove them from. Default false.
 	 * @return bool True when finished.
 	 */
-	function remove_all_actions($tag, $priority = false) {
+	static function remove_all_actions($tag, $priority = false) {
 		return self::remove_all_filters($tag, $priority);
 	}
 }
