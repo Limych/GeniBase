@@ -36,8 +36,11 @@ function gb_negotiate_client_locale($supported){
 	$lang = reset($supported);
 	if( !$lang )	return false;
 
-	if( isset($_COOKIE[GB_COOKIE_LANG]) && in_array($_COOKIE[GB_COOKIE_LANG], $supported) )
-		return $_COOKIE[GB_COOKIE_LANG];
+	if( isset($_COOKIE[GB_COOKIE_LANG]) ){
+		$locale = str_replace('-', '_', $_COOKIE[GB_COOKIE_LANG]);
+		if( in_array($locale, $supported) )
+			return $_COOKIE[GB_COOKIE_LANG];
+	}
 
 	if( function_exists('http_negotiate_language') ){
 		$lang = http_negotiate_language($supported);
@@ -67,14 +70,14 @@ function gb_negotiate_client_locale($supported){
 		$priority = 0;
 		foreach ($supported as $language){
 			$l = strtolower($language);
-			if( $prefered_languages[$l] > $priority ){
+			if( isset($prefered_languages[$l]) && $prefered_languages[$l] > $priority ){
 				$lang = $language;
 				$priority = $prefered_languages[$l];
 			}
 
 			$language = strtok($language, '-');
 			$l = strtolower($language);
-			if( $l != $language && $prefered_languages[$l] > $priority ){
+			if( $l != $language && isset($prefered_languages[$l]) && $prefered_languages[$l] > $priority ){
 				$lang = $language;
 				$priority = $prefered_languages[$l];
 			}
@@ -131,9 +134,10 @@ function get_locale() {
 	$locale = GB_Hooks::apply_filters('locale', $locale);
 	
 	// Set a cookie with user locale
-	if( !isset($_COOKIE[GB_COOKIE_LANG]) || $_COOKIE[GB_COOKIE_LANG] != $locale || 0 == rand(0, 99) ){
+	$lang = str_replace('_', '-', $locale);
+	if( !isset($_COOKIE[GB_COOKIE_LANG]) || $_COOKIE[GB_COOKIE_LANG] != $lang || 0 == rand(0, 99) ){
 		$secure = ( 'https' === parse_url(site_url(), PHP_URL_SCHEME) && 'https' === parse_url(home_url(), PHP_URL_SCHEME) );
-		@setcookie(GB_COOKIE_LANG, $locale, time() + YEAR_IN_SECONDS, GB_COOKIE_PATH, GB_COOKIE_DOMAIN, $secure);
+		@setcookie(GB_COOKIE_LANG, $lang, time() + YEAR_IN_SECONDS, GB_COOKIE_PATH, GB_COOKIE_DOMAIN, $secure);
 	}
 
 	return $locale;

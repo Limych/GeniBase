@@ -1396,6 +1396,7 @@ function gb_filter_nohtml_kses( $data ) {
  * @since	2.0.0
  */
 function kses_init_filters() {
+	// TODO: actions
 	// Normal filtering
 /*	GB_Hooks::add_filter('title_save_pre', 'gb_filter_kses');
 
@@ -1424,6 +1425,7 @@ function kses_init_filters() {
  * @since	2.0.0
  */
 function kses_remove_filters() {
+	// TODO: actions
 	// Normal filtering
 /*	GB_Hooks::remove_filter('title_save_pre', 'gb_filter_kses');
 
@@ -1453,14 +1455,16 @@ function kses_remove_filters() {
 function kses_init() {
 	kses_remove_filters();
 
-	if( current_user_can('unfiltered_html') == false)
+	// TODO: current_user_can()
+// 	if( current_user_can('unfiltered_html') == false)
 		kses_init_filters();
 }
 
-// TODO: actions
-// GB_Hooks::add_action('init', 'kses_init');
-// GB_Hooks::add_action('set_current_user', 'kses_init');
-
+if( class_exists('GB_Hooks') ){
+	GB_Hooks::add_action('init', 'kses_init');
+	GB_Hooks::add_action('set_current_user', 'kses_init');
+}
+	
 /**
  * Inline CSS filter
  *

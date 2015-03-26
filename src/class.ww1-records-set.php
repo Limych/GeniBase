@@ -102,9 +102,19 @@ class ww1_solders_set extends ww1_records_set{
 					($row['name'] ? $row['name'] : '<span class="na">' . __('(name is not&nbsp;specified)', WW1_TXTDOM) . '</span>'); 
 			print "<td scope='row' class='align-right'>" . (++$num) . "<span class='rt-show'>$details</span></td>\n";
 			foreach($brief_fields as $key => $title){
-				$val = $row[$key] ? esc_html($row[$key]) : __('(not&nbsp;specified)', WW1_TXTDOM);
-				if( substr($val, 0, 1) === '(')	$val = "<span class='na'>$val</span>";
-				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $val . "</td>\n";
+				if( empty($row[$key]) )
+					$text = __('(not&nbsp;specified)', WW1_TXTDOM);
+				else{
+					$text = $row[$key];
+					if( in_array($key, array('name', 'surname')) )
+						$text = GB_Transcriptor::transcript($text, 'ru');
+					if( in_array($key, array('region', 'place')) )
+						$text = GB_Transcriptor::transcript($text, 'ru', null, GB_Transcriptor::TRANSLITERATE);
+					$text = esc_html($text);
+				}
+				if( substr($text, 0, 1) === '(')
+					$text = "<span class='na'>$text</span>";
+				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $text . "</td>\n";
 			}
 			if( $show_detailed ){
 				print "<td class='rt-hide no-print'><div class='arrow'></div></td>\n";
@@ -118,7 +128,10 @@ class ww1_solders_set extends ww1_records_set{
 				foreach($detailed_fields as $key => $val){
 					if( !isset($row[$key]) )
 						continue;
-					$text = esc_html($row[$key]);
+					$text = $row[$key];
+					if( in_array($key, array('name', 'surname')) )
+						$text = GB_Transcriptor::transcript($text, 'ru');
+					$text = esc_html($text);
 					if( $key == 'source' ){
 						if( !empty($row['source_url']) ){
 							$url = str_replace('{pg}', (int) ($row['source_pg'] + $row['source_pg_corr']), $row['source_url']);

@@ -40,7 +40,8 @@ class GB_Scripts extends GB_Dependencies {
 
 	public function __construct() {
 		$this->init();
-// 		GB_Hooks::add_action( 'init', array( $this, 'init' ), 0 );	// TODO: action init
+		if( class_exists('GB_Hooks') )	GB_Hooks::add_action('init', array($this, 'init'), 0);
+		else	$this->init();
 	}
 
 	public function init() {

@@ -5,9 +5,9 @@ msgstr ""
 "Project-Id-Version: GeniBase\n"
 "POT-Creation-Date: 2015-03-19 03:13+0300\n"
 "PO-Revision-Date: \n"
-"Last-Translator: \n"
+"Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
-"Language: de_DE\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -33,13 +33,13 @@ msgstr ""
 #: index.php:49
 msgctxt "Field name"
 msgid "Surname"
-msgstr ""
+msgstr "Familienname"
 
 #: class.ww1-database.php:223 class.ww1-database.php:262 extsearch.php:46
 #: index.php:50
 msgctxt "Field name"
 msgid "Other names"
-msgstr ""
+msgstr "Vorname, Vatersname"
 
 #: class.ww1-database.php:224
 msgctxt "Field name"
@@ -49,37 +49,37 @@ msgstr ""
 #: class.ww1-database.php:263 extsearch.php:49 index.php:54 stat.php:29
 msgctxt "Field name"
 msgid "Military rank"
-msgstr ""
+msgstr "Militärischer Rang"
 
 #: class.ww1-database.php:264 extsearch.php:50 index.php:55 stat.php:69
 msgctxt "Field name"
 msgid "Religion"
-msgstr ""
+msgstr "Konfession"
 
 #: class.ww1-database.php:265 extsearch.php:51 index.php:56 stat.php:70
 msgctxt "Field name"
 msgid "Marital status"
-msgstr ""
+msgstr "Familienstand"
 
 #: class.ww1-database.php:266 extsearch.php:52
 msgctxt "Field name"
 msgid "Province, Uezd, Volost"
-msgstr ""
+msgstr "Gouvernement, Ujesd, Wolost"
 
 #: class.ww1-database.php:267 extsearch.php:53
 msgctxt "Field name"
 msgid "Volost/Place"
-msgstr ""
+msgstr "Wolost/Wohnort"
 
 #: class.ww1-database.php:268 extsearch.php:54 index.php:57 stat.php:48
 msgctxt "Field name"
 msgid "Event"
-msgstr ""
+msgstr "Ereignis"
 
 #: class.ww1-database.php:269 extsearch.php:55 index.php:58
 msgctxt "Field name"
 msgid "Event date"
-msgstr ""
+msgstr "Datum des Ereignisses"
 
 #: class.ww1-database.php:270
 msgctxt "Field name"
@@ -122,7 +122,7 @@ msgstr ""
 #: class.ww1-records-set.php:85
 msgctxt "Table header “Item number”"
 msgid "No."
-msgstr ""
+msgstr "Nr."
 
 #: class.ww1-records-set.php:97
 msgid "(surname is not&nbsp;specified)"
@@ -281,7 +281,7 @@ msgstr ""
 #: extsearch.php:30 index.php:30
 msgctxt "Button name"
 msgid "Search"
-msgstr ""
+msgstr "Suche"
 
 #: extsearch.php:33
 msgid ""
@@ -432,7 +432,7 @@ msgstr ""
 #: index.php:51
 msgctxt "Field name"
 msgid "Province, Uezd, Volost, Place"
-msgstr ""
+msgstr "Gouvernement, Ujesd, Wolost, Wohnort"
 
 #: index.php:80
 msgid "Some last search queries:"

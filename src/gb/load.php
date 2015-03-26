@@ -141,7 +141,7 @@ function gb_load_translations_early() {
 		return;
 	$loaded = true;
 
-	if( function_exists( 'GB_Hooks::did_action' ) && GB_Hooks::did_action( 'init' ) )
+	if( class_exists('GB_Hooks') && GB_Hooks::did_action('init') )
 		return;
 
 	// Translation and localization

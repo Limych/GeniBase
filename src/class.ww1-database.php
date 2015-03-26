@@ -211,7 +211,7 @@ class ww1_database_solders extends ww1_database {
 	 */
 	function search_form(){
 		// Выводим предупреждение, что поиск производится только на русском
-		if( get_locale() !== 'ru_RU' ){
+		if( get_locale() !== 'ru' ){
 			print '<p class="nb">' . __('<strong>Please note:</strong> We have translated the interface in English, but we can not translate the whole database. Unfortunately, the search for information you still need to do in Russian.', WW1_TXTDOM) . "</p>\n";
 		}
 

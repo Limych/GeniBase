@@ -69,6 +69,7 @@ require_once(GB_CORE_DIR . '/kses.php');
 require_once(GB_CORE_DIR . '/formatting.php');
 require_once(GB_CORE_DIR . '/script-loader.php');
 require_once(GB_CORE_DIR . '/text.php');
+require_once(GB_CORE_DIR . '/class.gb-transcriptor.php');
 
 // Define constants that rely on the API to obtain the default value.
 gb_plugin_constants();
@@ -97,3 +98,19 @@ gb_userid(0 == rand(0, 99));
  * @since	2.0.0
 */
 $GLOBALS['gb_locale'] = new GB_Locale();
+
+/**
+ * Fires after GeniBase has finished loading but before any headers are sent.
+ *
+ * If you wish to plug an action once GB is loaded, use the gb_loaded hook below.
+ *
+ * @since 2.2.3
+ */
+GB_Hooks::do_action('init');
+
+/**
+ * This hook is fired once GB, all plugins, and the theme are fully loaded and instantiated.
+ *
+ * @since 2.2.3
+ */
+GB_Hooks::do_action('gb_loaded');
