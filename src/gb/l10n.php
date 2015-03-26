@@ -174,7 +174,7 @@ function translate($text, $domain = 'default'){
 		$translations = GB_Hooks::apply_filters('gettext', $translations, $text, $domain);
 	}
 	
-	return $translation;
+	return $translations;
 }
 
 /**
@@ -227,7 +227,7 @@ function translate_with_context($text, $context, $domain = 'default'){
 		$translations = GB_Hooks::apply_filters('gettext_with_context', $translations, $text, $context, $domain);
 	}
 	
-	return $translation;
+	return $translations;
 }
 
 /**
