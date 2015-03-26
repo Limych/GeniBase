@@ -111,7 +111,7 @@ class GB_DBase	{
 		$this->base = $base;
 		$this->prefix = $prefix;
 
-		if( GB_DEBUG && GB_DEBUG_DISPLAY)
+		if( GB_DEBUG && GB_DEBUG_DISPLAY )
 			$this->show_errors();
 	}
 
@@ -123,7 +123,7 @@ class GB_DBase	{
 	 */
 	function __destruct(){
 		// Закрываем соединение с СУБД, если оно было
-		if( $this->db)	$this->db->close();
+		if( $this->db )	$this->db->close();
 
 		return TRUE;
 	}
@@ -145,7 +145,7 @@ class GB_DBase	{
 	static function make_regex($str, $full_word = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
-		if( is_array($str)){
+		if( is_array($str) ){
 			foreach($str as $key => $val)
 				$str[$key] = self::make_regex($val, $full_word);
 			return $str;
@@ -164,7 +164,7 @@ class GB_DBase	{
 			// return '[[:alpha:]]' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));
 			return '(..)' . ($ch == '*' ? '+' : ($len == 1 ? '' : '{' . $len . '}'));	// Костыли для учёта двухбайтной кодировки
 		}, $str);
-		if( $full_word)
+		if( $full_word )
 			$str = "[[:<:]]${str}[[:>:]]";
 
 		return $str;
@@ -187,7 +187,7 @@ class GB_DBase	{
 	static function make_condition($str, $full_text = TRUE){
 		// Если вместо строки передан массив, обработать каждое значение в отдельности
 		// и вернуть результат в виде массива
-		if( is_array($str)){
+		if( is_array($str) ){
 			foreach($str as $key => $val)
 				$str[$key] = self::make_condition($val, $full_text);
 			return $str;
@@ -195,7 +195,7 @@ class GB_DBase	{
 
 		$str = strtr($str, array('_' => '\\_', '%' => '\\%'));
 		$str = strtr($str, array('?' => '_', '*' => '_%'));
-		if( !$full_text)	$str = '%' . $str . '%';
+		if( !$full_text )	$str = '%' . $str . '%';
 
 		return $str;
 	}
@@ -206,19 +206,26 @@ class GB_DBase	{
 	 * @since	2.0.0
 	 */
 	protected function connect(){
-		if( $this->db)	return;
+		if( $this->db )	return;
 	
 		$this->db = new MySQLi($this->host, $this->user, $this->password, $this->base);
-		if( $this->db->connect_error) {
-			@header('HTTP/1.1 503 Service Temporarily Unavailable');
-			@header('Status: 503 Service Temporarily Unavailable');
+		if( $this->db->connect_error ) {
 			@header('Retry-After: 600');	// 600 seconds
-			die('Database connection error (' . $this->db->connect_errno . ') ' . $this->db->connect_error);
+			$message = 'Database connection error (' . $this->db->connect_errno . ') ' . $this->db->connect_error;
+			if( function_exists('gb_die') )
+				gb_die($message, '', 'response=503');
+			else{
+				@header('HTTP/1.1 503 Service Temporarily Unavailable');
+				@header('Status: 503 Service Temporarily Unavailable');
+				die($message);
+			}
 		}
 	
 		// Проверка версии MySQL
-		if( version_compare($this->db->server_info, GB_MYSQL_REQUIRED, "<")){
-			die('<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!');
+		if( version_compare($this->db->server_info, GB_MYSQL_REQUIRED, '<') ){
+			$message = '<b>ERROR:</b> MySQL version ' . GB_MYSQL_REQUIRED . '+ needed!';
+			if( function_exists('gb_die') )	gb_die($message);
+			else	die($message);
 		}
 	
 		$this->db->set_charset('utf8');

@@ -72,17 +72,21 @@ function get_site_url($path = '', $scheme = null) {
 	if( $path && is_string( $path ) )
 		$url .= '/' . ltrim( $path, '/' );
 
-	/**
-	 * Filter the site URL.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string      $url     The complete site URL including scheme and path.
-	 * @param string      $path    Path relative to the site URL. Blank string if no path is specified.
-	 * @param string|null $scheme  Scheme to give the site URL context. Accepts 'http', 'https', 'login',
-	 *                             'login_post', 'admin', 'relative' or null.
-	*/
-	return GB_Hooks::apply_filters('site_url', $url, $path, $scheme);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the site URL.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string      $url     The complete site URL including scheme and path.
+		 * @param string      $path    Path relative to the site URL. Blank string if no path is specified.
+		 * @param string|null $scheme  Scheme to give the site URL context. Accepts 'http', 'https', 'login',
+		 *                             'login_post', 'admin', 'relative' or null.
+		*/
+		$url = GB_Hooks::apply_filters('site_url', $url, $path, $scheme);
+	}
+
+	return $url;
 }
 
 /**
@@ -115,15 +119,18 @@ function get_admin_url($path = '', $scheme = 'admin') {
 	if( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
 
-	/**
-	 * Filter the admin area URL.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string   $url     The complete admin area URL including scheme and path.
-	 * @param string   $path    Path relative to the admin area URL. Blank string if no path is specified.
-	*/
-	return GB_Hooks::apply_filters('admin_url', $url, $path);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the admin area URL.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string   $url     The complete admin area URL including scheme and path.
+		 * @param string   $path    Path relative to the admin area URL. Blank string if no path is specified.
+		*/
+		$url = GB_Hooks::apply_filters('admin_url', $url, $path);
+	}
+	return $url;
 }
 
 /**
@@ -158,17 +165,21 @@ function set_url_scheme( $url, $scheme = null ) {
 		$url = preg_replace( '#^\w+://#', $scheme . '://', $url );
 	}
 
-	/**
-	 * Filter the resulting URL after setting the scheme.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $url         The complete URL including scheme and path.
-	 * @param string $scheme      Scheme applied to the URL. One of 'http', 'https', or 'relative'.
-	 * @param string $orig_scheme Scheme requested for the URL. One of 'http', 'https', 'login',
-	 *                            'login_post', 'admin', 'rpc', or 'relative'.
-	 */
-	return GB_Hooks::apply_filters('set_url_scheme', $url, $scheme, $orig_scheme);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the resulting URL after setting the scheme.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $url         The complete URL including scheme and path.
+		 * @param string $scheme      Scheme applied to the URL. One of 'http', 'https', or 'relative'.
+		 * @param string $orig_scheme Scheme requested for the URL. One of 'http', 'https', 'login',
+		 *                            'login_post', 'admin', 'rpc', or 'relative'.
+		 */
+		$url = GB_Hooks::apply_filters('set_url_scheme', $url, $scheme, $orig_scheme);
+	}
+
+	return $url;
 }
 
 /**
@@ -179,14 +190,16 @@ function set_url_scheme( $url, $scheme = null ) {
 function rel_canonical() {
 	$link = get_site_url($_SERVER['REQUEST_URI']);
 
-	/**
-	 * Filter rel=canonical link.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $link Full URL of rel=canonical link
-	 */
-	$link = GB_Hooks::apply_filters('rel_canonical', $link);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter rel=canonical link.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $link Full URL of rel=canonical link
+		 */
+		$link = GB_Hooks::apply_filters('rel_canonical', $link);
+	}
 	
 	if(!empty($link))
 		echo "<link rel='canonical' href='$link' />\n";
@@ -254,14 +267,16 @@ function get_pagenum_link($pagenum = 1, $escape = true) {
 // 		$result = $base . $request . $query_string;
 // 	}
 
-	/**
-	 * Filter the page number link for the current request.
-	 *
-	 * @since 2.2.3
-	 *
-	 * @param string $result The page number link.
-	 */
-	$result = GB_Hooks::apply_filters('get_pagenum_link', $result);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the page number link for the current request.
+		 *
+		 * @since 2.2.3
+		 *
+		 * @param string $result The page number link.
+		 */
+		$result = GB_Hooks::apply_filters('get_pagenum_link', $result);
+	}
 
 	if( $escape )
 		return esc_url($result);

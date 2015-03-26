@@ -178,18 +178,23 @@ function _gb_specialchars($string, $quote_style = ENT_NOQUOTES, $charset = false
 function esc_attr($text) {
 	$safe_text = gb_check_invalid_utf8($text);
 	$safe_text = _gb_specialchars($safe_text, ENT_QUOTES);
-	/**
-	 * Filter a string cleaned and escaped for output in an HTML attribute.
-	 *
-	 * Text passed to esc_attr() is stripped of invalid or special characters
-	 * before output.
-	 *
-	 * @since	2.1.0
-	 *
-	 * @param string $safe_text The text after it has been escaped.
-	 * @param string $text      The text prior to being escaped.
-	 */
-	return GB_Hooks::apply_filters('escape_attribute', $safe_text, $text);
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter a string cleaned and escaped for output in an HTML attribute.
+		 *
+		 * Text passed to esc_attr() is stripped of invalid or special characters
+		 * before output.
+		 *
+		 * @since	2.1.0
+		 *
+		 * @param string $safe_text The text after it has been escaped.
+		 * @param string $text      The text prior to being escaped.
+		 */
+		$safe_text = GB_Hooks::apply_filters('escape_attribute', $safe_text, $text);
+	}
+	
+	return $safe_text;
 }
 
 /**
@@ -203,18 +208,23 @@ function esc_attr($text) {
 function esc_html($text){
 	$safe_text = gb_check_invalid_utf8($text);
 	$safe_text = _gb_specialchars($safe_text, ENT_QUOTES);
-	/**
-	 * Filter a string cleaned and escaped for output in HTML.
-	 *
-	 * Text passed to esc_html() is stripped of invalid or special characters
-	 * before output.
-	 *
-	 * @since	2.1.0
-	 *
-	 * @param string $safe_text The text after it has been escaped.
-	 * @param string $text      The text prior to being escaped.
-	 */
-	return GB_Hooks::apply_filters('escape_html', $safe_text, $text);
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter a string cleaned and escaped for output in HTML.
+		 *
+		 * Text passed to esc_html() is stripped of invalid or special characters
+		 * before output.
+		 *
+		 * @since	2.1.0
+		 *
+		 * @param string $safe_text The text after it has been escaped.
+		 * @param string $text      The text prior to being escaped.
+		 */
+		$safe_text = GB_Hooks::apply_filters('escape_html', $safe_text, $text);
+	}
+	
+	return $safe_text;
 }
 
 /**
@@ -235,18 +245,23 @@ function esc_js( $text ) {
 	$safe_text = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes( $safe_text ) );
 	$safe_text = str_replace( "\r", '', $safe_text );
 	$safe_text = str_replace( "\n", '\\n', addslashes( $safe_text ) );
-	/**
-	 * Filter a string cleaned and escaped for output in JavaScript.
-	 *
-	 * Text passed to esc_js() is stripped of invalid or special characters,
-	 * and properly slashed for output.
-	 *
-	 * @since	2.1.0
-	 *
-	 * @param string $safe_text The text after it has been escaped.
-	 * @param string $text      The text prior to being escaped.
-	 */
-	return GB_Hooks::apply_filters( 'js_escape', $safe_text, $text );
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter a string cleaned and escaped for output in JavaScript.
+		 *
+		 * Text passed to esc_js() is stripped of invalid or special characters,
+		 * and properly slashed for output.
+		 *
+		 * @since	2.1.0
+		 *
+		 * @param string $safe_text The text after it has been escaped.
+		 * @param string $text      The text prior to being escaped.
+		 */
+		$safe_text = GB_Hooks::apply_filters( 'js_escape', $safe_text, $text );
+	}
+	
+	return $safe_text;
 }
 
 /**
@@ -299,16 +314,20 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
 			return '';
 	}
 
-	/**
-	 * Filter a string cleaned and escaped for output as a URL.
-	 *
-	 * @since	2.1.0
-	 *
-	 * @param string $good_protocol_url The cleaned URL to be returned.
-	 * @param string $original_url      The URL prior to cleaning.
-	 * @param string $_context          If 'display', replace ampersands and single quotes only.
-	 */
-	return GB_Hooks::apply_filters( 'clean_url', $good_protocol_url, $original_url, $_context );
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter a string cleaned and escaped for output as a URL.
+		 *
+		 * @since	2.1.0
+		 *
+		 * @param string $good_protocol_url The cleaned URL to be returned.
+		 * @param string $original_url      The URL prior to cleaning.
+		 * @param string $_context          If 'display', replace ampersands and single quotes only.
+		 */
+		$good_protocol_url = GB_Hooks::apply_filters('clean_url', $good_protocol_url, $original_url, $_context);
+	}
+	
+	return $good_protocol_url;
 }
 
 /**

@@ -47,11 +47,19 @@ $tests = array(
 );
 */
 
+/**
+ * @since	2.2.3 
+ */
 class GB_Transcriptor {
-	const TRANSCRIBE	= 1;
-	const TRANSLITERATE	= 2;
+	/** Transcription modes  */
+	const MODE_TRANSCRIBE		= 1;
+	const MODE_TRANSLITERATE	= 2;
 	
-	/** A multidimentional array of text translation rules from one language to another. */
+	/**
+	 * A multidimentional array of text translation rules from one language to another.
+	 * 
+	 * @access private
+	 */
 	static $trans_table = array();
 
 	/**
@@ -62,10 +70,10 @@ class GB_Transcriptor {
 	 * @param string $text		Source text.
 	 * @param string $from_lang	Source language code.
 	 * @param string $to_lang	Destination language code. Default current locale language.
-	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::TRANSCRIBE
+	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::MODE_TRANSCRIBE
 	 * @return string	Converted text.
 	 */
-	static function transcript($text, $from_lang, $to_lang = null, $mode = self::TRANSCRIBE){
+	static function transcript($text, $from_lang, $to_lang = null, $mode = self::MODE_TRANSCRIBE){
 		$text = trim($text);
 		if( empty($text) || !preg_match('/\w/u', $text) )
 			return $text;
@@ -173,10 +181,10 @@ class GB_Transcriptor {
 	 * 
 	 * @param string $from_lang	Source language code.
 	 * @param string $to_lang	Destination language code. Default current locale language.
-	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::TRANSCRIBE
+	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::MODE_TRANSCRIBE
 	 * @return boolean	True if transcription table have. False otherwise.
 	 */
-	static function has_transcription($from_lang, $to_lang = null, $mode = self::TRANSCRIBE){
+	static function has_transcription($from_lang, $to_lang = null, $mode = self::MODE_TRANSCRIBE){
 		$from_lang = strtolower($from_lang);
 		$to_lang = strtolower($to_lang);
 
@@ -230,8 +238,8 @@ function gb_transcriptor_init(){
 			'эй' => 'ei',		'ю' => 'yu',		'юй' => 'yui',		'я' => 'ya',
 			'яй' => 'yai',
 	);
-	GB_Transcriptor::add_transcription('ru', 'en', GB_Transcriptor::TRANSLITERATE, $tr, $tr_special);
-	GB_Transcriptor::add_transcription('ru', 'en', GB_Transcriptor::TRANSCRIBE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('ru', 'en', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('ru', 'en', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
 
 	// Русско-немецкая транскрипция (произношение)
 	$tr = array(
@@ -242,7 +250,7 @@ function gb_transcriptor_init(){
 			'ч' => 'tsch',	'ш' => 'sch',	'щ' => 'schtsch',	'ь' => '\'',	'ы' => 'y',
 			'ъ' => '\'',	'э' => 'e',		'ю' => 'yu',	'я' => 'ja',
 	);
-	GB_Transcriptor::add_transcription('ru', 'de', GB_Transcriptor::TRANSCRIBE, $tr);
+	GB_Transcriptor::add_transcription('ru', 'de', GB_Transcriptor::MODE_TRANSCRIBE, $tr);
 
 	// Русско-немецкая транслитерация (написание)
 	$tr_special = array(
@@ -260,7 +268,7 @@ function gb_transcriptor_init(){
 			'готфрид' => 'gottfried',		'вильгельм' => 'wilhelm',	'иоган' => 'johann',
 			'август' => 'august',			'готлиб' => 'gottlieb',		'людвиг' => 'ludwig',
 	);
-	GB_Transcriptor::add_transcription('ru', 'de', GB_Transcriptor::TRANSLITERATE, $tr);
+	GB_Transcriptor::add_transcription('ru', 'de', GB_Transcriptor::MODE_TRANSLITERATE, $tr);
 
 	// Русско-польская транскрипция (произношение)
 	$tr_special = array(
@@ -281,7 +289,7 @@ function gb_transcriptor_init(){
 			'щ' => 'szcz',	'ъ' => '',		'ы' => 'y',		'ь' => '\'',	'э' => 'e',
 			'ю' => 'iu',	'я' => 'ia',
 	);
-	GB_Transcriptor::add_transcription('ru', 'pl', GB_Transcriptor::TRANSCRIBE, $tr);
+	GB_Transcriptor::add_transcription('ru', 'pl', GB_Transcriptor::MODE_TRANSCRIBE, $tr);
 
 	// Русско-польская транслитерация (написание)
 	$tr_special = array(
@@ -295,7 +303,7 @@ function gb_transcriptor_init(){
 			'ф' => 'f',	'х' => 'h',	'ц' => 'c',	'ч' => 'č',	'ш' => 'š',	'щ' => 'ŝ',	'ъ' => '″',
 			'ы' => 'y',	'ь' => '′',	'э' => 'è',	'ю' => 'û',	'я' => 'â',
 	);
-	GB_Transcriptor::add_transcription('ru', 'pl', GB_Transcriptor::TRANSLITERATE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('ru', 'pl', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
 
 	// Русско-финская транскрипция (произношение) и транслитерация (написание)
 	$tr_special = array(
@@ -313,8 +321,8 @@ function gb_transcriptor_init(){
 			'э' => 'e',		'ю' => 'ju',	'я' => 'ja',
 			'вейна' => 'wayne',		'вайне' => 'wayne',
 	);
-	GB_Transcriptor::add_transcription('ru', 'fi', GB_Transcriptor::TRANSCRIBE, $tr, $tr_special);
-	GB_Transcriptor::add_transcription('ru', 'fi', GB_Transcriptor::TRANSLITERATE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('ru', 'fi', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('ru', 'fi', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
 
 	// Польско-русская транскрипция (произношение) и транслитерация (написание)
 	// https://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%BB%D1%8C%D1%81%D0%BA%D0%BE-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%82%D1%80%D0%B0%D0%BD%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%86%D0%B8%D1%8F
@@ -369,8 +377,8 @@ function gb_transcriptor_init(){
 			'z' => 'з',
 			'' => '',
 	);
-	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::TRANSCRIBE, $tr, $tr_special);
-	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::TRANSLITERATE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
 }
 
 // Initialize transcriptor

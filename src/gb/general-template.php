@@ -87,8 +87,8 @@ function get_siteinfo($show = '', $filter = 'raw'){
 	}
 
 	$url = (strpos($show, 'url') !== false || strpos($show, 'directory') !== false);
-	if( 'display' == $filter){
-		if( $url){
+	if( 'display' == $filter && class_exists('GB_Hooks') ){
+		if( $url ){
 			/**
 			 * Filter the URL returned by get_siteinfo().
 			 *
@@ -97,7 +97,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			 * @param mixed $output The URL returned by siteinfo().
 			 * @param mixed $show   Type of information requested.
 			 */
-			$output = GB_Hooks::apply_filters( 'siteinfo_url', $output, $show );
+			$output = GB_Hooks::apply_filters('siteinfo_url', $output, $show);
 		}else{
 			/**
 			 * Filter the site information returned by get_siteinfo().
@@ -107,7 +107,7 @@ function get_siteinfo($show = '', $filter = 'raw'){
 			 * @param mixed $output The requested non-URL site information.
 			 * @param mixed $show   Type of information requested.
 			 */
-			$output = GB_Hooks::apply_filters( 'siteinfo', $output, $show );
+			$output = GB_Hooks::apply_filters('siteinfo', $output, $show);
 		}
 	}
 
@@ -140,14 +140,18 @@ function language_attributes($doctype = 'html') {
 
 	$output = implode(' ', $attributes);
 
-	/**
-	 * Filter the language attributes for display in the html tag.
-	 *
-	 * @since	2.1.0
-	 *
-	 * @param string $output A space-separated list of language attributes.
-	*/
-	echo GB_Hooks::apply_filters('language_attributes', $output);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the language attributes for display in the html tag.
+		 *
+		 * @since	2.1.0
+		 *
+		 * @param string $output A space-separated list of language attributes.
+		*/
+		$output = GB_Hooks::apply_filters('language_attributes', $output);
+	}
+	
+	echo $output;
 }
 
 /**
@@ -156,12 +160,14 @@ function language_attributes($doctype = 'html') {
  * @since	2.0.0
  */
 function gb_head(){
-	/**
-	 * Print scripts or data in the head tag on the front end.
-	 *
-	 * @since	2.1.0
-	 */
-	GB_Hooks::do_action('gb_head');
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Print scripts or data in the head tag on the front end.
+		 *
+		 * @since	2.1.0
+		 */
+		GB_Hooks::do_action('gb_head');
+	}
 }
 
 /**
@@ -170,12 +176,14 @@ function gb_head(){
  * @since	2.1.0
  */
 function gb_footer() {
-	/**
-	 * Print scripts or data before the closing body tag on the front end.
-	 *
-	 * @since	2.1.0
-	 */
-	GB_Hooks::do_action('gb_footer');
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Print scripts or data before the closing body tag on the front end.
+		 *
+		 * @since	2.1.0
+		 */
+		GB_Hooks::do_action('gb_footer');
+	}
 }
 
 /**
@@ -266,15 +274,18 @@ function _paginate_link($page_num, $args, $class = '', $page_title = null){
 	
 	if( $rel )	$rel = ' rel="' . $rel . '"';
 
-	/**
-	 * Filter the paginated links for the given archive pages.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param string $link The paginated link URL.
-	 */
-	return '<a class="pagination' . ($class ? " $class" : '') . '" href="' .
-			esc_url(GB_Hooks::apply_filters('paginate_links', $link)) . '"' . $rel . '>' . $page_title . '</a>';
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the paginated links for the given archive pages.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param string $link The paginated link URL.
+		 */
+		$link = GB_Hooks::apply_filters('paginate_links', $link);
+	}
+	return '<a class="pagination' . ($class ? " $class" : '') . '" href="' . esc_url($link) . '"' .
+			$rel . '>' . $page_title . '</a>';
 }
 
 /**

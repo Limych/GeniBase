@@ -196,7 +196,8 @@ class GB_Locale {
 
 		if( 'rtl' === $this->text_direction && strpos( $GLOBALS['gb_version'], '-src' ) ) {
 			$this->text_direction = 'ltr';
-			GB_Hooks::add_action( 'all_admin_notices', array( $this, 'rtl_src_admin_notice' ) );
+			// TODO: admin
+// 			GB_Hooks::add_action( 'all_admin_notices', array( $this, 'rtl_src_admin_notice' ) );
 		}
 	}
 

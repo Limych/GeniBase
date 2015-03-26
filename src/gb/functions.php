@@ -72,14 +72,18 @@ function number_format_i18n($number, $decimals = 0){
 	if( ' ' === $gb_locale->number_format['thousands_sep'] )
 		$formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', $formatted);
 	
-	/**
-	 * Filter the number formatted based on the locale.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $formatted Converted number in string format.
-	*/
-	return GB_Hooks::apply_filters('number_format_i18n', $formatted);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the number formatted based on the locale.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $formatted Converted number in string format.
+		*/
+		$formatted = GB_Hooks::apply_filters('number_format_i18n', $formatted);
+	}
+	
+	return $formatted;
 }
 
 /**
@@ -110,19 +114,20 @@ function gb_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 	foreach ( $trace as $call ) {
 		if( $skip_frames > 0 ) {
 			$skip_frames--;
-		}elseif( isset( $call['class'] ) ) {
+		}elseif( isset($call['class']) ) {
 			if( $check_class && $ignore_class == $call['class'] )
 				continue; // Filter out calls
 
-			$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
+			if( $call['class'] == 'GB_Hooks'
+					&& in_array($call['function'], array('do_action', 'apply_filters')) )
+				$caller[] = "{$call['class']}{$call['type']}{$call['function']}('{$call['args'][0]}')";
+			else
+				$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
 		}else{
-			if( in_array( $call['function'], array( 'GB_Hooks::do_action', 'GB_Hooks::apply_filters' ) ) ) {
-				$caller[] = "{$call['function']}('{$call['args'][0]}')";
-			}elseif( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ) ) ) {
+			if( in_array($call['function'], array('include', 'include_once', 'require', 'require_once')) )
 				$caller[] = $call['function'] . "('" . str_replace( array( GB_CONTENT_DIR, BASE_DIR ) , '', $call['args'][0] ) . "')";
-			}else{
+			else
 				$caller[] = $call['function'];
-			}
 		}
 	}
 	if( $pretty )
@@ -381,7 +386,7 @@ function status_header( $code ) {
 		$protocol = 'HTTP/1.0';
 	$status_header = "$protocol $code $description";
 
-	if( function_exists('GB_Hooks::apply_filters')){
+	if( class_exists('GB_Hooks') ){
 		/**
 		 * Filter an HTTP status header.
 		 *
@@ -415,7 +420,7 @@ function get_nocache_headers() {
 		'Pragma' => 'no-cache',
 	);
 
-	if( function_exists('GB_Hooks::apply_filters')){
+	if( class_exists('GB_Hooks') ){
 		/**
 		 * Filter the cache-controlling headers.
 		 *
@@ -454,8 +459,8 @@ function nocache_headers() {
 	unset( $headers['Last-Modified'] );
 
 	// In PHP 5.3+, make sure we are not sending a Last-Modified header.
-	if( function_exists( 'header_remove' ) ) {
-		@header_remove( 'Last-Modified' );
+	if( function_exists('header_remove') ) {
+		@header_remove('Last-Modified');
 	}else{
 		// In PHP 5.2, send an empty Last-Modified header, but only as a
 		// last resort to override a header already sent. #WP23021
@@ -467,7 +472,7 @@ function nocache_headers() {
 		}
 	}
 
-	foreach( $headers as $name => $field_value )
+	foreach($headers as $name => $field_value)
 		@header("{$name}: {$field_value}");
 }
 
@@ -512,34 +517,43 @@ function gb_die( $message = '', $title = '', $args = array() ) {
 	}
 
 	if( defined('DOING_AJAX') && DOING_AJAX ){
-		/**
-		 * Filter callback for killing WordPress execution for AJAX requests.
-		 *
-		 * @since	2.1.0
-		 *
-		 * @param callback $function Callback function name.
-		 */
-		$function = GB_Hooks::apply_filters( 'gb_die_ajax_handler', '_ajax_gb_die_handler' );
+		$function = '_ajax_gb_die_handler';
+		if( class_exists('GB_Hooks') ){
+			/**
+			 * Filter callback for killing WordPress execution for AJAX requests.
+			 *
+			 * @since	2.1.0
+			 *
+			 * @param callback $function Callback function name.
+			 */
+			$function = GB_Hooks::apply_filters('gb_die_ajax_handler', $function);
+		}
 
 	}elseif( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ){
-		/**
-		 * Filter callback for killing WordPress execution for XML-RPC requests.
-		 *
-		 * @since	2.1.0
-		 *
-		 * @param callback $function Callback function name.
-		 */
-		$function = GB_Hooks::apply_filters( 'gb_die_xmlrpc_handler', '_xmlrpc_gb_die_handler' );
+		$function = '_xmlrpc_gb_die_handler';
+		if( class_exists('GB_Hooks') ){
+			/**
+			 * Filter callback for killing WordPress execution for XML-RPC requests.
+			 *
+			 * @since	2.1.0
+			 *
+			 * @param callback $function Callback function name.
+			 */
+			$function = GB_Hooks::apply_filters('gb_die_xmlrpc_handler', $function);
+		}
 
 	}else{
-		/**
-		 * Filter callback for killing WordPress execution for all non-AJAX, non-XML-RPC requests.
-		 *
-		 * @since	2.1.0
-		 *
-		 * @param callback $function Callback function name.
-		 */
-		$function = GB_Hooks::apply_filters( 'gb_die_handler', '_default_gb_die_handler' );
+		$function = '_default_gb_die_handler';
+		if( class_exists('GB_Hooks') ){
+			/**
+			 * Filter callback for killing WordPress execution for all non-AJAX, non-XML-RPC requests.
+			 *
+			 * @since	2.1.0
+			 *
+			 * @param callback $function Callback function name.
+			 */
+			$function = GB_Hooks::apply_filters('gb_die_handler', $function);
+		}
 	}
 
 	call_user_func( $function, $message, $title, $args );
@@ -591,11 +605,11 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 		$message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
 	}
 
-// 	if( !GB_Hooks::did_action( 'admin_head' ) ):	// TODO: action admin_head
+// 	if( !class_exists('GB_Hooks') || !GB_Hooks::did_action('admin_head') ):	// TODO: action admin_head
 
 	status_header($r['response']);
 	nocache_headers();
-	header( 'Content-Type: text/html; charset=utf-8' );
+	header('Content-Type: text/html; charset=utf-8');
 
 	if( empty($title) )
 		$title = $have_gettext ? __('GeniBase Error') : 'GeniBase Error';
@@ -604,7 +618,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 	if( isset($r['text_direction']) && 'rtl' == $r['text_direction'] )
 		$text_direction = 'rtl';
 	elseif( function_exists( 'is_rtl' ) && is_rtl() )
-	$text_direction = 'rtl';
+		$text_direction = 'rtl';
 	?>
 <!DOCTYPE html>
 <!-- IE bug fix: always pad the error page with enough characters such that it is greater than 512 bytes, even after gzip compression abcdefghijklmnopqrstuvwxyz1234567890aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz11223344556677889900abacbcbdcdcededfefegfgfhghgihihjijikjkjlklkmlmlnmnmononpopoqpqprqrqsrsrtstsubcbcdcdedefefgfabcadefbghicjkldmnoepqrfstugvwxhyz1i234j567k890laabmbccnddeoeffpgghqhiirjjksklltmmnunoovppqwqrrxsstytuuzvvw0wxx1yyz2z113223434455666777889890091abc2def3ghi4jkl5mno6pqr7stu8vwx9yz11aab2bcc3dd4ee5ff6gg7hh8ii9j0jk1kl2lmm3nnoo4p5pq6qrr7ss8tt9uuvv0wwx1x2yyzz13aba4cbcb5dcdc6dedfef8egf9gfh0ghg1ihi2hji3jik4jkj5lkl6kml7mln8mnm9ono
@@ -715,7 +729,7 @@ function _default_gb_die_handler( $message, $title = '', $args = array() ) {
 	</style>
 </head>
 <body id="error-page">
-<?php //endif; // ! GB_Hooks::did_action( 'admin_head' ) // TODO: action admin_head ?>
+<?php //endif; // !did_action('admin_head') // TODO: action admin_head ?>
 	<?php echo $message; ?>
 </body>
 </html>
@@ -798,14 +812,16 @@ function gb_allowed_protocols() {
 		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher',
 				'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp' );
 
-		/**
-		 * Filter the list of protocols allowed in HTML attributes.
-		 *
-		 * @since	2.1.0
-		 *
-		 * @param array $protocols Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
-		*/
-		$protocols = GB_Hooks::apply_filters('kses_allowed_protocols', $protocols);
+		if( class_exists('GB_Hooks') ){
+			/**
+			 * Filter the list of protocols allowed in HTML attributes.
+			 *
+			 * @since	2.1.0
+			 *
+			 * @param array $protocols Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
+			*/
+			$protocols = GB_Hooks::apply_filters('kses_allowed_protocols', $protocols);
+		}
 	}
 
 	return $protocols;
@@ -1014,7 +1030,7 @@ function is_bot_user($is_first_visited_page = TRUE) {
 		// the user agent could be google bot, bing bot or some other bot,  one would hope real user agents do not have the
 		// string 'bot|spider|crawler|preview' in them, there are bots that don't do us the kindness of identifying themselves as such,
 		// check for the user being logged in in a real user is using a bot to access content from our site
-		$bot_agent_strings = array('alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider',
+		$bot_uagents = array('alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider',
 				'bingbot', 'bot', 'chtml generic', 'crawler', 'fastmobilecrawl', 'feedfetcher-google',
 				'firefly', 'froogle', 'gigabot', 'googlebot', 'googlebot-mobile', 'heritrix',
 				'ia_archiver', 'infoseek', 'irlbot', 'jumpbot', 'lycos', 'mail.ru', 'mediapartners',
@@ -1022,8 +1038,17 @@ function is_bot_user($is_first_visited_page = TRUE) {
 				'pss-webkit-request', 'pythumbnail', 'robot', 'scooter', 'slurp', 'snapbot',
 				'spider', 'stackrambler', 'taptubot', 'technoratisnoop', 'teleport', 'teoma',
 				'twiceler', 'webalta', 'wget', 'wordpress', 'yahooseeker', 'yahooysmcm', 'yammybot', );
-		$bot_agent_strings = GB_Hooks::apply_filters('bot_user_agents', $bot_agent_strings);
-		foreach($bot_agent_strings as $bot){
+		if( class_exists('GB_Hooks') ){
+			/**
+			 * Filter list of known http-bots.
+			 * 
+			 * @since	2.0.1
+			 * 
+			 * @param	array $bot_uagents	User-Agent's substrings to detect bots.
+			 */
+			$bot_uagents = GB_Hooks::apply_filters('bot_user_agents', $bot_uagents);
+		}
+		foreach($bot_uagents as $bot){
 			if( stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false)
 				return true;
 		}
@@ -1179,26 +1204,31 @@ function gb_guess_url() {
  */
 function _deprecated_function($version, $replacement = null) {
 	$caller = next(debug_backtrace());
+	$trigger_error = GB_DEBUG;
 
-	/**
-	 * Fires when a deprecated function is called.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param string $function    The function that was called.
-	 * @param string $replacement The function that should have been called.
-	 * @param string $version     The version of GeniBase that deprecated the function.
-	 */
-	GB_Hooks::do_action( 'deprecated_function_run', $caller['function'], $replacement, $version );
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Fires when a deprecated function is called.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param string $function    The function that was called.
+		 * @param string $replacement The function that should have been called.
+		 * @param string $version     The version of GeniBase that deprecated the function.
+		 */
+		GB_Hooks::do_action('deprecated_function_run', $caller['function'], $replacement, $version);
+	
+		/**
+		 * Filter whether to trigger an error for deprecated functions.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param bool $trigger Whether to trigger the error for deprecated functions. Default true.
+		*/
+		$trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_function_trigger_error', true);
+	}
 
-	/**
-	 * Filter whether to trigger an error for deprecated functions.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param bool $trigger Whether to trigger the error for deprecated functions. Default true.
-	*/
-	if( GB_DEBUG && GB_Hooks::apply_filters( 'deprecated_function_trigger_error', true ) ) {
+	if( $trigger_error ){
 		$file = substr($caller['file'], strlen(BASE_DIR) + 1);
 		if( function_exists('__') ){
 			if( !is_null( $replacement ) )
@@ -1235,27 +1265,32 @@ function _deprecated_function($version, $replacement = null) {
  * @param string $message     Optional. A message regarding the change. Default empty.
  */
 function _deprecated_file( $file, $version, $replacement = null, $message = '' ) {
+	$trigger_error = GB_DEBUG;
 
-	/**
-	 * Fires when a deprecated file is called.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param string $file        The file that was called.
-	 * @param string $replacement The file that should have been included based on BASE_DIR.
-	 * @param string $version     The version of GeniBase that deprecated the file.
-	 * @param string $message     A message regarding the change.
-	 */
-	GB_Hooks::do_action( 'deprecated_file_included', $file, $replacement, $version, $message );
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Fires when a deprecated file is called.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param string $file        The file that was called.
+		 * @param string $replacement The file that should have been included based on BASE_DIR.
+		 * @param string $version     The version of GeniBase that deprecated the file.
+		 * @param string $message     A message regarding the change.
+		 */
+		GB_Hooks::do_action('deprecated_file_included', $file, $replacement, $version, $message);
+	
+		/**
+		 * Filter whether to trigger an error for deprecated files.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param bool $trigger Whether to trigger the error for deprecated files. Default true.
+		*/
+		$trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_file_trigger_error', true);
+	}
 
-	/**
-	 * Filter whether to trigger an error for deprecated files.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param bool $trigger Whether to trigger the error for deprecated files. Default true.
-	*/
-	if( GB_DEBUG && GB_Hooks::apply_filters( 'deprecated_file_trigger_error', true ) ) {
+	if( $trigger_error ){
 		$message = empty( $message ) ? '' : ' ' . $message;
 		if( function_exists( '__' ) ) {
 			if( ! is_null( $replacement ) )
@@ -1297,27 +1332,32 @@ function _deprecated_file( $file, $version, $replacement = null, $message = '' )
  * @param string $message  Optional. A message regarding the change. Default null.
  */
 function _deprecated_argument( $function, $version, $message = null ) {
+	$trigger_error = GB_DEBUG;
 
-	/**
-	 * Fires when a deprecated argument is called.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param string $function The function that was called.
-	 * @param string $message  A message regarding the change.
-	 * @param string $version  The version of GeniBase that deprecated the argument used.
-	 */
-	GB_Hooks::do_action( 'deprecated_argument_run', $function, $message, $version );
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Fires when a deprecated argument is called.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param string $function The function that was called.
+		 * @param string $message  A message regarding the change.
+		 * @param string $version  The version of GeniBase that deprecated the argument used.
+		 */
+		GB_Hooks::do_action('deprecated_argument_run', $function, $message, $version);
+	
+		/**
+		 * Filter whether to trigger an error for deprecated arguments.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param bool $trigger Whether to trigger the error for deprecated arguments. Default true.
+		*/
+		$trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_argument_trigger_error', true);
+	}
 
-	/**
-	 * Filter whether to trigger an error for deprecated arguments.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param bool $trigger Whether to trigger the error for deprecated arguments. Default true.
-	*/
-	if( GB_DEBUG && GB_Hooks::apply_filters( 'deprecated_argument_trigger_error', true ) ) {
-		if( function_exists( '__' ) ) {
+	if( $trigger_error ){
+		if( function_exists('__') ){
 			if( ! is_null( $message ) )
 				trigger_error( sprintf( __('%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s! %3$s'), $function, $version, $message ) );
 			else
@@ -1348,26 +1388,31 @@ function _deprecated_argument( $function, $version, $message = null ) {
  * @param string $version  The version of GeniBase where the message was added.
  */
 function _doing_it_wrong( $function, $message, $version ) {
+	$trigger_error = GB_DEBUG;
 
-	/**
-	 * Fires when the given function is being used incorrectly.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param string $function The function that was called.
-	 * @param string $message  A message explaining what has been done incorrectly.
-	 * @param string $version  The version of GeniBase where the message was added.
-	 */
-	GB_Hooks::do_action( 'doing_it_wrong_run', $function, $message, $version );
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Fires when the given function is being used incorrectly.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param string $function The function that was called.
+		 * @param string $message  A message explaining what has been done incorrectly.
+		 * @param string $version  The version of GeniBase where the message was added.
+		 */
+		GB_Hooks::do_action('doing_it_wrong_run', $function, $message, $version);
+	
+		/**
+		 * Filter whether to trigger an error for _doing_it_wrong() calls.
+		 *
+		 * @since	2.2.2
+		 *
+		 * @param bool $trigger Whether to trigger the error for _doing_it_wrong() calls. Default true.
+		 */
+		$trigger_error = GB_DEBUG && GB_Hooks::apply_filters('doing_it_wrong_trigger_error', true);
+	}
 
-	/**
-	 * Filter whether to trigger an error for _doing_it_wrong() calls.
-	 *
-	 * @since	2.2.2
-	 *
-	 * @param bool $trigger Whether to trigger the error for _doing_it_wrong() calls. Default true.
-	*/
-	if( GB_DEBUG && GB_Hooks::apply_filters( 'doing_it_wrong_trigger_error', true ) ) {
+	if( $trigger_error ){
 		if( function_exists( '__' ) ) {
 			$version = is_null( $version ) ? '' : sprintf( __( '(This message was added in version %s.)' ), $version );
 			// TODO Debugging link

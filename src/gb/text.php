@@ -32,18 +32,21 @@ define('GB_MK_OTHER_NAME',	9900);
  */
 function make_metakeys($names){
 	foreach($names as $key => $val){
-		if( !is_array($val))
+		if( !is_array($val) )
 			$names[$key] = preg_split('/[^\w\?\*]+/uS', $val, -1, PREG_SPLIT_NO_EMPTY);
+	}	
+	$metakeys = $names;
+
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Make meta keys for names.
+		 * 
+		 * @since	2.1.1
+		 * 
+		 * @param	array	$names	Associative array of arrays of names.
+		 */
+		$metakeys = GB_Hooks::apply_filters('make_metakeys', $metakeys);
 	}
-	
-	/**
-	 * Make meta keys for names.
-	 * 
-	 * @since	2.1.1
-	 * 
-	 * @param	array	$names	Associative array of arrays of names.
-	 */
-	$metakeys = GB_Hooks::apply_filters('make_metakeys', $names);
 
 	foreach($metakeys as $key => $val)
 		$metakeys[$key] = array_unique(array_map('mb_strtoupper', array_filter((array) $val)));
@@ -144,7 +147,7 @@ function gb_metaphone($metakeys){
 	}
 	return $metakeys;
 }
-GB_Hooks::add_filter('make_metakeys', 'gb_metaphone');
+if( class_exists('GB_Hooks') )	GB_Hooks::add_filter('make_metakeys', 'gb_metaphone');
 
 /**
  * Функция вычисления письменного ключа русского слова.
@@ -204,7 +207,7 @@ function gb_metascript($metakeys){
 	}
 	return $metakeys;
 }
-GB_Hooks::add_filter('make_metakeys', 'gb_metascript');
+if( class_exists('GB_Hooks') )	GB_Hooks::add_filter('make_metakeys', 'gb_metascript');
 
 
 

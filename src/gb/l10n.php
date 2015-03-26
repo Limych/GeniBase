@@ -109,7 +109,19 @@ function gb_negotiate_client_locale($supported){
 function get_locale() {
 	global $locale;
 
-	if( isset($locale) ){
+	if( $first_run = !isset($locale) ){
+		@header('Vary: Accept-Language');
+	
+		if( defined('GB_LOCAL_PACKAGE') )	$locale = GB_LOCAL_PACKAGE;
+	
+		// GB_LANG was defined in gb-config.
+		if( defined('GB_LANG') )
+			$locale = gb_negotiate_client_locale(preg_split('/[^\w\-]+/si', GB_LANG, -1, PREG_SPLIT_NO_EMPTY));
+	
+		if( empty($locale) )	$locale = 'en_US';
+	}
+
+	if( class_exists('GB_Hooks') ){
 		/**
 		 * Filter GeniBase install's locale ID.
 		 * 
@@ -117,27 +129,16 @@ function get_locale() {
 		 *
 		 * @param string $locale The locale ID.
 		 */
-		return GB_Hooks::apply_filters('locale', $locale);
+		$locale = GB_Hooks::apply_filters('locale', $locale);
 	}
 	
-	@header('Vary: Accept-Language');
-
-	if( defined('GB_LOCAL_PACKAGE') )		$locale = GB_LOCAL_PACKAGE;
-
-	// GB_LANG was defined in gb-config.
-	if( defined('GB_LANG') )
-		$locale = gb_negotiate_client_locale(preg_split('/[^\w\-]+/si', GB_LANG, -1, PREG_SPLIT_NO_EMPTY));
-
-	if( empty($locale) )		$locale = 'en_US';
-
-	/** This filter is documented in gb/l10n.php */
-	$locale = GB_Hooks::apply_filters('locale', $locale);
-	
-	// Set a cookie with user locale
-	$lang = str_replace('_', '-', $locale);
-	if( !isset($_COOKIE[GB_COOKIE_LANG]) || $_COOKIE[GB_COOKIE_LANG] != $lang || 0 == rand(0, 99) ){
-		$secure = ( 'https' === parse_url(site_url(), PHP_URL_SCHEME) && 'https' === parse_url(home_url(), PHP_URL_SCHEME) );
-		@setcookie(GB_COOKIE_LANG, $lang, time() + YEAR_IN_SECONDS, GB_COOKIE_PATH, GB_COOKIE_DOMAIN, $secure);
+	if( $first_run ){
+		// Set a cookie with user locale
+		$lang = str_replace('_', '-', $locale);
+		if( !isset($_COOKIE[GB_COOKIE_LANG]) || $_COOKIE[GB_COOKIE_LANG] != $lang || 0 == rand(0, 99) ){
+			$secure = ( 'https' === parse_url(site_url(), PHP_URL_SCHEME) && 'https' === parse_url(home_url(), PHP_URL_SCHEME) );
+			@setcookie(GB_COOKIE_LANG, $lang, time() + YEAR_IN_SECONDS, GB_COOKIE_PATH, GB_COOKIE_DOMAIN, $secure);
+		}
 	}
 
 	return $locale;
@@ -160,16 +161,20 @@ function translate($text, $domain = 'default'){
 	$translations = get_translations_for_domain($domain);
 	$translations = $translations->translate($text);
 
-	/**
-	 * Filter text with its translation.
-	 * 
-	 * @since	2.1.1
-	 *
-	 * @param string $translations Translated text.
-	 * @param string $text         Text to translate.
-	 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
-	 */
-	return GB_Hooks::apply_filters('gettext', $translations, $text, $domain);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter text with its translation.
+		 * 
+		 * @since	2.1.1
+		 *
+		 * @param string $translations Translated text.
+		 * @param string $text         Text to translate.
+		 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
+		 */
+		$translations = GB_Hooks::apply_filters('gettext', $translations, $text, $domain);
+	}
+	
+	return $translation;
 }
 
 /**
@@ -207,17 +212,22 @@ function before_last_bar($string){
 function translate_with_context($text, $context, $domain = 'default'){
 	$translations = get_translations_for_domain( $domain );
 	$translations = $translations->translate($text, $context);
-	/**
-	 * Filter text with its translation based on context information.
-	 * 
-	 * @since	2.1.1
-	 *
-	 * @param string $translations Translated text.
-	 * @param string $text         Text to translate.
-	 * @param string $context      Context information for the translators.
-	 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
-	 */
-	return GB_Hooks::apply_filters('gettext_with_context', $translations, $text, $context, $domain);
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter text with its translation based on context information.
+		 * 
+		 * @since	2.1.1
+		 *
+		 * @param string $translations Translated text.
+		 * @param string $text         Text to translate.
+		 * @param string $context      Context information for the translators.
+		 * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
+		 */
+		$translations = GB_Hooks::apply_filters('gettext_with_context', $translations, $text, $context, $domain);
+	}
+	
+	return $translation;
 }
 
 /**
@@ -412,18 +422,23 @@ function esc_html_ex($text, $context, $domain = 'default') {
 function _n( $single, $plural, $number, $domain = 'default' ) {
 	$translations = get_translations_for_domain( $domain );
 	$translation = $translations->translate_plural( $single, $plural, $number );
-	/**
-	 * Filter text with its translation when plural option is available.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $translation Translated text.
-	 * @param string $single      The text that will be used if $number is 1.
-	 * @param string $plural      The text that will be used if $number is not 1.
-	 * @param string $number      The number to compare against to use either $single or $plural.
-	 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
-	 */
-	return GB_Hooks::apply_filters('ngettext', $translation, $single, $plural, $number, $domain);
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter text with its translation when plural option is available.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $translation Translated text.
+		 * @param string $single      The text that will be used if $number is 1.
+		 * @param string $plural      The text that will be used if $number is not 1.
+		 * @param string $number      The number to compare against to use either $single or $plural.
+		 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
+		 */
+		$translation = GB_Hooks::apply_filters('ngettext', $translation, $single, $plural, $number, $domain);
+	}
+	
+	return $translation;
 }
 
 /**
@@ -443,19 +458,24 @@ function _n( $single, $plural, $number, $domain = 'default' ) {
 function _nx($single, $plural, $number, $context, $domain = 'default') {
 	$translations = get_translations_for_domain( $domain );
 	$translation = $translations->translate_plural( $single, $plural, $number, $context );
-	/**
-	 * Filter text with its translation while plural option and context are available.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $translation Translated text.
-	 * @param string $single      The text that will be used if $number is 1.
-	 * @param string $plural      The text that will be used if $number is not 1.
-	 * @param string $number      The number to compare against to use either $single or $plural.
-	 * @param string $context     Context information for the translators.
-	 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
-	 */
-	return GB_Hooks::apply_filters('ngettext_with_context', $translation, $single, $plural, $number, $context, $domain);
+	
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter text with its translation while plural option and context are available.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $translation Translated text.
+		 * @param string $single      The text that will be used if $number is 1.
+		 * @param string $plural      The text that will be used if $number is not 1.
+		 * @param string $number      The number to compare against to use either $single or $plural.
+		 * @param string $context     Context information for the translators.
+		 * @param string $domain      Text domain. Unique identifier for retrieving translated strings.
+		 */
+		$translation = GB_Hooks::apply_filters('ngettext_with_context', $translation, $single, $plural, $number, $context, $domain);
+	}
+	
+	return $translation;
 }
 
 /**
@@ -538,37 +558,39 @@ function translate_nooped_plural( $nooped_plural, $count, $domain = 'default' ) 
 function load_textdomain( $domain, $mofile ) {
 	global $l10n;
 
-	/**
-	 * Filter text domain and/or MO file path for loading translations.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param bool   $override Whether to override the text domain. Default false.
-	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
-	 * @param string $mofile   Path to the MO file.
-	 */
-	if( GB_Hooks::apply_filters('override_load_textdomain', false, $domain, $mofile) )
-		return true;
-
-	/**
-	 * Fires before the MO translation file is loaded.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
-	 * @param string $mofile Path to the .mo file.
-	 */
-	GB_Hooks::do_action('load_textdomain', $domain, $mofile);
-
-	/**
-	 * Filter MO file path for loading translations for a specific text domain.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $mofile Path to the MO file.
-	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
-	 */
-	$mofile = GB_Hooks::apply_filters('load_textdomain_mofile', $mofile, $domain);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter text domain and/or MO file path for loading translations.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param bool   $override Whether to override the text domain. Default false.
+		 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
+		 * @param string $mofile   Path to the MO file.
+		 */
+		if( GB_Hooks::apply_filters('override_load_textdomain', false, $domain, $mofile) )
+			return true;
+	
+		/**
+		 * Fires before the MO translation file is loaded.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+		 * @param string $mofile Path to the .mo file.
+		 */
+		GB_Hooks::do_action('load_textdomain', $domain, $mofile);
+	
+		/**
+		 * Filter MO file path for loading translations for a specific text domain.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $mofile Path to the MO file.
+		 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+		 */
+		$mofile = GB_Hooks::apply_filters('load_textdomain_mofile', $mofile, $domain);
+	}
 
 	if( !is_readable($mofile) )		return false;
 
@@ -594,25 +616,27 @@ function load_textdomain( $domain, $mofile ) {
 function unload_textdomain( $domain ) {
 	global $l10n;
 
-	/**
-	 * Filter the text domain for loading translation.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param bool   $override Whether to override unloading the text domain. Default false.
-	 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
-	 */
-	if( GB_Hooks::apply_filters('override_unload_textdomain', false, $domain) )
-		return true;
-
-	/**
-	 * Fires before the text domain is unloaded.
-	 *
-	 * @since	2.1.1
-	 *
-	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
-	 */
-	GB_Hooks::do_action('unload_textdomain', $domain);
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the text domain for loading translation.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param bool   $override Whether to override unloading the text domain. Default false.
+		 * @param string $domain   Text domain. Unique identifier for retrieving translated strings.
+		 */
+		if( GB_Hooks::apply_filters('override_unload_textdomain', false, $domain) )
+			return true;
+	
+		/**
+		 * Fires before the text domain is unloaded.
+		 *
+		 * @since	2.1.1
+		 *
+		 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+		 */
+		GB_Hooks::do_action('unload_textdomain', $domain);
+	}
 
 	if( isset($l10n[$domain]) ) {
 		unset($l10n[$domain]);

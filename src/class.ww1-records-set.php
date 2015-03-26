@@ -109,7 +109,7 @@ class ww1_solders_set extends ww1_records_set{
 					if( in_array($key, array('name', 'surname')) )
 						$text = GB_Transcriptor::transcript($text, 'ru');
 					if( in_array($key, array('region', 'place')) )
-						$text = GB_Transcriptor::transcript($text, 'ru', null, GB_Transcriptor::TRANSLITERATE);
+						$text = GB_Transcriptor::transcript($text, 'ru', null, GB_Transcriptor::MODE_TRANSLITERATE);
 					$text = esc_html($text);
 				}
 				if( substr($text, 0, 1) === '(')
