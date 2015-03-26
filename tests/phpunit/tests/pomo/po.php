@@ -2,9 +2,9 @@
 
 class Tests_POMO_PO extends GB_UnitTestCase {
 	function setUp() {
-		require_once ABSPATH . '/gb-includes/pomo/po.php';
-		// not so random wordpress.pot string -- multiple lines
-		$this->mail = "Your new GeniBase blog has been successfully set up at:
+		require_once GB_CORE_DIR . '/pomo/po.php';
+		// not so random .pot string -- multiple lines
+		$this->mail = "Your new GeniBase site has been successfully set up at:
 
 %1\$s
 
@@ -13,12 +13,12 @@ You can log in to the administrator account with the following information:
 Username: %2\$s
 Password: %3\$s
 
-We hope you enjoy your new blog. Thanks!
+We hope you enjoy your new site. Thanks!
 
 --The GeniBase Team
 ";
 	$this->po_mail = '""
-"Your new GeniBase blog has been successfully set up at:\n"
+"Your new GeniBase site has been successfully set up at:\n"
 "\n"
 "%1$s\n"
 "\n"
@@ -27,7 +27,7 @@ We hope you enjoy your new blog. Thanks!
 "Username: %2$s\n"
 "Password: %3$s\n"
 "\n"
-"We hope you enjoy your new blog. Thanks!\n"
+"We hope you enjoy your new site. Thanks!\n"
 "\n"
 "--The GeniBase Team\n"';
 		$this->a90 = str_repeat("a", 90);

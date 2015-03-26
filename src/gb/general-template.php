@@ -247,11 +247,11 @@ function paginator($pg, $max_pg){
  * @param string $format
  * @return string
  */
-function _paginate_link($page_num, $args, $class = '', $page_title = null, $format = null){
-	if( $format == null )
-		$format = $args['format'];
+function _paginate_link($page_num, $args, $class = '', $page_title = null){
 	if( $page_title == null )
 		$page_title = $args['before_page_number'] . number_format_i18n($page_num) . $args['after_page_number'];
+
+	$format = ( $page_num == 1 ) ? '' : $args['format'];
 	$link = str_replace('%_%', $format, $args['base']);
 	$link = str_replace('%#%', $page_num, $link);
 	if( $args['add_args'] )
@@ -317,11 +317,12 @@ function paginate_links( $args = '' ) {
 	$current = isset($_REQUEST['pg']) ? intval($_REQUEST['pg']) : 1;
 
 	// Append the format placeholder to the base URL.
-	$pagenum_link = trailingslashit($url_parts[0]) . '%_%';
+	$pagenum_link = $url_parts[0] . '%_%';	// TODO: rewrite
+// 	$pagenum_link = trailingslashit($url_parts[0]) . '%_%';
 
 	// URL base depends on permalink settings.
 	$format = '?pg=%#%';	// TODO: rewrite
-// 	$format  = $wp_rewrite->using_index_permalinks() && ! strpos( $pagenum_link, 'index.php' ) ? 'index.php/' : '';
+// 	$format  = $wp_rewrite->using_index_permalinks() && !strpos($pagenum_link, 'index.php') ? 'index.php/' : '';
 // 	$format .= $wp_rewrite->using_permalinks() ? user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' ) : '?paged=%#%';
 	
 	$defaults = array(
@@ -333,8 +334,8 @@ function paginate_links( $args = '' ) {
 			'tenth_size'	=> 1,
 			'mid_size'		=> 4,
 			'prev_next'		=> true,
-			'prev_text'		=> '←',
-			'next_text'		=> '→',
+			'prev_text'		=> '&larr;',
+			'next_text'		=> '&rarr;',
 			'type'			=> 'plain',
 			'add_args'		=> array(), // array of query args to add
 			'add_fragment'	=> '',
@@ -342,16 +343,20 @@ function paginate_links( $args = '' ) {
 			'after_page_number'		=> '',
 	);
 	
-	$args = gb_parse_args( $args, $defaults );
+	$args = gb_parse_args($args, $defaults);
 
 	if( !is_array($args['add_args']) )
 		$args['add_args'] = array();
 
 	// Merge additional query vars found in the original URL into 'add_args' array.
 	if( isset($url_parts[1]) ){
-		foreach (gb_parse_args($url_parts[1]) as $key => $val)
-			if( !isset($args['add_args'][$key]) )
-				$args['add_args'][$key] = $val;
+		// Find the format argument.
+		$format_query = parse_url(str_replace('%_%', $args['format'], $args['base']), PHP_URL_QUERY);
+		gb_parse_str($format_query, $format_arg);
+
+		// Remove the format argument from the array of query arguments, to avoid overwriting custom format.
+		gb_parse_str(remove_query_arg(array_keys($format_arg), $url_parts[1]), $query_args);
+		$args['add_args'] = array_merge($args['add_args'], urlencode_deep($query_args));
 	}
 
 	// Who knows what else people pass in $args
@@ -371,8 +376,7 @@ function paginate_links( $args = '' ) {
 
 	if( $current >= 2 ){
 		if( $args['prev_next'] ){
-			$page_links[] = _paginate_link($current - 1, $args, 'prev', $args['prev_text'],
-					($current == 2 ? '' : $args['format']));
+			$page_links[] = _paginate_link($current - 1, $args, 'prev', $args['prev_text']);
 		}
 		for ($n = 1; $n <= $end_size; $n++)
 			$page_links[] = _paginate_link($n, $args);

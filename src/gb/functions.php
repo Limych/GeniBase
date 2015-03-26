@@ -902,7 +902,7 @@ function add_query_arg() {
 			unset( $qs[$k] );
 	}
 
-	$ret = build_query( $qs );
+	$ret = build_query($qs);
 	$ret = trim( $ret, '?' );
 	$ret = preg_replace( '#=(&|$)#', '$1', $ret );
 	$ret = $protocol . $base . $ret . $frag;
@@ -940,11 +940,11 @@ function remove_query_arg($key, $uri = false){
  * @see http://us2.php.net/manual/en/function.http-build-query.php for more on what
  *		http_build_query() does.
  *
- * @param array $data URL-encode key/value pairs.
+ * @param array $data URL-encoded key/value pairs.
  * @return string URL-encoded string.
  */
-function build_query( $data ) {
-	return _http_build_query( $data, null, '&', '', false );
+function build_query($data) {
+	return _http_build_query($data, null, '&', '', false);
 }
 
 /**
@@ -965,11 +965,11 @@ function build_query( $data ) {
  *
  * @return string The query string.
  */
-function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urlencode = true ) {
+function _http_build_query($data, $prefix = null, $sep = null, $key = '', $urlencode = true) {
 	$ret = array();
 
-	foreach ( (array) $data as $k => $v ) {
-		if( $urlencode)
+	foreach((array) $data as $k => $v){
+		if( $urlencode )
 			$k = urlencode($k);
 		if( is_int($k) && $prefix != null )
 			$k = $prefix.$k;
@@ -977,13 +977,13 @@ function _http_build_query( $data, $prefix = null, $sep = null, $key = '', $urle
 			$k = $key . '%5B' . $k . '%5D';
 		if( $v === null )
 			continue;
-		elseif( $v === FALSE )
-		$v = '0';
+		elseif( $v === false )
+			$v = '0';
 
 		if( is_array($v) || is_object($v) )
 			array_push($ret,_http_build_query($v, '', $sep, $k, $urlencode));
 		elseif( $urlencode )
-		array_push($ret, $k.'='.urlencode($v));
+			array_push($ret, $k.'='.urlencode($v));
 		else
 			array_push($ret, $k.'='.$v);
 	}

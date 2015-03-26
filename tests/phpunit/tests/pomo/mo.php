@@ -5,7 +5,7 @@ class Tests_POMO_MO extends GB_UnitTestCase {
 	function test_mo_simple() {
 		$mo = new MO();
 		$mo->import_from_file(DIR_TESTDATA . '/pomo/simple.mo');
-		$this->assertEquals(array('Project-Id-Version' => 'GeniBase 2.6-bleeding', 'Report-Msgid-Bugs-To' => 'gb-polyglots@lists.automattic.com'), $mo->headers);
+		$this->assertEquals(array('Project-Id-Version' => 'GeniBase 2.10-bleeding', 'Report-Msgid-Bugs-To' => 'gb-polyglots@lists.automattic.com'), $mo->headers);
 		$this->assertEquals(2, count($mo->entries));
 		$this->assertEquals(array('dyado'), $mo->entries['baba']->translations);
 		$this->assertEquals(array('yes'), $mo->entries["kuku\nruku"]->translations);

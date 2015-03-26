@@ -10,7 +10,7 @@ class Tests_Paginate_Links extends GB_UnitTestCase {
 // TODO: rewrite
 // 		global $gb_rewrite;
 
-		$this->go_to(home_url('/' ));
+		$this->go_to(home_url('/'));
 
 // TODO: rewrite
 // 		$this->permalink_structure = $gb_rewrite->permalink_structure;
@@ -26,77 +26,105 @@ class Tests_Paginate_Links extends GB_UnitTestCase {
 	function test_defaults() {
 		$page2 = get_pagenum_link(2);
 		$page3 = get_pagenum_link(3);
+		$page4 = get_pagenum_link(4);
+		$page5 = get_pagenum_link(5);
+		$page11 = get_pagenum_link(11);
 		$page50 = get_pagenum_link(50);
 
 		$expected =<<<EXPECTED
-<span class='pagination current'>1</span>
-<a class='pagination' href='$page2'>2</a>
-<a class='pagination' href='$page3'>3</a>
+<span class="pagination current">1</span>
+<a class="pagination" href="$page2" rel="next">2</a>
+<a class="pagination" href="$page3">3</a>
+<a class="pagination" href="$page4">4</a>
+<a class="pagination" href="$page5">5</a>
 <span class="pagination dots">&hellip;</span>
-<a class='pagination' href='$page50'>50</a>
-<a class="next pagination" href="$page2">Next &raquo;</a>
+<a class="pagination" href="$page11">11</a>
+<span class="pagination dots">&hellip;</span>
+<a class="pagination" href="$page50" rel="last">50</a>
+<a class="pagination next" href="$page2" rel="next">&rarr;</a>
 EXPECTED;
 
-		$links = paginate_links( array( 'total' => 50 ) );
-		$this->assertEquals( $expected, $links );
+		$links = paginate_links(array('total' => 50));
+		$this->assertEquals($expected, $links);
 	}
 
 	function test_format() {
 		$page2 = home_url('/page/2/');
 		$page3 = home_url('/page/3/');
+		$page4 = home_url('/page/4/');
+		$page5 = home_url('/page/5/');
+		$page11 = home_url('/page/11/');
 		$page50 = home_url('/page/50/');
 
 		$expected =<<<EXPECTED
-<span class='pagination current'>1</span>
-<a class='pagination' href='$page2'>2</a>
-<a class='pagination' href='$page3'>3</a>
+<span class="pagination current">1</span>
+<a class="pagination" href="$page2" rel="next">2</a>
+<a class="pagination" href="$page3">3</a>
+<a class="pagination" href="$page4">4</a>
+<a class="pagination" href="$page5">5</a>
 <span class="pagination dots">&hellip;</span>
-<a class='pagination' href='$page50'>50</a>
-<a class="next pagination" href="$page2">Next &raquo;</a>
+<a class="pagination" href="$page11">11</a>
+<span class="pagination dots">&hellip;</span>
+<a class="pagination" href="$page50" rel="last">50</a>
+<a class="pagination next" href="$page2" rel="next">&rarr;</a>
 EXPECTED;
 
-		$links = paginate_links( array( 'total' => 50, 'format' => 'page/%#%/' ) );
-		$this->assertEquals( $expected, $links );
+		$links = paginate_links(array('total' => 50, 'format' => 'page/%#%/'));
+		$this->assertEquals($expected, $links);
 	}
 
 	function test_prev_next_false() {
 		$home = home_url( '/' );
-		$page3 = get_pagenum_link( 3 );
-		$page4 = get_pagenum_link( 4 );
-		$page50 = get_pagenum_link( 50 );
+		$page3 = get_pagenum_link(3);
+		$page4 = get_pagenum_link(4);
+		$page5 = get_pagenum_link(5);
+		$page6 = get_pagenum_link(6);
+		$page12 = get_pagenum_link(12);
+		$page50 = get_pagenum_link(50);
 
 		$expected =<<<EXPECTED
-<a class='pagination' href='$home'>1</a>
-<span class='pagination current'>2</span>
-<a class='pagination' href='$page3'>3</a>
-<a class='pagination' href='$page4'>4</a>
+<a class="pagination" href="$home" rel="first">1</a>
+<span class="pagination current">2</span>
+<a class="pagination" href="$page3" rel="next">3</a>
+<a class="pagination" href="$page4">4</a>
+<a class="pagination" href="$page5">5</a>
+<a class="pagination" href="$page6">6</a>
 <span class="pagination dots">&hellip;</span>
-<a class='pagination' href='$page50'>50</a>
+<a class="pagination" href="$page12">12</a>
+<span class="pagination dots">&hellip;</span>
+<a class="pagination" href="$page50" rel="last">50</a>
 EXPECTED;
-
-		$links = paginate_links( array( 'total' => 50, 'prev_next' => false, 'current' => 2 ) );
-		$this->assertEquals( $expected, $links );
+		
+		$links = paginate_links(array('total' => 50, 'prev_next' => false, 'current' => 2));
+		$this->assertEquals($expected, $links);
 	}
 
 	function test_prev_next_true() {
 		$home = home_url( '/' );
-		$page3 = get_pagenum_link( 3 );
-		$page4 = get_pagenum_link( 4 );
-		$page50 = get_pagenum_link( 50 );
+		$page3 = get_pagenum_link(3);
+		$page4 = get_pagenum_link(4);
+		$page5 = get_pagenum_link(5);
+		$page6 = get_pagenum_link(6);
+		$page12 = get_pagenum_link(12);
+		$page50 = get_pagenum_link(50);
 
 		$expected =<<<EXPECTED
-<a class="prev pagination" href="$home">&laquo; Previous</a>
-<a class='pagination' href='$home'>1</a>
-<span class='pagination current'>2</span>
-<a class='pagination' href='$page3'>3</a>
-<a class='pagination' href='$page4'>4</a>
+<a class="pagination prev" href="$home" rel="first">&larr;</a>
+<a class="pagination" href="$home" rel="first">1</a>
+<span class="pagination current">2</span>
+<a class="pagination" href="$page3" rel="next">3</a>
+<a class="pagination" href="$page4">4</a>
+<a class="pagination" href="$page5">5</a>
+<a class="pagination" href="$page6">6</a>
 <span class="pagination dots">&hellip;</span>
-<a class='pagination' href='$page50'>50</a>
-<a class="next pagination" href="$page3">Next &raquo;</a>
+<a class="pagination" href="$page12">12</a>
+<span class="pagination dots">&hellip;</span>
+<a class="pagination" href="$page50" rel="last">50</a>
+<a class="pagination next" href="$page3" rel="next">&rarr;</a>
 EXPECTED;
 
-		$links = paginate_links( array( 'total' => 50, 'prev_next' => true, 'current' => 2 ) );
-		$this->assertEquals( $expected, $links );
+		$links = paginate_links(array('total' => 50, 'prev_next' => true, 'current' => 2));
+		$this->assertEquals($expected, $links);
 	}
 
 	function increment_i18n_count() {
@@ -105,37 +133,39 @@ EXPECTED;
 
 	function test_paginate_links_number_format() {
 		$this->i18n_count = 0;
-		add_filter( 'number_format_i18n', array( $this, 'increment_i18n_count' ) );
-		paginate_links( array(
-			'total'     => 100,
-			'current'   => 50,
-			'prev_next' => true,
-			'end_size'  => 1,
-			'mid_size'  => 1,
-		) );
+		GB_Hooks::add_filter('number_format_i18n', array($this, 'increment_i18n_count'));
+		paginate_links(array(
+			'total'			=> 100,
+			'current'		=> 50,
+			'prev_next'		=> true,
+			'end_size'		=> 1,
+			'tenth_size'	=> 1,
+			'mid_size'		=> 1,
+		));
 		// The links should be:
-		// < Previous 1 ... 49 50 51 ... 100 Next >
-		$this->assertEquals( 5, $this->i18n_count );
-		remove_filter( 'number_format_i18n', array( $this, 'increment_i18n_count' ) );
+		// <- 1 ... 40 ... 49 50 51 ... 60 ... 100 ->
+		$this->assertEquals(7, $this->i18n_count);
+		GB_Hooks::remove_filter('number_format_i18n', array($this, 'increment_i18n_count'));
 	}
 
 	function test_paginate_links_base_value() {
 		// Current page: 2
 		$links = paginate_links( array(
-			'current'  => 2,
-			'total'    => 5,
-			'end_size' => 1,
-			'mid_size' => 1,
-			'type'     => 'array',
+			'current'		=> 2,
+			'total'			=> 5,
+			'end_size'		=> 1,
+			'tenth_size'	=> 1,
+			'mid_size'		=> 1,
+			'type'			=> 'array',
 		) );
 
 		$expected_attributes = array(
 			array(
-				'href'  => home_url( '/' ),
-				'class' => 'prev pagination'
+				'href'  => home_url('/'),
+				'class' => 'pagination prev'
 			),
 			array(
-				'href'  => home_url( '/' ),
+				'href'  => home_url('/'),
 				'class' => 'pagination'
 			)
 		);
@@ -160,11 +190,12 @@ EXPECTED;
 
 		// Current page: 1
 		$links = paginate_links( array(
-			'current'  => 1,
-			'total'    => 5,
-			'end_size' => 1,
-			'mid_size' => 1,
-			'type'     => 'array',
+			'current'		=> 1,
+			'total'			=> 5,
+			'end_size'		=> 1,
+			'tenth_size'	=> 1,
+			'mid_size'		=> 1,
+			'type'			=> 'array',
 		) );
 
 		$document->loadHTML( $links[0] );
@@ -190,7 +221,7 @@ EXPECTED;
 	}
 
 	function test_paginate_links_query_args() {
-		add_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
+		GB_Hooks::add_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
 		$links = paginate_links( array(
 			'current'  => 2,
 			'total'    => 5,
@@ -198,7 +229,7 @@ EXPECTED;
 			'mid_size' => 1,
 			'type'     => 'array',
 		) );
-		remove_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
+		GB_Hooks::remove_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
 
 		$document = new DOMDocument();
 		$document->preserveWhiteSpace = false;
@@ -207,9 +238,9 @@ EXPECTED;
 		$data = array(
 			0 => home_url( '/?foo=bar&s=search+term' ),
 			1 => home_url( '/?foo=bar&s=search+term' ),
-			3 => home_url( '/?paged=3&foo=bar&s=search+term' ),
-			5 => home_url( '/?paged=5&foo=bar&s=search+term' ),
-			6 => home_url( '/?paged=3&foo=bar&s=search+term' ),
+			3 => home_url( '/?pg=3&foo=bar&s=search+term' ),
+			5 => home_url( '/?pg=5&foo=bar&s=search+term' ),
+			6 => home_url( '/?pg=3&foo=bar&s=search+term' ),
 		);
 
 		foreach ( $data as $index => $expected_href ) {
@@ -223,7 +254,7 @@ EXPECTED;
 	}
 
 	function test_paginate_links_with_custom_query_args() {
-		add_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
+		GB_Hooks::add_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
 		$links = paginate_links( array(
 			'current'  => 2,
 			'total'    => 5,
@@ -234,7 +265,7 @@ EXPECTED;
 				'baz' => 'qux',
 			),
 		) );
-		remove_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
+		GB_Hooks::remove_filter( 'get_pagenum_link', array( $this, 'add_query_arg' ) );
 
 		$document = new DOMDocument();
 		$document->preserveWhiteSpace = false;
@@ -242,9 +273,9 @@ EXPECTED;
 		$data = array(
 			0 => home_url( '/?baz=qux&foo=bar&s=search+term' ),
 			1 => home_url( '/?baz=qux&foo=bar&s=search+term' ),
-			3 => home_url( '/?paged=3&baz=qux&foo=bar&s=search+term' ),
-			5 => home_url( '/?paged=5&baz=qux&foo=bar&s=search+term' ),
-			6 => home_url( '/?paged=3&baz=qux&foo=bar&s=search+term' ),
+			3 => home_url( '/?pg=3&baz=qux&foo=bar&s=search+term' ),
+			5 => home_url( '/?pg=5&baz=qux&foo=bar&s=search+term' ),
+			6 => home_url( '/?pg=3&baz=qux&foo=bar&s=search+term' ),
 		);
 
 		foreach ( $data as $index => $expected_href ) {
@@ -285,13 +316,13 @@ EXPECTED;
 
 		$links = paginate_links( array(
 			'add_args' => false,
-			'base'    => add_query_arg( 'foo', '%#%' ),
+			'base'    => add_query_arg('foo', '%#%'),
 			'format'  => '',
 			'total'   => 5,
 			'current' => 3,
 			'type'    => 'array',
 		) );
 
-		$this->assertContains( "<span class='pagination current'>3</span>", $links );
+		$this->assertContains('<span class="pagination current">3</span>', $links);
 	}
 }
