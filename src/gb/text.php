@@ -10,10 +10,7 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 
-/**
- * Date of last modification search keys making alghoritm.
- * @var string
- */
+/** Date of last modification search keys making alghoritm. */
 define('GB_METAKEYS_MAKE_DATE', '2015-03-04');	// YYYY-MM-DD
 
 define('GB_MK_SURNAME',		 100);

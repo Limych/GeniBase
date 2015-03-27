@@ -38,6 +38,23 @@ function _mb_substr( $str, $start, $length=null, $encoding=null ) {
 }
 
 /**
+ * mb_ucfirst()
+ */
+if( !function_exists('mb_ucfirst') ):
+/**
+ * Make a string's first character uppercase (Multibyte version)
+ *
+ * @since	1.0.0
+ *
+ * @param	string	$str	The input string
+ * @return	string		The resilting string.
+ */
+function mb_ucfirst($str){
+	return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
+}
+endif;
+
+/**
  * hash_hmac()
  */
 if( !function_exists('hash_hmac') ):

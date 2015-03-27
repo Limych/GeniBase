@@ -1120,20 +1120,6 @@ function force_ssl_admin( $force = null ) {
 	return $forced;
 }
 
-if( !function_exists('mb_ucfirst') ):
-/**
- * Make a string's first character uppercase (Multibyte version)
- *
- * @since	1.0.0
- *
- * @param	string	$str	The input string
- * @return	string		The resilting string.
- */
-function mb_ucfirst($str){
-	return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
-}
-endif;
-
 /**
  * Guess the URL for the site.
  *

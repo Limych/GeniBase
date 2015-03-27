@@ -70,7 +70,7 @@ class GB_Transcriptor {
 	 * @param string $text		Source text.
 	 * @param string $from_lang	Source language code.
 	 * @param string $to_lang	Destination language code. Default current locale language.
-	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::MODE_TRANSCRIBE
+	 * @param int $mode			Convertion mode. {@link GB_Transcriptor} Default self::MODE_TRANSCRIBE
 	 * @return string	Converted text.
 	 */
 	static function transcript($text, $from_lang, $to_lang = null, $mode = self::MODE_TRANSCRIBE){
@@ -149,10 +149,10 @@ class GB_Transcriptor {
 	 * 
 	 * @param string $from_lang	Source language code.
 	 * @param string $to_lang	Destination language code.
-	 * @param int $mode			Convertion mode. {@see GB_Transcriptor}
-	 * @param array $tr			Main translation table. {@see strtr}
+	 * @param int $mode			Convertion mode. {@link GB_Transcriptor}
+	 * @param array $tr			Main translation table. {@link strtr}
 	 * @param array $tr_special	Additional translation table for special ocassions.
-	 * 							{@see preg_replace} 
+	 * 							{@link preg_replace} 
 	 * @return boolean	Always true.
 	 */
 	static function add_transcription($from_lang, $to_lang, $mode, $tr, $tr_special = null){
@@ -181,7 +181,7 @@ class GB_Transcriptor {
 	 * 
 	 * @param string $from_lang	Source language code.
 	 * @param string $to_lang	Destination language code. Default current locale language.
-	 * @param int $mode			Convertion mode. {@see GB_Transcriptor} Default self::MODE_TRANSCRIBE
+	 * @param int $mode			Convertion mode. {@link GB_Transcriptor} Default self::MODE_TRANSCRIBE
 	 * @return boolean	True if transcription table have. False otherwise.
 	 */
 	static function has_transcription($from_lang, $to_lang = null, $mode = self::MODE_TRANSCRIBE){

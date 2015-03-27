@@ -34,4 +34,16 @@ class Tests_Compat extends GB_UnitTestCase {
 // 		$this->assertEquals( '["foo"]', $json->encodeUnsafe( array( 'foo' ) ) );
 // 		$this->assertEquals( array( 'foo' ), $json->decode( '["foo"]' ) );
 // 	}
+
+	function test_mb_ucfirst(){
+		$data = array(
+				'СоВсем'	=> 'СоВсем',
+				'простой'	=> 'Простой',
+				'ТЕКСТ'		=> 'ТЕКСТ',
+				'lorem'		=> 'Lorem',
+				'IPSUM'		=> 'IPSUM',
+		);
+		foreach ($data as $src => $res)
+			$this->assertEquals($res, mb_ucfirst($src));
+	}
 }

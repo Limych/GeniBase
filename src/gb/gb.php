@@ -70,6 +70,7 @@ require_once(GB_CORE_DIR . '/formatting.php');
 require_once(GB_CORE_DIR . '/script-loader.php');
 require_once(GB_CORE_DIR . '/text.php');
 require_once(GB_CORE_DIR . '/class.gb-transcriptor.php');
+// require_once(GB_CORE_DIR . '/class.gb-rewrite.php');
 
 // Define constants that rely on the API to obtain the default value.
 gb_plugin_constants();

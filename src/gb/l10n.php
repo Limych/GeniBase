@@ -36,6 +36,12 @@ function gb_negotiate_client_locale($supported){
 	$lang = reset($supported);
 	if( !$lang )	return false;
 
+	if( isset($_REQUEST['hl']) ){
+		$locale = str_replace('-', '_', $_REQUEST['hl']);
+		if( in_array($locale, $supported) )
+			return $_REQUEST['hl'];
+	}
+
 	if( isset($_COOKIE[GB_COOKIE_LANG]) ){
 		$locale = str_replace('-', '_', $_COOKIE[GB_COOKIE_LANG]);
 		if( in_array($locale, $supported) )

@@ -104,3 +104,90 @@ function _gb_sanitize_utf8_in_redirect($matches) {
 	return urlencode($matches[0]);
 }
 endif;
+
+if( !function_exists('gb_safe_redirect') ):
+/**
+ * Performs a safe (local) redirect, using gb_redirect().
+*
+* Checks whether the $location is using an allowed host, if it has an absolute
+* path. A plugin can therefore set or remove allowed host(s) to or from the
+* list.
+*
+* If the host is not allowed, then the redirect is to gb-admin on the siteurl
+* instead. This prevents malicious redirects which redirect to another host,
+* but only used in a few places.
+*
+* @since	2.2.3
+*
+* @return void Does not return anything
+**/
+function gb_safe_redirect($location, $status = 302) {
+	// Need to look at the URL the way it will end up in gb_redirect()
+	$location = gb_sanitize_redirect($location);
+
+	$location = gb_validate_redirect($location, admin_url());
+
+	gb_redirect($location, $status);
+}
+endif;
+
+if( !function_exists('gb_validate_redirect') ):
+/**
+ * Validates a URL for use in a redirect.
+*
+* Checks whether the $location is using an allowed host, if it has an absolute
+* path. A plugin can therefore set or remove allowed host(s) to or from the
+* list.
+*
+* If the host is not allowed, then the redirect is to $default supplied
+*
+* @since	2.2.3
+*
+* @param string $location The redirect to validate
+* @param string $default The value to return if $location is not allowed
+* @return string redirect-sanitized URL
+**/
+function gb_validate_redirect($location, $default = '') {
+	$location = trim($location);
+	// browsers will assume 'http' is your protocol, and will obey a redirect to a URL starting with '//'
+	if( substr($location, 0, 2) == '//' )
+		$location = 'http:' . $location;
+
+	// In php 5 parse_url may fail if the URL query part contains http://, bug #38143
+	$test = ( $cut = strpos($location, '?') ) ? substr( $location, 0, $cut ) : $location;
+
+	$lp  = parse_url($test);
+
+	// Give up if malformed URL
+	if( false === $lp )
+		return $default;
+
+	// Allow only http and https schemes. No data:, etc.
+	if( isset($lp['scheme']) && !('http' == $lp['scheme'] || 'https' == $lp['scheme']) )
+		return $default;
+
+	// Reject if scheme is set but host is not. This catches urls like https:host.com for which parse_url does not set the host field.
+	if( isset($lp['scheme'])  && !isset($lp['host']) )
+		return $default;
+
+	$gbp = parse_url(home_url());
+	$allowed_hosts = array($gbp['host']);
+
+	if( class_exists('GB_Hooks') ){
+		/**
+		 * Filter the whitelist of hosts to redirect to.
+		 *
+		 * @since 2.2.3
+		 *
+		 * @param array       $hosts An array of allowed hosts.
+		 * @param bool|string $host  The parsed host; empty if not isset.
+		*/
+		$allowed_hosts = (array) apply_filters('allowed_redirect_hosts', $allowed_hosts, isset($lp['host']) ? $lp['host'] : '');
+	}
+
+	if( isset($lp['host']) && ( !in_array($lp['host'], $allowed_hosts) && $lp['host'] != strtolower($gbp['host']) ) )
+		$location = $default;
+
+	return $location;
+}
+endif;
