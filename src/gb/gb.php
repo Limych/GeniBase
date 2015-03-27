@@ -77,6 +77,9 @@ gb_plugin_constants();
 // Define cookie constants.
 gb_cookie_constants();
 
+// Load pluggable functions.
+require_once(GB_CORE_DIR . '/pluggable.php');
+
 // Load the default text localization domain.
 load_default_textdomain();
 

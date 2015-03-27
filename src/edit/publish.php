@@ -112,7 +112,7 @@ if( !isset($_REQUEST['id']) && !$have_trouble){
 		gbdb()->set_row('?_persons_raw', array('status' => 'Published'), array('id' => $raw['id']));
 	}
 
-	header('Location: ' . $_SERVER['PHP_SELF'] . '?rnd=' . rand());
+	gb_redirect($_SERVER['PHP_SELF'] . '?rnd=' . rand());
 	die();
 }
 

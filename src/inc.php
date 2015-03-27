@@ -374,14 +374,10 @@ function load_check(){
 				' WHERE `ip` = ?ip',
 				array('ip' => $_SERVER["REMOTE_ADDR"], 'ban' => OVERLOAD_BAN_TIME));
 
-		$protocol = $_SERVER["SERVER_PROTOCOL"];
-		if( 'HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)	$protocol = 'HTTP/1.0';
-		@header("$protocol 503 Service Unavailable", true, 503);
 		@header('Retry-After: 600000');
-		html_header('Доступ приостановлен', FALSE);
-		print "<div style='color: red; margin: 3em; font-width: bold; text-align: center'>" . __('You are overload the database and have been blocked for some time. Please, take a break...', WW1_TXTDOM) . "</div>";
-		html_footer();
-		die();
+		$title = 'Доступ приостановлен';
+		$message = __('You are overload the database and have been blocked for some time. Please, take a break...', WW1_TXTDOM);
+		gb_die($message, $title, 'response=503');
 
 	}else{
 		// Очередной заход пользователя

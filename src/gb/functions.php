@@ -502,7 +502,7 @@ function nocache_headers() {
  *
  *     @type int    $response       The HTTP response code. Default 500.
  *     @type bool   $back_link      Whether to include a link to go back. Default false.
- *     @type string $text_direction The text direction. This is only useful internally, when WordPress
+ *     @type string $text_direction The text direction. This is only useful internally, when GeniBase
  *                                  is still loading and the site's locale is not set up yet. Accepts 'rtl'.
  *                                  Default is the value of {@see is_rtl()}.
  * }

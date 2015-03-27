@@ -7,7 +7,7 @@ define('GB_VERSION', '2.2.3');
 /**
  * GeniBase DB revision, increments when changes are made to the GeniBase DB schema.
  */
-define('GB_DB_VERSION', 11);
+define('GB_DB_VERSION', 12);
 
 /**
  * Required PHP version.
