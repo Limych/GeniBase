@@ -358,8 +358,10 @@ function gb_transcriptor_init(){
 			// ję
 			'/\bję(?=[bp])/uS' => 'ем',
 			'/\bję(?=[cćdfghjkłmnńrsśtwzźż])/uS' => 'ен',
-			'/(?=[aąeęioóuy])ję(?=[bp])/uS' => 'ьем',
-			'/(?=[aąeęioóuy])ję/uS' => 'ьен',
+			'/(?=[aąeęioóuy])ję(?=[bp])/uS' => 'ем',
+			'/(?=[aąeęioóuy])ję/uS' => 'ен',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ję(?=[bp])/uS' => 'ьем',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ję/uS' => 'ьен',
 			//в конце личных имен y → ий
 			'/y\b/uS' => 'ий',
 			//перед согласными, за которыми следует i: dź → дз, ś → с, ź → з 
