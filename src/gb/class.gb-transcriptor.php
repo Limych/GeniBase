@@ -353,8 +353,6 @@ function gb_transcriptor_init(){
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
-			//перед согласными и в конце слова j → й
-			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			// ję
 			'/\bję(?=[bp])/uS' => 'ем',
 			'/\bję(?=[cćdfghjkłmnńrsśtwzźż])/uS' => 'ен',
@@ -362,6 +360,8 @@ function gb_transcriptor_init(){
 			'/(?=[aąeęioóuy])ję/uS' => 'ен',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])ję(?=[bp])/uS' => 'ьем',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])ję/uS' => 'ьен',
+			//перед согласными и в конце слова j → й
+			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
 			'/y\b/uS' => 'ий',
 			//перед согласными, за которыми следует i: dź → дз, ś → с, ź → з 
