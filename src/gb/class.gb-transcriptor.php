@@ -351,13 +351,13 @@ function gb_transcriptor_init(){
 			//перед согласными и в конце слова j → й
 			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
-			'/y\b)/uS' => 'ий',
+			'/y\b/uS' => 'ий',
 			//перед согласными, за которыми следует i: dź → дз, ś → с, ź → з 
 			'/dź(?=[bcdfghjkłmnprstwzż])i/uS' => 'дз',
 			'/ś(?=[bcdfghjkłmnprstwzż])i/uS' => 'с',
 			'/ź(?=[bcdfghjkłmnprstwzż])i/uS' => 'з',
 			//Мягкость звука l показывается в транскрипции на конце слова или перед согласной — мягким знаком
-			'/l\b)/uS' => 'ль',
+			'/l\b/uS' => 'ль',
 			'/l(?=[bcćdfghjklłmnńprsśtwzźż])/uS' => 'ль',
 			//окончания фамилий:
 			//	-ski / -ska 	→ -ский / -ская
@@ -366,9 +366,6 @@ function gb_transcriptor_init(){
 			'/ski\b/uS' => 'ский',	'/ska\b/uS' => 'ская',	
 			'/cki\b/uS' => 'цкий',	'/cka\b/uS' => 'цкая',
 			'/dzki\b/uS' => 'дский',	'/dzka\b/uS' => 'дская',
-				
-			
-			'//uS' => '',
 	);
 	$tr = array(
 			//ą → o + носовая согласная (m перед b или p, иначе n)
@@ -417,9 +414,9 @@ function gb_transcriptor_init(){
 			'szy' => 'и',
 			'szczy' => 'и',
 			'ży' => 'и',
-			//'y' => 'ы',
+			'y' => 'ы',
 			//в личных именах в середине слова y → и не только после шипящих
-			'y' => 'и',
+			//'y' => 'и',
 			//после глухих согласных (ch, k, p, t) и перед ними rz → ш, в остальных случаях rz → ж
 			'chrz' => 'ш',
 			'krz' => 'ш',
@@ -446,8 +443,6 @@ function gb_transcriptor_init(){
 			'lo' => 'лё',
 			'ló' => 'лю',
 			'lu' => 'лю',
-				
-			'' => '',
 	);
 	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
 	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
