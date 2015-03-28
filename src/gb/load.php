@@ -411,3 +411,69 @@ function gb_debug_info($var, $ignore = 0){
 	}
 	print("\n<!-- " . $place . ': ' . var_export($var, TRUE) . " -->\n");
 }
+
+/**
+ * Start the GeniBase object cache.
+ *
+ * If an object-cache.php file exists in the gb-content directory,
+ * it uses that drop-in as an external object cache.
+ *
+ * @since 2.3.0
+ * @access private
+ */
+function gb_start_object_cache() {
+	$first_init = false;
+	if( !function_exists('gb_cache_init') ){
+		if( file_exists(GB_CONTENT_DIR . '/object-cache.php') ){
+			require_once(GB_CONTENT_DIR . '/object-cache.php');
+			if( function_exists('gb_cache_init'))
+				gb_using_ext_object_cache(true);
+		}
+
+		$first_init = true;
+	}elseif( !gb_using_ext_object_cache() && file_exists(GB_CONTENT_DIR . '/object-cache.php') ){
+		/*
+		 * Sometimes advanced-cache.php can load object-cache.php before
+		 * it is loaded here. This breaks the function_exists check above
+		 * and can result in `$_gb_using_ext_object_cache` being set
+		 * incorrectly. Double check if an external cache exists.
+		 */
+		gb_using_ext_object_cache(true);
+	}
+
+	if( !gb_using_ext_object_cache() )
+		require_once(GB_CORE_DIR . '/class.gb-object-cache.php');
+
+	/*
+	 * If cache supports reset, reset instead of init if already
+	 * initialized. Reset signals to the cache that global IDs
+	 * have changed and it may need to update keys and cleanup caches.
+	*/
+	if( function_exists('gb_cache_init') )
+		gb_cache_init();
+
+	if( function_exists('gb_cache_add_global_groups') )
+		gb_cache_add_global_groups(array('users', 'user-logins', 'user-meta', 'site-transient', 'site-options', 'site-lookup'));
+	if( function_exists('gb_cache_add_non_persistent_groups') )
+		gb_cache_add_non_persistent_groups(array('counts', 'plugins'));
+}
+
+/**
+ * Access/Modify private global variable `$_gb_using_ext_object_cache`.
+ *
+ * Toggle `$_gb_using_ext_object_cache` on and off without directly
+ * touching global.
+ *
+ * @since 2.3.0
+ *
+ * @param bool $using Whether external object cache is being used.
+ * @return bool The current 'using' setting.
+ */
+function gb_using_ext_object_cache($using = null) {
+	global $_gb_using_ext_object_cache;
+
+	$current_using = $_gb_using_ext_object_cache;
+	if( null !== $using )
+		$_gb_using_ext_object_cache = $using;
+	return $current_using;
+}

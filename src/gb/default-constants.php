@@ -100,6 +100,9 @@ function gb_initial_constants() {
 	if( !defined('GB_DEBUG_LOG') )
 		define('GB_DEBUG_LOG', false);
 
+	if( !defined('GB_CACHE') )
+		define('GB_CACHE', false);
+
 	// Constants for expressing human-readable intervals
 	// in their respective number of seconds.
 	define( 'MINUTE_IN_SECONDS', 60 );

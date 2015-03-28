@@ -1496,3 +1496,27 @@ function __return_null() {
 function __return_empty_string() {
 	return '';
 }
+
+/**
+ * Temporarily suspend cache additions.
+ *
+ * Stops more data being added to the cache, but still allows cache retrieval.
+ * This is useful for actions, such as imports, when a lot of data would otherwise
+ * be almost uselessly added to the cache.
+ *
+ * Suspension lasts for a single page load at most. Remember to call this
+ * function again if you wish to re-enable cache adds earlier.
+ *
+ * @since 2.3.0
+ *
+ * @param bool $suspend Optional. Suspends additions if true, re-enables them if false.
+ * @return bool The current suspend setting
+ */
+function gb_suspend_cache_addition($suspend = null) {
+	static $_suspend = false;
+
+	if ( is_bool( $suspend ) )
+		$_suspend = $suspend;
+
+	return $_suspend;
+}

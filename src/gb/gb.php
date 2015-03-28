@@ -47,6 +47,11 @@ timer_start();
 // Check if we're in GB_DEBUG mode.
 gb_debug_mode();
 
+// For an advanced caching plugin to use. Uses a static drop-in because you would only want one.
+if( GB_CACHE && file_exists(GB_CONTENT_DIR . '/advanced-cache.php') )
+	GB_DEBUG ? include(GB_CONTENT_DIR . '/advanced-cache.php')
+			: @include(GB_CONTENT_DIR . '/advanced-cache.php');
+
 // Load early GeniBase files.
 require_once(GB_CORE_DIR . '/compat.php');
 require_once(GB_CORE_DIR . '/functions.php');
@@ -54,6 +59,9 @@ require_once(GB_CORE_DIR . '/class.gb-error.php');
 require_once(GB_CORE_DIR . '/class.gb-hooks.php');
 require_once(GB_CORE_DIR . '/pomo/mo.php');
 require_once(GB_CORE_DIR . '/class.gb-dbase.php');
+
+// Start the GeniBase object cache, or an external object cache if the drop-in is present.
+gb_start_object_cache();
 
 // Attach the default filters.
 require_once(GB_CORE_DIR . '/default-filters.php');
@@ -80,6 +88,10 @@ gb_cookie_constants();
 
 // Load pluggable functions.
 require_once(GB_CORE_DIR . '/pluggable.php');
+
+// Run gb_cache_postload() if object cache is enabled and the function exists.
+if( GB_CACHE && function_exists('gb_cache_postload') )
+	gb_cache_postload();
 
 // Load the default text localization domain.
 load_default_textdomain();
