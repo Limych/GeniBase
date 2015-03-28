@@ -366,6 +366,9 @@ function gb_transcriptor_init(){
 			'/ski\b/uS' => 'ский',	'/ska\b/uS' => 'ская',	
 			'/cki\b/uS' => 'цкий',	'/cka\b/uS' => 'цкая',
 			'/dzki\b/uS' => 'дский',	'/dzka\b/uS' => 'дская',
+			//исключения
+			'/\badrian\be/uS' => 'адриан',
+			'/\bmarian\be/uS' => 'мариан',
 	);
 	$tr = array(
 			'a' => 'а',
