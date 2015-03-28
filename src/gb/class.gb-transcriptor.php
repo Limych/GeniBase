@@ -343,16 +343,16 @@ function gb_transcriptor_init(){
 			'/(?=[aąeęioóuy])jó/uS' => 'ю',
 			'/(?=[aąeęioóuy])ju/uS' => 'ю',
 			//после согласной ja → ья, je → ье, jo → ьо, jó (ju) → ью
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])ja/uS' => 'ья',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])je/uS' => 'ье',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
 			'/lja/uS' => 'лья',
 			'/lje/uS' => 'лье',
 			'/ljo/uS' => 'льо',
 			'/ljó/uS' => 'лью',
 			'/lju/uS' => 'лью',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ja/uS' => 'ья',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])je/uS' => 'ье',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
 			//перед согласными и в конце слова j → й
 			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
