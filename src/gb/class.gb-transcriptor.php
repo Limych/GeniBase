@@ -337,35 +337,35 @@ function gb_transcriptor_init(){
 			'/\bjó/uS' => 'ю',
 			'/\bju/uS' => 'ю',
 			//после гласной ja → я, je → е, jo → ё, jó (ju) → ю
-			//'/(?=[aąeęioóuy])ja/uS' => 'я',
-			//'/(?=[aąeęioóuy])je/uS' => 'е',
-			//'/(?=[aąeęioóuy])jo/uS' => 'ё',
-			//'/(?=[aąeęioóuy])jó/uS' => 'ю',
-			//'/(?=[aąeęioóuy])ju/uS' => 'ю',
+			'/(?=[aąeęioóuy])ja/uS' => 'я',
+			'/(?=[aąeęioóuy])je/uS' => 'е',
+			'/(?=[aąeęioóuy])jo/uS' => 'ё',
+			'/(?=[aąeęioóuy])jó/uS' => 'ю',
+			'/(?=[aąeęioóuy])ju/uS' => 'ю',
 			//после согласной ja → ья, je → ье, jo → ьо, jó (ju) → ью
-			//'/(?=[bcćdfghjklłmnńprsśtwzźż])ja/uS' => 'ья',
-			//'/(?=[bcćdfghjklłmnńprsśtwzźż])je/uS' => 'ье',
-			//'/(?=[bcćdfghjklłmnńprsśtwzźż])jo/uS' => 'ьо',
-			//'/(?=[bcćdfghjklłmnńprsśtwzźż])jó/uS' => 'ью',
-			//'/(?=[bcćdfghjklłmnńprsśtwzźż])ju/uS' => 'ью',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])ja/uS' => 'ья',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])je/uS' => 'ье',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])jo/uS' => 'ьо',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])jó/uS' => 'ью',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])ju/uS' => 'ью',
 			//перед согласными и в конце слова j → й
-			//'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
+			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
-			//'/y\b/uS' => 'ий',
+			'/y\b/uS' => 'ий',
 			//перед согласными, за которыми следует i: dź → дз, ś → с, ź → з 
-			//'/dź(?=[bcdfghjkłmnprstwzż])i/uS' => 'дз',
-			//'/ś(?=[bcdfghjkłmnprstwzż])i/uS' => 'с',
-			//'/ź(?=[bcdfghjkłmnprstwzż])i/uS' => 'з',
+			'/dź(?=[bcdfghjkłmnprstwzż])i/uS' => 'дз',
+			'/ś(?=[bcdfghjkłmnprstwzż])i/uS' => 'с',
+			'/ź(?=[bcdfghjkłmnprstwzż])i/uS' => 'з',
 			//Мягкость звука l показывается в транскрипции на конце слова или перед согласной — мягким знаком
 			'/l\b/uS' => 'ль',
-			//'/l(?=[bcćdfghjklłmnńprsśtwzźż])/uS' => 'ль',
+			'/l(?=[bcćdfghjklłmnńprsśtwzźż])/uS' => 'ль',
 			//окончания фамилий:
 			//	-ski / -ska 	→ -ский / -ская
 			//	-cki / -cka 	→ -цкий / -цкая
 			//	-dzki / -dzka 	→ -дский (-дзский) / -дская (-дзская)
-			//'/ski\b/uS' => 'ский',	'/ska\b/uS' => 'ская',	
-			//'/cki\b/uS' => 'цкий',	'/cka\b/uS' => 'цкая',
-			//'/dzki\b/uS' => 'дский',	'/dzka\b/uS' => 'дская',
+			'/ski\b/uS' => 'ский',	'/ska\b/uS' => 'ская',	
+			'/cki\b/uS' => 'цкий',	'/cka\b/uS' => 'цкая',
+			'/dzki\b/uS' => 'дский',	'/dzka\b/uS' => 'дская',
 	);
 	$tr = array(
 			//ą → o + носовая согласная (m перед b или p, иначе n)
