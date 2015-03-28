@@ -348,6 +348,11 @@ function gb_transcriptor_init(){
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
 			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
+			'/lja/uS' => 'лья',
+			'/lje/uS' => 'лье',
+			'/ljo/uS' => 'льо',
+			'/ljó/uS' => 'лью',
+			'/lju/uS' => 'лью',
 			//перед согласными и в конце слова j → й
 			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
@@ -372,7 +377,7 @@ function gb_transcriptor_init(){
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
 			//***************временно!!! после решения ljo удалить!!!*********************
-			'/\bceljowski\b/uS' => 'цельовский',
+			//'/\bceljowski\b/uS' => 'цельовский',
 			);
 	$tr = array(
 			'a' => 'а',
@@ -407,11 +412,6 @@ function gb_transcriptor_init(){
 			'ió' => 'ю',
 			'iu' => 'ю',
 			'k' => 'к',
-			'lja' => 'лья',
-			'lje' => 'лье',
-			'ljo' => 'льо',
-			'ljó' => 'лью',
-			'lju' => 'лью',
 			'ł' => 'л',
 			'm' => 'м',
 			'n' => 'н',
