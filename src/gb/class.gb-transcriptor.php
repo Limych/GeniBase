@@ -343,11 +343,11 @@ function gb_transcriptor_init(){
 			'/(?=[aąeęioóuy])jó/uS' => 'ю',
 			'/(?=[aąeęioóuy])ju/uS' => 'ю',
 			//после согласной ja → ья, je → ье, jo → ьо, jó (ju) → ью
-			'/(?=[bcćdfghjklłmnńprsśtwzźż])ja/uS' => 'ья',
-			'/(?=[bcćdfghjklłmnńprsśtwzźż])je/uS' => 'ье',
-			'/(?=[bcćdfghjklłmnńprsśtwzźż])jo/uS' => 'ьо',
-			'/(?=[bcćdfghjklłmnńprsśtwzźż])jó/uS' => 'ью',
-			'/(?=[bcćdfghjklłmnńprsśtwzźż])ju/uS' => 'ью',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ja/uS' => 'ья',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])je/uS' => 'ье',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
+			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
 			//перед согласными и в конце слова j → й
 			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
@@ -358,7 +358,7 @@ function gb_transcriptor_init(){
 			'/ź(?=[bcdfghjkłmnprstwzż])i/uS' => 'з',
 			//Мягкость звука l показывается в транскрипции на конце слова или перед согласной — мягким знаком
 			'/l\b/uS' => 'ль',
-			'/l(?=[bcćdfghklłmnńprsśtwzźż])/uS' => 'ль',
+			'/l(?=[bcćdfghjklłmnńprsśtwzźż])/uS' => 'ль',
 			//окончания фамилий:
 			//	-ski / -ska 	→ -ский / -ская
 			//	-cki / -cka 	→ -цкий / -цкая
