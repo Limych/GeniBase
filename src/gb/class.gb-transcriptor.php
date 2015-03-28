@@ -343,11 +343,11 @@ function gb_transcriptor_init(){
 			'/(?=[aąeęioóuy])jó/uS' => 'ю',
 			'/(?=[aąeęioóuy])ju/uS' => 'ю',
 			//после согласной ja → ья, je → ье, jo → ьо, jó (ju) → ью
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])ja/uS' => 'ья',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])je/uS' => 'ье',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])jo/uS' => 'ьо',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])jó/uS' => 'ью',
-			'/(?=[bcćdfghjkłmnńprsśtwzźż])ju/uS' => 'ью',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])ja/uS' => 'ья',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])je/uS' => 'ье',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])jo/uS' => 'ьо',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])jó/uS' => 'ью',
+			'/(?=[bcćdfghjklłmnńprsśtwzźż])ju/uS' => 'ью',
 			//перед согласными и в конце слова j → й
 			'/j(?<=[bcćdfghjklłmnńprsśtwzźż]|\b)/uS' => 'й',
 			//в конце личных имен y → ий
@@ -375,7 +375,6 @@ function gb_transcriptor_init(){
 	$tr = array(
 			'a' => 'а',
 			'j' => 'й',
-			'l' => 'ль',
 			'o' => 'о',
 			'u' => 'у',
 			//ą → o + носовая согласная (m перед b или p, иначе n)
