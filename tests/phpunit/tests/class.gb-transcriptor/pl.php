@@ -17,7 +17,7 @@ class Tests_Transcriptor_PL extends GB_UnitTestCase {
 					'Ciępka'		=> 'Цемпка',			'Cieślak'		=> 'Цесляк',
 					'Ciołek'		=> 'Циолек',			'Cirlić'		=> 'Цирлиць',
 					'Czerniatowicz'	=> 'Чернятович',		'Dąbkowo'		=> 'Домбково',
-					'Derdowski'		=> 'Дердовский',		'Dziąmba'		=> 'Дзёмба',
+					'Derdowski'		=> 'Дердовский',		'Dziąba'		=> 'Дзёмба', //Dziąmba - по-моему неверно
 					'Dzianisz'		=> 'Дзяниш',			'Dżunkowski'	=> 'Джунковский',
 					'Emil'			=> 'Эмиль',				'Eugeniusz'		=> 'Эугениуш',
 					'Filip'			=> 'Филип',				'Gjądła'		=> 'Гьондла',
