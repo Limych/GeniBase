@@ -384,7 +384,7 @@ function gb_transcriptor_init(){
 			'/\bjo/uS' => 'йо',
 			'/\bjó/uS' => 'ю',
 			'/\bju/uS' => 'ю',
-			'/l(?=[aąeęioóuy])/uS' => 'ль',
+			'/l(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'ль',
 			'/ś(?=[ćlńśź])/uS' => 'с',
 			'/ść\b/uS' => 'сть',
 			'/ź(?=[ćlńśź])/uS' => 'з',
