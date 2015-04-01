@@ -385,7 +385,7 @@ function gb_transcriptor_init(){
 				
 			'/ą(?=[bp])/uS' => 'ом',
 			'/ę(?=[bp])/uS' => 'ем',
-			'/i(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'и',
+			'/i(?=[bcćdfghjklłmnpqrstwxzż])/uS' => 'и',
 			'/\bja/uS' => 'я',
 			'/\bją/uS' => 'йон',
 			'/\bje/uS' => 'е',
