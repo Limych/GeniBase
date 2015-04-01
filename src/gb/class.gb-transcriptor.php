@@ -341,7 +341,7 @@ function gb_transcriptor_init(){
 				
 			'/dzka\b/uS' => 'дская',
 			'/dzki\b/uS' => 'дский',
-			'/dź(?=[bcdfghjkłmnpqrstwxzż])i/uS' => 'дзи',
+			'/dź(?=[bcdfghjkłmnpqrstwxzż])(?=[i])/uS' => 'дз',
 			'/cią(?=[bp])/uS' => 'циом',
 			'/cią(?=[cdfghjklłmnqrstwxzż])/uS' => 'цион',
 			'/iusz\b/uS' => 'иуш',
