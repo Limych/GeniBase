@@ -330,10 +330,14 @@ function gb_transcriptor_init(){
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
 			
-			'/(?=[aąeęioóuy])jęska\b/uS' => 'енская',
-			'/(?=[aąeęioóuy])jęcka\b/uS' => 'енцкая',
-			'/(?=[aąeęioóuy])jęski\b/uS' => 'енский',
-			'/(?=[aąeęioóuy])jęcki\b/uS' => 'енцкий',
+			'/ajęska\b/uS' => 'аенская',
+			'/ajęcka\b/uS' => 'аенцкая',
+			'/ajęski\b/uS' => 'аенский',
+			'/ajęcki\b/uS' => 'аенцкий',
+			'/(?=[ąeęioóuy])jęska\b/uS' => 'енская',
+			'/(?=[ąeęioóuy])jęcka\b/uS' => 'енцкая',
+			'/(?=[ąeęioóuy])jęski\b/uS' => 'енский',
+			'/(?=[ąeęioóuy])jęcki\b/uS' => 'енцкий',
 				
 			'/dzka\b/uS' => 'дская',
 			'/dzki\b/uS' => 'дский',
