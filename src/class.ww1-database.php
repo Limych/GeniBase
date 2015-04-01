@@ -392,6 +392,7 @@ class ww1_database_solders extends ww1_database {
 	
 					$is_regex = preg_match('/[?*]/uS', $val);
 					$val_a = preg_split('/[^\w\?\*]+/uS', mb_strtoupper($val), -1, PREG_SPLIT_NO_EMPTY);
+					$val_a = simplify_query($val_a);
 					switch($key){
 						case 'surname':
 							$from_q = gbdb()->prepare_query('( SELECT k.person_id, MIN(k.surname_key_type)' .

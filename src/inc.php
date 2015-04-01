@@ -468,3 +468,18 @@ function lang_select(){
 	$lang = mb_strtoupper(strtok(get_locale(), '_'));
 	print "<div class='language'>$lang</div>\n";
 }
+
+function simplify_query($query){
+	// Если вместо строки передан массив, обработать каждое значение в отдельности
+	// и вернуть результат в виде массива
+	if( is_array($query) )
+		return array_map(__FUNCTION__, $query);
+
+	$query = preg_replace('/(\*+)(\?+)/uSs', '$2$1', $query);
+	$query = preg_replace_callback('/\*{2,}/uSs', function ($m){
+				return str_repeat('?', strlen($m[0]) - 1) . '*';
+			}, $query);
+	$query = preg_replace('/^\*$/uSs', '', $query);
+	return $query;
+}
+
