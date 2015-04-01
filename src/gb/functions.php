@@ -13,6 +13,8 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 
+require_once(GB_CORE_DIR . '/class.gb-options.php');
+
 /**
  * File validates against allowed set of defined rules.
  *
@@ -1515,7 +1517,7 @@ function __return_empty_string() {
 function gb_suspend_cache_addition($suspend = null) {
 	static $_suspend = false;
 
-	if ( is_bool( $suspend ) )
+	if( is_bool($suspend) )
 		$_suspend = $suspend;
 
 	return $_suspend;

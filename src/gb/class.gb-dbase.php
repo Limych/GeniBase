@@ -139,7 +139,7 @@ class GB_DBase	{
 	 * @since	2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
-	 * @param string $full_word	FALSE, если надо искать по этой маске части слов
+	 * @param string $full_word	false, если надо искать по этой маске части слов
 	 * @return string	Регулярное выражение для поиска через RLIKE
 	 */
 	static function make_regex($str, $full_word = TRUE){
@@ -181,7 +181,7 @@ class GB_DBase	{
 	 * @since	2.0.0
 	 *
 	 * @param string $str	Строка с метасимволами
-	 * @param string $full_text	FALSE, если надо искать по этой маске части данных
+	 * @param string $full_text	false, если надо искать по этой маске части данных
 	 * @return string	Условное выражение для поиска через LIKE
 	 */
 	static function make_condition($str, $full_text = TRUE){
@@ -240,7 +240,7 @@ class GB_DBase	{
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
 	 * @return string|array	Имя таблицы с префиксом
 	 */
-	function table_escape($table, $preserve_array = FALSE){
+	function table_escape($table, $preserve_array = false){
 		if( is_array($table)){
 			$result = array_map(array($this, __FUNCTION__), $table);
 			return ($preserve_array)
@@ -279,7 +279,7 @@ class GB_DBase	{
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
 	 * @return string|array	Экранированное имя поля.
 	 */
-	function field_escape($field, $preserve_array = FALSE) {
+	function field_escape($field, $preserve_array = false) {
 		if( is_array($field)){
 			$result = array_map(array($this, __FUNCTION__), $field);
 			return ($preserve_array)
@@ -322,7 +322,7 @@ class GB_DBase	{
 	 * @param boolean $preserve_array	TRUE, чтобы возвращать массивы в виде массивов
 	 * @return mixed	Экранированное значение переменной
 	 */
-	function data_escape($value, $preserve_array = FALSE) {
+	function data_escape($value, $preserve_array = false) {
 		if( is_array($value)){
 			$result = array_map(array($this, __FUNCTION__), $value);
 			return ($preserve_array)
@@ -537,7 +537,7 @@ class GB_DBase	{
 	 *
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return mixed	Результат выполнения запроса. FALSE при ошибке.
+	 * @return mixed	Результат выполнения запроса. false при ошибке.
 	 */
 	function query($query, $substitutions = array()) {
 		$this->connect();
@@ -569,7 +569,7 @@ class GB_DBase	{
 				$this->insert_id = 0;
 
 			$this->print_error();
-			return FALSE;
+			return false;
 		}
 
 		if( preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query) ){
@@ -599,12 +599,12 @@ class GB_DBase	{
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
 	 * @param boolean $get_assoc	TRUE для превращения первого столбца результата
 	 * 								в ключи массива, а второго — в значения.
-	 * @return array|bool	False on failure. Результат выполнения запроса
+	 * @return array|bool	false on failure. Результат выполнения запроса
 	 */
-	function get_column($query, $substitutions = array(), $get_assoc = FALSE) {
+	function get_column($query, $substitutions = array(), $get_assoc = false) {
 		$result = $this->query($query, $substitutions);
-		if( FALSE === $result)
-			return FALSE;
+		if( false === $result)
+			return false;
 	
 		$data = array();
 		if( $get_assoc) {
@@ -630,12 +630,12 @@ class GB_DBase	{
 	 * 
 	 * @param string $query	SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return array|bool	False on failure. Результат выполнения запроса
+	 * @return array|bool	false on failure. Результат выполнения запроса
 	 */
 	function get_cell($query, $substitutions = array()) {
-	    $result = $this->get_column($query, $substitutions, FALSE);
-		if( FALSE === $result)
-			return FALSE;
+	    $result = $this->get_column($query, $substitutions, false);
+		if( false === $result)
+			return false;
 		
 	    return ($result)
 	          ? reset($result)
@@ -653,14 +653,14 @@ class GB_DBase	{
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @param string $key_col	FALSE или имя столбца, значения которого превратить
+	 * @param string $key_col	false или имя столбца, значения которого превратить
 	 * 							в ключи массива
-	 * @return array|bool	False on failure. Результат выполнения запроса
+	 * @return array|bool	false on failure. Результат выполнения запроса
 	 */
-	function get_table($query, $substitutions = array(), $key_col = FALSE) {
+	function get_table($query, $substitutions = array(), $key_col = false) {
 		$result = $this->query($query, $substitutions);
-		if( FALSE === $result)
-			return FALSE;
+		if( false === $result)
+			return false;
 		
 		$data = array();
 		if( $key_col){
@@ -685,12 +685,12 @@ class GB_DBase	{
 	 * 
 	 * @param string $query		SQL-запрос
 	 * @param array $substitutions	Ассоциативный массив параметров для подстановки в запрос 
-	 * @return array|bool	False on failure. Результат выполнения запроса
+	 * @return array|bool	false on failure. Результат выполнения запроса
 	 */
 	function get_row($query, $substitutions = array()) {
-		$result = $this->get_table($query, $substitutions, FALSE);
-		if( FALSE === $result)
-			return FALSE;
+		$result = $this->get_table($query, $substitutions, false);
+		if( false === $result)
+			return false;
 		
 		return ($result)
 			? reset($result)
@@ -722,23 +722,21 @@ class GB_DBase	{
 	 * 							Либо массив вида 'ключ' => 'значение',
 	 * 							либо массив имён ключей из $data,
 	 * 							либо скалярное значение, тогда ключём будет "id".
-	 * 							FALSE — для добавления новой строки в таблицу.
+	 * 							false — для добавления новой строки в таблицу.
 	 * @param string $mode		Режим обновления. По-умолчанию: MODE_INSERT, если нет $unique_key,
 	 * 							иначе — MODE_UPDATE.
 	 * 							Варианты: добавление данных: MODE_INSERT, MODE_IGNORE («INSERT IGNORE …»), MODE_REPLACE;
 	 * 							обновление данных: MODE_UPDATE, MODE_DUPLICATE («INSERT … ON DUPLICATE KEY UPDATE»).
 	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
 	 */
-	function set_row($tablename, $data, $unique_key = FALSE, $mode = FALSE) {
-		$this->flush();
-
-		$query = (!$unique_key)
+	function set_row($tablename, $data, $unique_key = false, $mode = false) {
+		$query = ( !$unique_key )
 				// INSERT or REPLACE
 				? $this->_set_row_insert($tablename, $data, $mode)
 				// UPDATE or INSERT … ON DUPLICATE KEY UPDATE
 				: $this->_set_row_update($tablename, $data, $unique_key, $mode);
-		if( FALSE === $query)
-			return FALSE;
+		if( false === $query )
+			return false;
 		
 		return $this->query($query);
 	}
@@ -754,19 +752,23 @@ class GB_DBase	{
 	 * @param array $data		Массив с данными для добавления
 	 * @param string $mode		Режим добавление данных: MODE_INSERT, MODE_IGNORE («INSERT IGNORE …»), MODE_REPLACE.
 	 * 							Default MODE_INSERT.
-	 * @return string	SQL-query or FALSE on error.
+	 * @return string	SQL-query or false on error.
 	 */
 	function _set_row_insert($tablename, $data, $mode) {
-		if( !$mode || $mode == self::MODE_INSERT)	$query = 'INSERT';
-		elseif($mode == self::MODE_IGNORE)		$query = 'INSERT IGNORE';
-		elseif($mode == self::MODE_REPLACE)		$query = 'REPLACE';
+		if( empty($tablename) ){
+			$this->print_error('Table name not defined.');
+			return false;
+		}
+		if( !$mode || $mode == self::MODE_INSERT )	$query = 'INSERT';
+		elseif($mode == self::MODE_IGNORE )			$query = 'INSERT IGNORE';
+		elseif($mode == self::MODE_REPLACE )		$query = 'REPLACE';
 		else{
 			$this->print_error("Unknown mode '$mode'");
-			return FALSE;
+			return false;
 		}
 		
 		$first_el = reset($data);
-		if( !is_array($first_el)){
+		if( !is_array($first_el) ){
 			// Insert single row — convert data array to array of arrays with single element.
 			$first_el = $data;
 			$data = array($data);
@@ -796,13 +798,13 @@ class GB_DBase	{
 	 * 							либо массив имён ключей из $data,
 	 * 							либо скалярное значение, тогда ключём будет "id".
 	 * @param string $mode		Режим обновление данных: MODE_UPDATE, MODE_DUPLICATE («INSERT … ON DUPLICATE KEY UPDATE»).
-	 * @return string	SQL-query or FALSE on error.
+	 * @return string	SQL-query or false on error.
 	 */
 	function _set_row_update($tablename, $data, $unique_key, $mode) {
-		if( !is_array($unique_key))		// если указана скалярная величина —
+		if( !is_array($unique_key) )		// если указана скалярная величина —
 			$unique_key = array('id' => $unique_key);	// воспринимаем её как 'id'
 
-		if( !$mode || $mode == self::MODE_UPDATE) {	// обычный UPDATE
+		if( !$mode || $mode == self::MODE_UPDATE ) {	// обычный UPDATE
 			// В данном случае поля из второго аргумента подставляются в часть SET,
 			// а поля из третьего — в часть WHERE
 				
@@ -839,7 +841,7 @@ class GB_DBase	{
 			// а $unique_key содержит только имена полей,
 			// которые следует исключить из ON DUPLICATE KEY
 
-			if( $append) {
+			if( $append ) {
 				// Все данные для ON DUPLICATE KEY UPDATE есть в $data
 				$all_data = array_merge($data, $unique_key);
 				$data_to_update = $data;
@@ -856,7 +858,7 @@ class GB_DBase	{
 				$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
 			$query = substr($query, 0, -2);	// убираем последние запятую и пробел
 
-			if( $data_to_update) {
+			if( $data_to_update ) {
 				$query .= ' ON DUPLICATE KEY UPDATE ';
 				foreach ($data_to_update as $key => $value)
 					$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
@@ -867,9 +869,38 @@ class GB_DBase	{
 
 		}else{
 			$this->print_error("Unknown mode '$mode'");
-			return FALSE;
+			return false;
 		}
 	}	// function
+
+	/**
+	 * Delete records from table.
+	 * 
+	 * @since	2.3.0
+	 * 
+	 * @param string $tablename	Table from which data has been deleted.
+	 * @param mixed $unique_key	Associative array of unique key(s) for selecting
+	 * 							record(s) to delete.
+	 * @return integer|boolean	Number of deleted records. False on error.
+	 */
+	function delete($tablename, $unique_key){
+		if( empty($tablename) ){
+			$this->print_error('Table name not defined.');
+			return false;
+		}
+		if( empty($unique_key) || !is_array($unique_key) || !is_string(key($unique_key)) ){
+			$this->print_error('Record key not defined.');
+			return false;
+		}
+
+		$tablename = $this->table_escape($tablename);
+		$query = "DELETE FROM $tablename WHERE ";
+		foreach ($unique_key as $key => $value)
+			$query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
+		$query = substr($query, 0, -5); // убираем последние «AND» и пробелы
+		
+		return $this->query($query);
+	}
 
 	/**
 	 * Separate individual queries into an array.
@@ -916,12 +947,12 @@ class GB_DBase	{
 	 * @param bool	 $allow_deletions
 	 * @return array
 	 */
-	function create_table_patch($query, $allow_deletions = FALSE){
+	function create_table_patch($query, $allow_deletions = false){
 		// Run function only for CREATE TABLE queries
 		if( !preg_match('/CREATE\s+TABLE\s+(\S+)/uSi', $query, $matches)){
 			// TODO: Добавить сообщение об ошибке
 // 			$this->print_error("Unknown mode '$mode'");
-			return FALSE;
+			return false;
 		}
 
 		$table = $matches[1];
@@ -931,7 +962,7 @@ class GB_DBase	{
 		$tablefields = $this->get_table("DESCRIBE {$table}");
 		$this->suppress_errors($suppress);
 
-		if( !$tablefields)
+		if( !$tablefields )
 			return array($query);
 
 		// Clear the field and index arrays.
@@ -961,7 +992,7 @@ class GB_DBase	{
 				case 'FULLTEXT':
 				case 'UNIQUE':
 				case 'KEY':
-					$validfield = FALSE;
+					$validfield = false;
 					$indices[] = trim($fld, ", \n");
 					break;
 			}
@@ -1035,7 +1066,7 @@ class GB_DBase	{
 				$index_ary[$keyname]['columns'][] =
 					array('fieldname' => $tableindex['Column_name'],
 							'subpart' => $tableindex['Sub_part']);
-				$index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0)?TRUE:FALSE;
+				$index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0)?TRUE:false;
 			}
 
 			// For each actual index in the index array.
@@ -1064,7 +1095,7 @@ class GB_DBase	{
 				// Add the column list to the index create string.
 				$index_string .= ' ('.$index_columns.')';
 
-				if( !(($aindex = array_search($index_string, $indices)) === FALSE)) {
+				if( !(($aindex = array_search($index_string, $indices)) === false)) {
 					unset($indices[$aindex]);
 					// TODO: Remove this?
 // 					echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br />Found index:".$index_string."</pre>\n";
