@@ -451,7 +451,7 @@ function gb_transcriptor_init(){
 			'rzch' => 'шх',
 			'chrz' => 'хш',
 			'rz' => 'ж',
-			's' => 'c',
+			's' => 'с',
 			'sz' => 'ш',
 			'szcz' => 'щ',
 			'ś' => 'сь',
