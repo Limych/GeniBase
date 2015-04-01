@@ -330,10 +330,6 @@ function gb_transcriptor_init(){
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
 			
-			//'/ajęska\b/uS' => 'аенская',
-			//'/ajęcka\b/uS' => 'аенцкая',
-			//'/ajęski\b/uS' => 'аенский',
-			//'/ajęcki\b/uS' => 'аенцкий',
 			'/(?<=[ąeęioóuy])jęska\b/uS' => 'енская',
 			'/(?<=[ąeęioóuy])jęcka\b/uS' => 'енцкая',
 			'/(?<=[ąeęioóuy])jęski\b/uS' => 'енский',
@@ -380,12 +376,11 @@ function gb_transcriptor_init(){
 			'/lą(?=[cdfghjklłmnqrstwxzż])/uS' => 'лён',
 			'/ś(?=[bdfghjklłmnpqrstwxzż])i/uS' => 'с',
 			'/śc(?=[aąeęioóuy])\b/uS' => 'ст',
-			'/(?<=[bcdfghjklłmnpqrstwxzż])y(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'и',
 			'/ź(?=[bdfghjklłmnpqrstwxzż])i/uS' => 'з',
 				
 			'/ą(?=[bp])/uS' => 'ом',
 			'/ę(?=[bp])/uS' => 'ем',
-			'/i(?=[bcćdfghjklłmnpqrstwxzż])/uS' => 'и',
+			'/\Bi(?=[^aąeęioóuy])/uS' => 'и',
 			'/\bja/uS' => 'я',
 			'/\bją/uS' => 'йон',
 			'/\bje/uS' => 'е',
@@ -393,7 +388,7 @@ function gb_transcriptor_init(){
 			'/\bjo/uS' => 'йо',
 			'/\bjó/uS' => 'ю',
 			'/\bju/uS' => 'ю',
-			'/l(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'ль',
+			'/\Bl(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'ль',
 			'/ś(?=[ćlńśź])/uS' => 'с',
 			'/ść\b/uS' => 'сть',
 			'/ź(?=[ćlńśź])/uS' => 'з',
@@ -402,6 +397,7 @@ function gb_transcriptor_init(){
 			'/i\b/uS' => 'ий',				
 			'/j\b/uS' => 'й',
 			'/l\b/uS' => 'ль',
+			'/\By\B/uS' => 'и',
 			'/y\b/uS' => 'ий',
 				
 			);
