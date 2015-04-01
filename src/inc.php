@@ -422,11 +422,17 @@ function expand_names($names){
 	$have_name = false;
 	foreach($names as $key => $n){
 		$exp = array($n);
-		if( preg_match('/\b\w+(ВНА|[ВМТ]ИЧ|[МТ]ИЧНА|ИН|[ОЕ]В(Н?А)?)\b/uS', $n)){
+		if( preg_match('/\b\w+(ВНА|[ВМТ]ИЧ|[МТ]ИЧНА|ИН|[ОЕ]В(Н?А)?)\b/uS', $n) ){
 			// Это отчество
 			$n2 = preg_replace('/НА$/uS', 'А', preg_replace('/ИЧ$/uS', '', $n));
-			if( $n != $n2)
+			if( $n != $n2 )
 				$exp[] = $n2;
+			$n3 = preg_replace('/А$/uS', 'НА', $n2);
+			if( $n != $n3 )
+				$exp[] = $n3;
+			$n3 = $n2 . 'ИЧ';
+			if( $n != $n3 )
+				$exp[] = $n3;
 
 			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` IN (?keys)' .
 					' AND `is_patronimic` = 1', array('keys' => $exp));
@@ -435,7 +441,7 @@ function expand_names($names){
 
 			$names[$key] = '[[:blank:]](' . implode('|', array_unique($exp)) . ')[[:>:]]';
 
-		}elseif(!$have_name){
+		}elseif( !$have_name ){
 			// Это имя
 			$result = gbdb()->get_column('SELECT `expand` FROM ?_dic_names WHERE `key` = ?key' .
 					' AND `is_patronimic` = 0', array('key' => $n));
