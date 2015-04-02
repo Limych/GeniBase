@@ -45,7 +45,7 @@ class Tests_Transcriptor_PL extends GB_UnitTestCase {
 					'Żołnierz wolności'	=> 'Жолнеж вольности',	'Żorż'		=> 'Жорж',
 					'Zosia'			=> 'Зося',				'Źródłowski'	=> 'Зьрудловский',
 					'Związkowiec'	=> 'Звёнзковец',		'Życie'			=> 'Жиче',
-					'Сiąpała'		=> 'Циомпала',
+					'Ciąpała'		=> 'Циомпала',
 				)
 		);
 		foreach ($data as $to_lang => $pairs){
