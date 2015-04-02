@@ -346,7 +346,7 @@ function gb_transcriptor_init(){
 			'/(?<=[ąeęioóuy])jęski\b/uS' => 'енский',
 			'/(?<=[ąeęioóuy])jęcki\b/uS' => 'енцкий',
 				
-			'/dź(?=[bcdfghjkłmnpqrstwxzż])(?=[i])/uS' => 'дз',
+			'/dź(?=[bcdfghjkłmnpqrstwxzż]i)/uS' => 'дз',
 			'/cią(?=[bp])/uS' => 'циом',
 			'/cią(?=[cdfghjklłmnqrstwxzż])/uS' => 'цион',
 			'/(?<=[aąeęioóuy])ją(?=[bp])/uS' => 'ём',
