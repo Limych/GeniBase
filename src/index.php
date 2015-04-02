@@ -20,6 +20,7 @@ if( empty($squery) )
 else
 	$title = sprintf(__('Search “%s”', WW1_TXTDOM), $squery);
 html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
+print "<section id='search-form'>\n";
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
@@ -35,8 +36,12 @@ show_records_stat();
 	<p class="nb"><?php printf(__('If you do not have Russian keyboard, you can type text in transliteration&nbsp;&mdash; it will be automatically encoded in Russian letters. <a href="%s">See the conversion table.</a>', WW1_TXTDOM), site_url('/translit.php'));?></p>
 	</div>
 </form>
+</section>
 <?php
-if( $dbase->have_query){
+
+if( !$dbase->have_query )
+	ad();
+else{
 	// Упрощаем результаты для пользователя
 	foreach (array_keys($report->records) as $key){
 		$report->records[$key]['place'] = trim($report->records[$key]['region'] . ', ' .
@@ -64,7 +69,12 @@ if( $dbase->have_query){
 		'source'			=> _x('Source',				'Field name', WW1_TXTDOM),
 		'comments'			=> '',
 	);
+
+	// Выводим результаты в html
+	print "<section id='report'>\n";
+	ad();
 	$report->show_report($brief_fields, $detailed_fields);
+	print "</section>\n";
 }
 
 // Выводим ссылки для поисковых роботов на 12 последних результатов поиска

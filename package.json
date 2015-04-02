@@ -27,6 +27,7 @@
     "grunt-sass": "~0.18.0",
     "matchdep": "~0.3.0",
     "normalize.css": "^3.0.2",
-    "jquery": "^2.1.1"
+    "jquery": "^2.1.1",
+    "leafo/scssphp": "^0.1.1"
   }
 }

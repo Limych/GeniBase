@@ -86,7 +86,7 @@ class ww1_solders_set extends ww1_records_set{
 				'add_fragment'	=> '#report',
 		)) . '</div>';
 		print $pag;	// Вывод пагинатора
-		print '<table id="report" class="report responsive-table"><thead><tr><th scope="col">' . _x('No.', 'Table header “Item number”', WW1_TXTDOM) . '</th>';
+		print '<table class="report responsive-table"><thead><tr><th scope="col">' . _x('No.', 'Table header “Item number”', WW1_TXTDOM) . '</th>';
 		foreach(array_values($brief_fields) as $val)
 			print "<th scope='col'>" . esc_html($val) . "</th>";
 		if( $show_detailed )

@@ -20,6 +20,7 @@ if( empty($squery) )
 else
 	$title = sprintf(__('Search “%s”', WW1_TXTDOM), $squery);
 html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt <= MAX_RECORDS_INDEXATION));
+print "<section id='search-form'>\n";
 show_records_stat();
 ?>
 <form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
@@ -38,8 +39,12 @@ show_records_stat();
 	<p class="nb"><?php _e('In the fields “Source number”, “Source page” and “Record ID” you can list several values separated by commas or spaces.', WW1_TXTDOM);?></p>
 	</div>
 </form>
+</section>
 <?php
-if( $dbase->have_query){
+
+if( !$dbase->have_query )
+	ad();
+else{
 	// Определяем, какие поля будут выводиться в поле краткой информации, а какие в подробной
 	$brief_fields = array(
 		'surname'	=> _x('Surname',		'Field name', WW1_TXTDOM),
@@ -84,7 +89,10 @@ if( $dbase->have_query){
 	}
 
 	// Выводим результаты в html
+	print "<section id='report'>\n";
+	ad();
 	$report->show_report($brief_fields, $detailed_fields);
+	print "</section>\n";
 }
 
 html_footer();
