@@ -327,8 +327,17 @@ function gb_transcriptor_init(){
 	// Польско-русская транскрипция (произношение) и транслитерация (написание)
 	// https://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%BB%D1%8C%D1%81%D0%BA%D0%BE-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D1%82%D1%80%D0%B0%D0%BD%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%86%D0%B8%D1%8F
 	$tr_special = array(
-			'/\bkyrljęcik\b/uS' => 'кырльенцик',
+			//приоритет заполнения:
+			//	более длинные последовательности - первее;
+			//	последовательности с началом слова - раньше, с окончанием - позже
 			
+			//противоречия по 'y' => 'и|ы'
+			//'/\bkyrljęcik\b/uS' => 'кырльенцик',
+			//'/\błodyński\b/uS' => 'лодыньский',
+			'/\bkrystyna\b/uS' => 'кристина',
+			'/\bkrzysztof\b/uS' => 'кшиштоф',
+			'/\bkrystof\b/uS' => 'кристоф',
+				
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
 			
@@ -337,26 +346,22 @@ function gb_transcriptor_init(){
 			'/(?<=[ąeęioóuy])jęski\b/uS' => 'енский',
 			'/(?<=[ąeęioóuy])jęcki\b/uS' => 'енцкий',
 				
-			'/dzka\b/uS' => 'дская',
-			'/dzki\b/uS' => 'дский',
 			'/dź(?=[bcdfghjkłmnpqrstwxzż])(?=[i])/uS' => 'дз',
 			'/cią(?=[bp])/uS' => 'циом',
 			'/cią(?=[cdfghjklłmnqrstwxzż])/uS' => 'цион',
-			'/iusz\b/uS' => 'иуш',
 			'/(?<=[aąeęioóuy])ją(?=[bp])/uS' => 'ём',
 			'/(?<=[aąeęioóuy])ję(?=[bp])/uS' => 'ем',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])ją(?=[bp])/uS' => 'ьом',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])ję(?=[bp])/uS' => 'ьем',
 			'/(?<=[aąeęioóuy])ję(?=[cdfghjklłmnqrstwxzż])/uS' => 'ен',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])ję(?=[cdfghjklłmnqrstwxzż])/uS' => 'ьен',
+			'/dzka\b/uS' => 'дская',
+			'/dzki\b/uS' => 'дский',
+			'/iusz\b/uS' => 'иуш',
 				
-			'/ska\b/uS' => 'ская',	
-			'/cka\b/uS' => 'цкая',
-			'/cie\b/uS' => 'ч',
+			'/\bją(?=[bp])/uS' => 'йом',
 			'/dź(?=[ćlńśź])/uS' => 'дз',
 			'/ci(?=[óu])/uS' => 'ч',
-			'/ski\b/uS' => 'ский',
-			'/cki\b/uS' => 'цкий',
 			'/ią(?=[bp])/uS' => 'ём',
 			'/ię(?=[bp])/uS' => 'ем',
 			'/ią(?=[cdfghjklłmnqrstwxzż])/uS' => 'ён',
@@ -368,7 +373,6 @@ function gb_transcriptor_init(){
 			'/(?<=[aąeęioóuy])jo/uS' => 'ё',
 			'/(?<=[aąeęioóuy])jó/uS' => 'ю',
 			'/(?<=[aąeęioóuy])ju/uS' => 'ю',
-			'/\bją(?=[bp])/uS' => 'йом',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])ją/uS' => 'ьон',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])je/uS' => 'ье',
 			'/(?<=[bcdfghjklłmnpqrstwxzż])jo/uS' => 'ьо',
@@ -377,8 +381,13 @@ function gb_transcriptor_init(){
 			'/lą(?=[bp])/uS' => 'лём',
 			'/lą(?=[cdfghjklłmnqrstwxzż])/uS' => 'лён',
 			'/ś(?=[bdfghjklłmnpqrstwxzż])i/uS' => 'с',
-			'/śc(?=[aąeęioóuy])\b/uS' => 'ст',
 			'/ź(?=[bdfghjklłmnpqrstwxzż])i/uS' => 'з',
+			'/śc(?=[aąeęioóuy])\b/uS' => 'ст',
+			'/ska\b/uS' => 'ская',
+			'/cka\b/uS' => 'цкая',
+			'/cie\b/uS' => 'ч',
+			'/ski\b/uS' => 'ский',
+			'/cki\b/uS' => 'цкий',
 				
 			'/\bja/uS' => 'я',
 			'/\bją/uS' => 'йон',
@@ -399,7 +408,7 @@ function gb_transcriptor_init(){
 			'/i\b/uS' => 'ий',				
 			'/j\b/uS' => 'й',
 			'/l\b/uS' => 'ль',
-			'/\By\B/uS' => 'и', // в личных именах в середине слова - как это определить?! противоречит 'y' => 'ы' 
+			//'/\By\B/uS' => 'и', // в личных именах в середине слова - как это определить?! противоречит 'y' => 'ы' 
 			'/y\b/uS' => 'ий',
 				
 			);
