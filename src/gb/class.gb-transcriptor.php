@@ -346,6 +346,11 @@ function gb_transcriptor_init(){
 			'/(?<=[ąeęioóuy])jęcka\b/uS' => 'енцкая',
 			'/(?<=[ąeęioóuy])jęski\b/uS' => 'енский',
 			'/(?<=[ąeęioóuy])jęcki\b/uS' => 'енцкий',
+
+			'/\Bczy\B/uS' => 'чи',
+			'/\Brzy\B/uS' => 'жи',
+			'/\Bszy\B/uS' => 'ши',
+			'/\Bży\B/uS' => 'зи',
 				
 			'/dź(?=[bcdfghjkłmnpqrstwxzż]i)/uS' => 'дз',
 			'/cią(?=[bp])/uS' => 'циом',
@@ -387,7 +392,7 @@ function gb_transcriptor_init(){
 			'/ź(?=[bdfghjklłmnpqrstwxzż]i)/uS' => 'з',
 			'/cka\b/uS' => 'цкая',
 			'/ska\b/uS' => 'ская',
-			'/cie\b/uS' => 'ч',
+			'/cie\b/uS' => 'че',
 			'/cki\b/uS' => 'цкий',
 			'/ski\b/uS' => 'ский',
 			'/ści\b/uS' => 'сти',
@@ -471,10 +476,6 @@ function gb_transcriptor_init(){
 			't' => 'т',
 			'u' => 'у',
 			'w' => 'в',
-			'czy' => 'чи',
-			'rzy' => 'жи',
-			'szy' => 'ши',
-			'ży' => 'зи',
 			'y' => 'ы',//в остальных случаях; противоречит '/\By\B/uS' => 'и' - в личных именах в середине слова
 			'z' => 'з',
 			'ź' => 'зь',
