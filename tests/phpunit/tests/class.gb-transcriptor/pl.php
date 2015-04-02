@@ -37,7 +37,7 @@ class Tests_Transcriptor_PL extends GB_UnitTestCase {
 					'Pyru'			=> 'Пыру',				'Roman'			=> 'Роман',
 					'Rzeczywistość'	=> 'Жечивистость',		'Rzytka'		=> 'Житка',
 					'Solec'			=> 'Солец',				'Stanisław'		=> 'Станислав',
-					'Stepowska'		=> 'Стемповская',		'Stępowski'		=> 'Стемповский',
+					'Stępowska'		=> 'Стемповская',		'Stępowski'		=> 'Стемповский',
 					'Szczawiej'		=> 'Щавей',				'Szymon'		=> 'Шимон',
 					'Wałęsa'		=> 'Валенса',			'Władysław'		=> 'Владислав',
 					'Wojciech'		=> 'Войцех',			'Zając'			=> 'Зайонц',
