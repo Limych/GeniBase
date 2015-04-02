@@ -401,8 +401,8 @@ function gb_transcriptor_init(){
 			'/ę(?=[bp])/uS' => 'ем',
 			'/\Bi(?=[^aąeęioóuy])/uS' => 'и',
 			'/\Bl(?=[bcdfghjklłmnpqrstwxzż])/uS' => 'ль',
-			'/ś(?=[ćlńśź])/uS' => 'с',
 			'/ść\b/uS' => 'сть',
+			'/ś(?=[ćlńśź])/uS' => 'с',
 			'/ź(?=[ćlńśź])/uS' => 'з',
 				
 			'/\be/uS' => 'э',
