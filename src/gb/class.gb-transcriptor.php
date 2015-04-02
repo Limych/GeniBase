@@ -340,6 +340,7 @@ function gb_transcriptor_init(){
 			'/\bwładysław\b/uS' => 'владислав',
 			'/\brzytka\b/uS' => 'житка',
 			'/\bszymon\b/uS' => 'шимон',
+			'/\bżycie\b/uS' => 'жиче',
 				
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
