@@ -339,6 +339,7 @@ function gb_transcriptor_init(){
 			'/\bprzyjaciółka\b/uS' => 'пшиячулка',
 			'/\bwładysław\b/uS' => 'владислав',
 			'/\brzytka\b/uS' => 'житка',
+			'/\bszymon\b/uS' => 'шимон',
 				
 			'/\badrian\b/uS' => 'адриан',
 			'/\bmarian\b/uS' => 'мариан',
