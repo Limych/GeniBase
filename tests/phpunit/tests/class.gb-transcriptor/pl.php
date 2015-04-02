@@ -40,7 +40,7 @@ class Tests_Transcriptor_PL extends GB_UnitTestCase {
 					'Stępowska'		=> 'Стемповская',		'Stępowski'		=> 'Стемповский',
 					'Szczawiej'		=> 'Щавей',				'Szymon'		=> 'Шимон',
 					'Wałęsa'		=> 'Валенса',			'Władysław'		=> 'Владислав',
-					'Wojciech'		=> 'Войцех',			'Zając'			=> 'Зайонц',
+					'Wojciech'		=> 'Войцех',			'Zając'			=> 'Заёнц', //Зайонц - по-моему неверно
 					'Zbigniew'		=> 'Збигнев',			'Ziobro'		=> 'Зёбро',
 					'Żołnierz wolności'	=> 'Жолнеж вольности',	'Żorż'		=> 'Жорж',
 					'Zosia'			=> 'Зося',				'Źródłowski'	=> 'Зьрудловский',
