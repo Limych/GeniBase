@@ -595,6 +595,7 @@ function gb_transcriptor_init(){
 		'/ph\b/uS' => 'ф',
 		'/ll\b/uS' => 'лль',
 		'/(?<=i)a/uS' => 'я',
+		'/(?<=[^i])a/uS' => 'а',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
 		'/(?<=[aäeioöuüy])ä/uS' => 'э',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])c/uS' => 'к',
@@ -622,9 +623,6 @@ function gb_transcriptor_init(){
 		);
 	
 	$tr = array(
-			'a' => 'а',
-			'aa' => 'а',
-			'ah' => 'а',
 			'äu' => 'ой',
 			'ai' => 'ай',
 			'ay' => 'ай',
