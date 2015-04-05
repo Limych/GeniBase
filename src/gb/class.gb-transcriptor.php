@@ -486,6 +486,201 @@ function gb_transcriptor_init(){
 	);
 	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
 	GB_Transcriptor::add_transcription('pl', 'ru', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
+	
+	
+	// Немецко-русская транскрипция (произношение) и транслитерация (написание)
+	// https://ru.wikipedia.org/wiki/Немецко-русская_практическая_транскрипция
+	$tr_special = array(
+		//приоритет заполнения:
+		//	более длинные последовательности - первее;
+		//	последовательности с началом слова - раньше, с окончанием - позже
+			
+		'/\bcharlotte\b/uS' => 'шарлотта',
+		'/\bmarienberg\b/uS' => 'мариенберг', // ie как ие, если гласные относятся к разным слогам
+		'/\bitzehoe\b/uS' => 'итцехо', // в некоторых названиях севера Германии ([oː])
+		'/\bloitsche\b/uS' => 'лоче', // в некоторых названиях севера Германии ([oː])
+		'/\bludwigsstadt\b/uS' => 'людвигсштадт',
+		'/\bdietharz\b/uS' => 'дитхарц',
+		'/\baltschul\b/uS' => 'альтшуль',
+		'/\buenze\b/uS' => 'инце',
+		'/\bduisburg\b/uS' => 'дуйсбург',
+		'/\bavenarius\b/uS' => 'авенариус',
+		'/\bkleve\b/uS' => 'клеве',
+		'/\bnetzsch\b/uS' => 'неч',
+		'/\btzscheetzsch\b/uS' => 'чеч',
+		
+		'/schtsch/uS' => 'щ',
+		
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъя', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ji(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йи', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jo(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йо', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jö(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йё', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ju(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъю', // после согласных на стыке корней!&
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йю', // после согласных на стыке корней!&
+		
+		'/mann\b/uS' => 'ман',
+		'/(?<=[aäeioöuüy])ck(?=[aäeioöuüy])/uS' => 'кк',
+		'/(?<=eu)ee/uS' => 'е',
+		'/(?<=eu)eh/uS' => 'е',
+		'/(?<=äu)ee/uS' => 'е',
+		'/(?<=äu)eh/uS' => 'е',
+		'/(?<=[aäeioöuüy])ll(?=[aäeioöuüy])/uS' => 'лл',
+		'/(?<=[aäeioöuüy])tz(?=[aäeioöuüy])/uS' => 'тц',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[aäeioöuüy])/uS' => 'ц',
+		'/(?<=[aäeioöuüy])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
+		
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja\B/uS' => 'ья',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä\B/uS' => 'ье',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je\B/uS' => 'ье',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ji\B/uS' => 'ьи',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jo\B/uS' => 'ьо',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jö\B/uS' => 'ьё',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ju\B/uS' => 'ью',
+		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü\B/uS' => 'ью',
+		'/(?<=i)aa/uS' => 'я',
+		'/(?<=i)ah/uS' => 'я',	
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])äh/uS' => 'е',
+		'/(?<=[aäeioöuüy])äh/uS' => 'э',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])ae/uS' => 'е',
+		'/(?<=[aäeioöuüy])ae/uS' => 'э',
+		'/(?<=[bcdfghjklmnpqrsßtvwxziy])ee/uS' => 'е',
+		'/(?<=[bcdfghjklmnpqrsßtvwxziy])eh/uS' => 'е',
+		'/(?<=äu)e/uS' => 'е',
+		'/(?<=[aäeoöuü])ee/uS' => 'э', //не включены eu, äu 
+		'/(?<=[aäeoöuü])eh/uS' => 'э', //не включены eu, äu
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])ey/uS' => 'ай',
+		'/(?<=[aäeioöuüy])h(?=[bcdfghjklmnpqrsßtvwxze])/uS' => '',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])ih/uS' => 'и',
+		'/(?<=[aäeioöuüy])ih/uS' => 'й', // после гласных в нисходящих дифтонгах
+		'/(?<=[aäeioöuüy])ja/uS' => 'я',
+		'/(?<=[aäeioöuüy])jä/uS' => 'е',
+		'/(?<=[aäeioöuüy])je/uS' => 'е',
+		'/(?<=[aäeioöuüy])ji/uS' => 'йи',
+		'/(?<=[aäeioöuüy])jo/uS' => 'йо',
+		'/(?<=[aäeioöuüy])jö/uS' => 'йё',
+		'/(?<=[aäeioöuüy])ju/uS' => 'ю',
+		'/(?<=[aäeioöuüy])jü/uS' => 'йю',
+		'/ll(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'лль',
+		'/sch/uS' => 'ш',
+		'/(?<=[aäeioöuüy])ss/uS' => 'сс',
+		
+		'/\bäh/uS' => 'э',	
+		'/\bae/uS' => 'э',
+		'/\bch/uS' => 'к',
+		'/\bee/uS' => 'э',
+		'/\beh/uS' => 'э',
+		'/\bey/uS' => 'эй',
+		'/\bih/uS' => 'и',
+		'/\bja/uS' => 'я',
+		'/\bjä/uS' => 'е',
+		'/\bje/uS' => 'е',
+		'/\bji/uS' => 'йи',
+		'/\bjo/uS' => 'йо',
+		'/\bjö/uS' => 'йё',
+		'/\bju/uS' => 'ю',
+		'/\bjü/uS' => 'йю',
+		'/\böh/uS' => 'э',
+		'/\Böh/uS' => 'ё',
+		'/\boe/uS' => 'э',
+		'/\Boe/uS' => 'ё',
+		'/\bsp/uS' => 'шп',
+		'/\Bsp/uS' => 'сп',
+		'/\bst/uS' => 'шт',
+		'/\Bst/uS' => 'ст',
+		'/\büh/uS' => 'и',
+		'/\Büh/uS' => 'ю',
+		'/ph\b/uS' => 'ф',
+		'/ll\b/uS' => 'лль',
+		'/(?<=i)a/uS' => 'я',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
+		'/(?<=[aäeioöuüy])ä/uS' => 'э',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])c/uS' => 'к',
+		'/(?<=[aou])c/uS' => 'к',
+		'/(?<=[ei])c/uS' => 'ц',
+		'/(?<=[bcdfghjklmnpqrsßtvwxziy])e/uS' => 'е',
+		'/(?<=[aäeoöuü])e/uS' => 'э', //не включены eu, äu
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])i/uS' => 'и',
+		'/(?<=[aäeioöuüy])i/uS' => 'й', // после гласных в нисходящих дифтонгах
+		'/l(?=[aäeioöuüy])/uS' => 'л',
+		'/l(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ль',
+		'/s(?=[aäeioöuüy])/uS' => 'з',
+		'/s(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'с',
+		
+		'/\bä/uS' => 'э',
+		'/\be/uS' => 'э',
+		'/\bi/uS' => 'и',
+		'/\bö/uS' => 'э',
+		'/\Bö/uS' => 'ё',
+		'/\bü/uS' => 'и',
+		'/\Bü/uS' => 'ю',
+		'/h\b/uS' => '', // в конце слова не передаётся кроме ph
+		'/l\b/uS' => 'ль',
+		'/s\b/uS' => 'с',
+		);
+	
+	$tr = array(
+			'a' => 'а',
+			'aa' => 'а',
+			'ah' => 'а',
+			'äu' => 'ой',
+			'ai' => 'ай',
+			'ay' => 'ай',
+			'b' => 'б',
+			'ch' => 'х',
+			'chh' => 'хг',
+			//'chh' => 'хх', //современный вариант
+			'chs' => 'кс',
+			'ck' => 'к',
+			'd' => 'д',
+			'dh' => 'д',
+			'ei' => 'ай',
+			'eu' => 'ой',
+			'f' => 'ф',
+			'g' => 'г',
+			'gk' => 'г', //
+			//'h' => 'х', //если произносится
+			'rh' => 'р',
+			'th' => 'т',
+			'gh' => 'г',
+			'h' => 'г',
+			'ie' => 'и',
+			'ieh' => 'и',
+			'k' => 'к',
+			'm' => 'м',
+			'n' => 'н',
+			'o' => 'о',
+			'oo' => 'о',
+			'oh' => 'о',
+			'oi' => 'ой',
+			'oy' => 'ой',
+			'p' => 'п',
+			'ph' => 'ф',
+			'qu' => 'кв',
+			'r' => 'р',
+			'rh' => 'р',
+			'ß' => 'с',
+			't' => 'т',
+			'th' => 'т',
+			'tion' => 'цион',
+			'tsch' => 'ч',
+			'u' => 'у',
+			'uh' => 'у',
+			'v' => 'ф',
+			'w' => 'в',
+			'x' => 'кс',
+			'y' => 'и',
+			'yh' => 'и',
+			'z' => 'ц',
+			'zsch' => 'ч',
+			'tzsch' => 'цш', // устаревшая традиционная(!!!) транскрипция
+							
+	);
+	GB_Transcriptor::add_transcription('de', 'ru', GB_Transcriptor::MODE_TRANSCRIBE, $tr, $tr_special);
+	GB_Transcriptor::add_transcription('de', 'ru', GB_Transcriptor::MODE_TRANSLITERATE, $tr, $tr_special);
+	
 }
 
 // Initialize transcriptor
