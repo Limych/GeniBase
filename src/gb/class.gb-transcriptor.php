@@ -542,6 +542,8 @@ function gb_transcriptor_init(){
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü\B/uS' => 'ью',
 		'/(?<=i)aa/uS' => 'я',
 		'/(?<=i)ah/uS' => 'я',	
+		'/(?<=[^i])aa/uS' => 'а',
+		'/(?<=[^i])ah/uS' => 'а',	
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])äh/uS' => 'е',
 		'/(?<=[aäeioöuüy])äh/uS' => 'э',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ae/uS' => 'е',
