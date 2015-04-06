@@ -532,7 +532,8 @@ function gb_transcriptor_init(){
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[aäeioöuüy])/uS' => 'ц',
 		'/(?<=[aäeioöuüy])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
-		
+		'/sche/uS/' => 'ше',
+			
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja\B/uS' => 'ья',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä\B/uS' => 'ье',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je\B/uS' => 'ье',
@@ -662,8 +663,7 @@ function gb_transcriptor_init(){
 			'r' => 'р',
 			'rh' => 'р',
 			'ß' => 'с',
-		    'sch' => 'ш',
-			't' => 'т',
+		    't' => 'т',
 			'th' => 'т',
 			'tion' => 'цион',
 			'tsch' => 'ч',
