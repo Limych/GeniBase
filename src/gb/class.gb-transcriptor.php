@@ -544,8 +544,8 @@ function gb_transcriptor_init(){
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü\B/uS' => 'ью',
 		'/(?<=i)aa/uS' => 'я',
 		'/(?<=i)ah/uS' => 'я',	
-		'/(?!=i)aa/uS' => 'а',
-		'/(?!=i)ah/uS' => 'а',	
+		//'/(?!=i)aa/uS' => 'а',
+		//'/(?!=i)ah/uS' => 'а',	
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])äh/uS' => 'е',
 		'/(?<=[aäeioöuüy])äh/uS' => 'э',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ae/uS' => 'е',
@@ -598,7 +598,7 @@ function gb_transcriptor_init(){
 		'/ph\b/uS' => 'ф',
 		'/ll\b/uS' => 'лль',
 		'/(?<=i)a/uS' => 'я',
-		'/(?!=i)a/uS' => 'а',
+		//'/(?!=i)a/uS' => 'а',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
 		'/(?<=[aäeioöuüy])ä/uS' => 'э',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])c/uS' => 'к',
@@ -626,6 +626,9 @@ function gb_transcriptor_init(){
 		);
 	
 	$tr = array(
+			'a' => 'а',
+			'aa' => 'а',
+			'ah' => 'а',
 			'äu' => 'ой',
 			'ai' => 'ай',
 			'ay' => 'ай',
