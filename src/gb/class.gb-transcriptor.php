@@ -536,6 +536,8 @@ function gb_transcriptor_init(){
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
 		'/sche/uS' => 'ше',
 			
+		'/\bste/uS' => 'ште',
+		'/\Bste/uS' => 'сте',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja\B/uS' => 'ья',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä\B/uS' => 'ье',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je\B/uS' => 'ье',
