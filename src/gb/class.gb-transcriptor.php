@@ -600,6 +600,7 @@ function gb_transcriptor_init(){
 		'/\büh/uS' => 'и',
 		'/\Büh/uS' => 'ю',
 		'/ph\b/uS' => 'ф',
+		'/ch\b/uS' => 'х', // Bach → Бах, Erich → Эрих
 		'/ll\b/uS' => 'лль',
 		'/(?<=i)a/uS' => 'я',
 		//'/(?!=i)a/uS' => 'а',
