@@ -532,7 +532,7 @@ function gb_transcriptor_init(){
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[aäeioöuüy])/uS' => 'ц',
 		'/(?<=[aäeioöuüy])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])tz(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ц',
-		'/sche/uS/' => 'ше',
+		'/sche/uS' => 'ше',
 			
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja\B/uS' => 'ья',
 		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä\B/uS' => 'ье',
