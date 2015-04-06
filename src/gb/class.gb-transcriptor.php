@@ -524,6 +524,7 @@ function gb_transcriptor_init(){
 		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йю', // после согласных на стыке корней!?
 		
 		'/mann\b/uS' => 'ман',
+		'/(?<=[aäeioöuüy])cke/uS' => 'кке',
 		'/(?<=[aäeioöuüy])ck(?=[aäeioöuüy])/uS' => 'кк',
 		'/(?<=eu)ee/uS' => 'е',
 		'/(?<=eu)eh/uS' => 'е',
@@ -573,7 +574,6 @@ function gb_transcriptor_init(){
 		'/(?<=[aäeioöuüy])jü/uS' => 'йю',
 		'/ll(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'лль',
 		'/(?<=[aäeioöuüy])ss/uS' => 'сс',
-		'/(?<=ck)e/uS' => 'е',
 		
 		'/\bäh/uS' => 'э',	
 		'/\bae/uS' => 'э',
