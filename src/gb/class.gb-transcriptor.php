@@ -550,7 +550,7 @@ function gb_transcriptor_init(){
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ae/uS' => 'е',
 		'/(?<=[aäeioöuüy])ae/uS' => 'э',
 		'/(?<=[bcdfghjklmnpqrsßtvwxziy])ee/uS' => 'е',
-		'/(?<=[bcdfghjklmnpqrsßtvwxziy])eh/uS' => 'е',
+		'/(?<=[bcdfghjklmnpqrsßtvwxziy])eh/uS' => 'ее',
 		'/(?<=äu)e/uS' => 'е',
 		'/(?<=[aäeoöuü])ee/uS' => 'э', //не включены eu, äu 
 		'/(?<=[aäeoöuü])eh/uS' => 'э', //не включены eu, äu
