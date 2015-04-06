@@ -509,17 +509,19 @@ function gb_transcriptor_init(){
 		'/\bnetzsch\b/uS' => 'неч',
 		'/\btzscheetzsch\b/uS' => 'чеч',
 		'/\bachslach\b/uS' => 'акслах',
+		'/\boberjettingen\b/uS' => 'оберъеттинген',
+		'/\baltjürden\b/uS' => 'альтйюрден',
 		
 		'/schtsch/uS' => 'щ',
 		
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъя', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ji(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йи', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jo(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йо', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jö(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йё', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ju(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъю', // после согласных на стыке корней!&
-		'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йю', // после согласных на стыке корней!&
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ja(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъя', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jä(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])je(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъе', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ji(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йи', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jo(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йо', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jö(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йё', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])ju(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'ъю', // после согласных на стыке корней!?
+		//'/\B(?<=[bcdfghjklmnpqrsßtvwxz])jü(?=[bcdfghjklmnpqrsßtvwxz])\B/uS' => 'йю', // после согласных на стыке корней!?
 		
 		'/mann\b/uS' => 'ман',
 		'/(?<=[aäeioöuüy])ck(?=[aäeioöuüy])/uS' => 'кк',
