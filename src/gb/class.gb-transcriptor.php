@@ -567,7 +567,6 @@ function gb_transcriptor_init(){
 		'/(?<=[aäeioöuüy])ju/uS' => 'ю',
 		'/(?<=[aäeioöuüy])jü/uS' => 'йю',
 		'/ll(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'лль',
-		'/sch/uS' => 'ш',
 		'/(?<=[aäeioöuüy])ss/uS' => 'сс',
 		
 		'/\bäh/uS' => 'э',	
@@ -663,6 +662,7 @@ function gb_transcriptor_init(){
 			'r' => 'р',
 			'rh' => 'р',
 			'ß' => 'с',
+		    'sch' => 'ш',
 			't' => 'т',
 			'th' => 'т',
 			'tion' => 'цион',
