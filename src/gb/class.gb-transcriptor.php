@@ -605,19 +605,19 @@ function gb_transcriptor_init(){
 		'/ll\b/uS' => 'лль',
 		'/(?<=i)a/uS' => 'я',
 		//'/(?!=i)a/uS' => 'а',
-		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
-		'/(?<=[aäeioöuüy])ä/uS' => 'э',
 		'/c(?=[bcdfgjklmnpqrsßtvwxz])/uS' => 'к',
 		'/c(?=[aou])/uS' => 'к',
 		'/c(?=[ei])/uS' => 'ц',
-		'/(?<=[bcdfghjklmnpqrsßtvwxziy])e/uS' => 'е',
-		'/(?<=[aäeoöuü])e/uS' => 'э', //не включены eu, äu
-		'/(?<=[bcdfghjklmnpqrsßtvwxz])i/uS' => 'и',
-		'/(?<=[aäeioöuüy])i/uS' => 'й', // после гласных в нисходящих дифтонгах
 		'/l(?=[aäeioöuüy])/uS' => 'л',
 		'/l(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'ль',
 		'/s(?=[aäeioöuüy])/uS' => 'з',
 		'/s(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'с',
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
+		'/(?<=[aäeioöuüy])ä/uS' => 'э',
+		'/(?<=[bcdfghjklmnpqrsßtvwxziy])e/uS' => 'е',
+		'/(?<=[aäeoöuü])e/uS' => 'э', //не включены eu, äu
+		'/(?<=[bcdfghjklmnpqrsßtvwxz])i/uS' => 'и',
+		'/(?<=[aäeioöuüy])i/uS' => 'й', // после гласных в нисходящих дифтонгах
 		
 		'/\bä/uS' => 'э',
 		'/\be/uS' => 'э',
