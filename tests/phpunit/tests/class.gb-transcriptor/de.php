@@ -8,7 +8,7 @@ class Tests_Transcriptor_DE extends GB_UnitTestCase {
 		$data = array(
 				'ru' => array(
 					'Aachen'		=> 'Ахен',				'Achslach'		=> 'Акслах',
-					'Adenauer'		=> 'Аденауэр',			'Aeschenbacher'	=> 'Эшенбахер',
+					'Adenauer'		=> 'Аденауэр',			'Ae sch e nbacher'	=> 'Э ш е нбахер',
 					'Ahrenviöl'		=> 'Аренфиёль',			'Aichinger'		=> 'Айхингер',
 					'Altjürden'		=> 'Альтйюрден',		'Altschul'		=> 'Альтшуль',
 					'Andreas'		=> 'Андреас',			'Anjun'			=> 'Аньюн',
