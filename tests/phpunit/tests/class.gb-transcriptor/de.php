@@ -13,7 +13,8 @@ class Tests_Transcriptor_DE extends GB_UnitTestCase {
 					'Altjürden'		=> 'Альтйюрден',		'Altschul'		=> 'Альтшуль',
 					'Andreas'		=> 'Андреас',			'Anjun'			=> 'Аньюн',
 					'Avenarius'		=> 'Авенариус',			'Axel'			=> 'Аксель',
-					'Aystetten'		=> 'Айштеттен',			'Bach'			=> 'Бах',
+					'Aystetten'		=> 'Айстеттен', // Айштеттен по-моему не верно, т.к. st=шт в начале слова (или части сложного слова), иначе ст 
+					'Bach'			=> 'Бах',
 					'Baedeker'		=> 'Бедекер',			'Barbara'		=> 'Барбара',
 					'Bauer'			=> 'Бауэр',				'Becker'		=> 'Беккер',
 					'Behling'		=> 'Белинг',			'Beier'			=> 'Байер',
