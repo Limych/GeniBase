@@ -601,9 +601,9 @@ function gb_transcriptor_init(){
 		//'/(?!=i)a/uS' => 'а',
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])ä/uS' => 'е',
 		'/(?<=[aäeioöuüy])ä/uS' => 'э',
-		'/(?<=[bcdfghjklmnpqrsßtvwxz])c/uS' => 'к',
-		'/(?<=[aou])c/uS' => 'к',
-		'/(?<=[ei])c/uS' => 'ц',
+		'/c(?=[bcdfgjklmnpqrsßtvwxz])/uS' => 'к',
+		'/c(?=[aou])/uS' => 'к',
+		'/c(?=[ei])/uS' => 'ц',
 		'/(?<=[bcdfghjklmnpqrsßtvwxziy])e/uS' => 'е',
 		'/(?<=[aäeoöuü])e/uS' => 'э', //не включены eu, äu
 		'/(?<=[bcdfghjklmnpqrsßtvwxz])i/uS' => 'и',
