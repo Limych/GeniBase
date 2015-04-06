@@ -573,6 +573,7 @@ function gb_transcriptor_init(){
 		'/(?<=[aäeioöuüy])jü/uS' => 'йю',
 		'/ll(?=[bcdfghjklmnpqrsßtvwxz])/uS' => 'лль',
 		'/(?<=[aäeioöuüy])ss/uS' => 'сс',
+		'/(?<=ck)e/uS' => 'е',
 		
 		'/\bäh/uS' => 'э',	
 		'/\bae/uS' => 'э',
