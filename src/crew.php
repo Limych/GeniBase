@@ -13,7 +13,7 @@ crew_list(__('Preparation of electronic version of the lists', WW1_TXTDOM), arra
 		'Marcin Chorużyj',		'Andris Jirgensons',	'Artur Kołoszewski',	'Jan Makarewicz',
 		'Marian Mirzojan',		'Eryk Miskis',			'Karol Pawłowski',		'Tomasz Pawłowski',
 		'Daniel Rynkiewicz',	'Edward Rynkiewicz',	'Ernest Stankiewicz',	'Krzysztof Szuszkiewicz',		
-		'Ирина Ашевская',		'Александр Балахнин',	'Татьяна Беликина',		'Василий Богатырев',
+		'Ирина Ашевская',		'Пётр Афимьин',	'Александр Балахнин',	'Татьяна Беликина',		'Василий Богатырев',
 		'Надежда Вус',			'Павел Гаврильченко',	'Андрей Горбоносов',	'Владимир Гришин',
 		'Дмитрий Долгов',		'Никита Дубинин',		'Ирина Егорова',		'Татьяна Ефименко',
 		'Дмитрий Ждан',			'Анастасия Загорулько',	'Сергей Зарембо',		'Юлия Зилева',
