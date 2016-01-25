@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-03-24 13:16+0300\n"
-"PO-Revision-Date: 2015-03-26 15:58+0300\n"
+"POT-Creation-Date: 2015-04-07 19:04+0300\n"
+"PO-Revision-Date: 2015-04-07 19:04+0300\n"
 "Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -22,19 +22,38 @@ msgstr ""
 "esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: functions.gb-styles.php:86
+#: js/vendor/jquery-2.1.3.min.js:14
+msgid "<iframe frameborder='0' width='0' height='0'/>"
+msgstr ""
+
+#: js/vendor/jquery-2.1.3.min.js:26
+msgid "<script>"
+msgstr ""
+
+#: js/vendor/jquery-2.1.3.min.js:26
+msgid "<div>"
+msgstr ""
+
+#: functions.gb-scripts.php:31 functions.gb-styles.php:31
+#, php-format
+msgid ""
+"Scripts and styles should not be registered or enqueued until the %1$s, "
+"%2$s, or %3$s hooks."
+msgstr ""
+
+#: functions.gb-styles.php:84
 msgid "Do not pass style tags to gb_add_inline_style()."
 msgstr "Не добавляйте теги style к параметрам функции gb_add_inline_style()."
 
-#: functions.php:590
+#: functions.php:606
 msgid "&laquo; Back"
 msgstr "&laquo; Назад"
 
-#: functions.php:601
+#: functions.php:617
 msgid "GeniBase Error"
 msgstr "Ошибка GeniBase"
 
-#: functions.php:1205
+#: functions.php:1223
 #, php-format
 msgid ""
 "Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
@@ -45,7 +64,7 @@ msgstr ""
 "%3$s</em>, является <strong>устаревшей</strong> с версии %4$s! Используйте "
 "<code>%5$s()</code> вместо этого."
 
-#: functions.php:1207
+#: functions.php:1225
 #, php-format
 msgid ""
 "Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
@@ -56,45 +75,45 @@ msgstr ""
 "%3$s</em>, является <strong>устаревшей</strong> с версии %4$s. Альтернативы "
 "не предусмотрены."
 
-#: functions.php:1262
+#: functions.php:1285
 #, php-format
 msgid ""
 "%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead."
 msgstr ""
 
-#: functions.php:1264
+#: functions.php:1287
 #, php-format
 msgid ""
 "%1$s is <strong>deprecated</strong> since version %2$s with no alternative "
 "available."
 msgstr ""
 
-#: functions.php:1322
+#: functions.php:1350
 #, php-format
 msgid ""
 "%1$s was called with an argument that is <strong>deprecated</strong> since "
 "version %2$s! %3$s"
 msgstr ""
 
-#: functions.php:1324
+#: functions.php:1352
 #, php-format
 msgid ""
 "%1$s was called with an argument that is <strong>deprecated</strong> since "
 "version %2$s with no alternative available."
 msgstr ""
 
-#: functions.php:1372
+#: functions.php:1405
 #, php-format
 msgid "(This message was added in version %s.)"
 msgstr ""
 
-#: functions.php:1375
+#: functions.php:1408
 #, php-format
 msgid "%1$s was called <strong>incorrectly</strong>. %2$s %3$s"
 msgstr ""
 
-#: general-template.php:383 general-template.php:392 general-template.php:404
-#: general-template.php:413
+#: general-template.php:400 general-template.php:409 general-template.php:421
+#: general-template.php:430
 msgid "&hellip;"
 msgstr "&hellip;"
 
@@ -336,19 +355,17 @@ msgctxt "text direction"
 msgid "ltr"
 msgstr "ltr"
 
-#: locale.php:361
+#: locale.php:362
 msgid "F j, Y"
 msgstr "d.m.Y"
 
-#: locale.php:363
+#: locale.php:364
 msgid "g:i a"
 msgstr "H:i"
 
-#: locale.php:365
+#: locale.php:366
 msgid "F j, Y g:i a"
 msgstr "d.m.Y H:i"
 
-#: option.php:138
-#, php-format
-msgid "%s is a protected GB option and may not be modified"
-msgstr "%s защищённая опция GB и не может изменяться"
+#~ msgid "%s is a protected GB option and may not be modified"
+#~ msgstr "%s защищённая опция GB и не может изменяться"

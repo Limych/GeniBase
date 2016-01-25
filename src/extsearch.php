@@ -23,7 +23,7 @@ html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt
 print "<section id='search-form'>\n";
 show_records_stat();
 ?>
-<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
+<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form hide-on-print'>
 	<h2><?php _e('Advanced search person', WW1_TXTDOM); ?></h2>
 	<p class="small align-right"><a href="#help"><?php _e('Search instruction', WW1_TXTDOM)?></a> | <a href="/"><?php _e('Simple search', WW1_TXTDOM)?></a></p>
 	<?php $dbase->search_form(); ?>

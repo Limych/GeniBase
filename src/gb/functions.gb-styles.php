@@ -1,11 +1,10 @@
 <?php
 /**
- * BackPress Styles Procedural API
+ * GeniBase Styles Procedural API
  *
  * @since	2.0.0
  *
  * @package GeniBase
- * @subpackage BackPress
  * 
  * @copyright	Copyright © WordPress Team
  * @copyright	Partially copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)

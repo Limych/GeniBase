@@ -1,11 +1,11 @@
 <?php
 /**
- * BackPress Styles enqueue.
+ * GeniBase Styles enqueue.
  *
  * These classes were refactored from the GeniBase GB_Scripts and GeniBase
  * script enqueue API.
  *
- * @package BackPress
+ * @package GeniBase
  * @since	2.0.0
  * 
  * @copyright	Copyright © WordPress Team
@@ -18,9 +18,9 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 /**
- * BackPress Styles enqueue class.
+ * GeniBase Styles enqueue class.
  *
- * @package BackPress
+ * @package GeniBase
  * @uses GB_Dependencies
  * @since	2.0.0
  */
@@ -29,9 +29,9 @@ class GB_Styles extends GB_Dependencies {
 	public $content_url;
 	public $default_version;
 	public $text_direction = 'ltr';
-	public $concat = '';
-	public $concat_version = '';
 	public $do_concat = false;
+	public $concat_tag = '';
+	public $concat_code = '';
 	public $print_html = '';
 	public $print_code = '';
 	public $default_dirs;
@@ -47,11 +47,20 @@ class GB_Styles extends GB_Dependencies {
 		GB_Hooks::do_action_ref_array('gb_default_styles', array(&$this));
 	}
 
+	static function get_file($path) {
+		$path = realpath($path);
+	
+		if( !$path || !@is_file($path) )
+			return '';
+	
+		return @file_get_contents($path);
+	}
+
 	/**
 	 * @param string $handle
 	 * @return bool
 	 */
-	public function do_item( $handle ) {
+	public function do_item($handle) {
 		if( !parent::do_item($handle) )
 			return false;
 
@@ -66,11 +75,11 @@ class GB_Styles extends GB_Dependencies {
 
 		if( $this->do_concat ) {
 			if( $this->in_default_dir($obj->src) && !isset($obj->extra['conditional']) && !isset($obj->extra['alt']) ) {
-				$this->concat .= "$handle,";
-				$this->concat_version .= "$handle$ver";
-
-				$this->print_code .= $this->print_inline_style( $handle, false );
-
+				$this->concat_tag .= "$handle,";
+				$this->concat_code .= self::get_file(BASE_DIR . $obj->src);
+		
+				$this->print_code .= $this->print_inline_style($handle, false);
+		
 				return true;
 			}
 		}
@@ -80,13 +89,13 @@ class GB_Styles extends GB_Dependencies {
 		else
 			$media = 'all';
 
-		$href = $this->_css_href( $obj->src, $ver, $handle );
-		if( empty( $href ) ) {
+		$href = $this->_css_href($obj->src, $ver, $handle);
+		if( empty($href) ) {
 			// Turns out there is nothing to print.
 			return true;
 		}
 		$rel = isset($obj->extra['alt']) && $obj->extra['alt'] ? 'alternate stylesheet' : 'stylesheet';
-		$title = isset($obj->extra['title']) ? " title='" . esc_attr( $obj->extra['title'] ) . "'" : '';
+		$title = isset($obj->extra['title']) ? " title='" . esc_attr($obj->extra['title']) . "'" : '';
 
 		/**
 		 * Filter the HTML link tag of an enqueued style.
@@ -125,8 +134,8 @@ class GB_Styles extends GB_Dependencies {
 		if( $this->do_concat ) {
 			$this->print_html .= $conditional_pre;
 			$this->print_html .= $tag;
-			if( $inline_style = $this->print_inline_style( $handle, false ) )
-				$this->print_html .= sprintf( "<style id='%s-inline-css' type='text/css'>\n%s\n</style>\n", esc_attr( $handle ), $inline_style );
+			if( $inline_style = $this->print_inline_style($handle, false) )
+				$this->print_html .= sprintf("<style id='%s-inline-css' type='text/css'>\n%s\n</style>\n", esc_attr($handle), $inline_style);
 			$this->print_html .= $conditional_post;
 		}else{
 			echo $conditional_pre;
@@ -207,8 +216,8 @@ class GB_Styles extends GB_Dependencies {
 	 * @param string $handle
 	 * @return string
 	 */
-	public function _css_href( $src, $ver, $handle ) {
-		if( !is_bool($src) && !preg_match('|^(https?:)?//|', $src) && ! ( $this->content_url && 0 === strpos($src, $this->content_url) ) ) {
+	public function _css_href($src, $ver, $handle) {
+		if( !is_bool($src) && !preg_match('|^(https?:)?//|', $src) && !( $this->content_url && 0 === strpos($src, $this->content_url) ) ){
 			$src = $this->base_url . $src;
 		}
 
@@ -223,7 +232,7 @@ class GB_Styles extends GB_Dependencies {
 		 * @param string $src    The source URL of the enqueued style.
 		 * @param string $handle The style's registered handle.
 		 */
-		$src = GB_Hooks::apply_filters( 'style_loader_src', $src, $handle );
+		$src = GB_Hooks::apply_filters('style_loader_src', $src, $handle);
 
 		return esc_url( $src );
 	}
@@ -236,7 +245,7 @@ class GB_Styles extends GB_Dependencies {
 		if( !$this->default_dirs )
 			return true;
 
-		foreach ( (array) $this->default_dirs as $test ) {
+		foreach( (array) $this->default_dirs as $test ){
 			if( 0 === strpos($src, $test) )
 				return true;
 		}

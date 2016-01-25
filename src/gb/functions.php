@@ -1062,7 +1062,7 @@ function is_bot_user($is_first_visited_page = TRUE) {
 			return true;
 
 		// Common bots don't save cookies
-		if( !isset($_COOKIE[GB_COOKIE_USERID]) && 0 == strncmp(site_url(), $_SERVER['HTTP_REFERER'], strlen(site_url())) )
+		if( !isset($_COOKIE[GB_COOKIE_USERHASH]) && 0 == strncmp(site_url(), $_SERVER['HTTP_REFERER'], strlen(site_url())) )
 			return true;
 	}
 

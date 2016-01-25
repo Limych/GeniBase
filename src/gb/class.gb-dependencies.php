@@ -1,12 +1,12 @@
 <?php
 /**
- * BackPress Scripts enqueue
+ * GeniBase Scripts enqueue
  *
  * Classes were refactored from the GB_Scripts and GeniBase script enqueue API.
  *
  * @since	2.0.0
  *
- * @package BackPress
+ * @package GeniBase
  * @uses _GB_Dependency
  * @since	2.0.0
  * 
@@ -83,7 +83,7 @@ class GB_Dependencies {
 	 * @var int
 	 */
 	public $group = 0;
-
+	
 	/**
 	 * Process the items and dependencies.
 	 *
@@ -96,13 +96,13 @@ class GB_Dependencies {
 	 * @param mixed $group   Group level: level (int), no groups (false).
 	 * @return array Handles of items that have been processed.
 	 */
-	public function do_items( $handles = false, $group = false ) {
+	public function do_items($handles = false, $group = false) {
 		/*
 		 * If nothing is passed, print the queue. If a string is passed,
 		 * print that item. If an array is passed, print those items.
 		 */
 		$handles = false === $handles ? $this->queue : (array) $handles;
-		$this->all_deps( $handles );
+		$this->all_deps($handles);
 
 		foreach( $this->to_do as $key => $handle ) {
 			if( !in_array($handle, $this->done, true) && isset($this->registered[$handle]) ) {

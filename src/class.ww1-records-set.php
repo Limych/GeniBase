@@ -90,7 +90,7 @@ class ww1_solders_set extends ww1_records_set{
 		foreach(array_values($brief_fields) as $val)
 			print "<th scope='col'>" . esc_html($val) . "</th>";
 		if( $show_detailed )
-			print "<th class='no-print'></th>";
+			print "<th class='hide-on-print'></th>";
 		print "</tr></thead><tbody>";
 		$even = 0;
 		$num = ($this->page - 1) * Q_LIMIT;
@@ -117,7 +117,7 @@ class ww1_solders_set extends ww1_records_set{
 				print "<td " . ($key == 'surname' || $key == 'name' ? "class='rt-hide'" : "data-rt-title='" . esc_attr($title) . ": '") . ">" . $text . "</td>\n";
 			}
 			if( $show_detailed ){
-				print "<td class='rt-hide no-print'><div class='arrow'></div></td>\n";
+				print "<td class='rt-hide hide-on-print'><div class='arrow'></div></td>\n";
 
 				print "</tr><tr class='detailed h" . ($even ? ' even' : ' odd') . "'>\n";
 ?>
@@ -171,13 +171,13 @@ class ww1_solders_set extends ww1_records_set{
 		if( !is_array($hints) ){
 			$hints = array(
 				__('By clicking on the line that you are interested in, you will see an additional information.', WW1_TXTDOM),
-				__('You can navigate through the pages of search results by using the keys <span class="kbdKey">Ctrl</span>+<span class="kbdKey">→</span> and <span class="kbdKey">Ctrl</span>+<span class="kbdKey">←</span>', WW1_TXTDOM),
+				__('You can navigate through the pages of search results by using the keys <kbd>Ctrl</kbd>+<kbd>→</kbd> and <kbd>Ctrl</kbd>+<kbd>←</kbd>', WW1_TXTDOM),
 				__('Many records have links to electronic copies of sources on which the database is created.', WW1_TXTDOM),
 				__('Usually when searching system automatically searches for similar-sounding names or spelling variations. All of these findings are displayed at the end of the list and highlighted.', WW1_TXTDOM),
 			);
 		}
 		shuffle($hints);
-		print "<p class='nb align-center no-print' style='margin-top: 3em'><strong>" .
+		print "<p class='nb align-center hide-on-print' style='margin-top: 3em'><strong>" .
 				__('Please note:', WW1_TXTDOM) . "</strong> " . array_shift($hints) . "</p>";
 	} // function
 	

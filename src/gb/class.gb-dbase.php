@@ -8,6 +8,11 @@
  * @copyright	Copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  * @copyright	Partially copyright © 2010, Michail Serov
  * @copyright	Partially copyright © WordPress Team
+ * 
+ * 
+ * Подстановка параметров: «?key» — подстановка данных, «?#key» — подстановка имени поля,
+ * 		«?@key» — подстановка имени таблицы, «?_tablename» — добавление префикса перед именем таблицы
+ * 
  */
 
 // Direct execution forbidden for this script
@@ -727,7 +732,8 @@ class GB_DBase	{
 	 * 							иначе — MODE_UPDATE.
 	 * 							Варианты: добавление данных: MODE_INSERT, MODE_IGNORE («INSERT IGNORE …»), MODE_REPLACE;
 	 * 							обновление данных: MODE_UPDATE, MODE_DUPLICATE («INSERT … ON DUPLICATE KEY UPDATE»).
-	 * @return number	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
+	 * @return number|bool	Число изменённых строк (для MODE_UPDATE), или ID добавленной строки (во всех прочих случаях).
+	 * 						False при ошибке.
 	 */
 	function set_row($tablename, $data, $unique_key = false, $mode = false) {
 		$query = ( !$unique_key )

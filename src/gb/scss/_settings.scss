@@ -1,0 +1,30 @@
+
+// We use these to make sure border radius matches unless we want it different.
+$global-radius: 3px;
+$global-rounded: 1000px;
+
+// We use these as default colors throughout
+$primary-color: #3399FF;
+$secondary-color: #C2E0FF;
+// $alert-color: #f04124;
+$success-color: #33CC33;
+// $warning-color: #f08a24;
+// $info-color: #a0d3e8;
+
+// We use these to control various global styles
+// $body-bg: $white;
+$body-font-color: #1A1A1A;
+
+// We use these to define default font weights
+$font-weight-normal: normal;
+$font-weight-bold: bold;
+
+// We use these to control header font styles
+$header-font-weight: $font-weight-bold !default;
+$header-font-color: #4C4C4C;
+
+// We use these to style the labels in different ways
+$input-font-color: rgba(0,0,0,0.75);
+$input-font-size: rem-calc(14);
+$input-border-radius: $global-radius;
+$input-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);

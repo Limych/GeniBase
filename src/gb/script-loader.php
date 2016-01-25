@@ -51,13 +51,13 @@ function gb_default_scripts(&$scripts) {
 	$scripts->base_url = $guessurl;
 	$scripts->content_url = defined('GB_CONTENT_URL') ? GB_CONTENT_URL : '';
 	$scripts->default_version = get_siteinfo( 'version' );
-	$scripts->default_dirs = array('/gb-admin/js/', '/gb/js/');
+	$scripts->default_dirs = array(GB_CORE_URL . '/js/');
 
 	$suffix = GB_SCRIPT_DEBUG ? '' : '.min';
 
-	// jQuery
+	// Vendor libraries and friends
 	$scripts->add('jquery', false, array('jquery-core'), null);
-	$scripts->add('jquery-core', "http://code.jquery.com/jquery-2.1.3$suffix.js", array(), null);
+	$scripts->add('jquery-core',	GB_CORE_URL . "/js/vendor/jquery-2.1.3$suffix.js", array(), null);
 }
 
 /**
@@ -85,16 +85,14 @@ function gb_default_styles(&$styles) {
 	$styles->content_url = defined('GB_CONTENT_URL')? GB_CONTENT_URL : '';
 	$styles->default_version = get_siteinfo( 'version' );
 	$styles->text_direction = function_exists( 'is_rtl' ) && is_rtl() ? 'rtl' : 'ltr';
-	$styles->default_dirs = array('/gb-admin/css/', '/gb/css/');
+	$styles->default_dirs = array(GB_CORE_URL . '/css/');
 
 	$suffix = GB_SCRIPT_DEBUG ? '' : '.min';
 
 	// Common files
-	$styles->add('responsive-tables', "/gb/css/responsive-tables.css", array('normalize'));
-	$styles->add('responsive-forms', "/gb/css/responsive-forms.css", array('normalize'));
-	
-	// External libraries and friends
-	$styles->add('normalize', "/gb/css/normalize$suffix.css");
+	$styles->add('gb-core',	GB_CORE_URL . '/load-style.php/core' . $suffix);
+	$styles->add('responsive-tables',	GB_CORE_URL . "/css/responsive-tables.css", array('gb-core'));
+	$styles->add('responsive-forms',	GB_CORE_URL . '/load-style.php/responsive-forms' . $suffix, array('gb-core'));
 }
 
 /**

@@ -27,7 +27,7 @@
 	white-space: normal;
 }
 .responsive-table tbody tr {
-	margin-bottom: 0.5em;
+	margin-bottom: 0.5rem;
 	border: 2px solid #FFA500;
 	background-color: #F9F9F9;
 }
@@ -36,7 +36,7 @@
 }
 .responsive-table th,
 .responsive-table td {
-	padding: 0.5em;
+	padding: 0.5rem;
 	vertical-align: middle;
 }
 .responsive-table tbody td {
@@ -56,7 +56,7 @@
 	content: attr(data-rt-title);
 	float: left;
 	color: #999;
-	margin-right: 0.5em;
+	margin-right: 0.5rem;
 	text-align: left;
 }
 
@@ -65,11 +65,11 @@
 /*** Media Queries ****************************************************************/
 
 /* Tablet screen */
-@media (min-width: 30em)	{
+@media (min-width: 30rem)	{
 }/**/
 
 /* Narrow PC screen */
-@media print, (min-width: 42em)	{
+@media print, (min-width: 42rem)	{
 	.responsive-table thead {
 		position: relative;
 		clip: auto;
@@ -118,5 +118,5 @@
 }/**/
 
 /* Normal PC screen */
-@media (min-width: 62em)	{
+@media (min-width: 62rem)	{
 }/**/

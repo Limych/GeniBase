@@ -23,7 +23,7 @@ html_header($title, ($report && $report->records_cnt > 0 && $report->records_cnt
 print "<section id='search-form'>\n";
 show_records_stat();
 ?>
-<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form no-print'>
+<form action="<?php print $_SERVER['PHP_SELF']?>#report" class='responsive-form hide-on-print'>
 	<h2><?php _e('Search person', WW1_TXTDOM); ?></h2>
 	<p class="small align-right"><a href="/extsearch.php"><?php _e('Advanced search', WW1_TXTDOM)?></a></p>
 	<?php $dbase->search_form(); ?>
@@ -84,10 +84,12 @@ shuffle($res);
 $res = array_slice($res, 0, 12);
 foreach ($res as $key => $row){
 	if( empty($row['query']))	$row['query'] = '.';
-	$res[$key] = "<a href='$row[url]'>" . esc_html($row['query']) . "</a>";
+	$url = esc_attr($row['url'] . '#report');
+	$title = esc_html($row['query']);
+	$res[$key] = "<a href='$url'>$title</a>";
 }
 if( $res ){
-	print "<p class='lastq align-center no-print'>" . __('Some last search queries:', WW1_TXTDOM) .
+	print "<p class='lastq align-center hide-on-print'>" . __('Some last search queries:', WW1_TXTDOM) .
 			' ' . implode(', ', $res) . "</p>\n";
 }
 

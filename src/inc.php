@@ -45,8 +45,7 @@ static $region_short = array(
  */
 function html_header($title, $do_index = TRUE){
 	gb_enqueue_style('styles', site_url('/css/styles.css'),
-			array('normalize', 'responsive-tables', 'responsive-forms'));
-	gb_enqueue_style('print', site_url('/css/print.css'), array(), FALSE, 'print');
+			array('gb-core', 'responsive-tables', 'responsive-forms'));
 
 	$robots = $do_index ? 'All' : 'NoIndex,Follow';
 
@@ -64,14 +63,15 @@ function html_header($title, $do_index = TRUE){
 	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php print site_url('/favicon.ico'); ?>" />
 <?php gb_head(); ?>
 </head><body>
-	<?php lang_select(); ?>
+	<div id="adsense" style="position:absolute;left:-9999px;">&nbsp;</div>
+	<div class="afs_ads" style="position:absolute;left:-9999px;">&nbsp;</div>
 	<header>
 		<div class='logo'>
 			<a href="<?php print site_url(); ?>" tabindex="-2"><img src="<?php print site_url('/img/logo.jpg'); ?>" alt='' /></a>
 		</div>
 		<div class='title'>
 			<h1><?php _ex('The First World War, <nobr>1914&ndash;1918</nobr>', 'Project title in header', WW1_TXTDOM);?></h1>
-			<div><small><a href="http://www.svrt.ru/" tabindex="-1"><?php _e('The project of Union of Revival of Pedigree Traditions', WW1_TXTDOM)?></a></small></div>
+			<div><a href="http://www.svrt.ru/" tabindex="-1"><?php _e('The project of Union of Revival of Pedigree Traditions', WW1_TXTDOM)?></a></div>
 		</div>
 	</header>
 <?php
@@ -89,7 +89,7 @@ function html_header($title, $do_index = TRUE){
 function html_footer(){
 ?>
 <footer>
-	<p style="text-align: center; margin-top: 3em" class="no-print">
+	<p style="text-align: center; margin-top: 3em" class="hide-on-print">
 		<a href="<?php print site_url('/stat.php'); ?>"><?php _e('Statistic', WW1_TXTDOM);?></a>
 		| <a href="<?php print site_url('/guestbook/'); ?>"><?php _e('Guestbook', WW1_TXTDOM);?></a> 
 		| <a href="http://forum.svrt.ru/index.php?showforum=127" target="_blank"><?php _e('Discussion about the project', WW1_TXTDOM);?></a>
@@ -122,7 +122,7 @@ function html_footer(){
 
 function ad(){
 	?>
-<section class="ad no-print">
+<section class="ad hide-on-print">
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 	<!-- 1914 - Основной -->
 	<ins class="adsbygoogle"
@@ -358,7 +358,7 @@ function log_event($records_found = 0){
 				$timetotal = microtime(true) - $gb_timer['start'];
 				gbdb()->set_row('?_logs', array(
 						'query'		=> $squery,
-						'uid'		=> is_bot_user(FALSE) ? '' : gb_userid(),
+						'uid'		=> is_bot_user(FALSE) ? '' : GB_User::get_hash(),
 						'is_robot'	=> is_bot_user(FALSE),
 						'url'		=> $url,
 						'records_found'	=> $records_found,
@@ -439,7 +439,8 @@ function expand_names($names){
 	$have_name = false;
 	foreach($names as $key => $n){
 		$exp = array($n);
-		if( preg_match('/\b\w+(ВНА|[ВМТ]ИЧ|[МТ]ИЧНА|ИН|[ОЕ]В(Н?А)?)\b/uS', $n) ){
+		if( preg_match('/\b\w+(ВНА|[ВМТ]ИЧ|[МТ]ИЧНА|ИН|[ОЕ]В(Н?А)?)\b/uS', $n)
+				&& !in_array($n, array('ВАЛЕНТИН', 'КОНСТАНТИН')) ){
 			// Это отчество
 			$n2 = preg_replace('/НА$/uS', 'А', preg_replace('/ИЧ$/uS', '', $n));
 			if( $n != $n2 )
@@ -481,11 +482,6 @@ function expand_names($names){
 	return $names;
 } // function expand_names()
 
-function lang_select(){
-	$lang = mb_strtoupper(strtok(get_locale(), '_'));
-	print "<div class='language'>$lang</div>\n";
-}
-
 function simplify_query($query){
 	// Если вместо строки передан массив, обработать каждое значение в отдельности
 	// и вернуть результат в виде массива
@@ -499,4 +495,3 @@ function simplify_query($query){
 	$query = preg_replace('/^\*$/uSs', '', $query);
 	return $query;
 }
-

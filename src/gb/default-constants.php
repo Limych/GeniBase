@@ -132,7 +132,7 @@ function gb_plugin_constants() {
 	 * @since	2.0.0
 	 */
 	if( !defined('GB_CORE_URL') )
-		define( 'GB_CORE_URL', BASE_URL . '/gb');
+		define('GB_CORE_URL', BASE_URL . '/gb');
 	
 	/**
 	 * Allows for the content directory to be moved from the default location.
@@ -142,7 +142,7 @@ function gb_plugin_constants() {
 	 * @since	2.0.0
 	 */
 	if( !defined('GB_CONTENT_URL') )
-		define( 'GB_CONTENT_URL', BASE_URL . '/gb-content');
+		define('GB_CONTENT_URL', BASE_URL . '/gb-content');
 
 	/**
 	 * Allows for the cache directory to be moved from the default location.
@@ -152,7 +152,7 @@ function gb_plugin_constants() {
 	 * @since	2.1.1
 	 */
 	if( !defined('GB_CONTENT_CACHE_URL') )
-		define( 'GB_CONTENT_CACHE_URL', GB_CONTENT_URL . '/cache'); // full url
+		define('GB_CONTENT_CACHE_URL', GB_CONTENT_URL . '/cache'); // full url
 
 	/**
 	 * Allows for the plugins directory to be moved from the default location.
@@ -196,8 +196,8 @@ function gb_cookie_constants() {
 	/**
 	 * @since	2.1.1
 	 */
-	if( !defined('GB_COOKIE_USERID') )
-		define('GB_COOKIE_USERID', 'gb_uid' . GB_COOKIE_HASH);
+	if( !defined('GB_COOKIE_USERHASH') )
+		define('GB_COOKIE_USERHASH', 'gb_uid' . GB_COOKIE_HASH);
 
 	/**
 	 * @since	2.2.3

@@ -1,11 +1,11 @@
 <?php
 /**
- * BackPress Scripts enqueue.
+ * GeniBase Scripts enqueue.
  *
  * These classes were refactored from the GeniBase GB_Scripts and GeniBase
  * script enqueue API.
  *
- * @package BackPress
+ * @package GeniBase
  * @since	2.0.0
  * 
  * @copyright	Copyright © WordPress Team
@@ -18,9 +18,9 @@ if( !defined('GB_VERSION') || count(get_included_files()) == 1)	die('<b>ERROR:</
 
 
 /**
- * BackPress Scripts enqueue class.
+ * GeniBase Scripts enqueue class.
  *
- * @package BackPress
+ * @package GeniBase
  * @uses GB_Dependencies
  * @since	2.0.0
  */

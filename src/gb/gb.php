@@ -27,7 +27,7 @@ mb_internal_encoding('UTF-8');
 setlocale(LC_ALL, array('ru_RU.utf8', 'ru_RU.UTF-8'));
 
 // GeniBase calculates offsets from UTC.
-date_default_timezone_set( 'UTC' );
+date_default_timezone_set('UTC');
 
 // Turn register_globals off.
 gb_unregister_GLOBALS();
@@ -66,11 +66,15 @@ gb_start_object_cache();
 // Attach the default filters.
 require_once(GB_CORE_DIR . '/default-filters.php');
 
+// Stop most of GeniBase from being loaded if we just want the basics.
+if( defined('GB_SHORTINIT') && GB_SHORTINIT )
+	return false;
+
 // Load the L10n library.
 require_once(GB_CORE_DIR . '/l10n.php');
 
 // Load most of GeniBase.
-require_once(GB_CORE_DIR . '/user.php');
+require_once(GB_CORE_DIR . '/class.gb-user.php');
 require_once(GB_CORE_DIR . '/general-template.php');
 require_once(GB_CORE_DIR . '/link-template.php');
 require_once(GB_CORE_DIR . '/kses.php');
@@ -105,15 +109,15 @@ unset($locale_file);
 // Pull in locale data after loading text domain.
 require_once(GB_CORE_DIR . '/locale.php');
 
-// Set up current user (renew cookie every 100 runs).
-gb_userid(0 == rand(0, 99));
-
 /**
  * GeniBase Locale object for loading locale domain date and various strings.
  * @global object $gb_locale
  * @since	2.0.0
 */
 $GLOBALS['gb_locale'] = new GB_Locale();
+
+// Set up current user.
+GB::init();
 
 /**
  * Fires after GeniBase has finished loading but before any headers are sent.

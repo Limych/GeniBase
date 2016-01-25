@@ -413,3 +413,99 @@ function trailingslashit($string) {
 function untrailingslashit($string) {
 	return rtrim($string, '/\\');
 }
+
+/**
+ * Navigates through an array and removes slashes from the values.
+ *
+ * If an array is passed, the array_map() function causes a callback to pass the
+ * value back to the function. The slashes from this value will removed.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $value The value to be stripped.
+ * @return mixed Stripped value.
+ */
+function stripslashes_deep($value) {
+	if ( is_array($value) ) {
+		$value = array_map('stripslashes_deep', $value);
+		
+	} elseif ( is_object($value) ) {
+		$vars = get_object_vars( $value );
+		foreach ($vars as $key=>$data) {
+			$value->{$key} = stripslashes_deep( $data );
+		}
+		
+	} elseif ( is_string( $value ) ) {
+		$value = stripslashes($value);
+	}
+
+	return $value;
+}
+
+/**
+ * Sanitizes a string key.
+ *
+ * Keys are used as internal identifiers. Lowercase alphanumeric characters, dashes and underscores are allowed.
+ *
+ * @since 2.3.0
+ *
+ * @param string $key String key
+ * @return string Sanitized key
+ */
+function sanitize_key( $key ) {
+	$raw_key = $key;
+	$key = strtolower( $key );
+	$key = preg_replace( '/[^a-z0-9_\-]/', '', $key );
+
+	/**
+	 * Filter a sanitized key string.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $key     Sanitized key.
+	 * @param string $raw_key The key prior to sanitization.
+	*/
+	GB_Hooks::apply_filters( 'sanitize_key', $key, $raw_key );
+}
+
+/**
+ * Add slashes to a string or array of strings.
+ *
+ * This should be used when preparing data for core API that expects slashed data.
+ * This should not be used to escape data going directly into an SQL query.
+ *
+ * @since 2.3.0
+ *
+ * @param string|array $value String or array of strings to slash.
+ * @return string|array Slashed $value
+ */
+function gb_slash( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $k => $v ) {
+			if ( is_array( $v ) ) {
+				$value[$k] = gb_slash( $v );
+			} else {
+				$value[$k] = addslashes( $v );
+			}
+		}
+	} else {
+		$value = addslashes( $value );
+	}
+
+	return $value;
+}
+
+/**
+ * Remove slashes from a string or array of strings.
+ *
+ * This should be used to remove slashes from data passed to core API that
+ * expects data to be unslashed.
+ *
+ * @since 2.3.0
+ *
+ * @param string|array $value String or array of strings to unslash.
+ * @return string|array Unslashed $value
+ */
+function gb_unslash( $value ) {
+	return stripslashes_deep( $value );
+}

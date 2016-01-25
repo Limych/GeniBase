@@ -1,0 +1,295 @@
+/*! responsive-forms.css v1.0.0 | GPLv2 or later License | github.com/Limych/GeniBase */
+
+@import 'settings';
+
+@import "foundation/components/global";
+
+// We use this to set the base for lots of form spacing and positioning styles
+$form-spacing: rem-calc(16) !default;
+
+// We use these to style the labels in different ways
+$input-font-family: inherit !default;
+$input-bg-color: $white !default;
+$input-border-color: scale-color($white, $lightness: -20%) !default;
+$input-border-style: solid !default;
+$input-border-width: 2px !default;
+$input-focus-bg-color: scale-color($white, $lightness: -2%) !default;
+$input-focus-border-color: scale-color($white, $lightness: -40%) !default;
+$input-disabled-bg: $gainsboro !default;
+$input-disabled-cursor: $cursor-default-value !default;
+
+// Select variables
+$select-bg-color: $ghost !default;
+$select-hover-bg-color: scale-color($select-bg-color, $lightness: -3%) !default;
+
+// We use these to control button border styles.
+$button-bg-color: $primary-color !default;
+
+// @MIXIN
+//
+// We use this mixin to give all basic form elements their style
+@mixin form-element {
+	background-color: $input-bg-color;
+	font-family: $input-font-family;
+	border: {
+		width: $input-border-width;
+		style: $input-border-style;
+		color: $input-border-color;
+	}
+	box-shadow: $input-box-shadow;
+	color: $input-font-color;
+	font-size: $input-font-size;
+	padding: $form-spacing / 2;
+	height: ($input-font-size + ($form-spacing * 1.5) - rem-calc(1));
+	width: 100%;
+	@include box-sizing(border-box);
+	@include radius(0);
+	&.radius { @include radius($global-radius); }
+
+	// Basic focus styles
+	&:focus {
+		background: $input-focus-bg-color;
+		border-color: $input-focus-border-color;
+		outline: none;
+	}
+	// Disabled background input background color
+	&:disabled,
+	&[disabled],
+	&[readonly],
+	fieldset[disabled] & {
+		background-color: $input-disabled-bg;
+		cursor: $input-disabled-cursor;
+	}
+}
+
+// We use this mixin to style select elements
+@mixin form-select  {
+	-webkit-appearance: none !important;
+	border-radius: 0;
+	background-color: $select-bg-color;
+	
+	// Hide the dropdown arrow shown in newer IE versions
+	&::-ms-expand {
+		display: none;
+	}
+	
+	// The custom arrow has some fake horizontal padding so we can align it
+	// from the right side of the element without relying on CSS3
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9IjAgMCA2IDMiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDYgMyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PHBvbHlnb24gcG9pbnRzPSI1Ljk5MiwwIDIuOTkyLDMgLTAuMDA4LDAgIi8+PC9zdmc+);
+	
+	// We can safely use leftmost and rightmost now
+	background-position: if($text-direction == 'rtl', 0%, 100%) center;
+	
+	background-repeat: no-repeat;
+	border: {
+		width: $input-border-width;
+		style: $input-border-style;
+		color: $input-border-color;
+	}
+	padding: ($form-spacing / 2);
+	font-size: $input-font-size;
+	font-family: $body-font-family;
+	color: $input-font-color;
+	line-height: normal;
+	@include radius(0);
+	&.radius { @include radius($global-radius); }
+	&:hover {
+		background-color: $select-hover-bg-color;
+		border-color: $input-focus-border-color;
+	}
+	// Disabled Styles
+	&:disabled {
+		background-color: $input-disabled-bg;
+		cursor: $input-disabled-cursor;
+	}
+}
+
+//.responsive-form
+&{
+	div.fieldset {
+		border: 0;
+		padding: 0;
+		margin: 0;
+		
+		> label	{
+			margin: 0 0 ($form-spacing * 0.25);
+		}
+		div.field {
+			margin: 0 0 ($form-spacing * 0.5);
+		}
+	}
+	div.field {
+		margin: 0 0 ($form-spacing * 0.5);
+
+		> div,
+		> label	{
+			width: 100%;
+			float: none;
+			margin: 0 0 ($form-spacing * 0.25);
+		}
+	}
+
+	/* We use this to get basic styling on all basic form elements */
+	#{text-inputs(all, 'input')} {
+		-webkit-appearance: none;
+		border-radius: 0;
+		@include form-element;
+
+		&.radius {
+			@include radius($input-border-radius);
+		}
+	}
+	input[type="checkbox"],
+	input[type="radio"]	{
+		vertical-align: middle;
+	}
+	input[type="number"]	{
+		text-align: right;
+	}
+	input[type="date"]	{
+		width: auto;
+		padding: $form-spacing / 4;
+	}
+    /* Respect enforced amount of rows for textarea */
+    textarea[rows] {
+      height: auto;
+    }
+	/* Not allow resize out of parent */
+	textarea {
+		max-width: 100%;
+	}
+
+    /* Add height value for select elements to match text input height */
+    select {
+      @include form-select;
+      height: ($input-font-size + ($form-spacing * 1.5) - rem-calc(1));
+      &[multiple] {
+        height: auto;
+      }
+    }
+
+    input[type="submit"] {
+		-webkit-appearance: none;
+		border-radius: 0;
+    }
+
+	div.buttons	{
+		margin: 0.5rem 0 1rem;
+		text-align: right;
+
+		> button	{
+			display: inline-block;
+			margin-left: 1rem;
+		}
+	}
+	
+    @media #{$medium-up} {
+		div.fields	{
+			display: table;
+			margin: 0 auto;
+		}
+		div.fieldset,
+		div.field	{
+			display: table-row;
+			padding: 0 0 ($form-spacing * 0.5);
+			margin: 0;
+
+			> label,
+			> div	{
+				display: table-cell;
+				width: auto;
+				vertical-align: top;
+				padding: 0 0 ($form-spacing * 0.5);
+			}
+			> label	{
+				display: table-cell;
+				vertical-align: top;
+				width: 1%;
+				text-align: right;
+				padding: ($form-spacing * 0.25) ($form-spacing * 0.5) ($form-spacing * 0.25) 0;
+				white-space: nowrap;
+			}
+		}
+		div.fieldset div.field	{
+			display: block;
+			padding: 0;
+
+			&:last-child	{
+				margin: 0;
+			}
+			> label	{
+				display: initial;
+			}
+		}
+    }
+
+	.checkbox	{
+		width: $form-spacing * 1.4;
+		height: $form-spacing * 1.4;
+		margin: 0 $form-spacing * 0.25;
+		position: relative;
+		display: inline-block;
+
+		input[type="checkbox"]	{
+			position: absolute;
+			top: 0;
+			visibility: hidden;
+
+			&:checked + label	{
+				background-color: $button-bg-color;
+				@include single-transition(all, 0.15s, linear);
+
+				&:after {
+					border-color: $body-bg;
+	
+					-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+					    filter: alpha(opacity=100);
+					   opacity: 1;
+					@include single-transition(all, 0.15s, linear);
+				}
+			}
+		}
+		label {
+			cursor: pointer;
+			position: absolute;
+			top: 0;
+			width: $form-spacing * 1.4;
+			height: $form-spacing * 1.4;
+			border: {
+				width: $input-border-width;
+				style: $input-border-style;
+				color: $button-bg-color;
+				radius: $form-spacing * 0.2;
+			}
+
+			&:after {
+				content: '';
+				position: absolute;
+				width: $form-spacing * 0.85;
+				height: $form-spacing * 0.5;
+				background: transparent;
+				top: $form-spacing * 0.2 + $input-border-width;
+				left: $form-spacing * 0.15 + $input-border-width;
+				border: {
+					width: ($form-spacing * 0.2);
+					style: $input-border-style;
+					color: $button-bg-color;
+					top: none;
+					right: none;
+				}
+	
+				-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+				    filter: alpha(opacity=0);
+				   opacity: 0;
+				@include single-transition(all, 0.15s, linear);
+	
+				-webkit-transform: rotate(-45deg);
+				   -moz-transform: rotate(-45deg);
+				     -o-transform: rotate(-45deg);
+				    -ms-transform: rotate(-45deg);
+				        transform: rotate(-45deg);
+			}
+		}
+	}
+
+}

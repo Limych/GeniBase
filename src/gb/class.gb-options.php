@@ -112,12 +112,12 @@ class GB_Options {
 		$alloptions = self::_cache_get('alloptions', 'options');
 		if( !$alloptions ) {
 			$suppress = gbdb()->suppress_errors();
-			if(!$alloptions_db = gbdb()->get_table('SELECT section, option_name, option_value FROM ?_options WHERE autoload = "yes"') )
-				$alloptions_db = gbdb()->get_table('SELECT section, option_name, option_value FROM ?_options');
+			if(!$alloptions_db = gbdb()->get_table('SELECT section, key, value FROM ?_options WHERE autoload = "yes"') )
+				$alloptions_db = gbdb()->get_table('SELECT section, key, value FROM ?_options');
 			gbdb()->suppress_errors($suppress);
 			$alloptions = array();
 			foreach( (array) $alloptions_db as $o )
-				$alloptions[self::build_hash($o['option_name'], $o['section'])] = $o['option_value'];
+				$alloptions[self::build_hash($o['key'], $o['section'])] = $o['value'];
 			if( !defined('GB_INSTALLING') )
 				self::_cache_add('alloptions', $alloptions, 'options');
 		}
@@ -231,10 +231,10 @@ class GB_Options {
 
 			$result = gbdb()->set_row('?_options', array(
 						'section'		=> $section,
-						'option_name'	=> $option,
-						'option_value'	=> $value,
+						'key'	=> $option,
+						'value'	=> $value,
 						'autoload'		=> $autoload,
-					), array('section', 'option_name'), GB_DBase::MODE_DUPLICATE);
+					), array('section', 'key'), GB_DBase::MODE_DUPLICATE);
 			if( !$result )
 				return false;
 	
@@ -329,12 +329,12 @@ class GB_Options {
 	
 		if( defined('GB_INSTALLING') ){
 			$suppress = gbdb()->suppress_errors();
-			$row = gbdb()->get_row('SELECT option_value FROM ?_options ' .
-					'WHERE section = ?section AND option_name = ?key LIMIT 1',
+			$row = gbdb()->get_row('SELECT value FROM ?_options ' .
+					'WHERE section = ?section AND key = ?key LIMIT 1',
 					array('section' => $section, 'key' => $option));
 			gbdb()->suppress_errors($suppress);
 			if( !empty($row) )
-				$value = $row['option_value'];
+				$value = $row['value'];
 			elseif( self::$has_hooks ){
 				/**
 				 * Filter the default value for an option.
@@ -369,11 +369,11 @@ class GB_Options {
 			else{
 				$value = self::_cache_get($option_hash, 'options');
 				if( false === $value ){
-					$row = gbdb()->get_row('SELECT option_value FROM ?_options' .
-							' WHERE section = ?section AND option_name = ?key LIMIT 1',
+					$row = gbdb()->get_row('SELECT value FROM ?_options' .
+							' WHERE section = ?section AND key = ?key LIMIT 1',
 							array('section' => $section, 'key' => $option));
 					if( !empty($row) ){
-						$value = $row['option_value'];
+						$value = $row['value'];
 						self::_cache_add($option_hash, $value, 'options');
 	
 					}else{ // option does not exist, so we must cache its non-existence
@@ -520,9 +520,9 @@ class GB_Options {
 	
 		$result = gbdb()->set_row('?_options', array(
 					'section'		=> $section,
-					'option_name'	=> $option,
-					'option_value'	=> $serialized_value,
-				), array('section', 'option_name'), GB_DBase::MODE_UPDATE);
+					'key'	=> $option,
+					'value'	=> $serialized_value,
+				), array('section', 'key'), GB_DBase::MODE_UPDATE);
 		if( !$result )
 			return false;
 	
@@ -594,7 +594,7 @@ class GB_Options {
 		$option_hash = self::build_hash($option, $section);
 
 		// Checking that option there exists and retrieve record's 'autoload' state
-		$row = gbdb()->get_cell('SELECT autoload FROM ?_options WHERE section = ?section AND option_name = ?key',
+		$row = gbdb()->get_cell('SELECT autoload FROM ?_options WHERE section = ?section AND key = ?key',
 				array(
 						'section'	=> $section,
 						'key'		=> $option,
@@ -616,7 +616,7 @@ class GB_Options {
 	
 		$result = gbdb()->delete('?_options', array(
 				'section'		=> $section,
-				'option_name'	=> $option,
+				'key'	=> $option,
 		));
 		if( !defined('GB_INSTALLING') ){
 			if( 'yes' === $row['autoload'] ) {

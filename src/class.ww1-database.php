@@ -283,7 +283,7 @@ class ww1_database_solders extends ww1_database {
 								"<label for='q_$key'>$val:</label>" .
 								"<div>" .
 									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-									"<div class='field'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /> <label for='q_surname_ext'>" . __('also search for similar surnames', WW1_TXTDOM) . "</label></div>" .
+									"<div class='field'><span class='checkbox'><input type='checkbox' id='q_surname_ext' name='surname_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /><label for='q_surname_ext'></label></span> <label for='q_surname_ext'>" . __('also search for similar surnames', WW1_TXTDOM) . "</label></div>" .
 								"</div>" .
 								"</div>\n";
 						break;
@@ -294,7 +294,7 @@ class ww1_database_solders extends ww1_database {
 								"<label for='q_$key'>$val:</label>" .
 								"<div>" .
 									"<div class='field'><input type='text' id='q_$key' name='$key' value='" . esc_attr($this->query[$key]) . "' /></div>" .
-									"<div class='field'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->name_ext ? "" : " checked='checked'") . " /> <label for='q_name_ext'>" . __('also search for abbreviations of names', WW1_TXTDOM) . "</label></div>" .
+									"<div class='field'><span class='checkbox'><input type='checkbox' id='q_name_ext' name='name_ext' value='1'" . (!$this->surname_ext ? "" : " checked='checked'") . " /><label for='q_name_ext'></label></span> <label for='q_name_ext'>" . __('also search for abbreviations of names', WW1_TXTDOM) . "</label></div>" .
 								"</div>" .
 								"</div>\n";
 						break;
@@ -303,8 +303,8 @@ class ww1_database_solders extends ww1_database {
 						// Поля дат
 						print "<div class='field'>" .
 								"<label for='q_$key'>$val:</label>" .
-								"<div><nobr>" . _x('from ', 'Date from … to …', WW1_TXTDOM) . "<input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr> " .
-									"<nobr>" . _x('to ', 'Date from … to …', WW1_TXTDOM) . "<input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr></div>" .
+								"<div><nobr>" . _x('from', 'Date from … to …', WW1_TXTDOM) . " <input type='date' id='q_$key' name='date_from' value='" . esc_attr($this->query['date_from']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr> " .
+									"<nobr>" . _x('to', 'Date from … to …', WW1_TXTDOM) . " <input type='date' name='date_to' value='" . esc_attr($this->query['date_to']) . "' min='" . MIN_DATE . "' max='" . MAX_DATE . "' /></nobr></div>" .
 								"</div>\n";
 						break;
 	
@@ -314,7 +314,7 @@ class ww1_database_solders extends ww1_database {
 									"<label for='q_$key'>$val:</label>" .
 									"<div><select id='q_$key' name='${key}[]' multiple='multiple' size='5'>";
 							foreach($dics[$key] as $k => $v)
-								print "<option value='" . esc_attr($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . esc_html($v) . "</option>";
+								print "<option value='" . esc_attr($k) . "'" . (is_array($this->query[$key]) && in_array($k, $this->query[$key]) ? " selected='selected'" : '') . ">" . esc_html($v) . "</option>\n";
 							print "</select></div></div>\n";
 	
 						}else{	// Текстовые поля
@@ -402,7 +402,7 @@ class ww1_database_solders extends ww1_database {
 							if( $is_regex || !$this->surname_ext){
 								$data = gbdb()->data_escape(GB_DBase::make_condition($val_a), TRUE);
 								$data2 = gbdb()->data_escape($val_a, TRUE);
-								$from_q .= '(k.surname_key_type = 1 AND (k.surname_key LIKE ' .
+								$from_q .= '(k.surname_key_type = ' . GB_MK_SURNAME . ' AND (k.surname_key LIKE ' .
 										implode(' OR k.surname_key LIKE ', $data) .
 										')) OR (k.surname_mask != "" AND ' .
 										implode(' LIKE k.surname_mask OR ', $data2) .
