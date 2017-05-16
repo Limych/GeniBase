@@ -1,0 +1,36 @@
+{
+    "name": "GeniBase",
+    "description": "GeniBase is web software you can use to create a genealogical databases.",
+    "type": "project",
+    "require": {
+        "php": ">=5.4",
+        "ext-PDO": "*",
+        "ext-pdo_mysql": "*",
+        "ext-json": "*",
+        "psr/log": "~1.0",
+        "zendframework/zend-diactoros": "~1.3"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "~2.3",
+        "phploc/phploc": "*",
+        "phpmd/phpmd": "*"
+    },
+    "suggest": {
+    },
+    "autoload": {
+        "psr-4": {
+            "GeniBase\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "GeniBase Contributors",
+            "homepage": "https://github.com/Limych/GeniBase/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/Limych/GeniBase/issues",
+        "wiki": "https://github.com/Limych/GeniBase/wiki"
+    },
+    "license": "GPLv2 or later"
+}

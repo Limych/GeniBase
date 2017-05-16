@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/Limych/GeniBase.git"
   },
-  "author": "Andrey Khrolenok",
+  "author": "GeniBase Contributors",
   "license": "GPLv2 or later",
   "devDependencies": {
     "grunt": "~0.4.5",

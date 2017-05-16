@@ -1,5 +1,9 @@
 # Travis CI Configuration File
 
+env:
+  global:
+    - secure: "FgCl8NImpy0giLO/6nR+588kXUjcpX/TFNnFydd6Zjgjvxjk4GVAhNPSukUZgLNF6EjNPmJkzG97PV1aMtEddT7aO3sInKxORYW1FAZsz6PKnkbriYrAbop039RIPll74XQmvP+Cz2MDr5g5cNDQ8u32tVI0dlkGDzBxx8Lxy30="
+
 sudo: false
 
 # Tell Travis CI we're using PHP
@@ -41,10 +45,33 @@ before_install:
     fi
 #        svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/genibase-importer
 
+install:
+  # Composer
+  - composer self-update
+  - composer install -n --prefer-source
+
 # Before script, failures in this section will result in build status 'failed'
 before_script:
+  # Directories
+  - mkdir .reports
+  #
   - npm install -g grunt-cli
   - npm install
 
 # Script, failures in this section will result in build status 'failed'
-script: grunt $GB_TRAVISCI
+script:
+  # Check code style
+#  - php vendor/bin/phpcs --report=xml --report-file=.reports/phpcs.xml
+  # Lines of code
+  - php vendor/bin/phploc --log-xml=.reports/phploc.xml src
+  # Mess detection
+  - php vendor/bin/phpmd ./src xml codesize,unusedcode,naming --reportfile .reports/phpmd.xml || true
+  # Do tests
+  - grunt $GB_TRAVISCI
+
+after_success:
+  # Generate documentation
+  - bash .travis.sh
+
+notifications:
+  email: false

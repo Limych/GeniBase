@@ -285,7 +285,7 @@ module.exports = function(grunt) {
 			},
 			ajax: {
 				cmd: 'phpunit',
-				args: ['-c', 'phpunit.xml.dist', '--group', 'ajax']
+				args: ['-c', 'phpunit.xml.dist', '--group', 'ajax', '--coverage-clover=.reports/clover.xml', '--coverage-xml=.reports/coverage']
 			}
 		},
 		uglify: {
