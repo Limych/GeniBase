@@ -1,6 +1,6 @@
 <?php
 
-class GB_Tests_Exception extends PHPUnit_Framework_Exception
+class GB_Tests_Exception extends \PHPUnit\Framework\Exception
 {
 }
 

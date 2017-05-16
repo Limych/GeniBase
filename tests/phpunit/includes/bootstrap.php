@@ -1,4 +1,12 @@
 <?php
+// backward compatibility for php 5.5 and low (with phpunit < v.6)
+if (!class_exists('\PHPUnit\Framework\TestCase') && class_exists('\PHPUnit_Framework_TestCase')) {
+    class_alias('\PHPUnit_Framework_Exception', '\PHPUnit\Framework\Exception');
+    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
+    class_alias('\PHPUnit_Util_Getopt', '\PHPUnit\Util\Getopt');
+    class_alias('\PHPUnit_Util_Test', '\PHPUnit\Util\Test');
+}
+
 /**
  * Installs GeniBase for running the tests and loads GeniBase and the test libraries
  */
@@ -26,7 +34,7 @@ define('DIR_TESTDATA', dirname(__FILE__) . '/../data');
 
 if (! defined('GB_TESTS_FORCE_KNOWN_BUGS'))
     define('GB_TESTS_FORCE_KNOWN_BUGS', false);
-    
+
     // Cron tries to make an HTTP request to the blog, which always fails, because tests are run in CLI mode only
 define('DISABLE_GB_CRON', true);
 
@@ -89,7 +97,7 @@ require dirname(__FILE__) . '/utils.php';
  * If GB_TESTS_FORCE_KNOWN_BUGS is already set in gb-tests-config.php, then
  * how you call phpunit has no effect.
  */
-class GB_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt
+class GB_PHPUnit_Util_Getopt extends \PHPUnit\Util\Getopt
 {
 
     protected $longOptions = array(
@@ -104,15 +112,15 @@ class GB_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt
         while (list ($i, $arg) = each($argv)) {
             try {
                 if (strlen($arg) > 1 && $arg[0] === '-' && $arg[1] === '-') {
-                    PHPUnit_Util_Getopt::parseLongOption(substr($arg, 2), $this->longOptions, $options, $argv);
+                    \PHPUnit\Util\Getopt::parseLongOption(substr($arg, 2), $this->longOptions, $options, $argv);
                 }
-            } catch (PHPUnit_Framework_Exception $e) {
+            } catch (\PHPUnit\Framework\Exception $e) {
                 // Enforcing recognized arguments or correctly formed arguments is
                 // not really the concern here.
                 continue;
             }
         }
-        
+
         $ajax_message = true;
         foreach ($options as $option) {
             switch ($option[0]) {

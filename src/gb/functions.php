@@ -18,7 +18,7 @@ require_once (GB_CORE_DIR . '/class.gb-options.php');
  * files list.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $file
  *            File path.
  * @param array $allowed_files
@@ -29,16 +29,16 @@ function validate_file($file, $allowed_files = '')
 {
     if (false !== strpos($file, '..'))
         return 1;
-    
+
     if (false !== strpos($file, './'))
         return 1;
-    
+
     if (! empty($allowed_files) && ! in_array($file, $allowed_files))
         return 3;
-    
+
     if (':' == substr($file, 1, 1))
         return 2;
-    
+
     return 0;
 }
 
@@ -46,7 +46,7 @@ function validate_file($file, $allowed_files = '')
  * Convert a value to non-negative integer.
  *
  * @since 2.0.0
- *       
+ *
  * @param mixed $val
  *            wish to have converted to a non-negative integer.
  * @return integer non-negative integer.
@@ -60,7 +60,7 @@ function absint($val)
  * Convert integer number to format based on the locale.
  *
  * @since 2.0.0
- *       
+ *
  * @param int $number
  *            The number to convert based on locale.
  * @param int $decimals
@@ -73,19 +73,19 @@ function number_format_i18n($number, $decimals = 0)
     $formatted = number_format($number, absint($decimals), $gb_locale->number_format['decimal_point'], $gb_locale->number_format['thousands_sep']);
     if (' ' === $gb_locale->number_format['thousands_sep'])
         $formatted = preg_replace('/^(\d)\D(\d{3})$/uS', '$1$2', $formatted);
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Filter the number formatted based on the locale.
          *
          * @since 2.1.1
-         *       
+         *
          * @param string $formatted
          *            Converted number in string format.
          */
         $formatted = GB_Hooks::apply_filters('number_format_i18n', $formatted);
     }
-    
+
     return $formatted;
 }
 
@@ -94,7 +94,7 @@ function number_format_i18n($number, $decimals = 0)
  * to the current point in code.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $ignore_class
  *            Optional. A class to ignore all function calls within - useful
  *            when you want to just give info about the callee. Default null.
@@ -113,18 +113,18 @@ function gb_debug_backtrace_summary($ignore_class = null, $skip_frames = 0, $pre
         $trace = debug_backtrace(false);
     else
         $trace = debug_backtrace();
-    
+
     $caller = array();
     $check_class = ! is_null($ignore_class);
     $skip_frames ++; // skip this function
-    
+
     foreach ($trace as $call) {
         if ($skip_frames > 0) {
             $skip_frames --;
         } elseif (isset($call['class'])) {
             if ($check_class && $ignore_class == $call['class'])
                 continue; // Filter out calls
-            
+
             if ($call['class'] == 'GB_Hooks' && in_array($call['function'], array(
                 'do_action',
                 'apply_filters'
@@ -157,7 +157,7 @@ function gb_debug_backtrace_summary($ignore_class = null, $skip_frames = 0, $pre
  * Unserialize value only if it was serialized.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $original
  *            Maybe unserialized original, if is needed.
  * @return mixed Unserialized data can be any type.
@@ -176,7 +176,7 @@ function maybe_unserialize($original)
  * Serialized data is always a string.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $data
  *            Value to check to see if was serialized.
  * @param bool $strict
@@ -188,7 +188,7 @@ function is_serialized($data, $strict = true)
     // if it isn't a string, it isn't serialized.
     if (! is_string($data))
         return false;
-    
+
     $data = trim($data);
     if ('N;' == $data) {
         return true;
@@ -243,7 +243,7 @@ function is_serialized($data, $strict = true)
  * Serialize data, if needed.
  *
  * @since 2.0.0
- *       
+ *
  * @param string|array|object $data
  *            Data that might be serialized.
  * @return mixed A scalar data
@@ -252,7 +252,7 @@ function maybe_serialize($data)
 {
     if (is_array($data) || is_object($data))
         return serialize($data);
-    
+
     return $data;
 }
 
@@ -263,7 +263,7 @@ function maybe_serialize($data)
  * {@link http://www.php.net/magic_quotes magic_quotes_gpc} is on.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $string
  *            The string to be parsed.
  * @param array $array
@@ -278,7 +278,7 @@ function gb_parse_str($string, &$array)
      * Filter the array of variables derived from a parsed string.
      *
      * @since 2.1.0
-     *       
+     *
      * @param array $array
      *            The array populated with variables.
      */
@@ -292,7 +292,7 @@ function gb_parse_str($string, &$array)
  * to be merged into another array.
  *
  * @since 2.0.0
- *       
+ *
  * @param string|array $args
  *            Value to merge with $defaults
  * @param array $defaults
@@ -307,7 +307,7 @@ function gb_parse_args($args, $defaults = '')
         $r = & $args;
     else
         gb_parse_str($args, $r);
-    
+
     if (is_array($defaults))
         return array_merge($defaults, $r);
     return $r;
@@ -317,7 +317,7 @@ function gb_parse_args($args, $defaults = '')
  * Retrieve the description for the HTTP status.
  *
  * @since 2.0.0
- *       
+ *
  * @param int $code
  *            HTTP status code.
  * @return string Empty string if not found, or description if found.
@@ -325,15 +325,15 @@ function gb_parse_args($args, $defaults = '')
 function get_status_header_desc($code)
 {
     global $gb_header_to_desc;
-    
+
     $code = absint($code);
-    
+
     if (! isset($gb_header_to_desc)) {
         $gb_header_to_desc = array(
             100 => 'Continue',
             101 => 'Switching Protocols',
             102 => 'Processing',
-            
+
             200 => 'OK',
             201 => 'Created',
             202 => 'Accepted',
@@ -343,7 +343,7 @@ function get_status_header_desc($code)
             206 => 'Partial Content',
             207 => 'Multi-Status',
             226 => 'IM Used',
-            
+
             300 => 'Multiple Choices',
             301 => 'Moved Permanently',
             302 => 'Found',
@@ -352,7 +352,7 @@ function get_status_header_desc($code)
             305 => 'Use Proxy',
             306 => 'Reserved',
             307 => 'Temporary Redirect',
-            
+
             400 => 'Bad Request',
             401 => 'Unauthorized',
             402 => 'Payment Required',
@@ -379,7 +379,7 @@ function get_status_header_desc($code)
             428 => 'Precondition Required',
             429 => 'Too Many Requests',
             431 => 'Request Header Fields Too Large',
-            
+
             500 => 'Internal Server Error',
             501 => 'Not Implemented',
             502 => 'Bad Gateway',
@@ -392,7 +392,7 @@ function get_status_header_desc($code)
             511 => 'Network Authentication Required'
         );
     }
-    
+
     if (isset($gb_header_to_desc[$code]))
         return $gb_header_to_desc[$code];
     else
@@ -403,7 +403,7 @@ function get_status_header_desc($code)
  * Set HTTP status header.
  *
  * @since 2.0.0
- *       
+ *
  * @see get_status_header_desc()
  *
  * @param int $code
@@ -412,21 +412,21 @@ function get_status_header_desc($code)
 function status_header($code)
 {
     $description = get_status_header_desc($code);
-    
+
     if (empty($description))
         return;
-    
+
     $protocol = $_SERVER['SERVER_PROTOCOL'];
     if ('HTTP/1.1' != $protocol && 'HTTP/1.0' != $protocol)
         $protocol = 'HTTP/1.0';
     $status_header = "$protocol $code $description";
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Filter an HTTP status header.
          *
          * @since 2.1.0
-         *       
+         *
          * @param string $status_header
          *            HTTP status header.
          * @param int $code
@@ -438,7 +438,7 @@ function status_header($code)
          */
         $status_header = GB_Hooks::apply_filters('status_header', $status_header, $code, $description, $protocol);
     }
-    
+
     @header($status_header, true, $code);
 }
 
@@ -449,7 +449,7 @@ function status_header($code)
  * is handled by different browsers
  *
  * @since 2.0.0
- *       
+ *
  * @return array The associative array of header names and field values.
  */
 function get_nocache_headers()
@@ -459,19 +459,19 @@ function get_nocache_headers()
         'Cache-Control' => 'no-cache, must-revalidate, max-age=0',
         'Pragma' => 'no-cache'
     );
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Filter the cache-controlling headers.
          *
          * @since 2.1.0
-         *       
+         *
          * @see gb_get_nocache_headers()
          *
          * @param array $headers
          *            {
          *            Header names and field values.
-         *            
+         *
          *            @type string $Expires Expires header.
          *            @type string $Cache-Control Cache-Control header.
          *            @type string $Pragma Pragma header.
@@ -491,15 +491,15 @@ function get_nocache_headers()
  * caching should occur.
  *
  * @since 2.0.0
- *       
+ *
  * @see get_nocache_headers()
  */
 function nocache_headers()
 {
     $headers = get_nocache_headers();
-    
+
     unset($headers['Last-Modified']);
-    
+
     // In PHP 5.3+, make sure we are not sending a Last-Modified header.
     if (function_exists('header_remove')) {
         @header_remove('Last-Modified');
@@ -513,7 +513,7 @@ function nocache_headers()
             }
         }
     }
-    
+
     foreach ($headers as $name => $field_value)
         @header("{$name}: {$field_value}");
 }
@@ -531,7 +531,7 @@ function nocache_headers()
  * the `$title` parameter (the default title would apply) or the `$args` parameter.
  *
  * @since 2.0.0
- *       
+ *
  * @param string|GB_Error $message
  *            Optional. Error message. If this is a {@see GB_Error} object,
  *            the error's messages are used. Default empty.
@@ -544,7 +544,7 @@ function nocache_headers()
  *            {
  *            Optional. Arguments to control behavior. If `$args` is an integer, then it is treated
  *            as the response code. Default empty array.
- *            
+ *
  *            @type int $response The HTTP response code. Default 500.
  *            @type bool $back_link Whether to include a link to go back. Default false.
  *            @type string $text_direction The text direction. This is only useful internally, when GeniBase
@@ -564,7 +564,7 @@ function gb_die($message = '', $title = '', $args = array())
         );
         $title = '';
     }
-    
+
     if (defined('DOING_AJAX') && DOING_AJAX) {
         $function = '_ajax_gb_die_handler';
         if (class_exists('GB_Hooks')) {
@@ -572,7 +572,7 @@ function gb_die($message = '', $title = '', $args = array())
              * Filter callback for killing WordPress execution for AJAX requests.
              *
              * @since 2.1.0
-             *       
+             *
              * @param callback $function
              *            Callback function name.
              */
@@ -585,7 +585,7 @@ function gb_die($message = '', $title = '', $args = array())
              * Filter callback for killing WordPress execution for XML-RPC requests.
              *
              * @since 2.1.0
-             *       
+             *
              * @param callback $function
              *            Callback function name.
              */
@@ -598,14 +598,14 @@ function gb_die($message = '', $title = '', $args = array())
              * Filter callback for killing WordPress execution for all non-AJAX, non-XML-RPC requests.
              *
              * @since 2.1.0
-             *       
+             *
              * @param callback $function
              *            Callback function name.
              */
             $function = GB_Hooks::apply_filters('gb_die_handler', $function);
         }
     }
-    
+
     call_user_func($function, $message, $title, $args);
 }
 
@@ -617,7 +617,7 @@ function gb_die($message = '', $title = '', $args = array())
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @param string $message
  *            Error message.
  * @param string $title
@@ -631,9 +631,9 @@ function _default_gb_die_handler($message, $title = '', $args = array())
         'response' => 500
     );
     $r = gb_parse_args($args, $defaults);
-    
+
     $have_gettext = function_exists('__');
-    
+
     if (function_exists('is_gb_error') && is_gb_error($message)) {
         if (empty($title)) {
             $error_data = $message->get_error_data();
@@ -655,21 +655,21 @@ function _default_gb_die_handler($message, $title = '', $args = array())
     } elseif (is_string($message)) {
         $message = "<p>$message</p>";
     }
-    
+
     if (isset($r['back_link']) && $r['back_link']) {
         $back_text = $have_gettext ? __('&laquo; Back') : '&laquo; Back';
         $message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
     }
-    
-    // if( !class_exists('GB_Hooks') || !GB_Hooks::did_action('admin_head') ): // TODO: action admin_head
-    
+
+//    if( !class_exists('GB_Hooks') || !GB_Hooks::did_action('admin_head') ): // TODO: action admin_head
+
     status_header($r['response']);
     nocache_headers();
     header('Content-Type: text/html; charset=utf-8');
-    
+
     if (empty($title))
         $title = $have_gettext ? __('GeniBase Error') : 'GeniBase Error';
-    
+
     $text_direction = 'ltr';
     if (isset($r['text_direction']) && 'rtl' == $r['text_direction'])
         $text_direction = 'rtl';
@@ -787,19 +787,10 @@ a:hover {
 	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
 }
 
-<?
-php if ('rtl ' == $text_direction) :
-        ?> body {
+<?php if ('rtl ' == $text_direction) : ?> body {
 	font-family: Tahoma, Arial;
 }
-<?
-        php
-    
- 
-endif
-;
-    
-    ?>
+<?php endif; ?>
 </style>
 </head>
 <body id="error-page">
@@ -818,7 +809,7 @@ endif
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @param string $message
  *            Error message.
  * @param string $title
@@ -832,9 +823,9 @@ function _xmlrpc_gb_die_handler($message, $title = '', $args = array())
     $defaults = array(
         'response' => 500
     );
-    
+
     $r = gb_parse_args($args, $defaults);
-    
+
     // TODO: XMLRPC
     // if( $gb_xmlrpc_server ) {
     // $error = new IXR_Error( $r['response'] , $message);
@@ -850,7 +841,7 @@ function _xmlrpc_gb_die_handler($message, $title = '', $args = array())
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @param string $message
  *            Optional. Response to print. Default empty.
  */
@@ -868,7 +859,7 @@ function _ajax_gb_die_handler($message = '')
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @param string $message
  *            Optional. Response to print. Default empty.
  */
@@ -883,7 +874,7 @@ function _scalar_gb_die_handler($message = '')
  * Retrieve a list of protocols to allow in HTML attributes.
  *
  * @since 2.2.0
- *       
+ *
  * @see gb_kses()
  * @see esc_url()
  *
@@ -892,7 +883,7 @@ function _scalar_gb_die_handler($message = '')
 function gb_allowed_protocols()
 {
     static $protocols;
-    
+
     if (empty($protocols)) {
         $protocols = array(
             'http',
@@ -913,20 +904,20 @@ function gb_allowed_protocols()
             'fax',
             'xmpp'
         );
-        
+
         if (class_exists('GB_Hooks')) {
             /**
              * Filter the list of protocols allowed in HTML attributes.
              *
              * @since 2.1.0
-             *       
+             *
              * @param array $protocols
              *            Array of allowed protocols e.g. 'http', 'ftp', 'tel', and more.
              */
             $protocols = GB_Hooks::apply_filters('kses_allowed_protocols', $protocols);
         }
     }
-    
+
     return $protocols;
 }
 
@@ -936,20 +927,20 @@ function gb_allowed_protocols()
  * Mostly for internal use.
  *
  * @since 2.0.1
- *       
- * @param string $uri            
+ *
+ * @param string $uri
  * @return array
  */
 function parse_query($uri = false)
 {
     if ($uri === false)
         $uri = $_SERVER['REQUEST_URI'];
-    
+
     if ($frag = strstr($uri, '#'))
         $uri = substr($uri, 0, - strlen($frag));
     else
         $frag = '';
-    
+
     if (0 === stripos($uri, 'http://')) {
         $protocol = 'http://';
         $uri = substr($uri, 7);
@@ -959,7 +950,7 @@ function parse_query($uri = false)
     } else {
         $protocol = '';
     }
-    
+
     if (strpos($uri, '?') !== false) {
         list ($base, $query) = explode('?', $uri, 2);
         $base .= '?';
@@ -970,7 +961,7 @@ function parse_query($uri = false)
         $base = '';
         $query = $uri;
     }
-    
+
     return array(
         $protocol,
         $base,
@@ -991,7 +982,7 @@ function parse_query($uri = false)
  * with urlencode() or rawurlencode().
  *
  * @since 2.0.0
- *       
+ *
  * @param string|array $param1
  *            Either newkey or an associative_array.
  * @param string $param2
@@ -1014,9 +1005,9 @@ function add_query_arg()
         else
             $uri = $args[2];
     }
-    
+
     list ($protocol, $base, $query, $frag) = parse_query($uri);
-    
+
     gb_parse_str($query, $qs);
     $qs = urlencode_deep($qs); // this re-URL-encodes things that were already in the query string
     if (is_array($args[0])) {
@@ -1025,12 +1016,12 @@ function add_query_arg()
     } else {
         $qs[$args[0]] = $args[1];
     }
-    
+
     foreach ($qs as $k => $v) {
         if ($v === false)
             unset($qs[$k]);
     }
-    
+
     $ret = build_query($qs);
     $ret = trim($ret, '?');
     $ret = preg_replace('#=(&|$)#', '$1', $ret);
@@ -1043,7 +1034,7 @@ function add_query_arg()
  * Removes an item or list from the query string.
  *
  * @since 2.0.0
- *       
+ *
  * @param string|array $key
  *            key or keys to remove.
  * @param bool|string $uri
@@ -1067,11 +1058,11 @@ function remove_query_arg($key, $uri = false)
  * separator to '&' and uses _http_build_query() function.
  *
  * @since 2.0.0
- *       
+ *
  * @see _http_build_query() Used to build the query
  * @see http://us2.php.net/manual/en/function.http-build-query.php for more on what
  *      http_build_query() does.
- *     
+ *
  * @param array $data
  *            URL-encoded key/value pairs.
  * @return string URL-encoded string.
@@ -1086,7 +1077,7 @@ function build_query($data)
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @see http://us1.php.net/manual/en/function.http-build-query.php
  *
  * @param array|object $data
@@ -1101,13 +1092,13 @@ function build_query($data)
  *            Optional. Used to prefix key name. Default empty.
  * @param bool $urlencode
  *            Optional. Whether to use urlencode() in the result. Default true.
- *            
+ *
  * @return string The query string.
  */
 function _http_build_query($data, $prefix = null, $sep = null, $key = '', $urlencode = true)
 {
     $ret = array();
-    
+
     foreach ((array) $data as $k => $v) {
         if ($urlencode)
             $k = urlencode($k);
@@ -1119,7 +1110,7 @@ function _http_build_query($data, $prefix = null, $sep = null, $key = '', $urlen
             continue;
         elseif ($v === false)
             $v = '0';
-        
+
         if (is_array($v) || is_object($v))
             array_push($ret, _http_build_query($v, '', $sep, $k, $urlencode));
         elseif ($urlencode)
@@ -1127,10 +1118,10 @@ function _http_build_query($data, $prefix = null, $sep = null, $key = '', $urlen
         else
             array_push($ret, $k . '=' . $v);
     }
-    
+
     if (null === $sep)
         $sep = ini_get('arg_separator.output');
-    
+
     return implode($sep, $ret);
 }
 
@@ -1138,7 +1129,7 @@ function _http_build_query($data, $prefix = null, $sep = null, $key = '', $urlen
  * Checks if the browser/device is a robot
  *
  * @since 2.0.1
- *       
+ *
  * @param string $is_first_visited_page
  *            if this user visit other pages before.
  * @return boolean if user is a robot.
@@ -1147,11 +1138,11 @@ function is_bot_user($is_first_visited_page = TRUE)
 {
     // if( is_user_logged_in()){ // TODO: users
     // return false;
-    
+
     // XML RPC requests are probably from cybernetic beasts
     if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST)
         return true;
-    
+
     if (! empty($_SERVER['HTTP_USER_AGENT'])) {
         // the user agent could be google bot, bing bot or some other bot, one would hope real user agents do not have the
         // string 'bot|spider|crawler|preview' in them, there are bots that don't do us the kindness of identifying themselves as such,
@@ -1213,7 +1204,7 @@ function is_bot_user($is_first_visited_page = TRUE)
              * Filter list of known http-bots.
              *
              * @since 2.0.1
-             *       
+             *
              * @param array $bot_uagents
              *            substrings to detect bots.
              */
@@ -1224,17 +1215,17 @@ function is_bot_user($is_first_visited_page = TRUE)
                 return true;
         }
     }
-    
+
     if (! $is_first_visited_page) {
         // Common bots don't send referers
         if (! isset($_SERVER['HTTP_REFERER']) || empty($_SERVER['HTTP_REFERER']))
             return true;
-            
+
             // Common bots don't save cookies
         if (! isset($_COOKIE[GB_COOKIE_USERHASH]) && 0 == strncmp(site_url(), $_SERVER['HTTP_REFERER'], strlen(site_url())))
             return true;
     }
-    
+
     return false;
 }
 
@@ -1242,7 +1233,7 @@ function is_bot_user($is_first_visited_page = TRUE)
  * Determine if SSL is used.
  *
  * @since 2.0.1
- *       
+ *
  * @return bool True if SSL, false if not used.
  */
 function is_ssl()
@@ -1262,7 +1253,7 @@ function is_ssl()
  * Whether SSL login should be forced.
  *
  * @since 2.0.1
- *       
+ *
  * @see force_ssl_admin()
  *
  * @param string|bool $force
@@ -1278,7 +1269,7 @@ function force_ssl_login($force = null)
  * Whether to force SSL used for the Administration Screens.
  *
  * @since 2.0.1
- *       
+ *
  * @param string|bool $force
  *            Optional. Whether to force SSL in admin screens. Default null.
  * @return bool True if forced, false if not forced.
@@ -1286,13 +1277,13 @@ function force_ssl_login($force = null)
 function force_ssl_admin($force = null)
 {
     static $forced = false;
-    
+
     if (! is_null($force)) {
         $old_forced = $forced;
         $forced = $force;
         return $old_forced;
     }
-    
+
     return $forced;
 }
 
@@ -1303,7 +1294,7 @@ function force_ssl_admin($force = null)
  * directory.
  *
  * @since 2.1.1
- *       
+ *
  * @return string The guessed URL.
  */
 function gb_guess_url()
@@ -1313,11 +1304,11 @@ function gb_guess_url()
     } else {
         $abspath_fix = str_replace('\\', '/', BASE_DIR);
         $script_filename_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-        
+
         // The request is for the admin
         if (strpos($_SERVER['REQUEST_URI'], 'gb-admin') !== false) {
             $path = preg_replace('#/(gb-admin/.*)#i', '', $_SERVER['REQUEST_URI']);
-            
+
             // The request is for a file in BASE_DIR
         } elseif ($script_filename_dir . '/' == $abspath_fix) {
             // Strip off any file/query params in the path
@@ -1337,11 +1328,11 @@ function gb_guess_url()
                 $path = $_SERVER['REQUEST_URI'];
             }
         }
-        
+
         $schema = is_ssl() ? 'https://' : 'http://'; // set_url_scheme() is not defined yet
         $url = $schema . $_SERVER['HTTP_HOST'] . $path;
     }
-    
+
     return rtrim($url, '/');
 }
 
@@ -1358,7 +1349,7 @@ function gb_guess_url()
  *
  * @since 2.2.2
  * @access private
- *        
+ *
  * @param string $version
  *            The version of GeniBase that deprecated the function.
  * @param string $replacement
@@ -1368,13 +1359,13 @@ function _deprecated_function($version, $replacement = null)
 {
     $caller = next(debug_backtrace());
     $trigger_error = GB_DEBUG;
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Fires when a deprecated function is called.
          *
          * @since 2.2.2
-         *       
+         *
          * @param string $function
          *            The function that was called.
          * @param string $replacement
@@ -1383,18 +1374,18 @@ function _deprecated_function($version, $replacement = null)
          *            The version of GeniBase that deprecated the function.
          */
         GB_Hooks::do_action('deprecated_function_run', $caller['function'], $replacement, $version);
-        
+
         /**
          * Filter whether to trigger an error for deprecated functions.
          *
          * @since 2.2.2
-         *       
+         *
          * @param bool $trigger
          *            Whether to trigger the error for deprecated functions. Default true.
          */
         $trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_function_trigger_error', true);
     }
-    
+
     if ($trigger_error) {
         $file = substr($caller['file'], strlen(BASE_DIR) + 1);
         if (function_exists('__')) {
@@ -1424,7 +1415,7 @@ function _deprecated_function($version, $replacement = null)
  *
  * @since 2.2.2
  * @access private
- *        
+ *
  * @param string $file
  *            The file that was included.
  * @param string $version
@@ -1438,13 +1429,13 @@ function _deprecated_function($version, $replacement = null)
 function _deprecated_file($file, $version, $replacement = null, $message = '')
 {
     $trigger_error = GB_DEBUG;
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Fires when a deprecated file is called.
          *
          * @since 2.2.2
-         *       
+         *
          * @param string $file
          *            The file that was called.
          * @param string $replacement
@@ -1455,18 +1446,18 @@ function _deprecated_file($file, $version, $replacement = null, $message = '')
          *            A message regarding the change.
          */
         GB_Hooks::do_action('deprecated_file_included', $file, $replacement, $version, $message);
-        
+
         /**
          * Filter whether to trigger an error for deprecated files.
          *
          * @since 2.2.2
-         *       
+         *
          * @param bool $trigger
          *            Whether to trigger the error for deprecated files. Default true.
          */
         $trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_file_trigger_error', true);
     }
-    
+
     if ($trigger_error) {
         $message = empty($message) ? '' : ' ' . $message;
         if (function_exists('__')) {
@@ -1504,7 +1495,7 @@ function _deprecated_file($file, $version, $replacement = null, $message = '')
  *
  * @since 2.2.2
  * @access private
- *        
+ *
  * @param string $function
  *            The function that was called.
  * @param string $version
@@ -1515,13 +1506,13 @@ function _deprecated_file($file, $version, $replacement = null, $message = '')
 function _deprecated_argument($function, $version, $message = null)
 {
     $trigger_error = GB_DEBUG;
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Fires when a deprecated argument is called.
          *
          * @since 2.2.2
-         *       
+         *
          * @param string $function
          *            The function that was called.
          * @param string $message
@@ -1530,18 +1521,18 @@ function _deprecated_argument($function, $version, $message = null)
          *            The version of GeniBase that deprecated the argument used.
          */
         GB_Hooks::do_action('deprecated_argument_run', $function, $message, $version);
-        
+
         /**
          * Filter whether to trigger an error for deprecated arguments.
          *
          * @since 2.2.2
-         *       
+         *
          * @param bool $trigger
          *            Whether to trigger the error for deprecated arguments. Default true.
          */
         $trigger_error = GB_DEBUG && GB_Hooks::apply_filters('deprecated_argument_trigger_error', true);
     }
-    
+
     if ($trigger_error) {
         if (function_exists('__')) {
             if (! is_null($message))
@@ -1568,7 +1559,7 @@ function _deprecated_argument($function, $version, $message = null)
  *
  * @since 2.2.2
  * @access private
- *        
+ *
  * @param string $function
  *            The function that was called.
  * @param string $message
@@ -1579,13 +1570,13 @@ function _deprecated_argument($function, $version, $message = null)
 function _doing_it_wrong($function, $message, $version)
 {
     $trigger_error = GB_DEBUG;
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Fires when the given function is being used incorrectly.
          *
          * @since 2.2.2
-         *       
+         *
          * @param string $function
          *            The function that was called.
          * @param string $message
@@ -1594,18 +1585,18 @@ function _doing_it_wrong($function, $message, $version)
          *            The version of GeniBase where the message was added.
          */
         GB_Hooks::do_action('doing_it_wrong_run', $function, $message, $version);
-        
+
         /**
          * Filter whether to trigger an error for _doing_it_wrong() calls.
          *
          * @since 2.2.2
-         *       
+         *
          * @param bool $trigger
          *            Whether to trigger the error for _doing_it_wrong() calls. Default true.
          */
         $trigger_error = GB_DEBUG && GB_Hooks::apply_filters('doing_it_wrong_trigger_error', true);
     }
-    
+
     if ($trigger_error) {
         if (function_exists('__')) {
             $version = is_null($version) ? '' : sprintf(__('(This message was added in version %s.)'), $version);
@@ -1627,7 +1618,7 @@ function _doing_it_wrong($function, $message, $version)
  * Useful for returning true to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @see __return_false()
  *
  * @return bool True.
@@ -1643,7 +1634,7 @@ function __return_true()
  * Useful for returning false to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @see __return_true()
  *
  * @return bool False.
@@ -1659,7 +1650,7 @@ function __return_false()
  * Useful for returning 0 to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @return int 0.
  */
 function __return_zero()
@@ -1673,7 +1664,7 @@ function __return_zero()
  * Useful for returning an empty array to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @return array Empty array.
  */
 function __return_empty_array()
@@ -1687,7 +1678,7 @@ function __return_empty_array()
  * Useful for returning null to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @return null Null value.
  */
 function __return_null()
@@ -1701,7 +1692,7 @@ function __return_null()
  * Useful for returning an empty string to filters easily.
  *
  * @since 2.2.2
- *       
+ *
  * @see __return_null()
  *
  * @return string Empty string.
@@ -1722,7 +1713,7 @@ function __return_empty_string()
  * function again if you wish to re-enable cache adds earlier.
  *
  * @since 2.3.0
- *       
+ *
  * @param bool $suspend
  *            Optional. Suspends additions if true, re-enables them if false.
  * @return bool The current suspend setting
@@ -1730,10 +1721,10 @@ function __return_empty_string()
 function gb_suspend_cache_addition($suspend = null)
 {
     static $_suspend = false;
-    
+
     if (is_bool($suspend))
         $_suspend = $suspend;
-    
+
     return $_suspend;
 }
 
@@ -1741,21 +1732,21 @@ function gb_suspend_cache_addition($suspend = null)
  * Get PasswordHash instance.
  *
  * @since 3.0.0
- *       
+ *
  * @uses PasswordHash::HashPassword
- *      
+ *
  * @return PasswordHash of PasswordHash class.
  */
 function _gb_hasher()
 {
     static $gb_hasher;
-    
+
     if (empty($gb_hasher)) {
         require_once (GB_CORE_DIR . '/class-phpass.php');
         // By default, use the portable hash from phpass
         $gb_hasher = new PasswordHash(8, true);
     }
-    
+
     return $gb_hasher;
 }
 
@@ -1779,7 +1770,7 @@ function _gb_json_sanity_check($data, $depth)
     if ($depth < 0) {
         throw new Exception('Reached depth limit');
     }
-    
+
     if (is_array($data)) {
         $output = array();
         foreach ($data as $id => $el) {
@@ -1789,7 +1780,7 @@ function _gb_json_sanity_check($data, $depth)
             } else {
                 $clean_id = $id;
             }
-            
+
             // Check the element type, so that we're only recursing if we really have to.
             if (is_array($el) || is_object($el)) {
                 $output[$clean_id] = _gb_json_sanity_check($el, $depth - 1);
@@ -1807,7 +1798,7 @@ function _gb_json_sanity_check($data, $depth)
             } else {
                 $clean_id = $id;
             }
-            
+
             if (is_array($el) || is_object($el)) {
                 $output->$clean_id = _gb_json_sanity_check($el, $depth - 1);
             } elseif (is_string($el)) {
@@ -1821,7 +1812,7 @@ function _gb_json_sanity_check($data, $depth)
     } else {
         return $data;
     }
-    
+
     return $output;
 }
 
@@ -1844,7 +1835,7 @@ function _gb_json_convert_string($string)
     if (is_null($use_mb)) {
         $use_mb = function_exists('mb_convert_encoding');
     }
-    
+
     if ($use_mb) {
         $encoding = mb_detect_encoding($string, mb_detect_order(), true);
         if ($encoding) {
@@ -1861,7 +1852,7 @@ function _gb_json_convert_string($string)
  * Encode a variable into JSON, with some sanity checks.
  *
  * @since 3.0.0
- *       
+ *
  * @param mixed $data
  *            Variable (usually an array or object) to encode as JSON.
  * @param int $options
@@ -1894,22 +1885,22 @@ function gb_json_encode($data, $options = 0, $depth = 512)
             $data
         );
     }
-    
+
     $json = call_user_func_array('json_encode', $args);
-    
+
     // If json_encode() was successful, no need to do more sanity checking.
     // ... unless we're in an old version of PHP, and json_encode() returned
     // a string containing 'null'. Then we need to do more sanity checking.
     if (false !== $json && (version_compare(PHP_VERSION, '5.5', '>=') || false === strpos($json, 'null'))) {
         return $json;
     }
-    
+
     try {
         $args[0] = _gb_json_sanity_check($data, $depth);
     } catch (Exception $e) {
         return false;
     }
-    
+
     return call_user_func_array('json_encode', $args);
 }
 
@@ -1917,7 +1908,7 @@ function gb_json_encode($data, $options = 0, $depth = 512)
  * Retrieve URL with nonce added to URL query.
  *
  * @since 3.0.0
- *       
+ *
  * @param string $actionurl
  *            URL to add nonce action.
  * @param int|string $action

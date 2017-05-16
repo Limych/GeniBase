@@ -16,7 +16,7 @@ if (! class_exists('POMO_Reader')) :
 
         var $_post = '';
 
-        function POMO_Reader()
+        function __construct()
         {
             $this->is_overloaded = ((ini_get("mbstring.func_overload") & 2) != 0) && function_exists('mb_substr');
             $this->_pos = 0;
@@ -68,9 +68,9 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string            
-         * @param int $start            
-         * @param int $length            
+         * @param string $string
+         * @param int $start
+         * @param int $length
          * @return string
          */
         function substr($string, $start, $length)
@@ -84,7 +84,7 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string            
+         * @param string $string
          * @return int
          */
         function strlen($string)
@@ -98,8 +98,8 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string            
-         * @param int $chunk_size            
+         * @param string $string
+         * @param int $chunk_size
          * @return array
          */
         function str_split($string, $chunk_size)
@@ -140,17 +140,17 @@ if (! class_exists('POMO_FileReader')) :
 
         /**
          *
-         * @param string $filename            
+         * @param string $filename
          */
-        function POMO_FileReader($filename)
+        function __construct($filename)
         {
-            parent::POMO_Reader();
+            parent::__construct();
             $this->_f = fopen($filename, 'rb');
         }
 
         /**
          *
-         * @param int $bytes            
+         * @param int $bytes
          */
         function read($bytes)
         {
@@ -159,7 +159,7 @@ if (! class_exists('POMO_FileReader')) :
 
         /**
          *
-         * @param int $pos            
+         * @param int $pos
          * @return boolean
          */
         function seekto($pos)
@@ -208,16 +208,16 @@ if (! class_exists('POMO_StringReader')) :
 
         var $_str = '';
 
-        function POMO_StringReader($str = '')
+        function __construct($str = '')
         {
-            parent::POMO_Reader();
+            parent::__construct();
             $this->_str = $str;
             $this->_pos = 0;
         }
 
         /**
          *
-         * @param string $bytes            
+         * @param string $bytes
          * @return string
          */
         function read($bytes)
@@ -231,7 +231,7 @@ if (! class_exists('POMO_StringReader')) :
 
         /**
          *
-         * @param int $pos            
+         * @param int $pos
          * @return int
          */
         function seekto($pos)
@@ -263,9 +263,9 @@ if (! class_exists('POMO_CachedFileReader')) :
     class POMO_CachedFileReader extends POMO_StringReader
     {
 
-        function POMO_CachedFileReader($filename)
+        function __construct($filename)
         {
-            parent::POMO_StringReader();
+            parent::__construct();
             $this->_str = file_get_contents($filename);
             if (false === $this->_str)
                 return false;
@@ -283,9 +283,9 @@ if (! class_exists('POMO_CachedIntFileReader')) :
     class POMO_CachedIntFileReader extends POMO_CachedFileReader
     {
 
-        function POMO_CachedIntFileReader($filename)
+        function __construct($filename)
         {
-            parent::POMO_CachedFileReader($filename);
+            parent::__construct($filename);
         }
     }
 

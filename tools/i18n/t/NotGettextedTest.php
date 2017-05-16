@@ -8,7 +8,7 @@
 error_reporting(E_ALL);
 require_once dirname(dirname(__FILE__)) . '/not-gettexted.php';
 
-class NotGettextedTest extends PHPUnit_Framework_TestCase
+class NotGettextedTest extends \PHPUnit\Framework\TestCase
 {
 
     function __construct()
