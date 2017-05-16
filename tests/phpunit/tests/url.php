@@ -26,13 +26,13 @@ class Tests_URL extends GB_UnitTestCase
     {
         $_SERVER['HTTPS'] = 'on';
         $this->assertTrue(is_ssl());
-        
+
         $_SERVER['HTTPS'] = 'ON';
         $this->assertTrue(is_ssl());
-        
+
         $_SERVER['HTTPS'] = '1';
         $this->assertTrue(is_ssl());
-        
+
         unset($_SERVER['HTTPS']);
         $_SERVER['SERVER_PORT'] = '443';
         $this->assertTrue(is_ssl());
@@ -42,10 +42,10 @@ class Tests_URL extends GB_UnitTestCase
     {
         $_SERVER['HTTPS'] = 'off';
         $this->assertFalse(is_ssl());
-        
+
         $_SERVER['HTTPS'] = 'OFF';
         $this->assertFalse(is_ssl());
-        
+
         unset($_SERVER['HTTPS']);
         $this->assertFalse(is_ssl());
     }
@@ -65,14 +65,16 @@ class Tests_URL extends GB_UnitTestCase
             'on',
             'off'
         );
-        
+
         foreach ($https as $val) {
             $_SERVER['HTTPS'] = $val;
-            $siteurl = 'http:' . BASE_URL; // TODO: options
-                                         // $siteurl = get_option('siteurl');
+//             $siteurl = 'http:' . BASE_URL; // TODO: options
+                                           // $siteurl = get_option('siteurl');
+            $siteurl = GB_Options::get('site_url');
+
             if ($val == 'on')
                 $siteurl = str_replace('http://', 'https://', $siteurl);
-            
+
             foreach ($paths as $in => $out) {
                 $this->assertEquals($siteurl . $out, admin_url($in), "admin_url('{$in}') should equal '{$siteurl}{$out}'");
             }
@@ -91,14 +93,16 @@ class Tests_URL extends GB_UnitTestCase
             'on',
             'off'
         );
-        
+
         foreach ($https as $val) {
             $_SERVER['HTTPS'] = $val;
-            $siteurl = 'http:' . BASE_URL; // TODO: options
-                                         // $siteurl = get_option('siteurl');
+//             $siteurl = 'http:' . BASE_URL; // TODO: options
+                                           // $siteurl = get_option('siteurl');
+            $siteurl = GB_Options::get('site_url');
+
             if ($val == 'on')
                 $siteurl = str_replace('http://', 'https://', $siteurl);
-            
+
             foreach ($paths as $in => $out) {
                 $this->assertEquals($siteurl . $out, admin_url($in), "admin_url('{$in}') should equal '{$siteurl}{$out}'");
             }
@@ -120,14 +124,16 @@ class Tests_URL extends GB_UnitTestCase
             'on',
             'off'
         );
-        
+
         foreach ($https as $val) {
             $_SERVER['HTTPS'] = $val;
-            $home = 'http:' . BASE_URL; // TODO: options
-                                      // $home = get_option('home');
+//             $home = 'http:' . BASE_URL; // TODO: options
+                                        // $home = get_option('home');
+            $home = GB_Options::get('site_url');
+
             if ($val == 'on')
                 $home = str_replace('http://', 'https://', $home);
-            
+
             foreach ($paths as $in => $out) {
                 $this->assertEquals($home . $out, home_url($in), "home_url('{$in}') should equal '{$home}{$out}'");
             }
@@ -146,20 +152,22 @@ class Tests_URL extends GB_UnitTestCase
             'on',
             'off'
         );
-        
+
         foreach ($https as $val) {
             $_SERVER['HTTPS'] = $val;
-            $home = 'http:' . BASE_URL; // TODO: options
-                                      // $home = get_option('home');
+//             $home = 'http:' . BASE_URL; // TODO: options
+                                        // $home = get_option('home');
+            $home = GB_Options::get('site_url');
+
             if ($val == 'on')
                 $home = str_replace('http://', 'https://', $home);
-            
+
             foreach ($paths as $in => $out) {
                 $this->assertEquals($home . $out, home_url($in), "home_url('{$in}') should equal '{$home}{$out}'");
             }
         }
     }
-    
+
     // TODO: admin
     /*
      * function test_home_url_from_admin() {
@@ -222,35 +230,35 @@ class Tests_URL extends GB_UnitTestCase
     {
         if (! function_exists('set_url_scheme'))
             return;
-        
+
         $links = array(
             'http://somesite.org/',
             'https://somesite.org/',
             'http://somesite.org/news/',
             'http://somesite.org'
         );
-        
+
         $https_links = array(
             'https://somesite.org/',
             'https://somesite.org/',
             'https://somesite.org/news/',
             'https://somesite.org'
         );
-        
+
         $http_links = array(
             'http://somesite.org/',
             'http://somesite.org/',
             'http://somesite.org/news/',
             'http://somesite.org'
         );
-        
+
         $relative_links = array(
             '/',
             '/',
             '/news/',
             ''
         );
-        
+
         $forced_admin = force_ssl_admin();
         $forced_login = force_ssl_login();
         $i = 0;
@@ -258,35 +266,35 @@ class Tests_URL extends GB_UnitTestCase
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'https'));
             $this->assertEquals($http_links[$i], set_url_scheme($link, 'http'));
             $this->assertEquals($relative_links[$i], set_url_scheme($link, 'relative'));
-            
+
             $_SERVER['HTTPS'] = 'on';
             $this->assertEquals($https_links[$i], set_url_scheme($link));
-            
+
             $_SERVER['HTTPS'] = 'off';
             $this->assertEquals($http_links[$i], set_url_scheme($link));
-            
+
             force_ssl_login(false);
             force_ssl_admin(true);
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'admin'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'login_post'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'login'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'rpc'));
-            
+
             force_ssl_admin(false);
             $this->assertEquals($http_links[$i], set_url_scheme($link, 'admin'));
             $this->assertEquals($http_links[$i], set_url_scheme($link, 'login_post'));
             $this->assertEquals($http_links[$i], set_url_scheme($link, 'login'));
             $this->assertEquals($http_links[$i], set_url_scheme($link, 'rpc'));
-            
+
             force_ssl_login(true);
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'admin'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'login_post'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'login'));
             $this->assertEquals($https_links[$i], set_url_scheme($link, 'rpc'));
-            
+
             $i ++;
         }
-        
+
         force_ssl_admin($forced_admin);
         force_ssl_login($forced_login);
     }
@@ -306,7 +314,7 @@ class Tests_URL extends GB_UnitTestCase
         // 'content_url',
         // 'plugins_url',
         ;
-        
+
         foreach ($functions as $function) {
             $this->assertEquals(call_user_func($function, '/') . '../', call_user_func($function, '../'));
             $this->assertEquals(call_user_func($function, '/') . 'something...here', call_user_func($function, 'something...here'));
