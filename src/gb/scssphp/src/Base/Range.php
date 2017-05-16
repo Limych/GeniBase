@@ -8,24 +8,25 @@
  *
  * @link http://leafo.github.io/scssphp
  */
-
 namespace Leafo\ScssPhp\Base;
 
 /**
- * Range class
+ * Range
  *
  * @author Anthon Pang <anthon.pang@gmail.com>
  */
 class Range
 {
+
     public $first;
+
     public $last;
 
     /**
      * Initialize range
      *
-     * @param integer|float $first
-     * @param integer|float $last
+     * @param integer|float $first            
+     * @param integer|float $last            
      */
     public function __construct($first, $last)
     {
@@ -36,7 +37,7 @@ class Range
     /**
      * Test for inclusion in range
      *
-     * @param integer|float $value
+     * @param integer|float $value            
      *
      * @return boolean
      */

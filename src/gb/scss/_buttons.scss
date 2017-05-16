@@ -1,0 +1,430 @@
+/*! GeniBase Core SCSS. Buttons | GPLv2 or later License | github.com/Limych/GeniBase */
+@charset "UTF-8";
+
+/* ----------------------------------------------------------------------------
+
+GeniBase-style Buttons
+=======================
+Create a button by adding the `.button` class to an element.
+
+Button Styles
+-------------
+To display a primary button style, add the `.button-primary` class to a button.
+
+To display a destructive action button style, add the `.button-destructive` class to a button.
+
+Button Sizes
+------------
+Adjust a button's size by adding the `.button-large` or `.button-small` class.
+
+Button States
+-------------
+Lock the state of a button by adding the name of the pseudoclass as
+an actual class (e.g. `.hover` for `:hover`).
+
+
+TABLE OF CONTENTS:
+------------------
+ 1.0 - Button Layouts
+ 2.0 - Default Button Style
+ 3.1 - Primary Button Style
+ 3.2 - Destructive Button Style
+ 4.0 - Button Groups
+
+---------------------------------------------------------------------------- */
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//
+@
+Settings // // We use these to control button text styles .
+ $button-font-family: inherit !default ;
+ $button-bg-color: $secondary-color !default ;
+ $button-text-color: $black !default ;
+ $button-primary-bg-color: $primary-color !default ;
+ $button-primary-text-color: $white !default ;
+ $button-destructive-bg-color: $alert-color !default ;
+ $button-destructive-text-color: $yellow !default ; // We use these to control button border styles
+	.
+ $button-shadow-size: 2px 2px 3px !default ;
+ $button-shadow-color: rgba ($black, 0.2 ) !default ;
+ $button-pressed-shadow-size: 0 0 0 !default ;
+ $button-pressed-margin: 2px !default ;
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	// @Mixins // // We can control whether or not we have inset shadows edges
+	. // $outset-size - Default: $button-shadow-size // $outset-color -
+	Default: $button-shadow-color, If false, normal state shadow will not be defined 
+	|| Set color value
+ @mixin button-shadows ($outset-size: $button-shadow-size, $outset-color:
+	$button-shadow-color) { @if ($outset-size and $outset-color) { $outset:
+	$outset-size $outset-color;
+	-webkit-box-shadow: $outset;
+	//
+	Android
+	<
+	4,
+	iOS
+	<
+	5
+	box-shadow
+	:
+	$
+	outset;
+	//
+	IE
+	9+,
+	Chrome,
+	Opera
+	10.5+,
+	Safari
+	5.1+,
+	Firefox,
+	Android
+	4+,
+	iOS
+	5+
+}
+
+}
+
+/* ----------------------------------------------------------------------------
+  1.0 - Button Layouts
+---------------------------------------------------------------------------- */
+.gb-core-ui { .button , .primary-button, .destructive-button { display:inline-block;
+	text-decoration: none;
+	font-size: 13px;
+	line-height: 26px;
+	height: 28px;
+	margin: 0;
+	padding: 0 10px 1px;
+	cursor: pointer;
+	border-width: 1px;
+	border-style: solid;
+	-webkit-appearance: none;
+	white-space: nowrap;
+	@
+	include
+	box-sizing(border-box);
+	@
+	include
+	radius();
+	@
+	include
+	button-shadows();
+	&.
+	active
+	,
+	&.active
+	:
+	hover
+	,
+	&
+	.active
+	:
+	focus
+	,
+	&:
+	active
+	{
+	
+			
+	@
+	include
+	button-shadows(
+	$
+	outset-size
+	:$
+	button-pressed-shadow-size
+	);
+}
+
+//
+Remove the dotted border on :focus and the extra padding in Firefox
+		 &::-moz-focus-inner {
+	border-width: 0;
+	border-style: none;
+	padding: 0;
+}
+
+}
+@
+each $sel in '.button ', '.primary-button ', '.destructive-button ' {p
+	#{$sel
+	
+}
+
+{
+vertical-align
+:
+ 
+baseline
+;
+
+		
+}
+#{$
+sel
+}
+.button-large
+,
+.button-group
+.button-large
+ 
+#{$
+sel
+}
+{
+height
+:
+ 
+30
+px
+;
+
+		    
+line-height
+:
+ 
+28
+px
+;
+
+		    
+padding
+:
+ 
+0
+12
+px
+ 
+2
+px
+;
+
+		
+}
+#{$
+sel
+}
+.button-small
+,
+.button-group
+.button-small
+ 
+#{$
+sel
+}
+{
+height
+:
+ 
+24
+px
+;
+
+			
+line-height
+:
+ 
+22
+px
+;
+
+			
+padding
+:
+ 
+0
+8
+px
+ 
+1
+px
+;
+
+			
+font-size
+:
+ 
+11
+px
+;
+
+		
+}
+#{$
+sel
+}
+:active
+,
+#{$
+sel
+}
+:focus {
+	outline: none;
+}
+
+#{$
+sel
+}
+.hidden {
+	display: none;
+}
+
+}
+//
+Remove the dotted border on :focus and the extra padding in Firefox
+	input[type="reset"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner,
+	input[type="submit"]::-moz-focus-inner {
+	border-width: 0;
+	border-style: none;
+	padding: 0;
+}
+
+}
+
+/* ----------------------------------------------------------------------------
+  2.0 - Default Button Style
+---------------------------------------------------------------------------- */
+.gb-core-ui .button {
+	color: $button-text-color;
+	background: $button-bg-color;
+	border-color: darken($ button-bg-color, 16%);
+	vertical-align: top; &. hover , & : hover, & .focus, &: focus { 
+		 background : lighten( $ button-bg-color, 3%);
+	border-color: darken($ button-bg-color, 40%);
+}
+
+&
+.active, &.active:hover, &.active:focus, &:active {
+	background: darken($ button-bg-color, 10%);
+	border-color: darken($ button-bg-color, 30%);
+}
+
+&
+[disabled], &:disabled, &.disabled, &-disabled {
+	color: rgba($ button-text-color, 0.4) !important;
+	background: rgba(desaturate($ button-bg-color, 50%), .7) !important;
+	border-color: rgba(darken($ button-bg-color, 16%), 0.5) !important;
+	text-shadow: 0 1px 0 #fff !important;
+	cursor: default;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+}
+
+/* ----------------------------------------------------------------------------
+  3.1 - Primary Button Style
+---------------------------------------------------------------------------- */
+.gb-core-ui .primary-button {
+	color: $button-primary-text-color;
+	background: $button-primary-bg-color;
+	border-color: darken($ button-primary-bg-color, 16%);
+	text-decoration: none; &. hover , & : hover, & .focus, &: focus { 
+		 background : lighten( $ button-primary-bg-color, 3%);
+	border-color: darken($ button-primary-bg-color, 40%);
+}
+
+&
+.active, &.active:hover, &.active:focus, &:active {
+	background: darken($ button-primary-bg-color, 10%);
+	border-color: darken($ button-primary-bg-color, 30%);
+	vertical-align: top;
+}
+
+&
+[disabled], &:disabled, &.disabled, &-disabled {
+	color: rgba($ button-primary-text-color, 0.4) !important;
+	background: rgba(desaturate($ button-primary-bg-color, 50%), .7)
+		!important;
+	border-color: rgba(darken($ button-primary-bg-color, 16%), 0.5)
+		!important;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+	cursor: default;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+}
+
+/* ----------------------------------------------------------------------------
+  3.2 - Destructive Button Style
+---------------------------------------------------------------------------- */
+.gb-core-ui .destructive-button {
+	color: $button-destructive-text-color;
+	background: $button-destructive-bg-color;
+	border-color: darken($ button-destructive-bg-color, 16%);
+	text-decoration: none; &. hover , & : hover, & .focus, &: focus { 
+		 background : lighten( $ button-destructive-bg-color, 3%);
+	border-color: darken($ button-destructive-bg-color, 40%);
+}
+
+&
+.active, &.active:hover, &.active:focus, &:active {
+	background: darken($ button-destructive-bg-color, 10%);
+	border-color: darken($ button-destructive-bg-color, 30%);
+	vertical-align: top;
+}
+
+&
+[disabled], &:disabled, &.disabled, &-disabled {
+	color: rgba($ button-destructive-text-color, 0.4) !important;
+	background: rgba(desaturate($ button-destructive-bg-color, 50%), .7)
+		!important;
+	border-color: rgba(darken($ button-destructive-bg-color, 16%), 0.5)
+		!important;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+	cursor: default;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+}
+
+/* ----------------------------------------------------------------------------
+  4.0 - Button Groups
+---------------------------------------------------------------------------- */
+.gb-core-ui .button-group {
+	position: relative;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 0;
+	vertical-align: middle; & > . button { display : inline-block;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+	margin-right: -1px;
+	z-index: 10;
+}
+
+&
+>
+.button-primary, & > .button-destructive {
+	z-index: 100;
+}
+
+&
+>
+.button:hover {
+	z-index: 20;
+}
+
+&
+>
+.button:first-child {
+	-webkit-border-radius: 3px 0 0 3px;
+	border-radius: 3px 0 0 3px;
+}
+
+&
+>
+.button:last-child {
+	-webkit-border-radius: 0 3px 3px 0;
+	border-radius: 0 3px 3px 0;
+}
+
+&
+>
+.button:focus {
+	position: relative;
+	z-index: 1;
+}
+}

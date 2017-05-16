@@ -8,28 +8,37 @@
  *
  * @link http://leafo.github.io/scssphp
  */
-
 namespace Leafo\ScssPhp;
 
 /**
- * SCSS node
+ * Base node
  *
  * @author Anthon Pang <anthon.pang@gmail.com>
  */
 abstract class Node
 {
+
     /**
+     *
      * @var string
      */
     public $type;
 
     /**
-     * @var integer
-     */
-    public $sourcePosition;
-
-    /**
+     *
      * @var integer
      */
     public $sourceIndex;
+
+    /**
+     *
+     * @var integer
+     */
+    public $sourceLine;
+
+    /**
+     *
+     * @var integer
+     */
+    public $sourceColumn;
 }

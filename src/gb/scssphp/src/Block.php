@@ -8,47 +8,60 @@
  *
  * @link http://leafo.github.io/scssphp
  */
-
 namespace Leafo\ScssPhp;
 
 /**
- * SCSS block
+ * Block
  *
  * @author Anthon Pang <anthon.pang@gmail.com>
  */
 class Block
 {
+
     /**
+     *
      * @var string
      */
     public $type;
 
     /**
+     *
      * @var \Leafo\ScssPhp\Block
      */
     public $parent;
 
     /**
-     * @var integer
-     */
-    public $sourcePosition;
-
-    /**
+     *
      * @var integer
      */
     public $sourceIndex;
 
     /**
+     *
+     * @var integer
+     */
+    public $sourceLine;
+
+    /**
+     *
+     * @var integer
+     */
+    public $sourceColumn;
+
+    /**
+     *
      * @var array
      */
     public $selectors;
 
     /**
+     *
      * @var array
      */
     public $comments;
 
     /**
+     *
      * @var array
      */
     public $children;

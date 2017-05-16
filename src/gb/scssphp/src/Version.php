@@ -8,7 +8,6 @@
  *
  * @link http://leafo.github.io/scssphp
  */
-
 namespace Leafo\ScssPhp;
 
 /**
@@ -18,5 +17,6 @@ namespace Leafo\ScssPhp;
  */
 class Version
 {
-    const VERSION = 'v0.4.0';
+
+    const VERSION = 'v0.6.3';
 }

@@ -8,21 +8,23 @@
  *
  * @link http://leafo.github.io/scssphp
  */
-
 namespace Leafo\ScssPhp\Formatter;
 
 use Leafo\ScssPhp\Formatter;
 use Leafo\ScssPhp\Formatter\OutputBlock;
 
 /**
- * SCSS expanded formatter
+ * Expanded formatter
  *
  * @author Leaf Corcoran <leafot@gmail.com>
  */
 class Expanded extends Formatter
 {
+
     /**
-     * {@inheritdoc}
+     *
+     * @ERROR!!!
+     *
      */
     public function __construct()
     {
@@ -33,10 +35,13 @@ class Expanded extends Formatter
         $this->close = '}';
         $this->tagSeparator = ', ';
         $this->assignSeparator = ': ';
+        $this->keepSemicolons = true;
     }
 
     /**
-     * {@inheritdoc}
+     *
+     * @ERROR!!!
+     *
      */
     protected function indentStr()
     {
@@ -44,22 +49,24 @@ class Expanded extends Formatter
     }
 
     /**
-     * {@inheritdoc}
+     *
+     * @ERROR!!!
+     *
      */
     protected function blockLines(OutputBlock $block)
     {
         $inner = $this->indentStr();
-
+        
         $glue = $this->break . $inner;
-
+        
         foreach ($block->lines as $index => $line) {
             if (substr($line, 0, 2) === '/*') {
                 $block->lines[$index] = preg_replace('/(\r|\n)+/', $glue, $line);
             }
         }
-
+        
         echo $inner . implode($glue, $block->lines);
-
+        
         if (empty($block->selectors) || ! empty($block->children)) {
             echo $this->break;
         }

@@ -13,20 +13,50 @@
  */
 
 // ** MySQL settings - You can get this info from your web host ** //
-/** MySQL hostname */
-define('DB_HOST',		'localhost');
+/**
+ * MySQL hostname
+ */
+define('DB_HOST', 'localhost');
 
-/** MySQL database username */
-define('DB_USER',		'your_username_here');
+/**
+ * MySQL database username
+ */
+define('DB_USER', 'your_username_here');
 
-/** MySQL database password */
-define('DB_PASSWORD',	'your_password_here');
+/**
+ * MySQL database password
+ */
+define('DB_PASSWORD', 'your_password_here');
 
-/** The name of the database for WordPress */
-define('DB_BASE',		'your_database_name_here');
+/**
+ * The name of the database for WordPress
+ */
+define('DB_BASE', 'your_database_name_here');
 
-/** GeniBase Database Table prefix. */
-define('DB_PREFIX',		'gb_');	// Only numbers, letters, and underscores please!
+/**
+ * GeniBase Database Table prefix
+ */
+define('DB_PREFIX', 'gb_'); // Only numbers, letters, and underscores please!
+
+/**
+ * #@+
+ * Authentication Unique Keys and Salts.
+ *
+ * Change these to different unique phrases!
+ * You can generate these using the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}
+ * You can change these at any point in time to invalidate all existing cookies. This will force all users to have to log in again.
+ *
+ * @since 3.0.0
+ */
+define('AUTH_KEY', 'put your unique phrase here');
+define('SECURE_AUTH_KEY', 'put your unique phrase here');
+define('LOGGED_IN_KEY', 'put your unique phrase here');
+define('NONCE_KEY', 'put your unique phrase here');
+define('AUTH_SALT', 'put your unique phrase here');
+define('SECURE_AUTH_SALT', 'put your unique phrase here');
+define('LOGGED_IN_SALT', 'put your unique phrase here');
+define('NONCE_SALT', 'put your unique phrase here');
+/**#@-*/
 
 /**
  * For developers: GeniBase debugging mode.
@@ -35,19 +65,4 @@ define('DB_PREFIX',		'gb_');	// Only numbers, letters, and underscores please!
  * It is strongly recommended that plugin and theme developers use GB_DEBUG
  * in their development environments.
  */
-// define('GB_DEBUG', true);
-
-
-
-/* That's all, stop editing! ***************************************************/
-
-/** Absolute path to the root directory of this site. */
-if( !defined('BASE_DIR') )
-	define('BASE_DIR', dirname(__FILE__));
-
-/** Absolute path to the root directory of GeniBase core. */
-if( !defined('GB_CORE_DIR') )
-	define('GB_CORE_DIR', BASE_DIR . '/gb');
-
-/** Load GeniBase. */
-require_once(GB_CORE_DIR . '/gb.php');
+// define( 'GB_DEBUG', true );
