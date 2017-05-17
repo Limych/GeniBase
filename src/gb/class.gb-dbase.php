@@ -27,6 +27,7 @@ class GB_DBase
 {
 
     /**
+     *
      * @var MySQLi
      */
     protected $db;
@@ -134,7 +135,7 @@ class GB_DBase
 
     /**
      * Уничтожаем экземпляр класса.
-     * 
+     *
      * @return bool true
      */
     function __destruct()
@@ -541,8 +542,8 @@ class GB_DBase
         foreach ($substitutions as $key => $value) {
             $regexp .= '|' . preg_quote($key) . (substr($key, - 1) != '`' ? // нужно учесть,
 '\b' : // что теоретически метки могут быть
-'') // не только вида ?word, но и вида ?`…`
-;
+''); // не только вида ?word, но и вида ?`…`
+
         }
         $regexp .= ')/';
         
@@ -981,7 +982,7 @@ class GB_DBase
         
         return $query;
     }
- // function
+    // function
     
     /**
      * Making query for updating data
@@ -1028,8 +1029,8 @@ class GB_DBase
             $unique_key = array_fill_keys($unique_key, true);
             $data_to_update = array_diff_key( // В $unique_key переданы имена полей,
 $data, // которые необходимо исключить
-$unique_key) // из части ON DUPLICATE KEY UPDATE
-;
+$unique_key); // из части ON DUPLICATE KEY UPDATE
+
         }
         
         if (! $mode || $mode == self::MODE_UPDATE) { // обычный UPDATE
@@ -1078,7 +1079,7 @@ $unique_key) // из части ON DUPLICATE KEY UPDATE
             return false;
         }
     }
- // function
+    // function
     
     /**
      * Delete records from table.
@@ -1326,7 +1327,7 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
         return $cqueries;
     }
 }
- // class
+// class
 
 /**
  * Глобальная функция доступа к экземпляру класса GB_DBase.
@@ -1338,6 +1339,7 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
 function gbdb()
 {
     /**
+     *
      * @var GB_DBase
      */
     static $db = NULL;

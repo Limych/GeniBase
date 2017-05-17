@@ -665,6 +665,7 @@ function translate_nooped_plural($nooped_plural, $count, $domain = 'default')
 
 /**
  * Load a .
+ *
  * mo file into the text domain $domain.
  *
  * If the text domain already exists, the translations will be merged. If both

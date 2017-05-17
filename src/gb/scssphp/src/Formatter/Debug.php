@@ -22,9 +22,7 @@ class Debug extends Formatter
 {
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -39,9 +37,7 @@ class Debug extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function indentStr()
     {
@@ -49,9 +45,7 @@ class Debug extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockLines(OutputBlock $block)
     {
@@ -69,9 +63,7 @@ class Debug extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockSelectors(OutputBlock $block)
     {
@@ -89,9 +81,7 @@ class Debug extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockChildren(OutputBlock $block)
     {
@@ -113,9 +103,7 @@ class Debug extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function block(OutputBlock $block)
     {

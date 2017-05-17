@@ -1,7 +1,7 @@
 <?php
 require_once ('../gb-config.php'); // Load GeniBase
 require_once ('../inc.php'); // Основной подключаемый файл-заплатка
-                            
+                             
 // Узнаём, какой у нас самый большой номер региона
 $result = gbdb()->query('SELECT MAX(id) FROM ?_dic_regions');
 $r = $result->fetch_array(MYSQL_NUM);

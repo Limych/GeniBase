@@ -13,7 +13,7 @@ class MockClass
 /**
  * Create string with random characters.
  *
- * @param number $len
+ * @param number $len            
  * @return string
  */
 function rand_str($len = 32)
@@ -24,8 +24,8 @@ function rand_str($len = 32)
 /**
  * Catch output of printing function.
  *
- * @param unknown $callable
- * @param unknown $args
+ * @param unknown $callable            
+ * @param unknown $args            
  * @return string
  */
 function get_echo($callable, $args = array())
@@ -81,7 +81,7 @@ class MockAction
     {
         if ($this->debug)
             dmp(__FUNCTION__, $this->current_filter());
-
+        
         $args = func_get_args();
         $this->events[] = array(
             'action' => __FUNCTION__,
@@ -95,7 +95,7 @@ class MockAction
     {
         if ($this->debug)
             dmp(__FUNCTION__, $this->current_filter());
-
+        
         $args = func_get_args();
         $this->events[] = array(
             'filter' => __FUNCTION__,
@@ -109,7 +109,7 @@ class MockAction
     {
         if ($this->debug)
             dmp(__FUNCTION__, $this->current_filter());
-
+        
         $args = func_get_args();
         $this->events[] = array(
             'filter' => __FUNCTION__,
@@ -123,7 +123,7 @@ class MockAction
     {
         if ($this->debug)
             dmp(__FUNCTION__, $this->current_filter());
-
+        
         $args = func_get_args();
         $this->events[] = array(
             'filter' => __FUNCTION__,
@@ -138,7 +138,7 @@ class MockAction
         // this one doesn't return the result, so it's safe to use with the new 'all' filter
         if ($this->debug)
             dmp(__FUNCTION__, $this->current_filter());
-
+        
         $args = func_get_args();
         $this->events[] = array(
             'filter' => __FUNCTION__,
@@ -146,13 +146,13 @@ class MockAction
             'args' => array_slice($args, 1)
         );
     }
-
+    
     // return a list of all the actions, tags and args
     function get_events()
     {
         return $this->events;
     }
-
+    
     // return a count of the number of times the action was called since the last reset
     function get_call_count($tag = '')
     {
@@ -165,7 +165,7 @@ class MockAction
         }
         return count($this->events);
     }
-
+    
     // return an array of the tags that triggered calls to this action
     function get_tags()
     {
@@ -175,7 +175,7 @@ class MockAction
         }
         return $out;
     }
-
+    
     // return an array of args passed in calls to this action
     function get_args()
     {
@@ -189,7 +189,7 @@ class MockAction
 function dmp()
 {
     $args = func_get_args();
-
+    
     foreach ($args as $thing)
         echo (is_scalar($thing) ? strval($thing) : var_export($thing, true)), "\n";
 }

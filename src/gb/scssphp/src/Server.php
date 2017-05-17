@@ -63,6 +63,7 @@ class Server
 
     /**
      * Get name of requested .
+     *
      * scss file
      *
      * @return string|null
@@ -81,6 +82,7 @@ class Server
 
     /**
      * Get path to requested .
+     *
      * scss file
      *
      * @return string
@@ -100,6 +102,7 @@ class Server
 
     /**
      * Get path to cached .
+     *
      * css file
      *
      * @return string
@@ -121,6 +124,7 @@ class Server
 
     /**
      * Determine whether .
+     *
      * scss file needs to be re-compiled.
      *
      * @param string $out
@@ -203,6 +207,7 @@ class Server
 
     /**
      * Compile .
+     *
      * scss file
      *
      * @param string $in
@@ -278,6 +283,7 @@ class Server
 
     /**
      * Compile .
+     *
      * scss file
      *
      * @param string $in

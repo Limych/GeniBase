@@ -455,7 +455,7 @@ class GB_Dependencies
         return true;
     }
 }
- // GB_Dependencies
+// GB_Dependencies
 
 /**
  * Class _GB_Dependency
@@ -514,7 +514,7 @@ class _GB_Dependency
      * @var null
      */
     public $args = null;
- // Custom property, such as $in_footer or $media.
+    // Custom property, such as $in_footer or $media.
     
     /**
      * Extra data to supply to the handle.

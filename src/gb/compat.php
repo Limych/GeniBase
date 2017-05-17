@@ -16,6 +16,7 @@ if (! function_exists('_')) :
         return $string;
     }
 
+
 endif;
 
 /**
@@ -27,6 +28,7 @@ if (! function_exists('mb_substr')) :
     {
         return _mb_substr($str, $start, $length, $encoding);
     }
+
 
 endif;
 
@@ -63,6 +65,7 @@ if (! function_exists('mb_ucfirst')) :
         return mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
     }
 
+
 endif;
 
 /**
@@ -74,6 +77,7 @@ if (! function_exists('hash_hmac')) :
     {
         return _hash_hmac($algo, $data, $key, $raw_output);
     }
+
 
 endif;
 
@@ -179,6 +183,7 @@ if (! function_exists('hash_equals')) :
         
         return $result === 0;
     }
+
 
 endif;
 

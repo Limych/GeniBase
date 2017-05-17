@@ -303,6 +303,7 @@ function prepublish($raw, &$have_trouble, &$date_norm)
     // Расшифровываем вероисповедания
     if (isset($raw['religion'])) {
         /**
+         *
          * @var int[] Array of correspondences between contractions of religion names and their IDs in the database.
          */
         static $religion_conts = array();
@@ -389,7 +390,7 @@ function prepublish($raw, &$have_trouble, &$date_norm)
         var_export($raw); // TODO: Remove this?
     return prepublish_make_data($raw, $have_trouble);
 }
- // function prepublish
+// function prepublish
 
 /**
  * Функция подготовки данных для занесения в систему.

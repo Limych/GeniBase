@@ -139,9 +139,7 @@ class Number extends Node implements \ArrayAccess
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function offsetExists($offset)
     {
@@ -161,9 +159,7 @@ class Number extends Node implements \ArrayAccess
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function offsetGet($offset)
     {
@@ -189,9 +185,7 @@ class Number extends Node implements \ArrayAccess
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function offsetSet($offset, $value)
     {
@@ -209,9 +203,7 @@ class Number extends Node implements \ArrayAccess
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function offsetUnset($offset)
     {
@@ -303,9 +295,7 @@ class Number extends Node implements \ArrayAccess
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __toString()
     {

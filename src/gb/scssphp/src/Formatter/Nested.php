@@ -28,9 +28,7 @@ class Nested extends Formatter
     private $depth;
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -45,9 +43,7 @@ class Nested extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function indentStr()
     {
@@ -57,9 +53,7 @@ class Nested extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockLines(OutputBlock $block)
     {
@@ -81,9 +75,7 @@ class Nested extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockSelectors(OutputBlock $block)
     {
@@ -93,9 +85,7 @@ class Nested extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockChildren(OutputBlock $block)
     {
@@ -117,9 +107,7 @@ class Nested extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function block(OutputBlock $block)
     {

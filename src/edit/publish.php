@@ -2,7 +2,7 @@
 require_once ('../gb-config.php'); // Load GeniBase
 require_once ('../inc.php'); // Основной подключаемый файл-заплатка
 require_once ('functions.publish.php'); // Функции формализации данных
-                                       
+                                        
 // Поддержка запросов данных через AJAX
 if (isset($_REQUEST['mode']) && $_REQUEST['mode'] == 'get_data') {
     if (isset($_REQUEST['region_id'])) {
@@ -380,6 +380,6 @@ function trim_text($text, $max_len = 70)
 {
     $text = trim($text);
     if (mb_strlen($text) > $max_len)
-		$text = preg_replace('/\s+\w*$/uS', '', mb_substr($text, 0, $max_len)) . '…';
-	return $text;
+        $text = preg_replace('/\s+\w*$/uS', '', mb_substr($text, 0, $max_len)) . '…';
+    return $text;
 }

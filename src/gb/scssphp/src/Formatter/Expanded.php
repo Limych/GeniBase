@@ -22,9 +22,7 @@ class Expanded extends Formatter
 {
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -39,9 +37,7 @@ class Expanded extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function indentStr()
     {
@@ -49,9 +45,7 @@ class Expanded extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     protected function blockLines(OutputBlock $block)
     {

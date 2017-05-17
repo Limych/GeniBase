@@ -236,7 +236,7 @@ if (! class_exists('Translations')) :
         /**
          * Makes a function, which will return the right translation index, according to the
          * plural forms header
-         * 
+         *
          * @param int $nplurals            
          * @param string $expression            
          */
@@ -319,6 +319,7 @@ if (! class_exists('Translations')) :
         }
     }
 
+
 endif;
 
 if (! class_exists('NOOP_Translations')) :
@@ -389,5 +390,6 @@ if (! class_exists('NOOP_Translations')) :
         function merge_with(&$other)
         {}
     }
+
 
 endif;

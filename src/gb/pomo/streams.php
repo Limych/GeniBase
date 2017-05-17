@@ -68,9 +68,9 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string
-         * @param int $start
-         * @param int $length
+         * @param string $string            
+         * @param int $start            
+         * @param int $length            
          * @return string
          */
         function substr($string, $start, $length)
@@ -84,7 +84,7 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string
+         * @param string $string            
          * @return int
          */
         function strlen($string)
@@ -98,8 +98,8 @@ if (! class_exists('POMO_Reader')) :
 
         /**
          *
-         * @param string $string
-         * @param int $chunk_size
+         * @param string $string            
+         * @param int $chunk_size            
          * @return array
          */
         function str_split($string, $chunk_size)
@@ -131,6 +131,7 @@ if (! class_exists('POMO_Reader')) :
         }
     }
 
+
 endif;
 
 if (! class_exists('POMO_FileReader')) :
@@ -140,7 +141,7 @@ if (! class_exists('POMO_FileReader')) :
 
         /**
          *
-         * @param string $filename
+         * @param string $filename            
          */
         function __construct($filename)
         {
@@ -150,7 +151,7 @@ if (! class_exists('POMO_FileReader')) :
 
         /**
          *
-         * @param int $bytes
+         * @param int $bytes            
          */
         function read($bytes)
         {
@@ -159,7 +160,7 @@ if (! class_exists('POMO_FileReader')) :
 
         /**
          *
-         * @param int $pos
+         * @param int $pos            
          * @return boolean
          */
         function seekto($pos)
@@ -195,6 +196,7 @@ if (! class_exists('POMO_FileReader')) :
         }
     }
 
+
 endif;
 
 if (! class_exists('POMO_StringReader')) :
@@ -217,7 +219,7 @@ if (! class_exists('POMO_StringReader')) :
 
         /**
          *
-         * @param string $bytes
+         * @param string $bytes            
          * @return string
          */
         function read($bytes)
@@ -231,7 +233,7 @@ if (! class_exists('POMO_StringReader')) :
 
         /**
          *
-         * @param int $pos
+         * @param int $pos            
          * @return int
          */
         function seekto($pos)
@@ -253,6 +255,7 @@ if (! class_exists('POMO_StringReader')) :
         }
     }
 
+
 endif;
 
 if (! class_exists('POMO_CachedFileReader')) :
@@ -273,6 +276,7 @@ if (! class_exists('POMO_CachedFileReader')) :
         }
     }
 
+
 endif;
 
 if (! class_exists('POMO_CachedIntFileReader')) :
@@ -288,5 +292,6 @@ if (! class_exists('POMO_CachedIntFileReader')) :
             parent::__construct($filename);
         }
     }
+
 
 endif;

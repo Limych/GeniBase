@@ -114,6 +114,7 @@ class GB_SCSS_Server extends Leafo\ScssPhp\Server
 
     /**
      * Get path to requested .
+     *
      * scss file
      *
      * @return string

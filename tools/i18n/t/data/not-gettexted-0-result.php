@@ -21,6 +21,7 @@ if (! isset($gb_did_header)) :
     require_once (GB_CORE_DIR . '/template-loader.php');
 
 
+
 endif;
 
 ?>

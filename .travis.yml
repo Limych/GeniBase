@@ -60,8 +60,8 @@ before_script:
 
 # Script, failures in this section will result in build status 'failed'
 script:
-  # Check code style
-#  - php vendor/bin/phpcs --report=xml --report-file=.reports/phpcs.xml
+  # Check code style (" || true" for ignoring on code style errors)
+  - php vendor/bin/phpcs --report=xml --report-file=.reports/phpcs.xml || true
   # Lines of code
   - php vendor/bin/phploc --log-xml=.reports/phploc.xml src
   # Mess detection

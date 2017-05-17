@@ -1,123 +1,133 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!--  This is a skeleton phpDox config file - Check http://phpDox.de for latest version and more info -->
+<!-- This is a skeleton phpDox config file - Check http://phpDox.de for latest 
+	version and more info -->
 <phpdox xmlns="http://xml.phpdox.net/config" silent="false">
-    <!--  @silent: true | false to enable or disable visual output of progress -->
+	<!-- @silent: true | false to enable or disable visual output of progress -->
 
-    <!-- Additional bootstrap files to load for additional parsers, enrichers and/or engines -->
-    <!-- Place as many require nodes as you feel like in this container -->
-    <!-- syntax: <require file="/path/to/file.php" /> -->
-    <bootstrap />
+	<!-- Additional bootstrap files to load for additional parsers, enrichers 
+		and/or engines -->
+	<!-- Place as many require nodes as you feel like in this container -->
+	<!-- syntax: <require file="/path/to/file.php" /> -->
+	<bootstrap />
 
-    <!-- A phpDox project to process, you can have multiple projects in one config file -->
-    <project name="Bluz" source="${basedir}/src" workdir="${basedir}/build/phpdox/xml">
-        <!--  @name    - The name of the project -->
-        <!--  @source  - The source directory of the application to process -->
-        <!--  @workdir - The directory to store the xml data files in -->
+	<!-- A phpDox project to process, you can have multiple projects in one 
+		config file -->
+	<project name="Bluz" source="${basedir}/src" workdir="${basedir}/build/phpdox/xml">
+		<!-- @name - The name of the project -->
+		<!-- @source - The source directory of the application to process -->
+		<!-- @workdir - The directory to store the xml data files in -->
 
-        <!--  A phpDox config file can define additional variables (properties) per project -->
-        <!--  <property name="some.name" value="the.value" /> -->
+		<!-- A phpDox config file can define additional variables (properties) 
+			per project -->
+		<!-- <property name="some.name" value="the.value" /> -->
 
-        <!--  Values can make use of previously defined properties -->
-        <!--  The following are defined by default:
+		<!-- Values can make use of previously defined properties -->
+		<!-- The following are defined by default: ${basedir} Directory the loaded 
+			config file is in ${phpDox.home} Directory of the phpDox installation ${phpDox.file} 
+			The current config file ${phpDox.version} phpDox' version number ${phpDox.project.name} 
+			The value of project/@name if set, otherwise 'unnamed' ${phpDox.project.source} 
+			The value of project/@source if set, otherwise '${basedir}/src' ${phpDox.project.workdir} 
+			The value of project/@workdir if set, otherwise '${basedir}/build/phpdox/xml' 
+			${phpDox.php.version} The PHP Version of the interpreter in use -->
 
-                ${basedir}                Directory the loaded config file is in
+		<!-- Additional configuration for the collecting process (parsing of php 
+			code, generation of xml data) -->
+		<collector publiconly="false" backend="parser" encoding="auto">
+			<!-- @publiconly - Flag to disable/enable processing of non public methods 
+				and members -->
+			<!-- @backend - The collector backend to use, currently only shipping 
+				with 'parser' -->
+			<!-- @encoding - Charset encoding of source files (overwrite default 'auto' 
+				if detection fails) -->
 
-                ${phpDox.home}            Directory of the phpDox installation
-                ${phpDox.file}            The current config file
-                ${phpDox.version}         phpDox' version number
+			<!-- <include / exclude filter for filelist generator, mask must follow 
+				fnmatch() requirements -->
+			<include mask="*.php" />
+			<exclude mask="" />
 
-                ${phpDox.project.name}    The value of project/@name if set, otherwise 'unnamed'
-                ${phpDox.project.source}  The value of project/@source if set, otherwise '${basedir}/src'
-                ${phpDox.project.workdir} The value of project/@workdir if set, otherwise '${basedir}/build/phpdox/xml'
+			<!-- How to handle inheritance -->
+			<inheritance resolve="true">
+				<!-- @resolve - Flag to enable/disable resolving of inheritance -->
 
-                ${phpDox.php.version}     The PHP Version of the interpreter in use
+				<!-- You can define multiple (external) dependencies to be included -->
+				<!-- <dependency path="" -->
+				<!-- @path - path to a directory containing an index.xml for a dependency 
+					project -->
+			</inheritance>
 
-         -->
+		</collector>
 
-        <!--  Additional configuration for the collecting process (parsing of php code, generation of xml data) -->
-        <collector publiconly="false" backend="parser" encoding="auto">
-            <!--  @publiconly - Flag to disable/enable processing of non public methods and members -->
-            <!--  @backend    - The collector backend to use, currently only shipping with 'parser' -->
-            <!--  @encoding   - Charset encoding of source files (overwrite default 'auto' if detection fails) -->
+		<!-- Configuration of generation process -->
+		<generator output="${basedir}/docs">
+			<!-- @output - (Base-)Directory to store output data in -->
 
-            <!--  <include / exclude filter for filelist generator, mask must follow fnmatch() requirements  -->
-            <include mask="*.php" />
-            <exclude mask="" />
+			<!-- A generation process consists of one or more build tasks and of (optional) 
+				enrich sources -->
 
-            <!--  How to handle inheritance -->
-            <inheritance resolve="true">
-                <!--  @resolve - Flag to enable/disable resolving of inheritance -->
+			<enrich base="${basedir}">
+				<!-- @base - (Base-)Directory of datafiles used for enrich process -->
 
-                <!--  You can define multiple (external) dependencies to be included -->
-                <!--  <dependency  path="" -->
-                <!--    @path  - path to a directory containing an index.xml for a dependency project -->
-            </inheritance>
+				<!--<source type="..."> -->
+				<!-- @type - the handler for the enrichment -->
+				<!-- known types by default are: build, checkstyle, git, phpcs, phploc, 
+					phpunit, pmd -->
 
-        </collector>
+				<!-- every enrichment source can have additional configuration nodes, 
+					most probably need a logfile -->
+				<!-- <file name="path/to/log.xml" /> -->
+				<!--</source> -->
 
-        <!--  Configuration of generation process -->
-        <generator output="${basedir}/docs">
-            <!-- @output - (Base-)Directory to store output data in -->
+				<!-- git vcs information -->
+				<source type="git">
+					<git binary="/usr/bin/git" />
+					<history enabled="true" limit="15"
+						cache="${phpDox.project.workdir}/gitlog.xml" />
+				</source>
 
-            <!-- A generation process consists of one or more build tasks and of (optional) enrich sources -->
+				<!-- PHP Code Sniffer -->
+				<source type="phpcs">
+					<file name=".reports/phpcs.xml" />
+				</source>
 
-            <enrich base="${basedir}">
-                <!-- @base - (Base-)Directory of datafiles used for enrich process -->
+				<!-- PHPLoc -->
+				<source type="phploc">
+					<file name=".reports/phploc.xml" />
+				</source>
 
-                <!--<source type="...">-->
-                <!-- @type - the handler for the enrichment -->
-                <!--         known types by default are: build, checkstyle, git, phpcs, phploc, phpunit, pmd -->
+				<!-- PHPMessDetector -->
+				<source type="pmd">
+					<file name=".reports/phpmd.xml" />
+				</source>
 
-                <!-- every enrichment source can have additional configuration nodes, most probably need a logfile -->
-                <!-- <file name="path/to/log.xml" /> -->
-                <!--</source> -->
+				<!-- PHPUnit Coverage XML -->
+				<!-- <source type="phpunit"> -->
+				<!-- <coverage path="" /> -->
+				<!-- @path - the directory where the xml code coverage report can be 
+					found -->
+				<!--<filter directory="${phpDox.project.source}" /> -->
+				<!-- @directory - path of the phpunit config whitelist filter directory -->
+				<!--</source> -->
+				<!--<source type="phpunit"> -->
+				<!--<coverage path="tests/_output/coverage" /> -->
+				<!--</source> -->
 
-                <!-- git vcs information -->
-                <source type="git">
-                    <git binary="/usr/bin/git" />
-                    <history enabled="true" limit="15" cache="${phpDox.project.workdir}/gitlog.xml" />
-                </source>
+			</enrich>
 
-                <!-- PHP Code Sniffer -->
-                <source type="phpcs">
-                    <file name=".reports/phpcs.xml" />
-                </source>
+			<!-- <build engine="..." enabled="true" output="..." /> -->
+			<!-- @engine - The name of the engine this build task uses, use ./phpDox 
+				- -engines to get a list of available engines -->
+			<!-- @enabled - Flag to enable/disable this engine, default: enabled=true -->
+			<!-- @output - (optional) Output directory; if relative (no / as first 
+				char) it is interpreted as relative to generator/@output -->
 
-                <!-- PHPLoc -->
-                <source type="phploc">
-                    <file name=".reports/phploc.xml" />
-                </source>
+			<!-- An engine and thus build node can have additional configuration child 
+				nodes, please check the documentation for the engine to find out more -->
 
-                <!-- PHPMessDetector -->
-                <source type="pmd">
-                    <file name=".reports/phpmd.xml" />
-                </source>
-
-                <!-- PHPUnit Coverage XML -->
-                <!-- <source type="phpunit">  -->
-                <!-- <coverage path="" /> -->
-                <!--           @path - the directory where the xml code coverage report can be found -->
-                <!--<filter directory="${phpDox.project.source}" />-->
-                <!-- @directory - path of the phpunit config whitelist filter directory -->
-                <!--</source>-->
-                <!--<source type="phpunit">-->
-                    <!--<coverage path="tests/_output/coverage" />-->
-                <!--</source>-->
-
-            </enrich>
-
-            <!-- <build engine="..." enabled="true" output="..." /> -->
-            <!--   @engine  - The name of the engine this build task uses, use ./phpDox - -engines to get a list of available engines -->
-            <!--   @enabled - Flag to enable/disable this engine, default: enabled=true -->
-            <!--   @output  - (optional) Output directory; if relative (no / as first char) it is interpreted as relative to generator/@output -->
-
-            <!-- An engine and thus build node can have additional configuration child nodes, please check the documentation for the engine to find out more -->
-
-            <!--  default engine "html" -->
-            <build engine="html" enabled="true" output="html">
-                <template dir="${phpDox.home}/templates/html" />
-                <file extension="xhtml" />
-            </build>
-        </generator>
-    </project>
+			<!-- default engine "html" -->
+			<build engine="html" enabled="true" output="html">
+				<template dir="${phpDox.home}/templates/html" />
+				<file extension="xhtml" />
+			</build>
+		</generator>
+	</project>
 </phpdox>

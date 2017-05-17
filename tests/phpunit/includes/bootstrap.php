@@ -1,6 +1,6 @@
 <?php
 // backward compatibility for php 5.5 and low (with phpunit < v.6)
-if (!class_exists('\PHPUnit\Framework\TestCase') && class_exists('\PHPUnit_Framework_TestCase')) {
+if (! class_exists('\PHPUnit\Framework\TestCase') && class_exists('\PHPUnit_Framework_TestCase')) {
     class_alias('\PHPUnit_Framework_Exception', '\PHPUnit\Framework\Exception');
     class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
     class_alias('\PHPUnit_Util_Getopt', '\PHPUnit\Util\Getopt');
@@ -34,7 +34,7 @@ define('DIR_TESTDATA', dirname(__FILE__) . '/../data');
 
 if (! defined('GB_TESTS_FORCE_KNOWN_BUGS'))
     define('GB_TESTS_FORCE_KNOWN_BUGS', false);
-
+    
     // Cron tries to make an HTTP request to the blog, which always fails, because tests are run in CLI mode only
 define('DISABLE_GB_CRON', true);
 
@@ -120,7 +120,7 @@ class GB_PHPUnit_Util_Getopt extends \PHPUnit\Util\Getopt
                 continue;
             }
         }
-
+        
         $ajax_message = true;
         foreach ($options as $option) {
             switch ($option[0]) {

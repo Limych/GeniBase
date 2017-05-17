@@ -70,8 +70,8 @@ else {
         'source' => _x('Source', 'Field name', WW1_TXTDOM),
         'id' => _x('Record ID', 'Field name', WW1_TXTDOM),
         'comments' => ''
-    ) // Place it always last
-;
+    ); // Place it always last
+
     $tmp = array();
     foreach (array_keys($detailed_fields) as $key) {
         if (($key == 'date' && (! empty($dbase->query['date_from']) || ! empty($dbase->query['date_to']))) || ! empty($dbase->query[$key]))

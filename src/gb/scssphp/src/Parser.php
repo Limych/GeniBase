@@ -134,7 +134,7 @@ class Parser
      */
     public function throwParseError($msg = 'parse error')
     {
-        list ($line,  /* $column */) = $this->getSourcePosition($this->count);
+        list ($line,   /* $column */) = $this->getSourcePosition($this->count);
         
         $loc = empty($this->sourceName) ? "line: $line" : "$this->sourceName on line $line";
         

@@ -45,9 +45,27 @@ audio, canvas, progress, video {
  * Prevent modern browsers from displaying `audio` without controls.
  * Remove excess height in iOS 5 devices.
  */
-audio:not ([controls] ) {
-	display: none;
-	height: 0;
+audio
+:not
+ 
+(
+[
+controls
+]
+ 
+)
+{
+display
+:
+ 
+none
+;
+
+	
+height
+:
+ 
+0;
 }
 
 /**
@@ -155,8 +173,21 @@ img {
 /**
  * Correct overflow not hidden in IE 9/10/11.
  */
-svg:not (:root ) {
-	overflow: hidden;
+svg
+:not
+ 
+(
+:root
+ 
+)
+{
+overflow
+:
+ 
+hidden
+;
+
+
 }
 
 /* Grouping content

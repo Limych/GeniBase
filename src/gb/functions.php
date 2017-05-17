@@ -661,7 +661,7 @@ function _default_gb_die_handler($message, $title = '', $args = array())
         $message .= "\n<p><a href='javascript:history.back()'>$back_text</a></p>";
     }
 
-//    if( !class_exists('GB_Hooks') || !GB_Hooks::did_action('admin_head') ): // TODO: action admin_head
+    // if( !class_exists('GB_Hooks') || !GB_Hooks::did_action('admin_head') ): // TODO: action admin_head
 
     status_header($r['response']);
     nocache_headers();
@@ -787,7 +787,8 @@ a:hover {
 	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
 }
 
-<?php if ('rtl ' == $text_direction) : ?> body {
+<?php if ('rtl ' == $text_direction) : ?>
+body {
 	font-family: Tahoma, Arial;
 }
 <?php endif; ?>

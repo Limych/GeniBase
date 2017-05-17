@@ -64,6 +64,7 @@ if (! function_exists('gb_redirect')) :
         return true;
     }
 
+
 endif;
 
 if (! function_exists('gb_sanitize_redirect')) :
@@ -119,6 +120,7 @@ if (! function_exists('gb_sanitize_redirect')) :
         return urlencode($matches[0]);
     }
 
+
 endif;
 
 if (! function_exists('gb_safe_redirect')) :
@@ -147,6 +149,7 @@ if (! function_exists('gb_safe_redirect')) :
         
         gb_redirect($location, $status);
     }
+
 
 endif;
 
@@ -218,6 +221,7 @@ if (! function_exists('gb_validate_redirect')) :
         return $location;
     }
 
+
 endif;
 
 if (! function_exists('gb_set_current_user')) :
@@ -260,6 +264,7 @@ if (! function_exists('gb_set_current_user')) :
         
         return GB::$user;
     }
+
 
 endif;
 
@@ -313,6 +318,7 @@ if (! function_exists('gb_load_current_user')) :
         gb_set_current_user($user);
     }
 
+
 endif;
 
 if (! function_exists('gb_get_current_user')) :
@@ -330,6 +336,7 @@ if (! function_exists('gb_get_current_user')) :
         gb_load_current_user();
         return GB::$user;
     }
+
 
 endif;
 
@@ -350,6 +357,7 @@ if (! function_exists('is_user_logged_in')) :
         return $user->exists();
     }
 
+
 endif;
 
 if (! function_exists('gb_get_user')) :
@@ -367,6 +375,7 @@ if (! function_exists('gb_get_user')) :
     {
         return gb_get_user_by('id', $user_id);
     }
+
 
 endif;
 
@@ -395,6 +404,7 @@ if (! function_exists('gb_get_user_by')) :
         
         return $user;
     }
+
 
 endif;
 
@@ -429,6 +439,7 @@ if (! function_exists('gb_cache_users')) :
         }
         gb_update_meta_cache('user', $ids);
     }
+
 
 endif;
 
@@ -493,6 +504,7 @@ if (! function_exists('gb_authenticate')) :
         return $user;
     }
 
+
 endif;
 
 if (! function_exists('gb_logout')) :
@@ -516,6 +528,7 @@ if (! function_exists('gb_logout')) :
         GB_Hooks::do_action('gb_logout');
     }
 
+
 endif;
 
 if (! function_exists('gb_hash_password')) :
@@ -537,6 +550,7 @@ if (! function_exists('gb_hash_password')) :
     {
         return _gb_hasher()->HashPassword(trim($password));
     }
+
 
 endif;
 
@@ -572,6 +586,7 @@ if (! function_exists('gb_set_password')) :
         gb_cache_delete($user_id, 'users');
     }
 
+
 endif;
 
 if (! function_exists('gb_check_password')) :
@@ -604,6 +619,7 @@ if (! function_exists('gb_check_password')) :
          */
         return GB_Hooks::apply_filters('check_password', $check, $password, $hash, $user_id);
     }
+
 
 endif;
 
@@ -647,6 +663,7 @@ if (! function_exists('gb_generate_password')) :
          */
         return GB_Hooks::apply_filters('random_password', $password);
     }
+
 
 endif;
 
@@ -701,6 +718,7 @@ if (! function_exists('gb_rand')) :
         
         return abs(intval($value));
     }
+
 
 endif;
 
@@ -834,6 +852,7 @@ if (! function_exists('gb_salt')) :
         return GB_Hooks::apply_filters('salt', $cached_salts[$scheme], $scheme);
     }
 
+
 endif;
 
 if (! function_exists('gb_hash')) :
@@ -854,6 +873,7 @@ if (! function_exists('gb_hash')) :
         
         return hash_hmac('md5', $data, $salt);
     }
+
 
 endif;
 
@@ -981,6 +1001,7 @@ if (! function_exists('gb_validate_auth_cookie')) :
         return $user->ID;
     }
 
+
 endif;
 
 if (! function_exists('gb_generate_auth_cookie')) :
@@ -1041,6 +1062,7 @@ if (! function_exists('gb_generate_auth_cookie')) :
         return GB_Hooks::apply_filters('auth_cookie', $cookie, $user->ID, $expiration, $scheme, $token);
     }
 
+
 endif;
 
 if (! function_exists('gb_parse_auth_cookie')) :
@@ -1094,6 +1116,7 @@ if (! function_exists('gb_parse_auth_cookie')) :
         
         return compact('username', 'expiration', 'token', 'hmac', 'scheme');
     }
+
 
 endif;
 
@@ -1239,6 +1262,7 @@ if (! function_exists('gb_set_auth_cookie')) :
         // setcookie($auth_cookie_name, $auth_cookie, $expire, ADMIN_COOKIE_PATH, GB_COOKIE_DOMAIN, $secure, true);
     }
 
+
 endif;
 
 if (! function_exists('gb_clear_auth_cookie')) :
@@ -1266,6 +1290,7 @@ if (! function_exists('gb_clear_auth_cookie')) :
         // setcookie( AUTH_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH, GB_COOKIE_DOMAIN );
         // setcookie( SECURE_AUTH_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH, GB_COOKIE_DOMAIN );
     }
+
 
 endif;
 
@@ -1624,6 +1649,7 @@ if (! function_exists('gb_mail')) :
         }
     }
 
+
 endif;
 
 if (! function_exists('gb_nonce_tick')) :
@@ -1654,6 +1680,7 @@ if (! function_exists('gb_nonce_tick')) :
         return ceil(time() / ($nonce_life / 2));
     }
 
+
 endif;
 
 if (! function_exists('gb_create_nonce')) :
@@ -1676,6 +1703,7 @@ if (! function_exists('gb_create_nonce')) :
         
         return substr(gb_hash($i . '|' . $action . '|' . $user_hash . '|' . $token, 'nonce'), - 12, 10);
     }
+
 
 endif;
 
@@ -1719,5 +1747,6 @@ if (! function_exists('gb_verify_nonce')) :
             // Invalid nonce
         return false;
     }
+
 
 endif;

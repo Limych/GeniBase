@@ -22,8 +22,8 @@ abstract class ww1_records_set
 {
 
     protected $page;
- // Текущая страница результатов
-                     
+    // Текущая страница результатов
+    
     // Создание экземпляра класса
     function __construct($page)
     {
@@ -199,7 +199,7 @@ class ww1_solders_set extends ww1_records_set
         shuffle($hints);
         print "<p class='nb align-center hide-on-print' style='margin-top: 3em'><strong>" . __('Please note:', WW1_TXTDOM) . "</strong> " . array_shift($hints) . "</p>";
     }
- // function
+    // function
     
     /**
      * Вывод результатов поиска в виде html-таблицы
@@ -227,5 +227,5 @@ class ww1_solders_set extends ww1_records_set
 		</div>
 <?php
         } // if( $this->records_cnt)
-	}
+    }
 }

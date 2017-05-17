@@ -64,21 +64,21 @@ if (! defined('MAX_DATE'))
  */
 define('Q_SIMPLE', 'Q_SIMPLE'); // Простой режим поиска
 define('Q_EXTENDED', 'Q_EXTENDED');
- // Расширенный режим поиска
-                                    //
+// Расширенный режим поиска
+//
 abstract class ww1_database
 {
 
     protected $query_mode;
- // Режим поиска
+    // Режим поиска
     public $query;
- // Набор условий поиска
+    // Набор условий поиска
     protected $page;
- // Текущая страница результатов
+    // Текущая страница результатов
     public $have_query;
- // Признак наличия данных для запроса
+    // Признак наличия данных для запроса
     public $records_cnt;
- // Общее число записей в базе
+    // Общее число записей в базе
     
     /**
      * Создание экземпляра класса.
@@ -117,21 +117,21 @@ class ww1_database_solders extends ww1_database
 
     /**
      * If TRUE, the surname was automatically expanded with search keys.
-     * 
+     *
      * @var boolean
      */
     var $surname_ext = FALSE;
 
     /**
      * If TRUE, the name was automatically expanded with search keys.
-     * 
+     *
      * @var boolean
      */
     var $name_ext = FALSE;
 
     /**
      * List of fields for simple search mode.
-     * 
+     *
      * @var array
      */
     private $simple_fields = array(
@@ -142,7 +142,7 @@ class ww1_database_solders extends ww1_database
 
     /**
      * List of fields for extended search mode.
-     * 
+     *
      * @var array
      */
     private $extended_fields = array(
@@ -164,7 +164,7 @@ class ww1_database_solders extends ww1_database
 
     /**
      * List of fields with numeric values.
-     * 
+     *
      * @var array
      */
     private $numeric_fields = array(
@@ -179,7 +179,7 @@ class ww1_database_solders extends ww1_database
 
     /**
      * List of fields with IDs.
-     * 
+     *
      * @var array
      */
     private $ids_fields = array(/*don't add 'id',*/ 'religion',
@@ -190,7 +190,7 @@ class ww1_database_solders extends ww1_database
 
     /**
      * List of fields that have dictionaries.
-     * 
+     *
      * @var array
      */
     private $dictionary_fields = array(
@@ -351,7 +351,7 @@ class ww1_database_solders extends ww1_database
         }
         print "</div>\n";
     }
- // function
+    // function
     
     /**
      * Осуществление поиска и генерация класса результатов поиска.

@@ -27,7 +27,7 @@ class GB_Scripts extends GB_Dependencies
 {
 
     public $base_url;
- // Full URL with trailing slash
+    // Full URL with trailing slash
     public $content_url;
 
     public $default_version;

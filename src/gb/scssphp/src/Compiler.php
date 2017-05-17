@@ -552,7 +552,7 @@ class Compiler
         $found = false;
         
         foreach ($counts as $idx => $count) {
-            list ($target, $origin,  /* $block */) = $this->extends[$idx];
+            list ($target, $origin,   /* $block */) = $this->extends[$idx];
             
             // check count
             if ($count !== count($target)) {
@@ -1173,6 +1173,7 @@ class Compiler
 
     /**
      * Flatten selector single; joins together .
+     *
      * classes and #ids
      *
      * @param array $single            
@@ -1871,7 +1872,7 @@ class Compiler
      */
     protected function expToString($exp)
     {
-        list (, $op, $left, $right,  /* $inParens */, $whiteLeft, $whiteRight) = $exp;
+        list (, $op, $left, $right,   /* $inParens */, $whiteLeft, $whiteRight) = $exp;
         
         $content = [
             $this->reduce($left)

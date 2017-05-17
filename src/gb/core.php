@@ -118,7 +118,7 @@ require_once (GB_CORE_DIR . '/locale.php');
 
 /**
  * GeniBase Locale object for loading locale domain date and various strings.
- * 
+ *
  * @global object $gb_locale
  * @since 2.0.0
  *       

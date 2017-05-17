@@ -73,8 +73,8 @@ function gb_fix_server_vars()
         // IIS Mod-Rewrite
         if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
             $_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_ORIGINAL_URL'];
-        }         // IIS Isapi_Rewrite
-        else 
+        }  // IIS Isapi_Rewrite
+else 
             if (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
                 $_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
             } else {

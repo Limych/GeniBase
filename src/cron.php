@@ -2,7 +2,7 @@
 <?php
 /**
  * Tell GeniBase we are doing the CRON task.
- * 
+ *
  * @var bool
  */
 define('DOING_CRON', true);

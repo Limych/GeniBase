@@ -35,27 +35,22 @@ TABLE OF CONTENTS:
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 @
-Settings // // We use these to control button text styles .
- $button-font-family: inherit !default ;
- $button-bg-color: $secondary-color !default ;
- $button-text-color: $black !default ;
- $button-primary-bg-color: $primary-color !default ;
- $button-primary-text-color: $white !default ;
- $button-destructive-bg-color: $alert-color !default ;
- $button-destructive-text-color: $yellow !default ; // We use these to control button border styles
-	.
- $button-shadow-size: 2px 2px 3px !default ;
- $button-shadow-color: rgba ($black, 0.2 ) !default ;
- $button-pressed-shadow-size: 0 0 0 !default ;
- $button-pressed-margin: 2px !default ;
+Settings // // We use these to control button text styles . $button-font-family: inherit 
+	!default ; $button-bg-color: $secondary-color !default ; $button-text-color: 
+	$black !default ; $button-primary-bg-color: $primary-color !default ; $button-primary-text-color: 
+	$white !default ; $button-destructive-bg-color: $alert-color !default 
+	; $button-destructive-text-color: $yellow !default ; // We use these to control button border styles
+	 . $button-shadow-size: 2px 2px 3px !default ; $button-shadow-color: rgba 
+	($black, 0.2 ) !default ; $button-pressed-shadow-size: 0 0 0 !default 
+	; $button-pressed-margin: 2px !default ;
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	// @Mixins // // We can control whether or not we have inset shadows edges
-	. // $outset-size - Default: $button-shadow-size // $outset-color -
+	 . // $outset-size - Default: $button-shadow-size // $outset-color -
 	Default: $button-shadow-color, If false, normal state shadow will not be defined 
-	|| Set color value
+	 || Set color value
  @mixin button-shadows ($outset-size: $button-shadow-size, $outset-color:
-	$button-shadow-color) { @if ($outset-size and $outset-color) { $outset:
-	$outset-size $outset-color;
+	 $button-shadow-color ) { @if ($outset-size and $outset-color) {
+	$outset: $outset-size $outset-color;
 	-webkit-box-shadow: $outset;
 	//
 	Android
@@ -117,21 +112,35 @@ Settings // // We use these to control button text styles .
 	hover
 	,
 	&
+	
+	
 	.active
 	:
+	
+	
 	focus
 	,
 	&:
+	
+	
 	active
 	{
 	
+	
 			
+	
 	@
+	
+	
 	include
 	button-shadows(
 	$
+	
+	
 	outset-size
 	:$
+	
+	
 	button-pressed-shadow-size
 	);
 }
@@ -146,117 +155,197 @@ Remove the dotted border on :focus and the extra padding in Firefox
 
 }
 @
-each $sel in '.button ', '.primary-button ', '.destructive-button ' {p
-	#{$sel
-	
-}
+each
+ 
+$
+sel
+ 
+in
+ 
+'
+.button
+ 
+',
+'
+.primary-button
+ 
+',
+'
+.destructive-button
+ 
+'
+{
+p
 
+	
+#{$
+sel
+
+	
+
+}
 {
 vertical-align
-:
- 
-baseline
-;
 
-		
+
+:
+
+ 
+
+baseline
+
+
+;
 }
 #{$
 sel
+
+
 }
 .button-large
 ,
 .button-group
+
+
 .button-large
+
  
+
 #{$
 sel
+
+
 }
 {
 height
+
+
 :
+
  
+
 30
 px
-;
 
-		    
+
+;
 line-height
+
+
 :
+
  
+
 28
 px
-;
 
-		    
+
+;
 padding
+
+
 :
+
  
+
 0
 12
 px
+
  
+
 2
 px
-;
 
-		
+
+;
 }
 #{$
 sel
+
+
 }
 .button-small
 ,
 .button-group
+
+
 .button-small
+
  
+
 #{$
 sel
+
+
 }
 {
 height
+
+
 :
+
  
+
 24
 px
-;
 
-			
+
+;
 line-height
+
+
 :
+
  
+
 22
 px
-;
 
-			
+
+;
 padding
+
+
 :
+
  
+
 0
 8
 px
+
  
+
 1
 px
-;
 
-			
+
+;
 font-size
+
+
 :
+
  
+
 11
 px
-;
 
-		
+
+;
 }
 #{$
 sel
+
+
 }
 :active
 ,
 #{$
 sel
+
+
 }
 :focus {
 	outline: none;
@@ -264,6 +353,8 @@ sel
 
 #{$
 sel
+
+
 }
 .hidden {
 	display: none;

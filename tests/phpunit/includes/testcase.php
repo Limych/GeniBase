@@ -23,13 +23,13 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
     function setUp()
     {
         set_time_limit(0);
-
+        
         gbdb()->suppress_errors = false;
         gbdb()->show_errors = true;
         ini_set('display_errors', 1);
         // $this->factory = new GB_UnitTest_Factory();
         $this->clean_up_global_scope();
-
+        
         $this->start_transaction();
         $this->expectDeprecated();
         GB_Hooks::add_filter('gb_die_handler', array(
@@ -124,7 +124,7 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
         parent::checkRequirements();
         if (GB_TESTS_FORCE_KNOWN_BUGS)
             return;
-
+            
             // Get tickets
         $annotations = \PHPUnit\Util\Test::parseTestMethodAnnotations(get_class($this), $this->getName(false));
         $tickets = [];
@@ -134,7 +134,7 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
         if (isset($annotations['method']['ticket'])) {
             $tickets = \array_merge($tickets, $annotations['method']['ticket']);
         }
-
+        
         foreach (\array_unique($tickets) as $ticket) {
             if (is_numeric($ticket)) {
                 $this->knownGBBug($ticket);
@@ -213,27 +213,27 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
     function expectedDeprecated()
     {
         $errors = array();
-
+        
         $not_caught_deprecated = array_diff($this->expected_deprecated, $this->caught_deprecated);
         foreach ($not_caught_deprecated as $not_caught) {
             $errors[] = "Failed to assert that $not_caught triggered a deprecated notice";
         }
-
+        
         $unexpected_deprecated = array_diff($this->caught_deprecated, $this->expected_deprecated);
         foreach ($unexpected_deprecated as $unexpected) {
             $errors[] = "Unexpected deprecated notice for $unexpected";
         }
-
+        
         $not_caught_doing_it_wrong = array_diff($this->expected_doing_it_wrong, $this->caught_doing_it_wrong);
         foreach ($not_caught_doing_it_wrong as $not_caught) {
             $errors[] = "Failed to assert that $not_caught triggered an incorrect usage notice";
         }
-
+        
         $unexpected_doing_it_wrong = array_diff($this->caught_doing_it_wrong, $this->expected_doing_it_wrong);
         foreach ($unexpected_doing_it_wrong as $unexpected) {
             $errors[] = "Unexpected incorrect usage notice for $unexpected";
         }
-
+        
         if (! empty($errors)) {
             $this->fail(implode("\n", $errors));
         }
@@ -255,7 +255,7 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
      * Declare an expected `_deprecated_function()` or `_deprecated_argument()` call from within a test.
      *
      * @since 2.2.2
-     *
+     *       
      * @param string $deprecated
      *            Name of the function, method, class, or argument that is deprecated. Must match
      *            first parameter of the `_deprecated_function()` or `_deprecated_argument()` call.
@@ -269,7 +269,7 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
      * Declare an expected `_doing_it_wrong()` call from within a test.
      *
      * @since 2.2.2
-     *
+     *       
      * @param string $deprecated
      *            Name of the function, method, or class that appears in the first argument of the
      *            source `_doing_it_wrong()` call.
@@ -314,10 +314,10 @@ class GB_UnitTestCase extends \PHPUnit\Framework\TestCase
         if (! isset($parts['query'])) {
             $parts['query'] = '';
         }
-
+        
         $_SERVER['REQUEST_URI'] = $req;
         unset($_SERVER['PATH_INFO']);
-
+        
         // $this->flush_cache();
     }
 }

@@ -172,7 +172,7 @@ function publish_cron($force = false)
     }
     
     require_once (BASE_DIR . '/edit/functions.publish.php'); // Функции формализации данных
-                                                            
+                                                             
     // Делаем выборку записей для публикации
     $drafts = gbdb()->get_table('SELECT * FROM ?_persons_raw WHERE `status` = "Draft"' . ' ORDER BY RAND() LIMIT ' . P_LIMIT);
     
@@ -313,7 +313,7 @@ function db_update()
         } // foreach
     } // foreach
 }
- // function db_update
+// function db_update
 
 /**
  * Функция вывода общей статистики о числе записей в системе.
@@ -418,7 +418,7 @@ function get_request_attr($var, $default = '')
 
 /**
  * Функция форматирования числа и вывода сопровождающего слова в правильном склонении
- * 
+ *
  * @deprecated
  *
  */
@@ -441,7 +441,7 @@ function format_num($number, $tail_1 = Null, $tail_2 = Null, $tail_5 = Null)
     
     return $formatted;
 }
- // function format_num()
+// function format_num()
 
 /**
  * Функция расширения поискового запроса по именам
@@ -499,7 +499,7 @@ function expand_names($names)
     }
     return $names;
 }
- // function expand_names()
+// function expand_names()
 function simplify_query($query)
 {
     // Если вместо строки передан массив, обработать каждое значение в отдельности
@@ -512,5 +512,5 @@ function simplify_query($query)
         return str_repeat('?', strlen($m[0]) - 1) . '*';
     }, $query);
     $query = preg_replace('/^\*$/uSs', '', $query);
-	return $query;
+    return $query;
 }

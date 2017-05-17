@@ -21,9 +21,7 @@ class Compact extends Formatter
 {
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -38,9 +36,7 @@ class Compact extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function indentStr()
     {

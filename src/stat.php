@@ -122,8 +122,8 @@ function dic_stat($caption, $field_title, $field)
     foreach ($result as $field => $cnt) {
         $even = 1 - $even;
         print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . esc_html($field) . "</td>\n\t<td class='align-right'>" . format_num($cnt) . "</td>\n</tr>";
-	}
-?>
+    }
+    ?>
 </tbody>
 </table>
 <?php

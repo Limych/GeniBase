@@ -22,9 +22,7 @@ class Compressed extends Formatter
 {
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -39,9 +37,7 @@ class Compressed extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function blockLines(OutputBlock $block)
     {

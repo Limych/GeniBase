@@ -133,7 +133,7 @@ function gb_plugin_constants()
     if (! defined('BASE_URL'))
         // TODO: options
         define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER['DOCUMENT_ROOT']))); // no trailing slash
-                                                                                                                      // define( 'BASE_URL', get_option('siteurl')); // full url
+                                                                                                                    // define( 'BASE_URL', get_option('siteurl')); // full url
     
     /**
      * Allows for the core directory to be moved from the default location.
@@ -255,7 +255,7 @@ function gb_cookie_constants()
      */
     if (! defined('GB_COOKIE_PATH'))
         define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', site_url('/'))); // TODO: options
-                                                                                               // define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
+                                                                                             // define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
     
     /**
      *

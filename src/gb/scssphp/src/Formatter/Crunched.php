@@ -22,9 +22,7 @@ class Crunched extends Formatter
 {
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function __construct()
     {
@@ -39,9 +37,7 @@ class Crunched extends Formatter
     }
 
     /**
-     *
      * @ERROR!!!
-     *
      */
     public function blockLines(OutputBlock $block)
     {

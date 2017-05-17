@@ -43,9 +43,9 @@ class Tests_text extends GB_UnitTestCase
 
     function test_expand_names()
     { // !!! NEED MySQL
-                                      // $src = ;
-                                      // $res = ;
-                                      // $this->assertEquals($res, absint($src));
+          // $src = ;
+          // $res = ;
+          // $this->assertEquals($res, absint($src));
     }
 
     function test_is_translit()
