@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp\Compiler;
 
 /**
@@ -17,27 +18,22 @@ namespace Leafo\ScssPhp\Compiler;
  */
 class Environment
 {
-
     /**
-     *
      * @var \Leafo\ScssPhp\Block
      */
     public $block;
 
     /**
-     *
      * @var \Leafo\ScssPhp\Compiler\Environment
      */
     public $parent;
 
     /**
-     *
      * @var array
      */
     public $store;
 
     /**
-     *
      * @var integer
      */
     public $depth;

@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2015-04-07 19:04+0300\n"
-"PO-Revision-Date: 2015-04-07 19:04+0300\n"
+"POT-Creation-Date: 2017-05-18 22:22+0300\n"
+"PO-Revision-Date: 2017-05-18 22:22+0300\n"
 "Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -13,14 +13,160 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 2.0.2\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-Basepath: ../\n"
+"X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
 "esc_html__;esc_html_e;esc_html_x:1,2c;esc_html_ex:1,2c;esc_attr__;esc_attr_e;"
 "esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
+
+#: class.gb-dbase.php:294
+#, php-format
+msgid ""
+"\n"
+"<h1>Error establishing a database connection</h1>\n"
+"<p>This either means that the username and password information in your "
+"<code>gb-config.php</code> file is incorrect or we can't contact the "
+"database server at <code>%s</code>. This could mean your host's database "
+"server is down.</p>\n"
+"<ul>\n"
+"\t<li>Are you sure you have the correct username and password?</li>\n"
+"\t<li>Are you sure that you have typed the correct hostname?</li>\n"
+"\t<li>Are you sure that the database server is running?</li>\n"
+"</ul>\n"
+"<p>If you're unsure what these terms mean you should probably contact your "
+"host.</p>\n"
+msgstr ""
+
+#: class.gb-dbase.php:339
+#, fuzzy, php-format
+msgid "<strong>ERROR</strong>: GeniBase %1$s requires MySQL %2$s or higher."
+msgstr "<strong>ОШИБКА</strong>: GeniBase %1$s требует MySQL %2$s или старше."
+
+#: class.gb-user.php:1604
+#, fuzzy
+msgid "<strong>ERROR</strong>: The email field is empty."
+msgstr "<strong>ОШИБКА</strong>: Поле для электронный почты не заполнено."
+
+#: class.gb-user.php:1607
+#, fuzzy
+msgid "<strong>ERROR</strong>: The password field is empty."
+msgstr "<strong>ОШИБКА</strong>: Поле для пароля не заполнено."
+
+#: class.gb-user.php:1615
+#, php-format
+msgid ""
+"<strong>ERROR</strong>: Invalid email. <a href=\"%s\">Lost your password</a>?"
+msgstr ""
+
+#: class.gb-user.php:1633
+#, php-format
+msgid ""
+"<strong>ERROR</strong>: The password you entered for the username <strong>"
+"%1$s</strong> is incorrect. <a href=\"%2$s\">Lost your password</a>?"
+msgstr ""
+
+#: class.gb-user.php:1647
+msgid ""
+"Hint: The password should be at least seven characters long. To make it "
+"stronger, use upper and lower case letters, numbers, and symbols like ! \" ? "
+"$ % ^ &amp; )."
+msgstr ""
+
+#: class.gb-user.php:1744
+#, fuzzy
+msgid "Cannot create a user with an empty email."
+msgstr "Не могу создать пользователя с пустым почтовым адресом."
+
+#: class.gb-user.php:1747
+#, fuzzy
+msgid "Sorry, that email address is already used!"
+msgstr "Извините, но этот почтовый адрес уже используется!"
+
+#: functions.gb-scripts.php:31 functions.gb-styles.php:31
+#, php-format
+msgid ""
+"Scripts and styles should not be registered or enqueued until the %1$s, "
+"%2$s, or %3$s hooks."
+msgstr ""
+
+#: functions.gb-styles.php:88
+msgid "Do not pass style tags to gb_add_inline_style()."
+msgstr "Не добавляйте теги style к параметрам функции gb_add_inline_style()."
+
+#: functions.php:660
+msgid "&laquo; Back"
+msgstr "&laquo; Назад"
+
+#: functions.php:671
+msgid "GeniBase Error"
+msgstr "Ошибка GeniBase"
+
+#: functions.php:1394
+#, php-format
+msgid ""
+"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
+"is <strong>deprecated</strong> since version %4$s! Use <code>%5$s()</code> "
+"instead."
+msgstr ""
+"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
+"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s! Используйте "
+"<code>%5$s()</code> вместо этого."
+
+#: functions.php:1396
+#, php-format
+msgid ""
+"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
+"is <strong>deprecated</strong> since version %4$s with no alternative "
+"available."
+msgstr ""
+"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
+"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s. Альтернативы "
+"не предусмотрены."
+
+#: functions.php:1466
+#, php-format
+msgid ""
+"%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead."
+msgstr ""
+
+#: functions.php:1468
+#, php-format
+msgid ""
+"%1$s is <strong>deprecated</strong> since version %2$s with no alternative "
+"available."
+msgstr ""
+
+#: functions.php:1540
+#, php-format
+msgid ""
+"%1$s was called with an argument that is <strong>deprecated</strong> since "
+"version %2$s! %3$s"
+msgstr ""
+
+#: functions.php:1542
+#, php-format
+msgid ""
+"%1$s was called with an argument that is <strong>deprecated</strong> since "
+"version %2$s with no alternative available."
+msgstr ""
+
+#: functions.php:1603
+#, php-format
+msgid "(This message was added in version %s.)"
+msgstr ""
+
+#: functions.php:1606
+#, php-format
+msgid "%1$s was called <strong>incorrectly</strong>. %2$s %3$s"
+msgstr ""
+
+#: general-template.php:440 general-template.php:449 general-template.php:460
+#: general-template.php:469
+msgid "&hellip;"
+msgstr "&hellip;"
 
 #: js/vendor/jquery-2.1.3.min.js:14
 msgid "<iframe frameborder='0' width='0' height='0'/>"
@@ -34,94 +180,11 @@ msgstr ""
 msgid "<div>"
 msgstr ""
 
-#: functions.gb-scripts.php:31 functions.gb-styles.php:31
-#, php-format
-msgid ""
-"Scripts and styles should not be registered or enqueued until the %1$s, "
-"%2$s, or %3$s hooks."
-msgstr ""
-
-#: functions.gb-styles.php:84
-msgid "Do not pass style tags to gb_add_inline_style()."
-msgstr "Не добавляйте теги style к параметрам функции gb_add_inline_style()."
-
-#: functions.php:606
-msgid "&laquo; Back"
-msgstr "&laquo; Назад"
-
-#: functions.php:617
-msgid "GeniBase Error"
-msgstr "Ошибка GeniBase"
-
-#: functions.php:1223
-#, php-format
-msgid ""
-"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
-"is <strong>deprecated</strong> since version %4$s! Use <code>%5$s()</code> "
-"instead."
-msgstr ""
-"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
-"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s! Используйте "
-"<code>%5$s()</code> вместо этого."
-
-#: functions.php:1225
-#, php-format
-msgid ""
-"Function <code>%1$s()</code> called from <em>%2$s</em> on line <em>%3$s</em> "
-"is <strong>deprecated</strong> since version %4$s with no alternative "
-"available."
-msgstr ""
-"Функция <code>%1$s()</code>, вызываемая из файла <em>%2$s</em> со строки <em>"
-"%3$s</em>, является <strong>устаревшей</strong> с версии %4$s. Альтернативы "
-"не предусмотрены."
-
-#: functions.php:1285
-#, php-format
-msgid ""
-"%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead."
-msgstr ""
-
-#: functions.php:1287
-#, php-format
-msgid ""
-"%1$s is <strong>deprecated</strong> since version %2$s with no alternative "
-"available."
-msgstr ""
-
-#: functions.php:1350
-#, php-format
-msgid ""
-"%1$s was called with an argument that is <strong>deprecated</strong> since "
-"version %2$s! %3$s"
-msgstr ""
-
-#: functions.php:1352
-#, php-format
-msgid ""
-"%1$s was called with an argument that is <strong>deprecated</strong> since "
-"version %2$s with no alternative available."
-msgstr ""
-
-#: functions.php:1405
-#, php-format
-msgid "(This message was added in version %s.)"
-msgstr ""
-
-#: functions.php:1408
-#, php-format
-msgid "%1$s was called <strong>incorrectly</strong>. %2$s %3$s"
-msgstr ""
-
-#: general-template.php:400 general-template.php:409 general-template.php:421
-#: general-template.php:430
-msgid "&hellip;"
-msgstr "&hellip;"
-
-#: load.php:245 load.php:258
+#: load.php:259 load.php:274
 msgid "Maintenance"
 msgstr "Техническое обслуживание"
 
-#: load.php:259
+#: load.php:275
 msgid ""
 "This website is currently under going maintenance and will be back online "
 "shortly. Thank you for your patience."
@@ -129,7 +192,7 @@ msgstr ""
 "Этот сайт сейчас находится на техническом обслуживании и будет доступен "
 "через некоторое время. Спасибо за Ваше терпение."
 
-#: load.php:286
+#: load.php:305
 #, php-format
 msgid ""
 "Your server is running PHP version %1$s but GeniBase %2$s requires at least "
@@ -138,7 +201,7 @@ msgstr ""
 "На сервере установлен PHP версии %1$s, однако для GeniBase %2$s требуется "
 "хотя бы %3$s."
 
-#: load.php:292
+#: load.php:311
 msgid ""
 "Your PHP installation appears to be missing the MySQL extension which is "
 "required by GeniBase."
@@ -146,226 +209,265 @@ msgstr ""
 "Похоже, в вашей конфигурации PHP отсутствует расширение MySQL, необходимое "
 "для работы GeniBase."
 
-#: locale.php:109 locale.php:119 locale.php:132
+#: locale.php:112 locale.php:122 locale.php:135
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: locale.php:110 locale.php:120 locale.php:133
+#: locale.php:113 locale.php:123 locale.php:136
 msgid "Monday"
 msgstr "Понедельник"
 
-#: locale.php:111 locale.php:121 locale.php:134
+#: locale.php:114 locale.php:124 locale.php:137
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: locale.php:112 locale.php:122 locale.php:135
+#: locale.php:115 locale.php:125 locale.php:138
 msgid "Wednesday"
 msgstr "Среда"
 
-#: locale.php:113 locale.php:123 locale.php:136
+#: locale.php:116 locale.php:126 locale.php:139
 msgid "Thursday"
 msgstr "Четверг"
 
-#: locale.php:114 locale.php:124 locale.php:137
+#: locale.php:117 locale.php:127 locale.php:140
 msgid "Friday"
 msgstr "Пятница"
 
-#: locale.php:115 locale.php:125 locale.php:138
+#: locale.php:118 locale.php:128 locale.php:141
 msgid "Saturday"
 msgstr "Суббота"
 
-#: locale.php:119
+#: locale.php:122
 msgid "S_Sunday_initial"
 msgstr "Вс"
 
-#: locale.php:120
+#: locale.php:123
 msgid "M_Monday_initial"
 msgstr "Пн"
 
-#: locale.php:121
+#: locale.php:124
 msgid "T_Tuesday_initial"
 msgstr "Вт"
 
-#: locale.php:122
+#: locale.php:125
 msgid "W_Wednesday_initial"
 msgstr "Ср"
 
-#: locale.php:123
+#: locale.php:126
 msgid "T_Thursday_initial"
 msgstr "Чт"
 
-#: locale.php:124
+#: locale.php:127
 msgid "F_Friday_initial"
 msgstr "Пт"
 
-#: locale.php:125
+#: locale.php:128
 msgid "S_Saturday_initial"
 msgstr "Сб"
 
-#: locale.php:132
+#: locale.php:135
 msgid "Sun"
 msgstr "Вс"
 
-#: locale.php:133
+#: locale.php:136
 msgid "Mon"
 msgstr "Пн"
 
-#: locale.php:134
+#: locale.php:137
 msgid "Tue"
 msgstr "Вт"
 
-#: locale.php:135
+#: locale.php:138
 msgid "Wed"
 msgstr "Ср"
 
-#: locale.php:136
+#: locale.php:139
 msgid "Thu"
 msgstr "Чт"
 
-#: locale.php:137
+#: locale.php:140
 msgid "Fri"
 msgstr "Пт"
 
-#: locale.php:138
+#: locale.php:141
 msgid "Sat"
 msgstr "Сб"
 
-#: locale.php:141 locale.php:156
+#: locale.php:144 locale.php:159
 msgid "January"
 msgstr "Январь"
 
-#: locale.php:142 locale.php:157
+#: locale.php:145 locale.php:160
 msgid "February"
 msgstr "Февраль"
 
-#: locale.php:143 locale.php:158
+#: locale.php:146 locale.php:161
 msgid "March"
 msgstr "Март"
 
-#: locale.php:144 locale.php:159
+#: locale.php:147 locale.php:162
 msgid "April"
 msgstr "Апрель"
 
-#: locale.php:145 locale.php:160
+#: locale.php:148 locale.php:163
 msgid "May"
 msgstr "Май"
 
-#: locale.php:146 locale.php:161
+#: locale.php:149 locale.php:164
 msgid "June"
 msgstr "Июнь"
 
-#: locale.php:147 locale.php:162
+#: locale.php:150 locale.php:165
 msgid "July"
 msgstr "Июль"
 
-#: locale.php:148 locale.php:163
+#: locale.php:151 locale.php:166
 msgid "August"
 msgstr "Август"
 
-#: locale.php:149 locale.php:164
+#: locale.php:152 locale.php:167
 msgid "September"
 msgstr "Сентябрь"
 
-#: locale.php:150 locale.php:165
+#: locale.php:153 locale.php:168
 msgid "October"
 msgstr "Октябрь"
 
-#: locale.php:151 locale.php:166
+#: locale.php:154 locale.php:169
 msgid "November"
 msgstr "Ноябрь"
 
-#: locale.php:152 locale.php:167
+#: locale.php:155 locale.php:170
 msgid "December"
 msgstr "Декабрь"
 
-#: locale.php:156
+#: locale.php:159
 msgid "Jan_January_abbreviation"
 msgstr "Янв"
 
-#: locale.php:157
+#: locale.php:160
 msgid "Feb_February_abbreviation"
 msgstr "Фев"
 
-#: locale.php:158
+#: locale.php:161
 msgid "Mar_March_abbreviation"
 msgstr "Мар"
 
-#: locale.php:159
+#: locale.php:162
 msgid "Apr_April_abbreviation"
 msgstr "Апр"
 
-#: locale.php:160
+#: locale.php:163
 msgid "May_May_abbreviation"
 msgstr "Май"
 
-#: locale.php:161
+#: locale.php:164
 msgid "Jun_June_abbreviation"
 msgstr "Июн"
 
-#: locale.php:162
+#: locale.php:165
 msgid "Jul_July_abbreviation"
 msgstr "Июл"
 
-#: locale.php:163
+#: locale.php:166
 msgid "Aug_August_abbreviation"
 msgstr "Авг"
 
-#: locale.php:164
+#: locale.php:167
 msgid "Sep_September_abbreviation"
 msgstr "Сен"
 
-#: locale.php:165
+#: locale.php:168
 msgid "Oct_October_abbreviation"
 msgstr "Окт"
 
-#: locale.php:166
+#: locale.php:169
 msgid "Nov_November_abbreviation"
 msgstr "Ноя"
 
-#: locale.php:167
+#: locale.php:170
 msgid "Dec_December_abbreviation"
 msgstr "Дек"
 
-#: locale.php:174
+#: locale.php:177
 msgid "am"
 msgstr "дп"
 
-#: locale.php:175
+#: locale.php:178
 msgid "pm"
 msgstr "пп"
 
-#: locale.php:176
+#: locale.php:179
 msgid "AM"
 msgstr "ДП"
 
-#: locale.php:177
+#: locale.php:180
 msgid "PM"
 msgstr "ПП"
 
-#: locale.php:183
+#: locale.php:186
 msgid "number_format_thousands_sep"
 msgstr " "
 
-#: locale.php:187
+#: locale.php:190
 msgid "number_format_decimal_point"
 msgstr ","
 
-#: locale.php:194
+#: locale.php:197
 msgctxt "text direction"
 msgid "ltr"
 msgstr "ltr"
 
-#: locale.php:362
+#: locale.php:382
 msgid "F j, Y"
 msgstr "d.m.Y"
 
-#: locale.php:364
+#: locale.php:384
 msgid "g:i a"
 msgstr "H:i"
 
-#: locale.php:366
+#: locale.php:386
 msgid "F j, Y g:i a"
 msgstr "d.m.Y H:i"
+
+#: pluggable.php:484
+msgid "<strong>ERROR</strong>: Invalid login or incorrect password."
+msgstr ""
+
+#: script-loader.php:78
+msgid "Strength indicator"
+msgstr ""
+
+#: script-loader.php:79
+msgid "Very weak"
+msgstr ""
+
+#: script-loader.php:80
+msgid "Weak"
+msgstr ""
+
+#: script-loader.php:81
+msgctxt "password strength"
+msgid "Medium"
+msgstr ""
+
+#: script-loader.php:82
+msgid "Strong"
+msgstr ""
+
+#: script-loader.php:83
+msgid "Mismatch"
+msgstr ""
+
+#: script-loader.php:130
+msgctxt "Open Sans font: on or off"
+msgid "on"
+msgstr "on"
+
+#: script-loader.php:137
+msgctxt "Open Sans font: add new subset (greek, cyrillic, vietnamese)"
+msgid "no-subset"
+msgstr ""
 
 #~ msgid "%s is a protected GB option and may not be modified"
 #~ msgstr "%s защищённая опция GB и не может изменяться"

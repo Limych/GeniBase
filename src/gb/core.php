@@ -11,8 +11,8 @@
 // Direct execution forbidden for this script
 if (! defined('GB_CORE_DIR') || count(get_included_files()) == 1)
     die('<b>ERROR:</b> Direct execution forbidden!');
-    
-    // Include files required for initialization.
+
+// Include files required for initialization.
 require_once (GB_CORE_DIR . '/version.php');
 require_once (GB_CORE_DIR . '/default-constants.php');
 require_once (GB_CORE_DIR . '/load.php');
@@ -54,7 +54,7 @@ gb_debug_mode();
 // For an advanced caching plugin to use. Uses a static drop-in because you would only want one.
 if (GB_CACHE && file_exists(GB_CONTENT_DIR . '/advanced-cache.php'))
     GB_DEBUG ? include (GB_CONTENT_DIR . '/advanced-cache.php') : @include (GB_CONTENT_DIR . '/advanced-cache.php');
-    
+
     // Load early GeniBase files.
 require_once (GB_CORE_DIR . '/compat.php');
 require_once (GB_CORE_DIR . '/functions.php');
@@ -73,7 +73,7 @@ require_once (GB_CORE_DIR . '/default-filters.php');
 // Stop most of GeniBase from being loaded if we just want the basics.
 if (defined('GB_SHORTINIT') && GB_SHORTINIT)
     return false;
-    
+
     // Load the L10n library.
 require_once (GB_CORE_DIR . '/l10n.php');
 
@@ -103,7 +103,7 @@ require_once (GB_CORE_DIR . '/pluggable.php');
 // Run gb_cache_postload() if object cache is enabled and the function exists.
 if (GB_CACHE && function_exists('gb_cache_postload'))
     gb_cache_postload();
-    
+
     // Load the default text localization domain.
 load_default_textdomain();
 
@@ -121,7 +121,7 @@ require_once (GB_CORE_DIR . '/locale.php');
  *
  * @global object $gb_locale
  * @since 2.0.0
- *       
+ *
  */
 $GLOBALS['gb_locale'] = new GB_Locale();
 

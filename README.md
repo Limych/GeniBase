@@ -6,4 +6,4 @@ GeniBase
 
 ## Documentation
 
-Auto-generating documentation is available at the https://limych.github.io/GeniBase-Docs/
+Auto-generated technical documentation is available at the https://limych.github.io/GeniBase-Docs/

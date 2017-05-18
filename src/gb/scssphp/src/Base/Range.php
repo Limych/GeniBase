@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2015 Leaf Corcoran
+ * @copyright 2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp\Base;
 
 /**
@@ -17,16 +18,14 @@ namespace Leafo\ScssPhp\Base;
  */
 class Range
 {
-
     public $first;
-
     public $last;
 
     /**
      * Initialize range
      *
-     * @param integer|float $first            
-     * @param integer|float $last            
+     * @param integer|float $first
+     * @param integer|float $last
      */
     public function __construct($first, $last)
     {
@@ -37,7 +36,7 @@ class Range
     /**
      * Test for inclusion in range
      *
-     * @param integer|float $value            
+     * @param integer|float $value
      *
      * @return boolean
      */

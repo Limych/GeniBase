@@ -35,11 +35,11 @@ function gb_initial_constants()
         $gb_limit_int = intval(GB_MEMORY_LIMIT);
         if (false !== strpos(GB_MEMORY_LIMIT, 'G'))
             $gb_limit_int *= 1024;
-        
+
         if (- 1 != $current_limit && (- 1 == GB_MEMORY_LIMIT || $current_limit_int < $gb_limit_int))
             @ini_set('memory_limit', GB_MEMORY_LIMIT);
     }
-    
+
     /**
      * Allows for the core languages directory to be moved from the default location.
      *
@@ -47,7 +47,7 @@ function gb_initial_constants()
      */
     if (! defined('GB_LANG_DIR'))
         define('GB_LANG_DIR', GB_CORE_DIR . '/languages'); // no trailing slash, full paths only
-    
+
     /**
      * Allows for the content directory to be moved from the default location.
      *
@@ -57,7 +57,7 @@ function gb_initial_constants()
      */
     if (! defined('GB_CONTENT_DIR'))
         define('GB_CONTENT_DIR', BASE_DIR . '/gb-content'); // no trailing slash, full paths only
-    
+
     /**
      * Allows for the cache directory to be moved from the default location.
      *
@@ -67,17 +67,17 @@ function gb_initial_constants()
      */
     if (! defined('GB_CONTENT_CACHE_DIR'))
         define('GB_CONTENT_CACHE_DIR', GB_CONTENT_DIR . '/cache'); // no trailing slash, full paths only
-    
+
     /**
      * Allows for the administration directory to be moved from the default location.
      *
-     * GB_ADMIN_URL is defined further down
+     * GB_ADMIN_DIR is defined further down
      *
      * @since 3.0.0
      */
     if (! defined('GB_ADMIN_DIR'))
         define('GB_ADMIN_DIR', BASE_DIR . '/gb-admin'); // no trailing slash, full paths only
-    
+
     /**
      * By default switch off debug mode.
      *
@@ -87,7 +87,7 @@ function gb_initial_constants()
      */
     if (! defined('GB_DEBUG'))
         define('GB_DEBUG', false);
-    
+
     /**
      * By default display debug messages on page.
      *
@@ -99,7 +99,7 @@ function gb_initial_constants()
      */
     if (! defined('GB_DEBUG_DISPLAY'))
         define('GB_DEBUG_DISPLAY', true);
-    
+
     /**
      * By default switch off debug logging.
      *
@@ -109,10 +109,10 @@ function gb_initial_constants()
      */
     if (! defined('GB_DEBUG_LOG'))
         define('GB_DEBUG_LOG', false);
-    
+
     if (! defined('GB_CACHE'))
         define('GB_CACHE', false);
-        
+
         // Constants for expressing human-readable intervals
         // in their respective number of seconds.
     define('MINUTE_IN_SECONDS', 60);
@@ -134,7 +134,7 @@ function gb_plugin_constants()
         // TODO: options
         define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER['DOCUMENT_ROOT']))); // no trailing slash
                                                                                                                     // define( 'BASE_URL', get_option('siteurl')); // full url
-    
+
     /**
      * Allows for the core directory to be moved from the default location.
      *
@@ -144,7 +144,7 @@ function gb_plugin_constants()
      */
     if (! defined('GB_CORE_URL'))
         define('GB_CORE_URL', BASE_URL . '/gb'); // full url
-    
+
     /**
      * Allows for the content directory to be moved from the default location.
      *
@@ -154,7 +154,7 @@ function gb_plugin_constants()
      */
     if (! defined('GB_CONTENT_URL'))
         define('GB_CONTENT_URL', BASE_URL . '/gb-content'); // full url
-    
+
     /**
      * Allows for the cache directory to be moved from the default location.
      *
@@ -164,7 +164,7 @@ function gb_plugin_constants()
      */
     if (! defined('GB_CONTENT_CACHE_URL'))
         define('GB_CONTENT_CACHE_URL', GB_CONTENT_URL . '/cache'); // full url
-    
+
     /**
      * Allows for the administration directory to be moved from the default location.
      *
@@ -213,42 +213,42 @@ function gb_cookie_constants()
         else
             define('GB_COOKIE_HASH', '');
     }
-    
+
     /**
      *
      * @since 2.1.1
      */
     if (! defined('GB_COOKIE_USERHASH'))
         define('GB_COOKIE_USERHASH', 'gb_uid' . GB_COOKIE_HASH);
-    
+
     /**
      *
      * @since 2.2.3
      */
     if (! defined('GB_COOKIE_LANG'))
         define('GB_COOKIE_LANG', 'gb_lang' . GB_COOKIE_HASH);
-    
+
     /**
      *
      * @since 3.0.0
      */
     if (! defined('AUTH_COOKIE'))
         define('AUTH_COOKIE', 'gb_' . GB_COOKIE_HASH);
-    
+
     /**
      *
      * @since 3.0.0
      */
     if (! defined('SECURE_AUTH_COOKIE'))
         define('SECURE_AUTH_COOKIE', 'gb_sec_' . GB_COOKIE_HASH);
-    
+
     /**
      *
      * @since 3.0.0
      */
     if (! defined('LOGGED_IN_COOKIE'))
         define('LOGGED_IN_COOKIE', 'gb_logged_in_' . GB_COOKIE_HASH);
-    
+
     /**
      *
      * @since 2.1.1
@@ -256,7 +256,7 @@ function gb_cookie_constants()
     if (! defined('GB_COOKIE_PATH'))
         define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', site_url('/'))); // TODO: options
                                                                                              // define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
-    
+
     /**
      *
      * @since 2.6.0
@@ -264,7 +264,7 @@ function gb_cookie_constants()
         // TODO: admin
         // if( !defined('ADMIN_COOKIE_PATH') )
         // define( 'ADMIN_COOKIE_PATH', GB_COOKIE_PATH . 'wp-admin' );
-    
+
     /**
      *
      * @since 2.6.0
@@ -272,7 +272,7 @@ function gb_cookie_constants()
         // TODO: plugins
         // if( !defined('PLUGINS_COOKIE_PATH') )
         // define( 'PLUGINS_COOKIE_PATH', preg_replace('|https?://[^/]+|i', '', GB_PLUGIN_URL) );
-    
+
     /**
      *
      * @since 2.1.1

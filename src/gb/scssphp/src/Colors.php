@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp;
 
 /**
@@ -17,7 +18,6 @@ namespace Leafo\ScssPhp;
  */
 class Colors
 {
-
     /**
      * CSS Colors
      *
@@ -174,6 +174,6 @@ class Colors
         'white' => '255,255,255',
         'whitesmoke' => '245,245,245',
         'yellow' => '255,255,0',
-        'yellowgreen' => '154,205,50'
+        'yellowgreen' => '154,205,50',
     ];
 }

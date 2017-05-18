@@ -1031,7 +1031,7 @@ class GB_User_Roles
     /**
      * Set up the object properties.
      *
-     * The role key is set to the current prefix for the $wpdb object with
+     * The role key is set to the current prefix for the gbdb() object with
      * 'user_roles' appended. If the $gb_user_roles global is set, then it will
      * be used and the role option will not be updated or used.
      *

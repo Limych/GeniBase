@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp;
 
 /**
@@ -17,51 +18,42 @@ namespace Leafo\ScssPhp;
  */
 class Block
 {
-
     /**
-     *
      * @var string
      */
     public $type;
 
     /**
-     *
      * @var \Leafo\ScssPhp\Block
      */
     public $parent;
 
     /**
-     *
      * @var integer
      */
     public $sourceIndex;
 
     /**
-     *
      * @var integer
      */
     public $sourceLine;
 
     /**
-     *
      * @var integer
      */
     public $sourceColumn;
 
     /**
-     *
      * @var array
      */
     public $selectors;
 
     /**
-     *
      * @var array
      */
     public $comments;
 
     /**
-     *
      * @var array
      */
     public $children;

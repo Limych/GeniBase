@@ -16,12 +16,12 @@
 /**
  * MySQL hostname
  */
-define('DB_HOST', 'localhost');
+define('DB_HOST',     'localhost');
 
 /**
  * MySQL database username
  */
-define('DB_USER', 'your_username_here');
+define('DB_USER',     'your_username_here');
 
 /**
  * MySQL database password
@@ -31,12 +31,13 @@ define('DB_PASSWORD', 'your_password_here');
 /**
  * The name of the database for WordPress
  */
-define('DB_BASE', 'your_database_name_here');
+define('DB_BASE',     'your_database_name_here');
 
 /**
  * GeniBase Database Table prefix
+ * (Only numbers, letters, and underscores please!)
  */
-define('DB_PREFIX', 'gb_'); // Only numbers, letters, and underscores please!
+define('DB_PREFIX',   'gb_');
 
 /**
  * #@+
@@ -48,14 +49,14 @@ define('DB_PREFIX', 'gb_'); // Only numbers, letters, and underscores please!
  *
  * @since 3.0.0
  */
-define('AUTH_KEY', 'put your unique phrase here');
-define('SECURE_AUTH_KEY', 'put your unique phrase here');
-define('LOGGED_IN_KEY', 'put your unique phrase here');
-define('NONCE_KEY', 'put your unique phrase here');
-define('AUTH_SALT', 'put your unique phrase here');
+define('AUTH_KEY',         'put your unique phrase here');
+define('SECURE_AUTH_KEY',  'put your unique phrase here');
+define('LOGGED_IN_KEY',    'put your unique phrase here');
+define('NONCE_KEY',        'put your unique phrase here');
+define('AUTH_SALT',        'put your unique phrase here');
 define('SECURE_AUTH_SALT', 'put your unique phrase here');
-define('LOGGED_IN_SALT', 'put your unique phrase here');
-define('NONCE_SALT', 'put your unique phrase here');
+define('LOGGED_IN_SALT',   'put your unique phrase here');
+define('NONCE_SALT',       'put your unique phrase here');
 /**#@-*/
 
 /**
@@ -65,4 +66,4 @@ define('NONCE_SALT', 'put your unique phrase here');
  * It is strongly recommended that plugin and theme developers use GB_DEBUG
  * in their development environments.
  */
-// define( 'GB_DEBUG', true );
+// define('GB_DEBUG', true);

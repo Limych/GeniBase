@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp\Formatter;
 
 use Leafo\ScssPhp\Formatter;
@@ -19,9 +20,8 @@ use Leafo\ScssPhp\Formatter;
  */
 class Compact extends Formatter
 {
-
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Compact extends Formatter
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     public function indentStr()
     {

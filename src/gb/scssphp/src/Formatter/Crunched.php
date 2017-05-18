@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp\Formatter;
 
 use Leafo\ScssPhp\Formatter;
@@ -20,9 +21,8 @@ use Leafo\ScssPhp\Formatter\OutputBlock;
  */
 class Crunched extends Formatter
 {
-
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     public function __construct()
     {
@@ -37,22 +37,22 @@ class Crunched extends Formatter
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     public function blockLines(OutputBlock $block)
     {
         $inner = $this->indentStr();
-        
+
         $glue = $this->break . $inner;
-        
+
         foreach ($block->lines as $index => $line) {
             if (substr($line, 0, 2) === '/*') {
                 unset($block->lines[$index]);
             }
         }
-        
+
         echo $inner . implode($glue, $block->lines);
-        
+
         if (! empty($block->children)) {
             echo $this->break;
         }

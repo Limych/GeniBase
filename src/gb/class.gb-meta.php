@@ -825,7 +825,7 @@ class GB_Meta
      *
      * @since 2.3.0
      *       
-     * @global wpdb $wpdb GeniBase database abstraction object.
+     * @global wpdb gbdb() GeniBase database abstraction object.
      *        
      * @param string $meta_type
      *            Type of object metadata is for (e.g., comment, post, or user)

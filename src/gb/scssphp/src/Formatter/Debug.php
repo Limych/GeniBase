@@ -2,12 +2,13 @@
 /**
  * SCSSPHP
  *
- * @copyright 2012-2015 Leaf Corcoran
+ * @copyright 2012-2017 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
  * @link http://leafo.github.io/scssphp
  */
+
 namespace Leafo\ScssPhp\Formatter;
 
 use Leafo\ScssPhp\Formatter;
@@ -20,9 +21,8 @@ use Leafo\ScssPhp\Formatter\OutputBlock;
  */
 class Debug extends Formatter
 {
-
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     public function __construct()
     {
@@ -37,7 +37,7 @@ class Debug extends Formatter
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     protected function indentStr()
     {
@@ -45,72 +45,73 @@ class Debug extends Formatter
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     protected function blockLines(OutputBlock $block)
     {
         $indent = $this->indentStr();
-        
+
         if (empty($block->lines)) {
             echo "{$indent}block->lines: []\n";
-            
+
             return;
         }
-        
+
         foreach ($block->lines as $index => $line) {
             echo "{$indent}block->lines[{$index}]: $line\n";
         }
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     protected function blockSelectors(OutputBlock $block)
     {
         $indent = $this->indentStr();
-        
+
         if (empty($block->selectors)) {
             echo "{$indent}block->selectors: []\n";
-            
+
             return;
         }
-        
+
         foreach ($block->selectors as $index => $selector) {
             echo "{$indent}block->selectors[{$index}]: $selector\n";
         }
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     protected function blockChildren(OutputBlock $block)
     {
         $indent = $this->indentStr();
-        
+
         if (empty($block->children)) {
             echo "{$indent}block->children: []\n";
-            
+
             return;
         }
-        
-        $this->indentLevel ++;
-        
+
+        $this->indentLevel++;
+
         foreach ($block->children as $i => $child) {
             $this->block($child);
         }
-        
-        $this->indentLevel --;
+
+        $this->indentLevel--;
     }
 
     /**
-     * @ERROR!!!
+     * {@inheritdoc}
      */
     protected function block(OutputBlock $block)
     {
         $indent = $this->indentStr();
-        
-        echo "{$indent}block->type: {$block->type}\n" . "{$indent}block->depth: {$block->depth}\n";
-        
+
+        echo "{$indent}block->type: {$block->type}\n" .
+             "{$indent}block->depth: {$block->depth}\n";
+
         $this->blockSelectors($block);
         $this->blockLines($block);
         $this->blockChildren($block);
