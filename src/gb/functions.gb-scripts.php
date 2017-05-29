@@ -5,7 +5,7 @@
  * @since	2.0.0
  *
  * @package GeniBase
- * 
+ *
  * @copyright	Copyright © WordPress Team
  * @copyright	Partially copyright © 2014–2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
@@ -19,9 +19,9 @@ if (! defined('GB_VERSION') || count(get_included_files()) == 1)
  *
  * @since 2.0.0
  * @access private
- *        
+ *
  * @global GB_Scripts $gb_scripts The GB_Scripts object.
- *        
+ *
  * @return GB_Scripts GB_Scripts object for printing styles.
  */
 function _gb_scripts()
@@ -29,7 +29,7 @@ function _gb_scripts()
     if (! isset($GLOBALS['gb_scripts']) || ! is_a($GLOBALS['gb_scripts'], 'GB_Scripts')) {
         if (class_exists('GB_Hooks') && ! GB_Hooks::did_action('init'))
             _doing_it_wrong(__FUNCTION__, sprintf(__('Scripts and styles should not be registered or enqueued until the %1$s, %2$s, or %3$s hooks.'), '<code>gb_enqueue_scripts</code>', '<code>admin_enqueue_scripts</code>', '<code>login_enqueue_scripts</code>'), '3.3');
-        
+
         $GLOBALS['gb_scripts'] = new GB_Scripts();
     }
     return $GLOBALS['gb_scripts'];
@@ -45,9 +45,9 @@ function _gb_scripts()
  *
  * @see GB_Scripts::do_items()
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @param string|bool|array $handles
  *            Optional. Scripts to be printed. Default 'false'.
  * @return array On success, a processed array of GB_Dependencies items; otherwise, an empty array.
@@ -56,14 +56,14 @@ function gb_print_scripts($handles = false)
 {
     if ('' === $handles) // for gb_head
         $handles = false;
-    
+
     /**
      * Fires before scripts in the $handles queue are printed.
      *
      * @since 2.1.0
      */
     GB_Hooks::do_action('gb_print_scripts');
-    
+
     return _gb_scripts()->do_items($handles);
 }
 
@@ -74,9 +74,9 @@ function gb_print_scripts($handles = false)
  *
  * @see GB_Dependencies::add(), GB_Dependencies::add_data()
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @param string $handle
  *            Name of the script. Should be unique.
  * @param string $src
@@ -117,11 +117,11 @@ function gb_register_script($handle, $src, $deps = array(), $ver = false, $in_fo
  * @see GB_Dependencies::localize()
  * @link https://core.trac.wordpress.org/ticket/11520
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @todo Documentation cleanup
- *      
+ *
  * @param string $handle
  *            Script handle the data will be attached to.
  * @param string $object_name
@@ -144,9 +144,9 @@ function gb_localize_script($handle, $object_name, $l10n)
  *
  * @see GB_Dependencies::remove()
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @param string $handle
  *            Name of the script to be removed.
  */
@@ -157,28 +157,30 @@ function gb_deregister_script($handle)
      * Show minimal remorse if the correct hook is used.
      */
     // TODO: gb_deregister_script()
-    /*
-     * current_filter = GB_Hooks::current_filter();
-     * if( ( is_admin() && 'admin_enqueue_scripts' !== current_filter ) ||
-     * ( 'gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== current_filter )
-     * ) {
-     * $no = array(
-     * 'jquery', 'jquery-core', 'jquery-migrate', 'jquery-ui-core', 'jquery-ui-accordion',
-     * 'jquery-ui-autocomplete', 'jquery-ui-button', 'jquery-ui-datepicker', 'jquery-ui-dialog',
-     * 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-menu', 'jquery-ui-mouse',
-     * 'jquery-ui-position', 'jquery-ui-progressbar', 'jquery-ui-resizable', 'jquery-ui-selectable',
-     * 'jquery-ui-slider', 'jquery-ui-sortable', 'jquery-ui-spinner', 'jquery-ui-tabs',
-     * 'jquery-ui-tooltip', 'jquery-ui-widget', 'underscore', 'backbone',
-     * );
-     *
-     * if( in_array( $handle, $no ) ) {
-     * $message = sprintf( __( 'Do not deregister the %1$s script in the administration area. To target the frontend theme, use the %2$s hook.' ),
-     * "<code>$handle</code>", '<code>gb_enqueue_scripts</code>' );
-     * _doing_it_wrong( __FUNCTION__, $message, '3.6' );
-     * return;
-     * }
-     * }/*
-     */
+
+    $current_filter = GB_Hooks::current_filter();
+    if ((is_admin() && 'admin_enqueue_scripts' !== $current_filter)
+        || ('gb-login.php' === $GLOBALS['pagenow'] && 'login_enqueue_scripts' !== $current_filter)) {
+
+        $no = array(
+            'jquery', 'gb-core',
+            'jquery-migrate', 'jquery-ui-core', 'jquery-ui-accordion',
+            'jquery-ui-autocomplete', 'jquery-ui-button', 'jquery-ui-datepicker',
+            'jquery-ui-dialog', 'jquery-ui-draggable', 'jquery-ui-droppable',
+            'jquery-ui-menu', 'jquery-ui-mouse', 'jquery-ui-position',
+            'jquery-ui-progressbar', 'jquery-ui-resizable', 'jquery-ui-selectable',
+            'jquery-ui-slider', 'jquery-ui-sortable', 'jquery-ui-spinner',
+            'jquery-ui-tabs', 'jquery-ui-tooltip', 'jquery-ui-widget', 'underscore',
+            'backbone'
+        );
+
+        if (in_array($handle, $no)) {
+            $message = sprintf(__('Do not deregister the %1$s script in the administration area. To target the frontend theme, use the %2$s hook.'), "<code>$handle</code>", '<code>gb_enqueue_scripts</code>');
+            _doing_it_wrong(__FUNCTION__, $message, '3.0');
+            return;
+        }
+    }
+
     _gb_scripts()->remove($handle);
 }
 
@@ -189,9 +191,9 @@ function gb_deregister_script($handle)
  *
  * @see GB_Dependencies::add(), GB_Dependencies::add_data(), GB_Dependencies::enqueue()
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @param string $handle
  *            Name of the script.
  * @param string|bool $src
@@ -222,9 +224,9 @@ function gb_enqueue_script($handle, $src = false, $deps = array(), $ver = false,
  *
  * @see GB_Dependencies::dequeue()
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
- *       
+ *
  * @param string $handle
  *            Name of the script to be removed.
  */
@@ -237,10 +239,10 @@ function gb_dequeue_script($handle)
  * Check whether a script has been added to the queue.
  *
  * @global GB_Scripts _gb_scripts() The GB_Scripts object for printing scripts.
- *        
+ *
  * @since 2.0.0
  * @since 2.0.0 'enqueued' added as an alias of the 'queue' list.
- *       
+ *
  * @param string $handle
  *            Name of the script.
  * @param string $list
@@ -264,7 +266,7 @@ function gb_script_is($handle, $list = 'enqueued')
  * @see GB_Dependency::add_data()
  *
  * @since 2.2.2
- *       
+ *
  * @param string $handle
  *            Name of the script.
  * @param string $key

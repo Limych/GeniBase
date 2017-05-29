@@ -123,6 +123,23 @@ function gb_initial_constants()
 }
 
 /**
+ * Calculate correct module URL from local directory path.
+ *
+ * @param   string  $dir   Local directory path to module. No trailing slash, full path only.
+ * @return  string      Module's URL. No trailing slash, full url.
+ *
+ * @since 3.0.0
+ */
+function _gb_plugin_constants_calc_url($dir)  {
+    $url = substr($dir, strlen($_SERVER['DOCUMENT_ROOT']));
+    if (DIRECTORY_SEPARATOR !== '/')
+        $url = strtr($url, DIRECTORY_SEPARATOR, '/');
+    $url = '//' . $_SERVER['HTTP_HOST'] . $url;
+    return $url;
+}
+
+
+/**
  * Defines plugin directory GeniBase constants
  *
  * @since 2.0.0
@@ -130,10 +147,11 @@ function gb_initial_constants()
 function gb_plugin_constants()
 {
     // Запоминаем текущий каталог, как корень сайта
-    if (! defined('BASE_URL'))
+    if (! defined('BASE_URL')) {
         // TODO: options
-        define('BASE_URL', '//' . $_SERVER['HTTP_HOST'] . substr(BASE_DIR, strlen($_SERVER['DOCUMENT_ROOT']))); // no trailing slash
-                                                                                                                    // define( 'BASE_URL', get_option('siteurl')); // full url
+        define('BASE_URL', _gb_plugin_constants_calc_url(BASE_DIR)); // no trailing slash, full url
+//     define( 'BASE_URL', get_option('siteurl')); // no trailing slash, full url
+    }
 
     /**
      * Allows for the core directory to be moved from the default location.
@@ -143,7 +161,7 @@ function gb_plugin_constants()
      * @since 2.0.0
      */
     if (! defined('GB_CORE_URL'))
-        define('GB_CORE_URL', BASE_URL . '/gb'); // full url
+        define('GB_CORE_URL', _gb_plugin_constants_calc_url(GB_CORE_DIR)); // no trailing slash, full url
 
     /**
      * Allows for the content directory to be moved from the default location.
@@ -153,7 +171,7 @@ function gb_plugin_constants()
      * @since 2.0.0
      */
     if (! defined('GB_CONTENT_URL'))
-        define('GB_CONTENT_URL', BASE_URL . '/gb-content'); // full url
+        define('GB_CONTENT_URL', _gb_plugin_constants_calc_url(GB_CONTENT_DIR)); // no trailing slash, full url
 
     /**
      * Allows for the cache directory to be moved from the default location.
@@ -163,7 +181,7 @@ function gb_plugin_constants()
      * @since 2.1.1
      */
     if (! defined('GB_CONTENT_CACHE_URL'))
-        define('GB_CONTENT_CACHE_URL', GB_CONTENT_URL . '/cache'); // full url
+        define('GB_CONTENT_CACHE_URL', _gb_plugin_constants_calc_url(GB_CONTENT_CACHE_DIR)); // no trailing slash, full url
 
     /**
      * Allows for the administration directory to be moved from the default location.
@@ -173,7 +191,7 @@ function gb_plugin_constants()
      * @since 3.0.0
      */
     if (! defined('GB_ADMIN_URL'))
-        define('GB_ADMIN_URL', BASE_URL . '/gb-admin'); // full url
+        define('GB_ADMIN_URL', _gb_plugin_constants_calc_url(GB_ADMIN_DIR)); // no trailing slash, full url
 
 /**
  * Allows for the plugins directory to be moved from the default location.
@@ -255,7 +273,7 @@ function gb_cookie_constants()
      */
     if (! defined('GB_COOKIE_PATH'))
         define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', site_url('/'))); // TODO: options
-                                                                                             // define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
+// define('GB_COOKIE_PATH', preg_replace('|^https?://[^/]+|i', '', get_option('home') . '/' ) );
 
     /**
      *

@@ -25,27 +25,17 @@ error_reporting(E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WA
  * Define BASE_DIR as initial file's directory
  */
 if (! defined('BASE_DIR')) {
-    if (isset($_SERVER['PATH_TRANSLATED']))
-        $_path = $_SERVER['PATH_TRANSLATED'];
-
-    elseif (isset($_SERVER['SCRIPT_FILENAME']))
-        $_path = realpath($_SERVER['SCRIPT_FILENAME']);
-
-    elseif (isset($_SERVER['SCRIPT_NAME']) && isset($_SERVER['DOCUMENT_ROOT']))
-        $_path = $_SERVER['DOCUMENT_ROOT'] . $_SERVER['SCRIPT_NAME'];
-
-    else
-        $_path = get_included_files()[0];
-
-    define('BASE_DIR', dirname($_path));
-    unset($_path);
+    /** @var string  Absolute path to the initial file's directory */
+    define('BASE_DIR', dirname(__FILE__));
 }
 
 /**
  * Define GB_CORE_DIR as absolute path to the root directory of GeniBase core
  */
-if (! defined('GB_CORE_DIR'))
+if (! defined('GB_CORE_DIR')){
+    /** @var string  Absolute path to the root directory of GeniBase core */
     define('GB_CORE_DIR', BASE_DIR . '/gb');
+}
 
 /**
  * Loading configs and run GeniBase core
@@ -57,7 +47,7 @@ if (! $cfg_exists) {
     $cfg_fpath = dirname(BASE_DIR) . '/gb-config.php';
     $cfg_exists = file_exists($cfg_fpath);
 }
-if ($cfg_exists || (defined('GB_SHORTINIT') && GB_SHORTINIT)) {
+if ($cfg_exists || (defined('GB_SHORTINIT') && GB_SHORTINIT) || (defined('GB_INSTALLING') && GB_INSTALLING)) {
     // Config file found
 
     // Load configs

@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2017-05-18 22:22+0300\n"
-"PO-Revision-Date: 2017-05-18 22:22+0300\n"
+"POT-Creation-Date: 2017-05-30 00:25+0300\n"
+"PO-Revision-Date: 2017-05-30 00:27+0300\n"
 "Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -22,7 +22,7 @@ msgstr ""
 "esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: class.gb-dbase.php:294
+#: class.gb-dbase.php:295
 #, php-format
 msgid ""
 "\n"
@@ -39,19 +39,30 @@ msgid ""
 "<p>If you're unsure what these terms mean you should probably contact your "
 "host.</p>\n"
 msgstr ""
+"\n"
+"<h1>Ошибка подключения к базе данных</h1>\n"
+"<p>Это означает, что информация об имени пользователя и пароль в файле "
+"<code>gb-config.php</code> неверные или мы не можем подключиться к серверу "
+"базы данных по адресу <code>%s</code>. Это может означать, что ваш сервер "
+"баз данных выключен.</p>\n"
+"<ul>\n"
+"\t<li>Вы уверены, что указали корректные имя пользователя и пароль?</li>\n"
+"\t<li>Вы уверены, что правильно указали адрес сервера баз данных?</li>\n"
+"\t<li>Вы уверены, что сервер баз данных работает?</li>\n"
+"</ul>\n"
+"<p>Если вы не уверены в ответах на эти вопросы, возможно, вам следует "
+"обратиться за помощью к своему провайдеру.</p>\n"
 
-#: class.gb-dbase.php:339
-#, fuzzy, php-format
+#: class.gb-dbase.php:340
+#, php-format
 msgid "<strong>ERROR</strong>: GeniBase %1$s requires MySQL %2$s or higher."
 msgstr "<strong>ОШИБКА</strong>: GeniBase %1$s требует MySQL %2$s или старше."
 
 #: class.gb-user.php:1604
-#, fuzzy
 msgid "<strong>ERROR</strong>: The email field is empty."
 msgstr "<strong>ОШИБКА</strong>: Поле для электронный почты не заполнено."
 
 #: class.gb-user.php:1607
-#, fuzzy
 msgid "<strong>ERROR</strong>: The password field is empty."
 msgstr "<strong>ОШИБКА</strong>: Поле для пароля не заполнено."
 
@@ -74,14 +85,15 @@ msgid ""
 "stronger, use upper and lower case letters, numbers, and symbols like ! \" ? "
 "$ % ^ &amp; )."
 msgstr ""
+"Подсказка: Пароль должен быть длиной как минимум семь символов. Чтобы "
+"сделать его надёжнее, используйте заглавные и прописные буквы, числа и "
+"символы ! \" ? $ % ^ &amp; )."
 
 #: class.gb-user.php:1744
-#, fuzzy
 msgid "Cannot create a user with an empty email."
 msgstr "Не могу создать пользователя с пустым почтовым адресом."
 
 #: class.gb-user.php:1747
-#, fuzzy
 msgid "Sorry, that email address is already used!"
 msgstr "Извините, но этот почтовый адрес уже используется!"
 
@@ -90,6 +102,13 @@ msgstr "Извините, но этот почтовый адрес уже ис�
 msgid ""
 "Scripts and styles should not be registered or enqueued until the %1$s, "
 "%2$s, or %3$s hooks."
+msgstr ""
+
+#: functions.gb-scripts.php:178
+#, php-format
+msgid ""
+"Do not deregister the %1$s script in the administration area. To target the "
+"frontend theme, use the %2$s hook."
 msgstr ""
 
 #: functions.gb-styles.php:88
@@ -163,22 +182,10 @@ msgstr ""
 msgid "%1$s was called <strong>incorrectly</strong>. %2$s %3$s"
 msgstr ""
 
-#: general-template.php:440 general-template.php:449 general-template.php:460
-#: general-template.php:469
+#: general-template.php:445 general-template.php:454 general-template.php:465
+#: general-template.php:474
 msgid "&hellip;"
 msgstr "&hellip;"
-
-#: js/vendor/jquery-2.1.3.min.js:14
-msgid "<iframe frameborder='0' width='0' height='0'/>"
-msgstr ""
-
-#: js/vendor/jquery-2.1.3.min.js:26
-msgid "<script>"
-msgstr ""
-
-#: js/vendor/jquery-2.1.3.min.js:26
-msgid "<div>"
-msgstr ""
 
 #: load.php:259 load.php:274
 msgid "Maintenance"
@@ -434,40 +441,37 @@ msgstr "d.m.Y H:i"
 msgid "<strong>ERROR</strong>: Invalid login or incorrect password."
 msgstr ""
 
-#: script-loader.php:78
+#: script-loader.php:87
 msgid "Strength indicator"
-msgstr ""
+msgstr "Индикатор надёжности"
 
-#: script-loader.php:79
+#: script-loader.php:88
+msgctxt "password strength"
 msgid "Very weak"
-msgstr ""
+msgstr "Очень слабый"
 
-#: script-loader.php:80
+#: script-loader.php:89
+msgctxt "password strength"
 msgid "Weak"
-msgstr ""
+msgstr "Слабый"
 
-#: script-loader.php:81
+#: script-loader.php:90
 msgctxt "password strength"
 msgid "Medium"
-msgstr ""
+msgstr "Средний"
 
-#: script-loader.php:82
+#: script-loader.php:91
+msgctxt "password strength"
 msgid "Strong"
-msgstr ""
+msgstr "Сильный"
 
-#: script-loader.php:83
+#: script-loader.php:92
 msgid "Mismatch"
-msgstr ""
+msgstr "Не совпадают"
 
-#: script-loader.php:130
-msgctxt "Open Sans font: on or off"
-msgid "on"
-msgstr "on"
-
-#: script-loader.php:137
-msgctxt "Open Sans font: add new subset (greek, cyrillic, vietnamese)"
-msgid "no-subset"
-msgstr ""
+#~ msgctxt "Open Sans font: on or off"
+#~ msgid "on"
+#~ msgstr "on"
 
 #~ msgid "%s is a protected GB option and may not be modified"
 #~ msgstr "%s защищённая опция GB и не может изменяться"

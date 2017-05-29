@@ -7,7 +7,7 @@
  *
  * @package GeniBase
  * @since	2.0.0
- * 
+ *
  * @copyright	Copyright © WordPress Team
  * @copyright	Partially copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
@@ -68,7 +68,7 @@ class GB_Scripts extends GB_Dependencies
          * Fires when the GB_Scripts instance is initialized.
          *
          * @since 2.1.1
-         *       
+         *
          * @param
          *            GB_Scripts &$this GB_Scripts instance, passed by reference.
          */
@@ -99,16 +99,16 @@ class GB_Scripts extends GB_Dependencies
     {
         if (! $output = $this->get_data($handle, 'data'))
             return;
-        
+
         if (! $echo)
             return $output;
-        
+
         echo "<script type='text/javascript'>\n"; // CDATA and type='text/javascript' is not needed for HTML 5
         echo "/* <![CDATA[ */\n";
         echo "$output\n";
         echo "/* ]]> */\n";
         echo "</script>\n";
-        
+
         return true;
     }
 
@@ -116,40 +116,46 @@ class GB_Scripts extends GB_Dependencies
     {
         if (! parent::do_item($handle))
             return false;
-        
+
         if (0 === $group && $this->groups[$handle] > 0) {
             $this->in_footer[] = $handle;
             return false;
         }
-        
+
         if (false === $group && in_array($handle, $this->in_footer, true))
             $this->in_footer = array_diff($this->in_footer, (array) $handle);
-        
+
         $obj = $this->registered[$handle];
-        
+
         if (null === $obj->ver)
             $ver = '';
         else
             $ver = $obj->ver ? $obj->ver : $this->default_version;
-        
+
         if (isset($this->args[$handle]))
             $ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
-        
+
         $src = $obj->src;
         $cond_before = $cond_after = '';
         $conditional = isset($obj->extra['conditional']) ? $obj->extra['conditional'] : '';
-        
+
         if ($conditional) {
             $cond_before = "<!--[if {$conditional}]>\n";
             $cond_after = "<![endif]-->\n";
         }
-        
+
+        $sri_checking = '';
+        if (isset($obj->extra['integrity']) && !empty($obj->extra['integrity'])) {
+            $sri_checking = " integrity='" . $obj->extra['integrity'] .
+                "' crossorigin='" . (isset($obj->extra['crossorigin']) ? $obj->extra['crossorigin'] : 'anonymous') . "'";
+        }
+
         if ($this->do_concat) {
             /**
              * Filter the script loader source.
              *
              * @since 2.1.1
-             *       
+             *
              * @param string $src
              *            Script loader source path.
              * @param string $handle
@@ -166,39 +172,39 @@ class GB_Scripts extends GB_Dependencies
                 $this->ext_version .= "$handle$ver";
             }
         }
-        
+
         $has_conditional_data = $conditional && $this->get_data($handle, 'data');
-        
+
         if ($has_conditional_data)
             echo $cond_before;
-        
+
         $this->print_extra_script($handle);
-        
+
         if ($has_conditional_data)
             echo $cond_after;
-        
+
         if (! preg_match('|^(https?:)?//|', $src) && ! ($this->content_url && 0 === strpos($src, $this->content_url))) {
             $src = $this->base_url . $src;
         }
-        
+
         if (! empty($ver))
             $src = add_query_arg('ver', $ver, $src);
-        
+
         /**
          * This filter is documented in gb/class.gb-scripts.php
          */
         $src = esc_url(GB_Hooks::apply_filters('script_loader_src', $src, $handle));
-        
+
         if (! $src)
             return true;
-        
-        $tag = "{$cond_before}<script type='text/javascript' src='$src'></script>\n{$cond_after}";
-        
+
+        $tag = "{$cond_before}<script type='text/javascript' src='$src'$sri_checking></script>\n{$cond_after}";
+
         /**
          * Filter the HTML script tag of an enqueued script.
          *
          * @since 2.1.1
-         *       
+         *
          * @param string $tag
          *            The `<script>` tag for the enqueued script.
          * @param string $handle
@@ -207,13 +213,13 @@ class GB_Scripts extends GB_Dependencies
          *            The script's source URL.
          */
         $tag = GB_Hooks::apply_filters('script_loader_tag', $tag, $handle, $src);
-        
+
         if ($this->do_concat) {
             $this->print_html .= $tag;
         } else {
             echo $tag;
         }
-        
+
         return true;
     }
 
@@ -224,31 +230,28 @@ class GB_Scripts extends GB_Dependencies
      */
     public function localize($handle, $object_name, $l10n)
     {
-        if ($handle === 'jquery')
-            $handle = 'jquery-core';
-        
         if (is_array($l10n) && isset($l10n['l10n_print_after'])) { // back compat, preserve the code in 'l10n_print_after' if present
             $after = $l10n['l10n_print_after'];
             unset($l10n['l10n_print_after']);
         }
-        
+
         foreach ((array) $l10n as $key => $value) {
             if (! is_scalar($value))
                 continue;
-            
+
             $l10n[$key] = html_entity_decode((string) $value, ENT_QUOTES, 'UTF-8');
         }
-        
+
         $script = "var $object_name = " . gb_json_encode($l10n) . ';';
-        
+
         if (! empty($after))
             $script .= "\n$after;";
-        
+
         $data = $this->get_data($handle, 'data');
-        
+
         if (! empty($data))
             $script = "$data\n$script";
-        
+
         return $this->add_data($handle, 'data', $script);
     }
 
@@ -258,10 +261,10 @@ class GB_Scripts extends GB_Dependencies
             $grp = 1;
         else
             $grp = (int) $this->get_data($handle, 'group');
-        
+
         if (false !== $group && $grp > $group)
             $grp = $group;
-        
+
         return parent::set_group($handle, $recursion, $grp);
     }
 
@@ -273,7 +276,7 @@ class GB_Scripts extends GB_Dependencies
              * Filter the list of script dependencies left to print.
              *
              * @since 2.1.1
-             *       
+             *
              * @param array $to_do
              *            An array of script dependencies.
              */
@@ -299,11 +302,11 @@ class GB_Scripts extends GB_Dependencies
         if (! $this->default_dirs) {
             return true;
         }
-        
+
         if (0 === strpos($src, '/' . GB_CORE_DIR . '/js/l10n')) {
             return false;
         }
-        
+
         foreach ((array) $this->default_dirs as $test) {
             if (0 === strpos($src, $test)) {
                 return true;

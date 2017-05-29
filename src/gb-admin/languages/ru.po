@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GeniBase\n"
-"POT-Creation-Date: 2017-05-18 23:05+0300\n"
-"PO-Revision-Date: 2017-05-18 23:07+0300\n"
+"POT-Creation-Date: 2017-05-30 00:46+0300\n"
+"PO-Revision-Date: 2017-05-30 00:51+0300\n"
 "Last-Translator: Andrey Khrolenok <andrey@khrolenok.ru>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -22,72 +22,74 @@ msgstr ""
 "esc_attr_x:1,2c;esc_attr_ex:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/schema.php:240
+#: includes/schema.php:239
 msgctxt "default GMT offset or timezone string"
 msgid "0"
-msgstr ""
+msgstr "+3"
 
-#: includes/schema.php:249
+#: includes/schema.php:248
 msgid "My Site"
-msgstr ""
+msgstr "Мой сайт"
 
-#: includes/schema.php:253
+#: includes/schema.php:252
 msgctxt "start of week"
 msgid "1"
 msgstr "1"
 
-#: includes/schema.php:256
+#: includes/schema.php:255
 msgid "j F Y"
-msgstr ""
+msgstr "d.m.Y"
 
-#: includes/schema.php:258
+#: includes/schema.php:257
 msgid "G:i"
-msgstr ""
+msgstr "H:i"
 
-#: includes/schema.php:370 includes/upgrade.php:75
+#: includes/schema.php:369 includes/upgrade.php:74
 msgctxt "User role"
 msgid "Administrator"
 msgstr "Администратор"
 
-#: includes/schema.php:372
+#: includes/schema.php:371
 msgctxt "User role"
 msgid "Moderator"
 msgstr "Модератор"
 
-#: includes/schema.php:374
+#: includes/schema.php:373
 msgctxt "User role"
 msgid "Editor"
 msgstr "Редактор"
 
-#: includes/schema.php:376
+#: includes/schema.php:375
 msgctxt "User role"
 msgid "Contributor"
 msgstr "Помощник"
 
-#: includes/schema.php:378
+#: includes/schema.php:377
 msgctxt "User role"
 msgid "Reader"
 msgstr "Читатель"
 
-#: includes/upgrade.php:78
+#: includes/upgrade.php:77
 msgid ""
 "<strong><em>Note that password</em></strong> carefully! It is a <em>random</"
 "em> password that was generated just for you."
 msgstr ""
+"<strong><em>Запишите этот пароль</em></strong> аккуратно! Это <em>случайный</"
+"em> пароль, который был создан специально для вас."
 
-#: includes/upgrade.php:84
+#: includes/upgrade.php:83
 msgid "Your chosen password."
-msgstr ""
+msgstr "Указанный вами пароль."
 
-#: includes/upgrade.php:88
+#: includes/upgrade.php:87
 msgid "User already exists. Password inherited."
-msgstr ""
+msgstr "Пользователь уже существует. Сохранён старый пароль."
 
-#: includes/upgrade.php:99
+#: includes/upgrade.php:98
 msgid "The password you chose during the install."
-msgstr ""
+msgstr "Пароль, который вы выбрали при установке системы."
 
-#: includes/upgrade.php:167
+#: includes/upgrade.php:166
 #, php-format
 msgid ""
 "Your new GeniBase site has been successfully set up at:\n"
@@ -104,67 +106,81 @@ msgid ""
 "\n"
 "--The GeniBase Team\n"
 msgstr ""
+"Ваш новый сайт на базе GeniBase успешно установлен по адресу:\n"
+"\n"
+"%1$s\n"
+"\n"
+"Вы можете авторизоваться как администратор, используя следующую информацию:\n"
+"\n"
+"Имя пользователя: %2$s\n"
+"Пароль: %3$s\n"
+"Авторизуйтесь здесь: %4$s\n"
+"\n"
+"Мы надеемся, вам понравится ваш новый сайт. Спасибо!\n"
+"\n"
+"-- Команда разработчиков GeniBase\n"
 
-#: includes/upgrade.php:185
+#: includes/upgrade.php:184
 msgid "New GeniBase Site"
-msgstr ""
+msgstr "Новый сайт на GeniBase"
 
-#: install.php:83
+#: install.php:96
 msgid "GeniBase Installation"
 msgstr "Инсталляция GeniBase"
 
-#: install.php:88 setup-config.php:92
+#: install.php:106 setup-config.php:106
 msgid "GeniBase"
 msgstr "GeniBase"
 
-#: install.php:140
+#: install.php:160
 msgid "Site Title"
-msgstr ""
+msgstr "Название сайта"
 
-#: install.php:149
+#: install.php:168
 msgid "Your E-mail"
-msgstr ""
+msgstr "Ваш e-mail"
 
-#: install.php:152
+#: install.php:171
 msgid "User(s) already exists."
-msgstr ""
+msgstr "Пользователь(и) уже существует."
 
-#: install.php:159
+#: install.php:178
 msgid "Double-check your email address before continuing."
-msgstr ""
+msgstr "Дважды проверьте адрес почты, прежде чем продолжать."
 
-#: install.php:165
+#: install.php:184
 msgid "Password, twice"
-msgstr ""
+msgstr "Пароль, дважды"
 
-#: install.php:176
+#: install.php:190
 msgid "Strength indicator"
-msgstr ""
+msgstr "Индикатор надёжности"
 
-#: install.php:179
+#: install.php:193
 msgid ""
 "A&nbsp;password will be automatically generated for you if you leave this "
 "blank."
 msgstr ""
+"Если вы оставите эти поля пустыми, пароль для вас будет создан автоматически."
 
-#: install.php:186
+#: install.php:199
 msgid "Privacy"
-msgstr ""
+msgstr "Приватность"
 
-#: install.php:190
+#: install.php:203
 msgid "Allow search engines to&nbsp;index this site."
-msgstr ""
+msgstr "Разрешить поисковым системам индексировать ваш сайт."
 
-#: install.php:195
+#: install.php:209
 msgid "Install GeniBase"
 msgstr "Установить GeniBase"
 
-#: install.php:224
+#: install.php:227
 msgctxt "Howdy"
 msgid "Welcome"
 msgstr "Добро пожаловать"
 
-#: install.php:225
+#: install.php:228
 msgid ""
 "Welcome to five-minute GeniBase installation process! Just fill in the "
 "information below."
@@ -172,11 +188,11 @@ msgstr ""
 "Добро пожаловать в пятиминутный процесс инсталляции GeniBase! Просто "
 "заполните поля ниже."
 
-#: install.php:227
+#: install.php:230
 msgid "Information needed"
-msgstr "Необходима информация"
+msgstr "Необходимая информация"
 
-#: install.php:228
+#: install.php:231
 msgid ""
 "Please provide the following information. Don&#8217;t worry, you can always "
 "change these settings later."
@@ -184,57 +200,66 @@ msgstr ""
 "Пожалуста, укажите следующие данные. Вы всегда сможете изменить эти "
 "настройки позже."
 
-#: install.php:259
+#: install.php:255
 msgid "You must provide an email address."
-msgstr ""
+msgstr "Необходимо указать адрес электронной почты."
 
-#: install.php:263
+#: install.php:259
 msgid ""
 "Sorry, that isn&#8217;t a valid email address. Email addresses look like "
 "<code>username@example.com</code>."
 msgstr ""
+"Извините, но это не адрес электронной почты. Адрес должен быть похожим на "
+"<code>username@example.com</code>."
 
-#: install.php:267
+#: install.php:263
 msgid "Your passwords do not match. Please try again."
-msgstr ""
+msgstr "Введённые вами пароли не совпадают. Попробуйте ещё раз."
 
-#: install.php:277
+#: install.php:272
 msgid "Success!"
-msgstr ""
+msgstr "Поздравляем!"
 
-#: install.php:279
+#: install.php:274
 msgid ""
 "GeniBase has been installed. Were you expecting more steps? Sorry to "
 "disappoint."
 msgstr ""
+"GeniBase установлена. Вы ожидали, что шагов будет больше? Извините за "
+"неудобство."
 
-#: install.php:282
+#: install.php:277
 msgid "User login"
-msgstr ""
+msgstr "Имя пользователя"
 
-#: install.php:286 setup-config.php:169
+#: install.php:281 setup-config.php:171
 msgid "Password"
-msgstr ""
+msgstr "Пароль"
 
-#: install.php:298
+#: install.php:291
 msgid "Log In"
-msgstr ""
+msgstr "Авторизоваться"
 
-#: setup-config.php:52
+#: setup-config.php:63
 msgid ""
-"Sorry, I need a gb-config-sample.php file to work from. Please re-upload "
-"this file from your GeniBase installation."
+"Sorry, I need a <code>gb-config-sample.php</code> file to work from. Please "
+"re-upload this file from your GeniBase installation."
 msgstr ""
+"Извините, но для работы нужен файл <code>gb-config-sample.php</code>. "
+"Пожалуйста, загрузите его заново из инсталляционного пакета GeniBase."
 
-#: setup-config.php:56
+#: setup-config.php:67
 #, php-format
 msgid ""
 "The file <code>gb-config.php</code> already exists. If you need to reset any "
 "of the configuration items in this file, please delete it first. You may try "
 "<a href='%s'>installing now</a>."
 msgstr ""
+"Файл <code>gb-config.php</code> уже существует. Если вы хотите "
+"переустановить какие-либо настройки в нём, пожалуйста, сперва удалите его. "
+"Или вы можете <a href='%s'>перейти к инсталляции</a>."
 
-#: setup-config.php:60
+#: setup-config.php:71
 #, php-format
 msgid ""
 "The file <code>gb-config.php</code> already exists one level above your "
@@ -242,45 +267,47 @@ msgid ""
 "in this file, please delete it first. You may try <a href='%s'>installing "
 "now</a>."
 msgstr ""
+"Файл <code>gb-config.php</code> уже существует в каталоге на один уровень "
+"выше инсталляции GeniBase. Если вы хотите переустановить какие-либо "
+"настройки в нём, пожалуйста, сперва удалите его. Или вы можете <a "
+"href='%s'>перейти к инсталляции</a>."
 
-#: setup-config.php:86
+#: setup-config.php:94
 msgid "GeniBase &rsaquo; Setup Configuration File"
-msgstr ""
+msgstr "GeniBase &rsaquo; Создание файла настроек"
 
-#: setup-config.php:121
+#: setup-config.php:124
 msgid ""
 "Welcome to GeniBase. Before getting started, we need some information on the "
 "database. You will need to know the following items before proceeding."
 msgstr ""
+"Добро пожаловать в GeniBase. Прежде всего нам нужна некоторая информация о "
+"базе данных. Вам необходимо знать следующие данные для начала работы."
 
-#: setup-config.php:123 setup-config.php:177
-msgid "Database name"
-msgstr "Имя базы данных"
+#: setup-config.php:126 setup-config.php:150
+msgid "Database host"
+msgstr "Адрес сервера базы данных"
 
-#: setup-config.php:124
+#: setup-config.php:127
 msgid "Database username"
 msgstr "Логин к базе данных"
 
-#: setup-config.php:125
+#: setup-config.php:128
 msgid "Database password"
 msgstr "Пароль к базе данных"
 
-#: setup-config.php:126 setup-config.php:152
-msgid "Database host"
-msgstr "Сервер базы данных"
+#: setup-config.php:129 setup-config.php:183
+msgid "Database name"
+msgstr "Имя базы данных"
 
-#: setup-config.php:127
-msgid ""
-"Table prefix (if you want to run more than one GeniBase in a single database)"
-msgstr ""
-
-#: setup-config.php:130
+#: setup-config.php:131
 msgid ""
 "We&#8217;re going to use this information to create a <code>gb-config.php</"
 "code> file."
 msgstr ""
+"Мы используем эту информацию для создания файла <code>gb-config.php</code>."
 
-#: setup-config.php:131
+#: setup-config.php:132
 msgid ""
 "If for any reason this automatic file creation doesn&#8217;t work, don&#8217;"
 "t worry. All this does is fill in the database information to a "
@@ -288,110 +315,140 @@ msgid ""
 "code> in a text editor, fill in your information, and save it as <code>gb-"
 "config.php</code>."
 msgstr ""
+"Если по какой-то причине автоматическое создание этого файла не сработает, "
+"не волнуйтесь. Вы всегда можете открыть в текстовом редакторе файл <code>gb-"
+"config-sample.php</code>, заполнить необходимую информацию вручную и "
+"сохранить его как <code>gb-config.php</code>."
 
-#: setup-config.php:134
+#: setup-config.php:135
 msgid ""
 "In all likelihood, these items were supplied to you by your Web Host. If you "
 "do not have this information, then you will need to contact them before you "
 "can continue. If you&#8217;re all ready&hellip;"
 msgstr ""
+"По всей видимости, вся эта информация должна уже быть предоставлена вам "
+"вашим провайдером. Если вы не имеете этих данных, вам необходимо связаться с "
+"провайдером прежде, чем продолжить. Если же вы готовы&hellip;"
 
-#: setup-config.php:137
+#: setup-config.php:138
 msgid "Let&#8217;s go!"
-msgstr ""
+msgstr "Поехали!"
 
-#: setup-config.php:149
+#: setup-config.php:147
 msgid ""
 "Below you should enter your database connection details. If you&#8217;re not "
 "sure about these, contact your host."
 msgstr ""
+"Ниже вам необходимо указать ваши настройки для подключения к базе данных. "
+"Если вы не уверены в них, свяжитесь со своим провайдером."
 
-#: setup-config.php:158
+#: setup-config.php:155
 msgid ""
 "You should be able to get this info from your web host, if <code>localhost</"
 "code> does not work."
 msgstr ""
+"Вам необходимо получить эту информацию от провайдера, если значение "
+"<code>localhost</code> не работает."
 
-#: setup-config.php:161
+#: setup-config.php:159
 msgid "User Name"
-msgstr ""
+msgstr "Имя пользователя"
 
-#: setup-config.php:164
+#: setup-config.php:163
 msgctxt "example username"
 msgid "username"
 msgstr "username"
 
 #: setup-config.php:166
 msgid "Your MySQL username"
-msgstr ""
+msgstr "Ваш логин к серверу MySQL"
 
-#: setup-config.php:172
+#: setup-config.php:175
 msgctxt "example password"
 msgid "password"
-msgstr "пароль"
+msgstr "password"
 
-#: setup-config.php:174
-msgid "&hellip;and your MySQL password."
-msgstr ""
+#: setup-config.php:178
+msgid "&hellip; and your MySQL password."
+msgstr "&hellip; и пароль к нему."
 
-#: setup-config.php:182
+#: setup-config.php:188
 msgid "The name of the database you want to run GeniBase in."
-msgstr ""
+msgstr "Имя базы данных, в которой вы хотите запустить систему GeniBase."
 
-#: setup-config.php:185
+#: setup-config.php:193
 msgid "Table Prefix"
 msgstr "Префикс таблиц"
 
-#: setup-config.php:189
+#: setup-config.php:198
 #, php-format
 msgid ""
 "If you want to run multiple GeniBase installations in a single database or "
 "for security reasons, change this. For example, to &#8220;<code>%s</"
 "code>&#8221;."
 msgstr ""
+"Если вы хотите запустить несколько версий GeniBase в одной базе данных, либо "
+"хотите увеличить надёжность системы от взлома, измените это значение. "
+"Например, на &#8220;<code>%s</code>&#8221;."
 
-#: setup-config.php:204
+#: setup-config.php:211
 msgid "Submit"
 msgstr "Отправить"
 
-#: setup-config.php:234
+#: setup-config.php:239
 msgid "Try again"
-msgstr ""
+msgstr "Попробовать снова"
 
-#: setup-config.php:237
+#: setup-config.php:242
 msgid "<strong>ERROR</strong>: &#8220;Table Prefix&#8221; must not be empty."
 msgstr ""
+"<strong>ОШИБКА</strong>: Поле &laquo;Префикс таблиц&raquo; не должно быть "
+"пустым."
 
-#: setup-config.php:241
+#: setup-config.php:246
 msgid ""
 "<strong>ERROR</strong>: &#8220;Table Prefix&#8221; can only contain numbers, "
 "letters, and underscores."
 msgstr ""
+"<strong>ОШИБКА</strong>: Поле &laquo;Префикс таблиц&raquo; может содержать "
+"только цифры, латинские буквы и знаки подчёркивания."
 
-#: setup-config.php:320
+#: setup-config.php:332
 msgid "Sorry, but I can&#8217;t write the <code>gb-config.php</code> file."
-msgstr ""
+msgstr "К сожалению, не получается записать файл <code>gb-config.php</code>."
 
-#: setup-config.php:321
+#: setup-config.php:333
 msgid ""
 "You can create the <code>gb-config.php</code> manually and paste the "
-"following text into it."
+"following text into it:"
 msgstr ""
+"Вы можете создать файл <code>gb-config.php</code> вручную и скопировать в "
+"него следующий код:"
 
-#: setup-config.php:328
+#: setup-config.php:339
 msgid "After you&#8217;ve done that, click &#8220;Run the install.&#8221;"
 msgstr ""
+"После того, как вы это сделаете, нажмите &laquo;Запустить инсталляцию&raquo;"
 
-#: setup-config.php:330 setup-config.php:364
+#: setup-config.php:341 setup-config.php:375
 msgid "Run the install"
-msgstr ""
+msgstr "Запустить инсталляцию"
 
-#: setup-config.php:361
+#: setup-config.php:372
 msgid ""
 "All right, sparky! You&#8217;ve made it through this part of the "
 "installation. GeniBase can now communicate with your database. If you are "
 "ready, time now to&hellip;"
 msgstr ""
+"Замечательно! Вы прошли через этот этап установки системы. Теперь GeniBase "
+"может подключиться к серверу баз данных. Если вы готовы, пришло время&hellip;"
+
+#~ msgid ""
+#~ "Table prefix (for maximum database security or if you want to run more "
+#~ "than one GeniBase in a single database)"
+#~ msgstr ""
+#~ "Префикс таблиц (для максимальной устойчивости системы к взлому или если "
+#~ "вы хотите запускать более одной GeniBase в одной базе данных)"
 
 #, fuzzy
 #~ msgid "Database Name"

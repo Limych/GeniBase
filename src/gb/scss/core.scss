@@ -1,10 +1,4 @@
-/*! GeniBase Core SCSS | GPLv2 or later License | github.com/Limych/GeniBase */
-@import 'normalize.css';
+@CHARSET "UTF-8";
 
-@import 'global';
-
-//
-.gb-core-ui {@import 'grid';@import 'forms';@import 'buttons';@import
-	'typography'; //
-	
-}
+// Core variables and mixins
+@import "variables";

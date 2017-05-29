@@ -692,7 +692,7 @@ html {
 body {
 	background: #FFF;
 	color: #444;
-	font-family: "Open Sans", sans-serif;
+	font-family: Roboto, "Open Sans", sans-serif;
 	margin: 1rem auto;
 	padding: 1rem;
 	max-width: 700px;
@@ -704,7 +704,7 @@ h1 {
 	border-bottom: 1px solid #DADADA;
 	clear: both;
 	color: #666;
-	font: 24px "Open Sans", sans-serif;
+	font: 24px "Roboto Slab", Roboto, "Open Sans", sans-serif;
 	margin: 30px 0 0 0;
 	padding: 0;
 	padding-bottom: 7px;

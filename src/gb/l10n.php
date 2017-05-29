@@ -122,7 +122,7 @@ function get_locale()
         if (defined('GB_LOCAL_PACKAGE'))
             $locale = GB_LOCAL_PACKAGE;
 
-            // GB_LANG was defined in gb-config.
+        // GB_LANG was defined in gb-config.
         if (defined('GB_LANG'))
             $locale = gb_negotiate_client_locale(preg_split('/[^\w\-]+/si', GB_LANG, - 1, PREG_SPLIT_NO_EMPTY));
 
@@ -814,7 +814,7 @@ function load_default_textdomain($locale = null)
 
     // TODO: admin
     if( /* is_admin() || */ defined( 'GB_INSTALLING' ) || ( defined( 'GB_REPAIRING' ) && GB_REPAIRING ) )
-    load_textdomain( 'default', GB_ADMIN_DIR . "/languages/$locale.mo" );
+        load_textdomain( 'default', GB_ADMIN_DIR . "/languages/$locale.mo" );
 
     return $return;
 }
@@ -833,6 +833,7 @@ function load_default_textdomain($locale = null)
 function get_translations_for_domain($domain)
 {
     global $l10n;
+
     if (! isset($l10n[$domain])) {
         $l10n[$domain] = new NOOP_Translations();
     }
@@ -851,6 +852,7 @@ function get_translations_for_domain($domain)
 function is_textdomain_loaded($domain)
 {
     global $l10n;
+
     return isset($l10n[$domain]);
 }
 

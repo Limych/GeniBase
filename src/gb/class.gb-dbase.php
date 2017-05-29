@@ -122,13 +122,13 @@ class GB_DBase
     function __construct($host, $user, $password, $base, $prefix = '')
     {
         $this->db = NULL;
-        
+
         $this->host = $host;
         $this->user = $user;
         $this->password = $password;
         $this->base = $base;
         $this->prefix = $prefix;
-        
+
         if (GB_DEBUG && GB_DEBUG_DISPLAY)
             $this->show_errors();
     }
@@ -143,7 +143,7 @@ class GB_DBase
         // Закрываем соединение с СУБД, если оно было
         if ($this->db)
             @$this->db->close();
-        
+
         return TRUE;
     }
 
@@ -156,7 +156,7 @@ class GB_DBase
      * '*' — один или несколько любых символов.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string $str
      *            с метасимволами
      * @param string $full_word
@@ -172,7 +172,7 @@ class GB_DBase
                 $str[$key] = self::make_regex($val, $full_word);
             return $str;
         }
-        
+
         $str = strtr(preg_quote($str), array(
             '\\?' => '?',
             '\\*' => '*',
@@ -188,7 +188,7 @@ class GB_DBase
         }, $str);
         if ($full_word)
             $str = "[[:<:]]${str}[[:>:]]";
-        
+
         return $str;
     }
 
@@ -201,7 +201,7 @@ class GB_DBase
      * '*' — один или несколько любых символов.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string $str
      *            с метасимволами
      * @param string $full_text
@@ -217,7 +217,7 @@ class GB_DBase
                 $str[$key] = self::make_condition($val, $full_text);
             return $str;
         }
-        
+
         $str = strtr($str, array(
             '_' => '\\_',
             '%' => '\\%'
@@ -228,7 +228,7 @@ class GB_DBase
         ));
         if (! $full_text)
             $str = '%' . $str . '%';
-        
+
         return $str;
     }
 
@@ -238,7 +238,7 @@ class GB_DBase
      * Will not die if GB_DBase::$show_errors is false.
      *
      * @since 3.0.0
-     *       
+     *
      * @param string $message
      *            The Error message
      * @param string $error_code
@@ -265,7 +265,7 @@ class GB_DBase
      *
      * @since 2.0.0
      * @since 3.0.0 $allow_bail parameter added.
-     *       
+     *
      * @param bool $allow_bail
      *            the function to bail. Default true.
      * @return bool with a successful connection, false on failure.
@@ -274,22 +274,23 @@ class GB_DBase
     {
         if ($this->db)
             return true;
-        
+
         if (GB_DEBUG) {
             $this->db = new MySQLi($this->host, $this->user, $this->password, $this->base);
         } else {
             $this->db = @new MySQLi($this->host, $this->user, $this->password, $this->base);
         }
-        
-        if ((! $this->db || $this->db->connect_error) && $allow_bail) {
+
+        $is_connected = $this->db && ! $this->db->connect_error;
+        if (! $is_connected && $allow_bail) {
             gb_load_translations_early();
-            
+
             // Load custom DB error template, if present.
             if (file_exists(GB_CONTENT_DIR . '/db-error.php')) {
                 require_once (GB_CONTENT_DIR . '/db-error.php');
                 die();
             }
-            
+
             @header('Retry-After: 600'); // 600 seconds
             $this->bail(sprintf(__("
 <h1>Error establishing a database connection</h1>
@@ -301,15 +302,15 @@ class GB_DBase
 </ul>
 <p>If you're unsure what these terms mean you should probably contact your host.</p>
 "), htmlspecialchars($this->host, ENT_QUOTES)), 'db_connect_fail');
-            
+
             return false;
-        } elseif ($this->db && ! $this->db->connect_error) {
+        } elseif ($is_connected) {
             $this->check_database_version();
             $this->db->set_charset('utf8');
-            
+
             return true;
         }
-        
+
         return false;
     }
 
@@ -317,7 +318,7 @@ class GB_DBase
      * The database version number.
      *
      * @since 3.0.0
-     *       
+     *
      * @return null|string Null on failure, version number on success.
      */
     public function db_version()
@@ -329,7 +330,7 @@ class GB_DBase
      * Whether MySQL database is at least the required minimum version.
      *
      * @since 3.0.0
-     *       
+     *
      * @return GB_Error
      */
     public function check_database_version()
@@ -343,7 +344,7 @@ class GB_DBase
      * Determine if a database supports a particular feature.
      *
      * @since 3.0.0
-     *       
+     *
      * @param string $db_cap
      *            The feature to check for. Accepts 'collation',
      *            'group_concat', 'subqueries', 'set_charset',
@@ -353,7 +354,7 @@ class GB_DBase
     public function has_cap($db_cap)
     {
         $version = $this->db_version();
-        
+
         switch (strtolower($db_cap)) {
             case 'collation':
             case 'group_concat':
@@ -364,7 +365,7 @@ class GB_DBase
             case 'utf8mb4':
                 return version_compare($version, '5.5.3', '>=');
         }
-        
+
         return false;
     }
 
@@ -372,7 +373,7 @@ class GB_DBase
      * Добавление префикса к имени таблицы.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string|array $table
      *            имя таблицы
      * @param boolean $preserve_array
@@ -389,11 +390,11 @@ class GB_DBase
             return ($preserve_array) ? $result : implode(', ', $result);
         } else {
             $table = (string) $table;
-            
+
             // First unescape table name if it already escaped
             if (substr($table, 0, 1) == '`')
                 $table = $this->table_unescape($table);
-            
+
             return $this->field_escape($this->prefix . $table);
         }
     }
@@ -402,7 +403,7 @@ class GB_DBase
      * Unescape table name.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string $table
      *            table name.
      * @return string table name.
@@ -416,7 +417,7 @@ class GB_DBase
      * Экранирование имя поля.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string|array $field
      *            поля.
      * @param boolean $preserve_array
@@ -439,7 +440,7 @@ class GB_DBase
      * Unescape fields names.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string|array $field
      *            field name. Array of escaped fields names.
      * @return string|array field name. Array of unescaped fields names.
@@ -451,13 +452,13 @@ class GB_DBase
                 $this,
                 __FUNCTION__
             ), $field);
-        
+
         $field = (string) $field;
-        
+
         // First remove quotes if it have
         if (substr($field, 0, 1) == '`')
             $field = substr($field, 1, - 1);
-        
+
         return str_replace('``', '`', $field);
     }
 
@@ -465,7 +466,7 @@ class GB_DBase
      * Экранирование значения переменной, учитывая его тип.
      *
      * @since 2.0.0
-     *       
+     *
      * @param mixed $value
      *            переменной
      * @param boolean $preserve_array
@@ -485,10 +486,10 @@ class GB_DBase
             return '"' . $this->db->real_escape_string($value) . '"';
         } elseif (is_numeric($value))
             return ($value == intval($value)) ? intval($value) : rtrim(sprintf('%F', $value), '0');
-        
+
         elseif (is_null($value))
             return 'NULL';
-        
+
         else
             return intval($value);
     }
@@ -497,7 +498,7 @@ class GB_DBase
      * Экранирование значения переменной для оператора LIKE.
      *
      * @since 3.0.0
-     *       
+     *
      * @param mixed $value
      *            переменной
      * @return mixed значение переменной
@@ -515,8 +516,8 @@ class GB_DBase
      * «?@key» — подстановка имени таблицы, «?_tablename» — добавление префикса перед именем таблицы
      *
      * @since 2.0.0
-     *       
-     * @param string $query            
+     *
+     * @param string $query
      * @param array $substitutions
      *            массив параметров для подстановки в запрос
      * @return string с подставленными параметрами
@@ -527,7 +528,7 @@ class GB_DBase
             // TODO: Print error
             $substitutions = array();
         }
-        
+
         // Чтобы следующая метка не могла затронуть содержание предыдущей,
         // например, в случае $subst = array('id' => 5, 'title' => 'а тут ?id'),
         // проводить их замену приходится не по очереди через простой foreach,
@@ -537,7 +538,7 @@ class GB_DBase
         // О производительности здесь беспокоиться не будем,
         // т.к. запрос - это довольно короткая строка, поэтому он
         // будет обработан быстро в любом случае.
-        
+
         $regexp = '/\?(_([0-9a-zA-Z$_]+)';
         foreach ($substitutions as $key => $value) {
             $regexp .= '|' . preg_quote($key) . (substr($key, - 1) != '`' ? // нужно учесть,
@@ -546,20 +547,20 @@ class GB_DBase
 
         }
         $regexp .= ')/';
-        
+
         $self = $this;
         $query = preg_replace_callback($regexp, function ($matches) use(&$substitutions, &$self) {
             switch (substr($matches{1}, 0, 1)) { // Определяем тип информации для подстановки
-                
+
                 case '_': // Подставляем префикс к имени таблицы
                     return $self->table_escape($matches{2});
-                
+
                 case '@': // Подставляем имя таблицы
                     return $self->table_escape($substitutions[$matches{1}]);
-                
+
                 case '#': // Подставляем имя поля
                     return $self->field_escape($substitutions[$matches{1}]);
-                
+
                 default: // Подставляем данные
                     return $self->data_escape($substitutions[$matches{1}]);
             }
@@ -633,7 +634,7 @@ class GB_DBase
      * the one that would most logically had called this method.
      *
      * @since 2.0.0
-     *       
+     *
      * @return string The name of the calling function
      */
     public function get_caller()
@@ -646,14 +647,14 @@ class GB_DBase
      *
      * @since 2.0.0
      * @global array $GB_SQL_ERROR Stores error information of query and error string
-     *        
+     *
      * @param string $error
      *            The error text to display
      */
     public function print_error($error = '')
     {
         global $GB_SQL_ERROR;
-        
+
         if (! $error)
             $error = $this->db->error;
         $this->last_error = $error;
@@ -661,27 +662,27 @@ class GB_DBase
             'query' => $this->last_query,
             'error_str' => $error
         );
-        
+
         if ($this->suppress_errors)
             return;
-        
+
         gb_load_translations_early();
-        
+
         if ($caller = $this->get_caller())
             $error_str = sprintf('GeniBase database error "%1$s" for query %2$s made by %3$s', $error, $this->last_query, $caller);
         else
             $error_str = sprintf('GeniBase database error "%1$s" for query %2$s', $error, $this->last_query);
-        
+
         error_log($error_str);
-        
+
         // Are we showing errors?
         if (! $this->show_errors)
             return;
-            
+
             // If there is an error then take note of it
         $str = htmlspecialchars($error, ENT_QUOTES);
         $query = htmlspecialchars($this->last_query, ENT_QUOTES);
-        
+
         print "<div class='error'>
 		<p class='db_error'><strong>GeniBase database error:</strong> [$str]<br />
 		<code>$query</code></p>
@@ -707,7 +708,7 @@ class GB_DBase
      * @since 2.0.0
      * @see GB_DBase::prepare_query()
      *
-     * @param string $query            
+     * @param string $query
      * @param array $substitutions
      *            массив параметров для подстановки в запрос
      * @return mixed выполнения запроса. false при ошибке.
@@ -716,54 +717,54 @@ class GB_DBase
     {
         $this->connect();
         $this->flush();
-        
+
         $query_sub = $this->prepare_query($query, $substitutions);
-        
+
         if (defined('GB_DEBUG_SQL') && GB_DEBUG_SQL)
             gb_debug_info($query_sub, __CLASS__);
-            
+
             // Remove any comments from query and trim space symbols.
         $query_sub = trim($this->remove_comments($query_sub));
-        
+
         // Keep track of the last query for debug.
         $this->last_query = $query_sub;
-        
+
         if (defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
             $time_start = microtime(true);
-        
+
         $result = @$this->db->query($query_sub);
         $this->num_queries ++;
-        
+
         if (defined('GB_DBASE_SAVE_QUERIES') && GB_DBASE_SAVE_QUERIES)
             $this->queries[] = array(
                 $query_sub,
                 microtime(true) - $time_start,
                 $this->get_caller()
             );
-        
+
         $this->last_error = $this->db->error;
-        
+
         // If there is an error then take note of it.
         if ($this->last_error) {
             // Clear insert_id on a subsequent failed insert.
             if ($this->insert_id && preg_match('/^(INSERT|REPLACE)\s/usi', $query_sub))
                 $this->insert_id = 0;
-            
+
             $this->print_error();
             return false;
         }
-        
+
         if (preg_match('/^(INSERT|DELETE|UPDATE|REPLACE)\s/usi', $query)) {
             $this->rows_affected = $this->db->affected_rows;
-            
+
             // Take note of the insert_id
             if (preg_match('/^(INSERT|REPLACE)\s/usi', $query))
                 $this->insert_id = $this->db->insert_id;
-                
+
                 // Return number of rows affected
             $result = $this->rows_affected;
         }
-        
+
         return $result;
     }
 
@@ -774,7 +775,7 @@ class GB_DBase
      * @since 2.0.0
      * @see GB_DBase::query()
      *
-     * @param string $query            
+     * @param string $query
      * @param array $substitutions
      *            массив параметров для подстановки в запрос
      * @param boolean $get_assoc
@@ -787,7 +788,7 @@ class GB_DBase
         $result = $this->query($query, $substitutions);
         if (false === $result)
             return false;
-        
+
         $data = array();
         if ($get_assoc) {
             while ($row = $result->fetch_row())
@@ -796,7 +797,7 @@ class GB_DBase
             while ($row = $result->fetch_row())
                 $data[] = $row[0];
         }
-        
+
         $result->free();
         return $data;
     }
@@ -808,7 +809,7 @@ class GB_DBase
      * @since 2.0.0
      * @see GB_DBase::query()
      *
-     * @param string $query            
+     * @param string $query
      * @param array $substitutions
      *            параметров для подстановки в запрос
      * @return bool|mixed on failure. Результат выполнения запроса
@@ -818,7 +819,7 @@ class GB_DBase
         $result = $this->get_column($query, $substitutions, false);
         if (false === $result)
             return false;
-        
+
         return ($result) ? reset($result) : NULL;
     }
 
@@ -829,7 +830,7 @@ class GB_DBase
      * @since 2.0.0
      * @see GB_DBase::query()
      *
-     * @param string $query            
+     * @param string $query
      * @param array $substitutions
      *            массив параметров для подстановки в запрос
      * @param string $key_col
@@ -842,7 +843,7 @@ class GB_DBase
         $result = $this->query($query, $substitutions);
         if (false === $result)
             return false;
-        
+
         $data = array();
         if ($key_col) {
             while ($row = $result->fetch_assoc())
@@ -851,7 +852,7 @@ class GB_DBase
             while ($row = $result->fetch_assoc())
                 $data[] = $row;
         }
-        
+
         $result->free();
         return $data;
     }
@@ -862,7 +863,7 @@ class GB_DBase
      * @since 2.0.0
      * @see GB_DBase::query()
      *
-     * @param string $query            
+     * @param string $query
      * @param array $substitutions
      *            массив параметров для подстановки в запрос
      * @return array|bool on failure. Результат выполнения запроса
@@ -872,7 +873,7 @@ class GB_DBase
         $result = $this->get_table($query, $substitutions, false);
         if (false === $result)
             return false;
-        
+
         return ($result) ? reset($result) : array();
     }
 
@@ -896,7 +897,7 @@ class GB_DBase
      * Вставка в таблицу новых данных или обновление существующих.
      *
      * @since 2.0.0
-     *       
+     *
      * @param string $tablename
      *            обновляемой таблицы
      * @param array $data
@@ -916,14 +917,14 @@ class GB_DBase
      */
     function set_row($tablename, $data, $unique_key = false, $mode = false)
     {
-        $query = (! $unique_key) ? 
+        $query = (! $unique_key) ?
         // INSERT or REPLACE
-        $this->_set_row_insert($tablename, $data, $mode) : 
+        $this->_set_row_insert($tablename, $data, $mode) :
         // UPDATE or INSERT … ON DUPLICATE KEY UPDATE
         $this->_set_row_update($tablename, $data, $unique_key, $mode);
         if (false === $query)
             return false;
-        
+
         return $this->query($query);
     }
 
@@ -959,7 +960,7 @@ class GB_DBase
             $this->print_error("Unknown mode '$mode'");
             return false;
         }
-        
+
         $first_el = reset($data);
         if (! is_array($first_el)) {
             // Insert single row — convert data array to array of arrays with single element.
@@ -979,11 +980,11 @@ class GB_DBase
             $this,
             'field_escape'
         ), array_keys($first_el))) . ") VALUES " . implode(', ', $data);
-        
+
         return $query;
     }
     // function
-    
+
     /**
      * Making query for updating data
      *
@@ -1010,7 +1011,7 @@ class GB_DBase
             $unique_key = array(
                 'id' => $unique_key
             ); // воспринимаем её как 'id'
-        
+
         $append = is_string(key($unique_key));
         // $append: если массив $unique_key ассоциативный,
         // значит, в них данные для уникальных полей —
@@ -1019,7 +1020,7 @@ class GB_DBase
         // все необходимые данные переданы во втором аргументе,
         // а $unique_key содержит только имена полей,
         // которые следует исключить из ON DUPLICATE KEY
-        
+
         if ($append) {
             // Все данные для ON DUPLICATE KEY UPDATE есть в $data
             $all_data = array_merge($data, $unique_key);
@@ -1032,13 +1033,13 @@ $data, // которые необходимо исключить
 $unique_key); // из части ON DUPLICATE KEY UPDATE
 
         }
-        
+
         if (! $mode || $mode == self::MODE_UPDATE) { // обычный UPDATE
                                                      // В данном случае поля из второго аргумента подставляются в часть SET,
                                                      // а поля из третьего — в часть WHERE
-            
+
             $query = "UPDATE $tablename SET ";
-            
+
             // Чтобы одно и то же поле можно было использовать
             // и в части SET, и в части WHERE с разными значениями, например
             // UPDATE table
@@ -1046,11 +1047,11 @@ $unique_key); // из части ON DUPLICATE KEY UPDATE
             // WHERE col1 = 'C'
             // подстановку значений в запрос проводим "вручную" —
             // без использования меток.
-            
+
             foreach ($data as $key => $value)
                 $query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
             $query = substr($query, 0, - 2); // убираем последние запятую и пробел
-            
+
             if ($unique_key) {
                 $query .= ' WHERE ';
                 foreach ($unique_key as $key => $value) {
@@ -1058,21 +1059,21 @@ $unique_key); // из части ON DUPLICATE KEY UPDATE
                 }
                 $query = substr($query, 0, - 5); // убираем последние AND и пробелы
             }
-            
+
             return $query;
         } elseif ($mode == self::MODE_DUPLICATE) { // INSERT … ON DUPLICATE KEY UPDATE
             $query = "INSERT INTO $tablename SET ";
             foreach ($all_data as $key => $value)
                 $query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
             $query = substr($query, 0, - 2); // убираем последние запятую и пробел
-            
+
             if ($data_to_update) {
                 $query .= ' ON DUPLICATE KEY UPDATE ';
                 foreach ($data_to_update as $key => $value)
                     $query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ', ';
                 $query = substr($query, 0, - 2); // убираем последние запятую и пробел
             }
-            
+
             return $query;
         } else {
             $this->print_error("Unknown mode '$mode'");
@@ -1080,12 +1081,12 @@ $unique_key); // из части ON DUPLICATE KEY UPDATE
         }
     }
     // function
-    
+
     /**
      * Delete records from table.
      *
      * @since 2.3.0
-     *       
+     *
      * @param string $tablename
      *            from which data has been deleted.
      * @param mixed $unique_key
@@ -1103,13 +1104,13 @@ $unique_key); // из части ON DUPLICATE KEY UPDATE
             $this->print_error('Record key not defined.');
             return false;
         }
-        
+
         $tablename = $this->table_escape($tablename);
         $query = "DELETE FROM $tablename WHERE ";
         foreach ($unique_key as $key => $value)
             $query .= $this->field_escape($key) . ' = ' . $this->data_escape($value) . ' AND ';
         $query = substr($query, 0, - 5); // убираем последние «AND» и пробелы
-        
+
         return $this->query($query);
     }
 
@@ -1119,8 +1120,8 @@ $unique_key); // из части ON DUPLICATE KEY UPDATE
      * {@internal Missing Long Description}}
      *
      * @since 2.0.0
-     *       
-     * @param string $queries            
+     *
+     * @param string $queries
      * @return array
      */
     function split_queries($queries)
@@ -1153,9 +1154,9 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
      * {@internal Missing Long Description}}
      *
      * @since 2.0.0
-     *       
-     * @param string $query            
-     * @param bool $allow_deletions            
+     *
+     * @param string $query
+     * @param bool $allow_deletions
      * @return array
      */
     function create_table_patch($query, $allow_deletions = false)
@@ -1166,36 +1167,36 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
             // $this->print_error("Unknown mode '$mode'");
             return false;
         }
-        
+
         $table = $matches[1];
-        
+
         // Fetch the table column structure from the database
         $suppress = gbdb()->suppress_errors();
         $tablefields = $this->get_table("DESCRIBE {$table}");
         $this->suppress_errors($suppress);
-        
+
         if (! $tablefields)
             return array(
                 $query
             );
-            
+
             // Clear the field and index arrays.
         $cqueries = $cfields = $indices = array();
-        
+
         // Get all of the field names in the query from between the parentheses.
         preg_match('/\((.*)\)/uSms', $query, $match2);
         $qryline = trim($match2[1]);
-        
+
         // Separate field lines into an array.
         $flds = array_filter(preg_split('~"(?:[^"\\\\]+|\\\\.)*"(*SKIP)(*FAIL)|\'(?:[^\'\\\\]+|\\\\.)*\'(*SKIP)(*FAIL)|`(?:``|[^`]+)*`(*SKIP)(*FAIL)|,~uSis', $qryline));
-        
+
         // For every field line specified in the query.
         foreach ($flds as $fld) {
             $fld = trim($fld);
-            
+
             // Extract the field name.
             preg_match('/^(\S+)\s+(.*)$/uS', $fld, $fvals);
-            
+
             // Verify the found field name.
             $validfield = TRUE;
             switch (strtoupper($fvals[1])) {
@@ -1208,30 +1209,30 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                     $indices[] = trim($fld, ", \n");
                     break;
             }
-            
+
             // If it's a valid field, add it to the field array.
             if ($validfield)
                 $cfields[strtolower($this->field_unescape($fvals[1]))] = trim($fvals[2], ", \n");
         }
-        
+
         // For every field in the table.
         foreach ($tablefields as $tablefield) {
             $fld = strtolower($tablefield['Field']);
-            
+
             // If the table field exists in the field array…
             if (array_key_exists($fld, $cfields)) {
-                
+
                 // Get the field type from the query.
                 preg_match('/(\S+( unsigned)?)/uSi', $cfields[$fld], $matches);
                 $fieldtype = $matches[1];
-                
+
                 // Is actual field type different from the field type in query?
                 if (0 != strcasecmp($tablefield['Type'], $fieldtype)) {
                     // Add a query to change the column type
                     $cqueries[] = "ALTER TABLE {$table} CHANGE COLUMN `{$tablefield[Field]}` `{$tablefield[Field]}` $cfields[$fld]";
                     // $for_update[$table.'.'.$tablefield['Field']] = "Changed type of {$table}.{$tablefield['Field']} from {$tablefield['Type']} to {$fieldtype}";
                 }
-                
+
                 // Get the default value from the array
                 // TODO: Remove this?
                 // echo "{$cfields[$fld]}<br>";
@@ -1243,34 +1244,34 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                         // $for_update[$table.'.'.$tablefield['Field']] = "Changed default value of {$table}.{$tablefield['Field']} from {$tablefield->Default} to {$default_value}";
                     }
                 }
-                
+
                 // Remove the field from the array (so it's not added).
                 unset($cfields[$fld]);
-                
+
                 // This field exists in the table, but not in the creation queries?
             } elseif ($allow_deletions) {
                 // Add a query to delete unused column
                 $cqueries[] = "ALTER TABLE {$table} DROP COLUMN `{$tablefield[Field]}`";
             }
         }
-        
+
         // For every remaining field specified for the table.
         foreach ($cfields as $fieldname => $fielddef) {
             // Push a query line into $cqueries that adds the field to that table.
             $cqueries[] = "ALTER TABLE {$table} ADD COLUMN `$fieldname` $fielddef";
             // $for_update[$table.'.'.$fieldname] = 'Added column '.$table.'.'.$fieldname;
         }
-        
+
         // Index stuff goes here. Fetch the table index structure from the database.
         $tableindices = $this->get_table("SHOW INDEX FROM {$table}");
-        
+
         if ($tableindices) {
             // Clear the index array.
             unset($index_ary);
-            
+
             // For every index in the table.
             foreach ($tableindices as $tableindex) {
-                
+
                 // Add the index to the index data array.
                 $keyname = $tableindex['Key_name'];
                 $index_ary[$keyname]['columns'][] = array(
@@ -1279,10 +1280,10 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                 );
                 $index_ary[$keyname]['unique'] = ($tableindex['Non_unique'] == 0) ? TRUE : false;
             }
-            
+
             // For each actual index in the index array.
             foreach ($index_ary as $index_name => $index_data) {
-                
+
                 // Build a create string to compare to the query.
                 $index_string = '';
                 if ($index_name == 'PRIMARY')
@@ -1293,12 +1294,12 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                 if ($index_name != 'PRIMARY')
                     $index_string .= $index_name;
                 $index_columns = '';
-                
+
                 // For each column in the index.
                 foreach ($index_data['columns'] as $column_data) {
                     if ($index_columns != '')
                         $index_columns .= ',';
-                        
+
                         // Add the field to the column list string.
                     $index_columns .= $column_data['fieldname'];
                     if ($column_data['subpart'] != '')
@@ -1306,7 +1307,7 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                 }
                 // Add the column list to the index create string.
                 $index_string .= ' (' . $index_columns . ')';
-                
+
                 if (! (($aindex = array_search($index_string, $indices)) === false)) {
                     unset($indices[$aindex]);
                     // TODO: Remove this?
@@ -1316,14 +1317,14 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
                 // else echo "<pre style=\"border:1px solid #ccc;margin-top:5px;\">{$table}:<br /><b>Did not find index:</b>".$index_string."<br />".print_r($indices, true)."</pre>\n";
             }
         }
-        
+
         // For every remaining index specified for the table.
         foreach ((array) $indices as $index) {
             // Push a query line into $cqueries that adds the index to that table.
             $cqueries[] = "ALTER TABLE {$table} ADD $index";
             // $for_update[] = 'Added index ' . $table . ' ' . $index;
         }
-        
+
         return $cqueries;
     }
 }
@@ -1333,7 +1334,7 @@ $queries, - 1, PREG_SPLIT_NO_EMPTY);
  * Глобальная функция доступа к экземпляру класса GB_DBase.
  *
  * @since 2.0.0
- *       
+ *
  * @return GB_DBase
  */
 function gbdb()
@@ -1342,9 +1343,9 @@ function gbdb()
      *
      * @var GB_DBase
      */
-    static $db = NULL;
-    
-    if ($db == NULL)
+    static $db = null;
+
+    if ($db === null)
         $db = new GB_DBase(DB_HOST, DB_USER, DB_PASSWORD, DB_BASE, DB_PREFIX);
     return $db;
 }

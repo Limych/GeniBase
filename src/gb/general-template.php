@@ -18,7 +18,7 @@ if (! defined('GB_VERSION') || count(get_included_files()) == 1)
  *
  * @see siteinfo() For possible values for the parameter.
  * @since 2.0.0
- *       
+ *
  * @param string $show
  *            What to display.
  */
@@ -37,7 +37,7 @@ function siteinfo($show = '')
  * 3. description - Secondary title
  *
  * @since 2.0.0
- *       
+ *
  * @param string $show
  *            Blog info to retrieve.
  * @param string $filter
@@ -90,7 +90,7 @@ function get_siteinfo($show = '', $filter = 'raw')
         default:
             break;
     }
-    
+
     $url = (strpos($show, 'url') !== false || strpos($show, 'directory') !== false);
     if ('display' == $filter && class_exists('GB_Hooks')) {
         if ($url) {
@@ -98,7 +98,7 @@ function get_siteinfo($show = '', $filter = 'raw')
              * Filter the URL returned by get_siteinfo().
              *
              * @since 2.1.1
-             *       
+             *
              * @param mixed $output
              *            The URL returned by siteinfo().
              * @param mixed $show
@@ -110,7 +110,7 @@ function get_siteinfo($show = '', $filter = 'raw')
              * Filter the site information returned by get_siteinfo().
              *
              * @since 2.1.1
-             *       
+             *
              * @param mixed $output
              *            The requested non-URL site information.
              * @param mixed $show
@@ -119,7 +119,7 @@ function get_siteinfo($show = '', $filter = 'raw')
             $output = GB_Hooks::apply_filters('siteinfo', $output, $show);
         }
     }
-    
+
     return $output;
 }
 
@@ -130,39 +130,44 @@ function get_siteinfo($show = '', $filter = 'raw')
  * information for the page.
  *
  * @since 2.0.0
- *       
+ *
  * @param string $doctype
  *            The type of html document (xhtml|html).
  */
 function language_attributes($doctype = 'html')
 {
     $attributes = array();
-    
+
     if (function_exists('is_rtl') && is_rtl())
         $attributes[] = 'dir="rtl"';
-    
+
     if ($lang = get_siteinfo('language')) {
-        if( /* get_option('html_type') == 'text/html' || */ $doctype == 'html') // TODO: options
+        $opt_doctype = 'text/html';
+        if (class_exists('GB_Options')) {
+            $opt_doctype = GB_Options::get('html_type');
+        }
+
+        if( $opt_doctype == 'text/html' || $doctype == 'html')
             $attributes[] = "lang=\"$lang\"";
-        
-        if( /* get_option('html_type') != 'text/html' || */ $doctype == 'xhtml') // TODO: options
+
+        if( $opt_doctype != 'text/html' || $doctype == 'xhtml')
             $attributes[] = "xml:lang=\"$lang\"";
     }
-    
+
     $output = implode(' ', $attributes);
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Filter the language attributes for display in the html tag.
          *
          * @since 2.1.0
-         *       
+         *
          * @param string $output
          *            A space-separated list of language attributes.
          */
         $output = GB_Hooks::apply_filters('language_attributes', $output);
     }
-    
+
     echo $output;
 }
 
@@ -204,11 +209,11 @@ function gb_footer()
  * For internal use.
  *
  * @deprecated 2.2.2
- *            
+ *
  * @access private
  * @since 2.0.1
- *       
- * @param string $pg            
+ *
+ * @param string $pg
  * @return string
  */
 function _paginator_url($pg)
@@ -220,53 +225,53 @@ function _paginator_url($pg)
  * Функция формирования блока ссылок для перемещения между страницами.
  *
  * @deprecated 2.2.2
- *            
- * @param integer $pg            
- * @param integer $max_pg            
+ *
+ * @param integer $pg
+ * @param integer $max_pg
  * @return string
  */
 function paginator($pg, $max_pg)
 {
     _deprecated_function('2.2', 'paginate_links');
-    
+
     $pag = array();
-    
+
     if ($pg > 1)
         $pag[] = '<a href="' . _paginator_url($pg - 1) . '" class="prev">←</a>';
     if ($pg > 1)
         $pag[] = '<a href="' . _paginator_url(1) . '">1</a>';
-    
+
     if ($pg > 12)
         $pag[] = '<span>…</span>';
     if ($pg > 11)
         $pag[] = '<a href="' . _paginator_url($pg - 10) . '">' . ($pg - 10) . '</a>';
-    
+
     if ($pg == 8)
         $pag[] = '<a href="' . _paginator_url(2) . '">2</a>';
     elseif ($pg > 8)
         $pag[] = '<span>…</span>';
     for ($i = max($pg - 5, 2); $i < $pg; $i ++)
         $pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
-    
+
     $pag[] = '<span class="current">' . $pg . '</span>';
-    
+
     for ($i = $pg + 1; $i < min($pg + 5, $max_pg); $i ++)
         $pag[] = '<a href="' . _paginator_url($i) . '">' . $i . '</a>';
     if ($pg == $max_pg - 6)
         $pag[] = '<a href="' . _paginator_url($max_pg - 1) . '">' . ($max_pg - 1) . '</a>';
     elseif ($pg < $max_pg - 6)
         $pag[] = '<span>…</span>';
-    
+
     if ($pg < $max_pg - 10)
         $pag[] = '<a href="' . _paginator_url($pg + 10) . '">' . ($pg + 10) . '</a>';
     if ($pg < $max_pg - 11)
         $pag[] = '<span>…</span>';
-    
+
     if ($pg < $max_pg)
         $pag[] = '<a href="' . _paginator_url($max_pg) . '">' . $max_pg . '</a>';
     if ($pg < $max_pg)
         $pag[] = '<a href="' . _paginator_url($pg + 1) . '" class="next">→</a>';
-    
+
     return '<div class="paginator">' . implode(' ', $pag) . '</div>';
 }
 
@@ -275,27 +280,27 @@ function paginator($pg, $max_pg)
  *
  * @access private
  * @since 2.2.2
- *       
- * @param int $page_num            
+ *
+ * @param int $page_num
  * @param array $args
  *            paginate_links}
- * @param string $class            
- * @param string $page_title            
- * @param string $format            
+ * @param string $class
+ * @param string $page_title
+ * @param string $format
  * @return string
  */
 function _paginate_link($page_num, $args, $class = '', $page_title = null)
 {
     if ($page_title == null)
         $page_title = $args['before_page_number'] . number_format_i18n($page_num) . $args['after_page_number'];
-    
+
     $format = ($page_num == 1) ? '' : $args['format'];
     $link = str_replace('%_%', $format, $args['base']);
     $link = str_replace('%#%', $page_num, $link);
     if ($args['add_args'])
         $link = add_query_arg($args['add_args'], $link);
     $link .= $args['add_fragment'];
-    
+
     $rel = '';
     if ($page_num == 1)
         $rel = 'first';
@@ -305,16 +310,16 @@ function _paginate_link($page_num, $args, $class = '', $page_title = null)
         $rel = 'prev';
     elseif ($page_num == $args['current'] + 1)
         $rel = 'next';
-    
+
     if ($rel)
         $rel = ' rel="' . $rel . '"';
-    
+
     if (class_exists('GB_Hooks')) {
         /**
          * Filter the paginated links for the given archive pages.
          *
          * @since 2.2.2
-         *       
+         *
          * @param string $link
          *            The paginated link URL.
          */
@@ -327,11 +332,11 @@ function _paginate_link($page_num, $args, $class = '', $page_title = null)
  * Retrieve paginated link for multipaged data blocks.
  *
  * @since 2.2.2
- *       
+ *
  * @param string|array $args
  *            {
  *            Optional. Array or string of arguments for generating paginated links for archives.
- *            
+ *
  *            @type string $base Base of the paginated url. Default empty.
  *            @type string $format Format for the pagination structure. Default empty.
  *            @type int $total The total amount of pages. Default is the value WP_Query's
@@ -359,20 +364,20 @@ function paginate_links($args = '')
     // Setting up default values based on the current URL.
     $pagenum_link = html_entity_decode(get_pagenum_link());
     $url_parts = explode('?', $pagenum_link);
-    
+
     // Get max pages and current page out of the current query, if available.
     $total = 1;
     $current = isset($_REQUEST['pg']) ? intval($_REQUEST['pg']) : 1;
-    
+
     // Append the format placeholder to the base URL.
     $pagenum_link = $url_parts[0] . '%_%'; // TODO: rewrite
                                            // $pagenum_link = trailingslashit($url_parts[0]) . '%_%';
-                                           
+
     // URL base depends on permalink settings.
     $format = '?pg=%#%'; // TODO: rewrite
                          // $format = $wp_rewrite->using_index_permalinks() && !strpos($pagenum_link, 'index.php') ? 'index.php/' : '';
                          // $format .= $wp_rewrite->using_permalinks() ? user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' ) : '?paged=%#%';
-    
+
     $defaults = array(
         'base' => $pagenum_link, // http://example.com/index.php%_% : %_% is replaced by format (below)
         'format' => $format, // ?pg=%#% : %#% is replaced by the page number
@@ -390,28 +395,28 @@ function paginate_links($args = '')
         'before_page_number' => '',
         'after_page_number' => ''
     );
-    
+
     $args = gb_parse_args($args, $defaults);
-    
+
     if (! is_array($args['add_args']))
         $args['add_args'] = array();
-        
+
         // Merge additional query vars found in the original URL into 'add_args' array.
     if (isset($url_parts[1])) {
         // Find the format argument.
         $format_query = parse_url(str_replace('%_%', $args['format'], $args['base']), PHP_URL_QUERY);
         gb_parse_str($format_query, $format_arg);
-        
+
         // Remove the format argument from the array of query arguments, to avoid overwriting custom format.
         gb_parse_str(remove_query_arg(array_keys($format_arg), $url_parts[1]), $query_args);
         $args['add_args'] = array_merge($args['add_args'], urlencode_deep($query_args));
     }
-    
+
     // Who knows what else people pass in $args
     $total = (int) $args['total'];
     if ($total < 2)
         return;
-        
+
         // Out of bounds? Make it the default.
     if ($args['end_size'] < 1)
         $args['end_size'] = 1;
@@ -419,12 +424,12 @@ function paginate_links($args = '')
         $args['tenth_size'] = 1;
     if ($args['mid_size'] < 0)
         $args['mid_size'] = 4;
-    
+
     $current = (int) $args['current'];
     $end_size = (int) $args['end_size'];
     $tenth_size = (int) $args['tenth_size'];
     $mid_size = (int) $args['mid_size'];
-    
+
     if ($current >= 2) {
         if ($args['prev_next']) {
             $page_links[] = _paginate_link($current - 1, $args, 'prev', $args['prev_text']);
@@ -432,60 +437,60 @@ function paginate_links($args = '')
         for ($n = 1; $n <= $end_size; $n ++)
             $page_links[] = _paginate_link($n, $args);
     }
-    
+
     if ($tenth_size && $current >= 11 + $end_size) {
         if ($current == 11 + $end_size + $tenth_size)
             $page_links[] = _paginate_link($current - 10 - $tenth_size, $args);
         elseif ($current > 11 + $end_size + $tenth_size)
             $page_links[] = '<span class="pagination dots">' . __('&hellip;') . '</span>';
-        
+
         for ($n = max(1 + $end_size, $current - 9 - $tenth_size); $n <= $current - 10; $n ++)
             $page_links[] = _paginate_link($n, $args);
     }
-    
+
     if ($current == 2 + $end_size + $mid_size)
         $page_links[] = _paginate_link($current - $mid_size - 1, $args);
     elseif ($current > 2 + $end_size + $mid_size)
         $page_links[] = '<span class="pagination dots">' . __('&hellip;') . '</span>';
-    
+
     for ($n = max(1 + $end_size, $current - $mid_size); $n < $current; $n ++)
         $page_links[] = _paginate_link($n, $args);
     $page_links[] = '<span class="pagination current">' . $args['before_page_number'] . number_format_i18n($current) . $args['after_page_number'] . '</span>';
     for ($n = $current + 1; $n <= min($total - $end_size, $current + $mid_size); $n ++)
         $page_links[] = _paginate_link($n, $args);
-    
+
     if ($current == $total - 1 - $end_size - $mid_size)
         $page_links[] = _paginate_link($current + $mid_size + 1, $args);
     elseif ($current < $total - 1 - $end_size - $mid_size)
         $page_links[] = '<span class="pagination dots">' . __('&hellip;') . '</span>';
-    
+
     if ($tenth_size && $current <= $total - 9 - $end_size) {
         for ($n = $current + 10; $n <= min($total - $end_size, $current + 9 + $tenth_size); $n ++)
             $page_links[] = _paginate_link($n, $args);
-        
+
         if ($current == $total - 10 - $tenth_size - $end_size)
             $page_links[] = _paginate_link($current + 10 + $tenth_size, $args);
         elseif ($current < $total - 10 - $tenth_size - $end_size)
             $page_links[] = '<span class="pagination dots">' . __('&hellip;') . '</span>';
     }
-    
+
     if ($current <= $total - 1) {
         for ($n = $total - $end_size + 1; $n <= $total; $n ++)
             $page_links[] = _paginate_link($n, $args);
         if ($args['prev_next'] && $current < $total)
             $page_links[] = _paginate_link($current + 1, $args, 'next', $args['next_text']);
     }
-    
+
     switch ($args['type']) {
         case 'array':
             return $page_links;
-        
+
         case 'list':
             $r .= "<ul class='pagination'>\n\t<li>";
             $r .= join("</li>\n\t<li>", $page_links);
             $r .= "</li>\n</ul>\n";
             break;
-        
+
         default:
             $r = join("\n", $page_links);
             break;
@@ -503,7 +508,7 @@ function paginate_links($args = '')
  * (second) parameter.
  *
  * @since 3.0.0
- *       
+ *
  * @param string $file
  *            Optional. Style handle name or file name (without ".css" extension) relative
  *            to gb-admin/. Defaults to 'gb-admin'.
@@ -527,7 +532,7 @@ function gb_admin_css($file = 'gb-admin', $force_echo = false)
  *
  * @since 3.0.0
  * @access private
- *        
+ *
  * @param mixed $helper
  *            One of the values to compare
  * @param mixed $current
@@ -544,10 +549,10 @@ function __checked_selected_helper($helper, $current, $echo, $type)
         $result = " $type='$type'";
     else
         $result = '';
-    
+
     if ($echo)
         echo $result;
-    
+
     return $result;
 }
 
@@ -557,7 +562,7 @@ function __checked_selected_helper($helper, $current, $echo, $type)
  * Compares the first two arguments and if identical marks as checked
  *
  * @since 3.0.0
- *       
+ *
  * @param mixed $checked
  *            One of the values to compare
  * @param mixed $current
@@ -577,7 +582,7 @@ function checked($checked, $current = true, $echo = true)
  * Compares the first two arguments and if identical marks as selected
  *
  * @since 3.0.0
- *       
+ *
  * @param mixed $selected
  *            One of the values to compare
  * @param mixed $current
@@ -597,7 +602,7 @@ function selected($selected, $current = true, $echo = true)
  * Compares the first two arguments and if identical marks as disabled
  *
  * @since 3.0.0
- *       
+ *
  * @param mixed $disabled
  *            One of the values to compare
  * @param mixed $current
@@ -617,7 +622,7 @@ function disabled($disabled, $current = true, $echo = true)
  * Returns the URL that allows the user to log in to the site.
  *
  * @since 3.0.0
- *       
+ *
  * @param string $redirect
  *            Path to redirect to on login.
  * @param bool $force_reauth
@@ -627,18 +632,18 @@ function disabled($disabled, $current = true, $echo = true)
 function gb_login_url($redirect = '', $force_reauth = false)
 {
     $login_url = site_url('gb-login.php', 'login');
-    
+
     if (! empty($redirect))
         $login_url = add_query_arg('redirect_to', urlencode($redirect), $login_url);
-    
+
     if ($force_reauth)
         $login_url = add_query_arg('reauth', '1', $login_url);
-    
+
     /**
      * Filter the login URL.
      *
      * @since 3.0.0
-     *       
+     *
      * @param string $login_url
      *            The login URL.
      * @param string $redirect
@@ -653,7 +658,7 @@ function gb_login_url($redirect = '', $force_reauth = false)
  * Returns the URL that allows the user to log out of the site.
  *
  * @since 3.0.0
- *       
+ *
  * @param string $redirect
  *            Path to redirect to on logout.
  * @return string A log out URL.
@@ -666,15 +671,15 @@ function gb_logout_url($redirect = '')
     if (! empty($redirect)) {
         $args['redirect_to'] = urlencode($redirect);
     }
-    
+
     $logout_url = add_query_arg($args, site_url('gb-login.php', 'login'));
     $logout_url = gb_nonce_url($logout_url, 'log-out');
-    
+
     /**
      * Filter the logout URL.
      *
      * @since 3.0.0
-     *       
+     *
      * @param string $logout_url
      *            The Log Out URL.
      * @param string $redirect
@@ -689,7 +694,7 @@ function gb_logout_url($redirect = '')
  * Returns the URL that allows the user to register on the site.
  *
  * @since 3.0.0
- *       
+ *
  * @return string User registration URL.
  */
 function gb_registration_url()
@@ -698,7 +703,7 @@ function gb_registration_url()
      * Filter the user registration URL.
      *
      * @since 3.0.0
-     *       
+     *
      * @param string $register
      *            The user registration URL.
      */

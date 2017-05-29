@@ -7,7 +7,7 @@
  *
  * @package GeniBase
  * @since	2.0.0
- * 
+ *
  * @copyright	Copyright © WordPress Team
  * @copyright	Partially copyright © 2015, Andrey Khrolenok (andrey@khrolenok.ru)
  */
@@ -52,7 +52,7 @@ class GB_Styles extends GB_Dependencies
          * Fires when the GB_Styles instance is initialized.
          *
          * @since 2.1.1
-         *       
+         *
          * @param
          *            GB_Styles &$this GB_Styles instance, passed by reference.
          */
@@ -64,48 +64,48 @@ class GB_Styles extends GB_Dependencies
     static function get_file($path)
     {
         $path = realpath($path);
-        
+
         if (! $path || ! @is_file($path))
             return '';
-        
+
         return @file_get_contents($path);
     }
 
     /**
      *
-     * @param string $handle            
+     * @param string $handle
      * @return bool
      */
     public function do_item($handle)
     {
         if (! parent::do_item($handle))
             return false;
-        
+
         $obj = $this->registered[$handle];
         if (null === $obj->ver)
             $ver = '';
         else
             $ver = $obj->ver ? $obj->ver : $this->default_version;
-        
+
         if (isset($this->args[$handle]))
             $ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
-        
+
         if ($this->do_concat) {
             if ($this->in_default_dir($obj->src) && ! isset($obj->extra['conditional']) && ! isset($obj->extra['alt'])) {
                 $this->concat_tag .= "$handle,";
                 $this->concat_code .= self::get_file(BASE_DIR . $obj->src);
-                
+
                 $this->print_code .= $this->print_inline_style($handle, false);
-                
+
                 return true;
             }
         }
-        
+
         if (isset($obj->args))
             $media = esc_attr($obj->args);
         else
             $media = 'all';
-        
+
         $href = $this->_css_href($obj->src, $ver, $handle);
         if (empty($href)) {
             // Turns out there is nothing to print.
@@ -113,19 +113,25 @@ class GB_Styles extends GB_Dependencies
         }
         $rel = isset($obj->extra['alt']) && $obj->extra['alt'] ? 'alternate stylesheet' : 'stylesheet';
         $title = isset($obj->extra['title']) ? " title='" . esc_attr($obj->extra['title']) . "'" : '';
-        
+
+        $sri_checking = '';
+        if (isset($obj->extra['integrity']) && !empty($obj->extra['integrity'])) {
+            $sri_checking = " integrity='" . $obj->extra['integrity'] .
+            "' crossorigin='" . (isset($obj->extra['crossorigin']) ? $obj->extra['crossorigin'] : 'anonymous') . "'";
+        }
+
         /**
          * Filter the HTML link tag of an enqueued style.
          *
          * @since 2.1.1
-         *       
+         *
          * @param
          *            string The link tag for the enqueued style.
          * @param string $handle
          *            The style's registered handle.
          */
-        $tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-css'$title href='$href' type='text/css' media='$media' />\n", $handle);
-        
+        $tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-css'$title href='$href' type='text/css' media='$media'$sri_checking />\n", $handle);
+
         if ('rtl' === $this->text_direction && isset($obj->extra['rtl']) && $obj->extra['rtl']) {
             if (is_bool($obj->extra['rtl']) || 'replace' === $obj->extra['rtl']) {
                 $suffix = isset($obj->extra['suffix']) ? $obj->extra['suffix'] : '';
@@ -133,25 +139,25 @@ class GB_Styles extends GB_Dependencies
             } else {
                 $rtl_href = $this->_css_href($obj->extra['rtl'], $ver, "$handle-rtl");
             }
-            
+
             /**
              * This filter is documented in gb/class.gb-styles.php
              */
-            $rtl_tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-rtl-css'$title href='$rtl_href' type='text/css' media='$media' />\n", $handle);
-            
+            $rtl_tag = GB_Hooks::apply_filters('style_loader_tag', "<link rel='$rel' id='$handle-rtl-css'$title href='$rtl_href' type='text/css' media='$media'$sri_checking />\n", $handle);
+
             if ($obj->extra['rtl'] === 'replace') {
                 $tag = $rtl_tag;
             } else {
                 $tag .= $rtl_tag;
             }
         }
-        
+
         $conditional_pre = $conditional_post = '';
         if (isset($obj->extra['conditional']) && $obj->extra['conditional']) {
             $conditional_pre = "<!--[if {$obj->extra['conditional']}]>\n";
             $conditional_post = "<![endif]-->\n";
         }
-        
+
         if ($this->do_concat) {
             $this->print_html .= $conditional_pre;
             $this->print_html .= $tag;
@@ -164,61 +170,61 @@ class GB_Styles extends GB_Dependencies
             $this->print_inline_style($handle);
             echo $conditional_post;
         }
-        
+
         return true;
     }
 
     /**
      *
-     * @param string $handle            
-     * @param string $code            
+     * @param string $handle
+     * @param string $code
      */
     public function add_inline_style($handle, $code)
     {
         if (! $code) {
             return false;
         }
-        
+
         $after = $this->get_data($handle, 'after');
         if (! $after) {
             $after = array();
         }
-        
+
         $after[] = $code;
-        
+
         return $this->add_data($handle, 'after', $after);
     }
 
     /**
      *
-     * @param string $handle            
-     * @param bool $echo            
+     * @param string $handle
+     * @param bool $echo
      * @return bool
      */
     public function print_inline_style($handle, $echo = true)
     {
         $output = $this->get_data($handle, 'after');
-        
+
         if (empty($output)) {
             return false;
         }
-        
+
         $output = implode("\n", $output);
-        
+
         if (! $echo) {
             return $output;
         }
-        
+
         printf("<style id='%s-inline-css' type='text/css'>\n%s\n</style>\n", esc_attr($handle), $output);
-        
+
         return true;
     }
 
     /**
      *
-     * @param mixed $handles            
-     * @param bool $recursion            
-     * @param mixed $group            
+     * @param mixed $handles
+     * @param bool $recursion
+     * @param mixed $group
      * @return bool
      */
     public function all_deps($handles, $recursion = false, $group = false)
@@ -229,7 +235,7 @@ class GB_Styles extends GB_Dependencies
              * Filter the array of enqueued styles before processing for output.
              *
              * @since 2.1.0
-             *       
+             *
              * @param array $to_do
              *            The list of enqueued styles about to be processed.
              */
@@ -240,9 +246,9 @@ class GB_Styles extends GB_Dependencies
 
     /**
      *
-     * @param string $src            
-     * @param string $ver            
-     * @param string $handle            
+     * @param string $src
+     * @param string $ver
+     * @param string $handle
      * @return string
      */
     public function _css_href($src, $ver, $handle)
@@ -250,35 +256,35 @@ class GB_Styles extends GB_Dependencies
         if (! is_bool($src) && ! preg_match('|^(https?:)?//|', $src) && ! ($this->content_url && 0 === strpos($src, $this->content_url))) {
             $src = $this->base_url . $src;
         }
-        
+
         if (! empty($ver))
             $src = add_query_arg('ver', $ver, $src);
-        
+
         /**
          * Filter an enqueued style's fully-qualified URL.
          *
          * @since 2.1.0
-         *       
+         *
          * @param string $src
          *            The source URL of the enqueued style.
          * @param string $handle
          *            The style's registered handle.
          */
         $src = GB_Hooks::apply_filters('style_loader_src', $src, $handle);
-        
+
         return esc_url($src);
     }
 
     /**
      *
-     * @param string $src            
+     * @param string $src
      * @return bool
      */
     public function in_default_dir($src)
     {
         if (! $this->default_dirs)
             return true;
-        
+
         foreach ((array) $this->default_dirs as $test) {
             if (0 === strpos($src, $test))
                 return true;

@@ -38,7 +38,7 @@ require_once (GB_CORE_DIR . '/functions.gb-styles.php');
  * when last arg === 1 queues the script for the footer
  *
  * @since 2.0.0
- *       
+ *
  * @param GB_Scripts $scripts
  *            object.
  */
@@ -46,46 +46,55 @@ function gb_default_scripts(&$scripts)
 {
     if (! defined('GB_SCRIPT_DEBUG'))
         define('GB_SCRIPT_DEBUG', GB_DEBUG);
-    
+
     if (! $guessurl = site_url())
         $guessurl = gb_guess_url();
-    
+
     $scripts->base_url = $guessurl;
     $scripts->content_url = defined('GB_CONTENT_URL') ? GB_CONTENT_URL : '';
     $scripts->default_version = get_siteinfo('version');
     $scripts->default_dirs = array(
         GB_CORE_URL . '/js/'
     );
-    
+
     $suffix = GB_SCRIPT_DEBUG ? '' : '.min';
-    
+
     // Vendor libraries and friends
-    $scripts->add('jquery', false, array(
-        'jquery-core'
+    $scripts->add('gb-core', false, array(
+        'jquery',
+        'bootstrap'
     ), null);
-    $scripts->add('jquery-core', GB_CORE_URL . "/js/vendor/jquery-2.1.3$suffix.js", array(), null);
-    
+    $scripts->add('jquery', "//code.jquery.com/jquery-3.2.1$suffix.js", array(), null);
+    $scripts->add('bootstrap', "//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap$suffix.js", array(), null);
+
+    $scripts->add_data('gb-core', 'integrity',
+        (empty($suffix) ? 'sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=' // Uncompressed
+            : 'sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4='));  // Minified
+//     $scripts->add_data('bootstrap', 'integrity',
+//         (empty($suffix) ? '' // Uncompressed // TODO: Fill in
+//             : ''));  // Minified // TODO: Fill in
+
     $scripts->add('zxcvbn-async', GB_ADMIN_URL . "/js/zxcvbn-async$suffix.js", array(), '1.0');
     GB_Hooks::did_action('init') && $scripts->localize('zxcvbn-async', '_zxcvbnSettings', array(
         'src' => GB_ADMIN_URL . '/js/zxcvbn.min.js'
     ));
-    
+
     $scripts->add('password-strength-meter', GB_ADMIN_URL . "/js/password-strength-meter$suffix.js", array(
-        'jquery',
+        'gb-core',
         'zxcvbn-async'
     ), false, 1);
     GB_Hooks::did_action('init') && $scripts->localize('password-strength-meter', 'pwsL10n', array(
         'empty' => __('Strength indicator'),
-        'short' => __('Very weak', 'password strength'),
-        'bad' => __('Weak', 'password strength'),
+        'short' => _x('Very weak', 'password strength'),
+        'bad' => _x('Weak', 'password strength'),
         'good' => _x('Medium', 'password strength'),
-        'strong' => __('Strong', 'password strength'),
+        'strong' => _x('Strong', 'password strength'),
         'mismatch' => __('Mismatch')
     ));
-    
+
     // Admin mode scripts
     $scripts->add('user-profile', GB_ADMIN_URL . "/js/user-profile$suffix.js", array(
-        'jquery',
+        'gb-core',
         'password-strength-meter'/* , 'wp-util' */ ), false, 1);
 }
 
@@ -101,7 +110,7 @@ function gb_default_scripts(&$scripts)
  * property, the default version, and text direction for the object.
  *
  * @since 2.0.0
- *       
+ *
  * @param GB_Styles $styles
  *            object.
  */
@@ -109,10 +118,10 @@ function gb_default_styles(&$styles)
 {
     if (! defined('GB_SCRIPT_DEBUG'))
         define('GB_SCRIPT_DEBUG', GB_DEBUG);
-    
+
     if (! $guessurl = site_url())
         $guessurl = gb_guess_url();
-    
+
     $styles->base_url = $guessurl;
     $styles->content_url = defined('GB_CONTENT_URL') ? GB_CONTENT_URL : '';
     $styles->default_version = get_siteinfo('version');
@@ -120,55 +129,35 @@ function gb_default_styles(&$styles)
     $styles->default_dirs = array(
         GB_CORE_URL . '/css/'
     );
-    
+
     $open_sans_font_url = '';
-    
-    /*
-     * translators: If there are characters in your language that are not supported
-     * by Open Sans, translate this to 'off'. Do not translate into your own language.
-     */
-    if ('off' !== _x('on', 'Open Sans font: on or off')) {
-        $subsets = 'latin,latin-ext';
-        
-        /*
-         * translators: To add an additional Open Sans character subset specific to your language,
-         * translate this to 'greek', 'cyrillic' or 'vietnamese'. Do not translate into your own language.
-         */
-        $subset = _x('no-subset', 'Open Sans font: add new subset (greek, cyrillic, vietnamese)');
-        
-        if ('cyrillic' == $subset) {
-            $subsets .= ',cyrillic,cyrillic-ext';
-        } elseif ('greek' == $subset) {
-            $subsets .= ',greek,greek-ext';
-        } elseif ('vietnamese' == $subset) {
-            $subsets .= ',vietnamese';
-        }
-        
-        // Hotlink Open Sans, for now
-        $open_sans_font_url = "//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600&subset=$subsets";
-    }
-    
+
     $suffix = GB_SCRIPT_DEBUG ? '' : '.min';
-    
+
     // Common dependencies
-    $styles->add('buttons', GB_CORE_URL . "/load-style.php/buttons$suffix");
-    // $styles->add( 'dashicons', "/wp-includes/css/dashicons$suffix.css" );
-    $styles->add('open-sans', $open_sans_font_url);
-    
+    $styles->add('icons-material', "//fonts.googleapis.com/icon?family=Material+Icons");
+//     $styles->add( 'dashicons', "/wp-includes/css/dashicons$suffix.css" );
+
     // Common styles
-    $styles->add('gb-core', GB_CORE_URL . "/load-style.php/core$suffix");
-    $styles->add('responsive-tables', GB_CORE_URL . "/css/responsive-tables.css", array(
+    $styles->add('gb-core', GB_CORE_URL . "/load-style.php/core$suffix", array(
+        'bootstrap'
+    ));
+    $styles->add('bootstrap', "//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap$suffix.css");
+//     $styles->add('responsive-tables', GB_CORE_URL . "/css/responsive-tables.css", array(
+//         'gb-core'
+//     ));
+//     $styles->add('forms', GB_CORE_URL . "/load-style.php/forms$suffix"/* , array('gb-core') */ );
+
+//     $styles->add_data('bootstrap', 'integrity',
+//         (empty($suffix) ? '' // Uncompressed // TODO: Fill in
+//             : ''));  // Minified // TODO: Fill in
+
+    // Admin styles
+    $styles->add('install', GB_ADMIN_URL . "/load-style.php/install$suffix", array(
         'gb-core'
     ));
-    $styles->add('forms', GB_CORE_URL . "/load-style.php/forms$suffix"/* , array('gb-core') */ );
-    
-    // Admin styles
-    $styles->add('install', "/gb-admin/css/gb-install$suffix.css", array(
-        'gb-core',
-        'open-sans'
-    ));
-    $styles->add('ie', "/gb-admin/css/ie$suffix.css");
-    
+    $styles->add('ie', GB_ADMIN_URL . "/css/ie$suffix.css");
+
     $styles->add_data('ie', 'conditional', 'lte IE 7');
 }
 
@@ -179,36 +168,36 @@ function gb_default_styles(&$styles)
  * print_footer_scripts() is called in the footer to print these scripts.
  *
  * @since 2.0.0
- *       
+ *
  * @see gb_print_scripts()
  */
 function print_head_scripts()
 {
     global $concatenate_scripts;
-    
+
     if (! GB_Hooks::did_action('gb_print_scripts')) {
         /**
          * This action is documented in gb/functions.gb-scripts.php
          */
         GB_Hooks::do_action('gb_print_scripts');
     }
-    
+
     script_concat_settings();
     _gb_scripts()->do_concat = $concatenate_scripts;
     _gb_scripts()->do_concat = FALSE; // TODO: Remove for enable concatenate mode
     _gb_scripts()->do_head_items();
-    
+
     /**
      * Filter whether to print the head scripts.
      *
      * @since 2.1.0
-     *       
+     *
      * @param bool $print
      *            Whether to print the head scripts. Default true.
      */
     if (GB_Hooks::apply_filters('print_head_scripts', true))
         _print_scripts();
-    
+
     _gb_scripts()->reset();
     return _gb_scripts()->done;
 }
@@ -221,24 +210,24 @@ function print_head_scripts()
 function print_footer_scripts()
 {
     global $concatenate_scripts;
-    
+
     script_concat_settings();
     _gb_scripts()->do_concat = $concatenate_scripts;
     _gb_scripts()->do_concat = FALSE; // TODO: Remove for enable concatenate mode
                                       // _gb_scripts()->do_concat = true; // TODO: Remove for enable concatenate mode
     _gb_scripts()->do_footer_items();
-    
+
     /**
      * Filter whether to print the footer scripts.
      *
      * @since 2.1.0
-     *       
+     *
      * @param bool $print
      *            Whether to print the footer scripts. Default true.
      */
     if (GB_Hooks::apply_filters('print_footer_scripts', true))
         _print_scripts();
-    
+
     _gb_scripts()->reset();
     return _gb_scripts()->done;
 }
@@ -250,11 +239,11 @@ function print_footer_scripts()
 function _print_scripts()
 {
     global $compress_scripts;
-    
+
     $zip = $compress_scripts ? 1 : 0;
     if ($zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP)
         $zip = 'gzip';
-    
+
     if ($concat = trim(_gb_scripts()->concat, ', ')) {
         if (! empty(_gb_scripts()->print_code)) {
             echo "\n<script type='text/javascript'>\n";
@@ -263,11 +252,11 @@ function _print_scripts()
             echo "/* ]]> */\n";
             echo "</script>\n";
         }
-        
+
         $src = _gb_scripts()->base_url . "/gb/load-scripts.php?t=scr&c={$zip}&ver=" . _gb_scripts()->default_version;
         echo "<script type='text/javascript' src='" . esc_attr($src) . "'></script>\n";
     }
-    
+
     if (! empty(_gb_scripts()->print_html))
         echo _gb_scripts()->print_html;
 }
@@ -288,7 +277,7 @@ function gb_print_head_scripts()
          */
         GB_Hooks::do_action('gb_print_scripts');
     }
-    
+
     return print_head_scripts();
 }
 
@@ -344,22 +333,22 @@ function gb_enqueue_scripts()
 function print_late_styles()
 {
     global $concatenate_scripts;
-    
+
     gb_styles()->do_concat = $concatenate_scripts;
     gb_styles()->do_concat = FALSE; // TODO: Remove for enable concatenate mode
     gb_styles()->do_footer_items();
-    
+
     /**
      * Filter whether to print the styles queued too late for the HTML head.
      *
      * @since 2.0.0
-     *       
+     *
      * @param bool $print
      *            Whether to print the 'late' styles. Default true.
      */
     if (GB_Hooks::apply_filters('print_late_styles', true))
         _print_styles();
-    
+
     gb_styles()->reset();
     return gb_styles()->done;
 }
@@ -371,24 +360,24 @@ function print_late_styles()
 function _print_styles()
 {
     global $compress_css;
-    
+
     $zip = $compress_css ? 1 : 0;
     if ($zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP)
         $zip = 'gzip';
-    
+
     if (! empty(gb_styles()->concat)) {
         $dir = gb_styles()->text_direction;
         $ver = gb_styles()->default_version;
         $href = gb_styles()->base_url . "/gb/load-styles.php?c={$zip}&dir={$dir}&load=" . trim(gb_styles()->concat, ', ') . '&ver=' . $ver;
         echo "<link rel='stylesheet' href='" . esc_attr($href) . "' type='text/css' media='all' />\n";
-        
+
         if (! empty(gb_styles()->print_code)) {
             echo "<style type='text/css'>\n";
             echo gb_styles()->print_code;
             echo "\n</style>\n";
         }
     }
-    
+
     if (! empty(gb_styles()->print_html))
         echo gb_styles()->print_html;
 }
@@ -401,21 +390,21 @@ function _print_styles()
 function script_concat_settings()
 {
     global $concatenate_scripts, $compress_scripts, $compress_css;
-    
+
     $compressed_output = (ini_get('zlib.output_compression') || 'ob_gzhandler' == ini_get('output_handler'));
-    
+
     if (! isset($concatenate_scripts)) {
         $concatenate_scripts = defined('CONCATENATE_SCRIPTS') ? CONCATENATE_SCRIPTS : true;
         if( /*!is_admin() ||*/ (defined('GB_SCRIPT_DEBUG') && GB_SCRIPT_DEBUG))
             $concatenate_scripts = false;
     }
-    
+
     if (! isset($compress_scripts)) {
         $compress_scripts = defined('COMPRESS_SCRIPTS') ? COMPRESS_SCRIPTS : true;
         if ($compress_scripts && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output))
             $compress_scripts = false;
     }
-    
+
     if (! isset($compress_css)) {
         $compress_css = defined('COMPRESS_CSS') ? COMPRESS_CSS : true;
         if ($compress_css && ( /*!get_site_option('can_compress_scripts') ||*/ $compressed_output))

@@ -6,17 +6,22 @@
  * @subpackage Administration
  */
 
-if (! defined('GB_DEBUG'))
-    define('GB_DEBUG', true);
+if (! defined('GB_DEBUG'))  define('GB_DEBUG', true);   // TODO: Remove me
 
-    // Sanity check.
+// Sanity check.
 if (FALSE) {
+/**
+ * #@+
+ *
+ * @ignore
+ *
+ */
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Error: PHP is not running</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Error: PHP is not running</title>
 </head>
 <body class="gb-core-ui">
 	<h1 id="logo">GeniBase</h1>
@@ -26,6 +31,9 @@ if (FALSE) {
 </body>
 </html>
 <?php
+/**
+ * #@-
+ */
 }
 
 /**
@@ -36,27 +44,35 @@ if (FALSE) {
  */
 define('GB_INSTALLING', true);
 
-define('BASE_DIR', dirname(dirname(__FILE__)));
+if (GB_DEBUG)
+    header('Content-Type: text/html; charset=utf-8');
 
 /**
- * Load GeniBase Bootstrap
+ * Load GeniBase bootstrap
  */
-require_once (BASE_DIR . '/gb-load.php');
+require_once './gb-load.php';
 
 /**
  * Load GeniBase Administration Upgrade API
  */
-require_once (GB_ADMIN_DIR . '/includes/upgrade.php');
+require_once GB_ADMIN_DIR . '/includes/upgrade.php';
 
 // /** Load GeniBase Translation Install API */
-// require_once( BASE_DIR . 'gb-admin/includes/translation-index.php' );
-
-/**
- * Load gbdb
- */
-// require_once (GB_CORE_DIR . '/class.gb-dbase.php');
+// require_once BASE_DIR . '/gb-admin/includes/translation-index.php';
 
 nocache_headers();
+
+$language = '';
+if (! empty($_REQUEST['language'])) {
+    $language = preg_replace('/[^a-zA-Z_]/', '', $_REQUEST['language']);
+} elseif (defined('GB_LOCAL_PACKAGE')) {
+    $language = GB_LOCAL_PACKAGE;
+}
+if (! empty($language) && load_default_textdomain($language)) {
+    $GLOBALS['gb_locale'] = new GB_Locale();
+} else {
+    $language = 'en_US';
+}
 
 $step = isset($_GET['step']) ? (int) $_GET['step'] : 0;
 
@@ -70,26 +86,28 @@ function display_header($body_classes = [])
     $body_classes = (array) $body_classes;
     $body_classes[] = 'gb-core-ui';
     if (function_exists('is_rtl') && is_rtl())
-        $body_classes[] = ' rtl';
+        $body_classes[] = 'rtl';
 
     @header('Content-Type: text/html; charset=utf-8');
-    ?>
+?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	<?php language_attributes(); ?>>
+<html xmlns="http://www.w3.org/1999/xhtml" <?php language_attributes(); ?>>
 <head>
-<meta name="viewport" content="width=device-width" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?php _e('GeniBase Installation'); ?></title>
-	<?php gb_admin_css( 'install', true );	?>
+    <title><?php _e('GeniBase Installation'); ?></title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<?php gb_admin_css('install', true);	?>
 </head>
 <body class="<?php echo implode(' ', $body_classes); ?>">
-	<h1 id="logo">
-		<a name="genibase" tabindex="-1"><?php _e( 'GeniBase' ); ?></a>
-	</h1>
+	<div class="container">
+		<div class="header">
+			<h1 id="logo"><?php _e( 'GeniBase' ); ?></h1>
+		</div>
+		<div class="page">
 <?php
-}
-// end display_header()
+}   // end display_header()
 
 /**
  * Do we have a users table?
@@ -110,8 +128,7 @@ function has_users_table()
     ]);
     $has_users_table = ($users_table != null);
     return $has_users_table;
-}
-// end has_users_table()
+}   // end has_users_table()
 
 /**
  * Display installer setup form.
@@ -120,6 +137,8 @@ function has_users_table()
  */
 function display_setup_form($error = null)
 {
+    global $language;
+
     // Ensure that site appear in search engines by default.
     $site_public = 1;
     if (isset($_POST['site_title'])) {
@@ -130,83 +149,72 @@ function display_setup_form($error = null)
     $admin_email = isset($_POST['admin_email']) ? trim(gb_unslash($_POST['admin_email'])) : '';
 
     if (! is_null($error)) :
-        ?>
-<p class="message"><?php echo $error; ?></p>
-	<?php endif; ?>
-<form id="setup" method="post" action="install.php?step=2"
-		novalidate="novalidate">
-		<div class="row">
-			<div class="medium-3 columns medium-text-right">
-				<label for="site_title"><?php _e( 'Site Title' ); ?></label>
-			</div>
-			<div class="medium-4 columns end">
-				<input name="site_title" type="text" id="site_title" size="25"
+?>
+    <div class="alert alert-danger" role="alert">
+        <?php echo $error; ?>
+    </div>
+<?php endif; ?>
+    <form id="setup" method="post" action="install.php?step=2" novalidate="novalidate">
+		<div class="form-group row">
+			<label class="col-form-label col-md-3 col-12 text-md-right text-left"
+                for="site_title"><?php _e( 'Site Title' ); ?>:</label>
+			<div class="col-md-4 col-12">
+				<input class="form-control" name="site_title" id="site_title" type="text" size="25"
 					value="<?php echo esc_attr( $site_title ); ?>" />
 			</div>
 		</div>
-		<div class="row">
-			<div class="medium-3 columns medium-text-right">
-				<label for="admin_email"><?php _e( 'Your E-mail' ); ?></label>
+		<div class="form-group row">
+			<label class="col-form-label col-md-3 col-12 text-md-right text-left"
+                for="admin_email"><?php _e( 'Your E-mail' ); ?>:</label>
+            <div class="col-md-4 col-12">
+<?php   if ( has_users_table() ) : ?>
+                <p class="form-control-static"><?php _e('User(s) already exists.'); ?></p>
+    			<input name="admin_email" type="hidden" value="" />
 			</div>
-	<?php if ( has_users_table() ) : ?>
-		<div class="medium-4 columns end"><?php _e('User(s) already exists.'); ?></div>
-			<input name="admin_email" type="hidden" value="" />
-	<?php else : ?>
-		<div class="medium-4 columns">
-				<input name="admin_email" type="email" id="admin_email" size="25"
-					value="<?php echo esc_attr( $admin_email ); ?>" />
+<?php   else : ?>
+				<input class="form-control" name="admin_email" id="admin_email" type="email" size="25"
+					value="<?php echo esc_attr( $admin_email ); ?>" aria-describedby="admin_email-help" />
 			</div>
-			<div class="medium-5 columns description"><?php _e( 'Double-check your email address before continuing.' ); ?></div>
-	<?php endif; ?>
-	</div>
-	<?php if ( ! has_users_table() ) : ?>
-	<div class="row">
-			<div class="medium-3 columns medium-text-right">
-				<label for="pass1"><?php _e('Password, twice'); ?></label>
-			</div>
-			<div class="medium-4 columns">
-				<p>
-					<input name="admin_password" type="password" id="pass1" size="25"
-						value="" />
-				</p>
-				<p>
-					<input name="admin_password2" type="password" id="pass2" size="25"
-						value="" />
-				</p>
-				<p id="pass-strength-result"><?php _e('Strength indicator'); ?></p>
-			</div>
-			<div class="medium-5 columns description">
-				<p><?php _e('A&nbsp;password will be automatically generated for you if you leave this blank.'); ?></p>
-				<p><?php echo gb_get_password_hint(); ?></p>
-			</div>
-		</div>
-	<?php endif; ?>
-	<div class="row">
-			<div class="medium-3 columns medium-text-right">
-				<label for="site_public"><?php _e( 'Privacy' ); ?></label>
-			</div>
-			<div class="medium-4 columns end">
-				<label><input type="checkbox" name="site_public" id="site_public"
-					value="1" <?php checked( $site_public ); ?> /> <?php _e( 'Allow search engines to&nbsp;index this site.' ); ?></label>
+			<small id="admin_email-help" class="col-md-5 col form-text text-muted"><?php _e( 'Double-check your email address before continuing.' ); ?></small>
+<?php endif; ?>
+    	</div>
+<?php if ( ! has_users_table() ) : ?>
+    	<div class="form-group row">
+    		<label class="col-form-label col-md-3 col-12 text-md-right text-left"
+                for="pass1"><?php _e('Password, twice'); ?>:</label>
+    		<div class="col-md-4 col-12">
+    			<p><input class="form-control" name="admin_password" id="pass1" type="password" size="25"
+                    value="" aria-describedby="admin_password-help" /></p>
+    			<p><input class="form-control" name="admin_password2" id="pass2" type="password" size="25"
+                    value="" aria-describedby="admin_password-help" /></p>
+    			<p id="pass-strength-result"><?php _e('Strength indicator'); ?></p>
+    		</div>
+    		<div id="admin_password-help" class="col-md-5 col form-text text-muted">
+    			<p><small><?php _e('A&nbsp;password will be automatically generated for you if you leave this blank.'); ?></small></p>
+    			<p><small><?php echo gb_get_password_hint(); ?></small></p>
+    		</div>
+    	</div>
+<?php endif; ?>
+        <div class="form-group row">
+			<div class="col-md-3 col-12 text-md-right text-left"><?php _e( 'Privacy' ); ?>:</div>
+			<div class="col-md-4 col-12 form-check">
+                <label class="form-check-label"><input class="form-check-input" type="checkbox"
+                    name="site_public" id="site_public" value="1" <?php checked( $site_public ); ?> />
+                    <?php _e( 'Allow search engines to&nbsp;index this site.' ); ?></label>
 			</div>
 		</div>
-		<p class="step">
-			<input type="submit" name="Submit"
-				value="<?php esc_attr_e( 'Install GeniBase' ); ?>"
-				class="primary-button button-large" />
-		</p>
-		<input type="hidden" name="language"
-			value="<?php echo isset( $_REQUEST['language'] ) ? esc_attr( $_REQUEST['language'] ) : ''; ?>" />
+        <input type="hidden" name="language" value="<?php esc_attr_e( $language ); ?>" />
+		<div class="row step">
+			<p class="text-right col-md-7 col-12">
+    			<input type="submit" name="Submit" value="<?php esc_attr_e( 'Install GeniBase' ); ?>"
+                    class="btn btn-primary" />
+    		</p>
+    	</div>
 	</form>
 <?php
 } // end display_setup_form()
 
-$language = '';
-if ( ! empty( $_REQUEST['language'] ) ) {
-    $language = preg_replace( '/[^a-zA-Z_]/', '', $_REQUEST['language'] );
-} elseif ( isset( $GLOBALS['gb_local_package'] ) ) {
-    $language = $GLOBALS['gb_local_package'];
-}
+
 
 switch ($step) {
     case 0: // Step 0
@@ -214,31 +222,19 @@ switch ($step) {
     // Deliberately fall through if we can't reach the translations API.
 
     case 1: // Step 1, direct link or from language chooser.
-        if (! empty($language) && load_default_textdomain($language)) {
-            $language = $language;
-            $GLOBALS['gb_locale'] = new GB_Locale();
-        }
-
         display_header();
 ?>
-    <h1><?php _ex( 'Welcome', 'Howdy' ); ?></h1>
-	<p><?php _e( 'Welcome to five-minute GeniBase installation process! Just fill in the information below.' ); ?></p>
+            <h1><?php _ex( 'Welcome', 'Howdy' ); ?></h1>
+        	<p><?php _e( 'Welcome to five-minute GeniBase installation process! Just fill in the information below.' ); ?></p>
 
-	<h1><?php _e( 'Information needed' ); ?></h1>
-	<p><?php _e( 'Please provide the following information. Don&#8217;t worry, you can always change these settings later.' ); ?></p>
+        	<h2><?php _e( 'Information needed' ); ?></h2>
+        	<p><?php _e( 'Please provide the following information. Don&#8217;t worry, you can always change these settings later.' ); ?></p>
 
 <?php
         display_setup_form();
         break;
 
     case 2: // Step 2
-        if (! empty($language) && load_default_textdomain($language)) {
-            $language = $language;
-            $GLOBALS['gb_locale'] = new GB_Locale();
-        } else {
-            $language = 'en_US';
-        }
-
         if (! empty(gbdb()->error))
             gb_die(gbdb()->error->get_error_message());
 
@@ -271,35 +267,33 @@ switch ($step) {
 
         if ($error === false) :
             gbdb()->show_errors();
-            $result = gb_install($site_title, $admin_email, $public, gb_slash($admin_password), $language);
-            ?>
+            $result = gb_install($site_title, $admin_email, $public, gb_slash($admin_password), $language);  // TODO Uncomment
+?>
+        <h1><?php _e( 'Success!' ); ?></h1>
 
-<h1><?php _e( 'Success!' ); ?></h1>
+    	<p><?php _e( 'GeniBase has been installed. Were you expecting more steps? Sorry to disappoint.' ); ?></p>
 
-	<p><?php _e( 'GeniBase has been installed. Were you expecting more steps? Sorry to disappoint.' ); ?></p>
+    	<div class="row">
+    		<div class="col-4 text-right"><?php _e( 'User login' ); ?>:</div>
+    		<div class="col"><?php echo esc_html( sanitize_email( $admin_email ) ); ?></div>
+    	</div>
+    	<div class="row">
+    		<div class="col-4 text-right"><?php _e( 'Password' ); ?>:</div>
+    		<div class="col">
+<?php
+            if (! empty($result['password']) && empty($admin_password_check)) {
+                echo "<p><code>" . esc_html( $result['password'] ) . "</code></p>\n";
+            }
+            echo "<p>" . $result['password_message'] . "</p>\n";
+?>
+            </div>
+    	</div>
 
-	<div class="row">
-		<div class="small-3 columns text-right"><?php _e( 'User login' ); ?></div>
-		<div class="small-9 columns"><?php echo esc_html( sanitize_email( $admin_email ) ); ?></div>
-	</div>
-	<div class="row">
-		<div class="small-3 columns text-right"><?php _e( 'Password' ); ?></div>
-		<div class="small-9 columns"><?php
-            if (! empty($result['password']) && empty($admin_password_check)) :
-                ?>
-			<code><?php echo esc_html( $result['password'] ) ?></code>
-		<?php endif; ?>
-			<?php
+    	<p class="text-right step">
+    		<a href="../gb-login.php" class="btn btn-primary"><?php _e( 'Log In' ); ?></a>
+    	</p>
 
-            echo $result['password_message']?></div>
-	</div>
-
-	<p class="step">
-		<a href="../gb-login.php" class="primary-button button-large"><?php _e( 'Log In' ); ?></a>
-	</p>
-
-
-        <?php
+<?php
 	endif;
         break;
 }
