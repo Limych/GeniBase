@@ -7,9 +7,9 @@ error_reporting(E_ALL);
 gc_disable();
 
 if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
-    define('PHPUNIT_COMPOSER_INSTALL', __DIR__ . '/../vendor/autoload.php');
+    define('PHPUNIT_COMPOSER_INSTALL', __DIR__ . '/../../../vendor/autoload.php');
 }
 
 require_once PHPUNIT_COMPOSER_INSTALL;
 
-require_once './PHPUnitUtil.php';
+require_once __DIR__ . '/PHPUnitUtil.php';
