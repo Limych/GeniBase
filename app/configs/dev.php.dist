@@ -1,0 +1,12 @@
+<?php
+
+// enable the debug mode
+$app['debug'] = true;
+
+// === Logging ================================================================
+
+$app['monolog.level'] = Monolog\Logger::DEBUG;
+
+// === Profiler ===============================================================
+
+$app['profiler.cache_dir']  = BASE_DIR.'/tmp/cache/profiler';

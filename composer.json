@@ -1,37 +1,75 @@
 {
-    "name": "GeniBase",
-    "description": "GeniBase is web software you can use to create a genealogical databases.",
-    "type": "project",
-    "require": {
-        "php": ">=5.4",
-        "ext-PDO": "*",
-        "ext-pdo_mysql": "*",
-        "ext-json": "*",
-        "psr/log": "~1.0",
-        "zendframework/zend-diactoros": "~1.3",
-        "leafo/scssphp": "0.6.7"
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer": "~2.3",
-        "phploc/phploc": "*",
-        "phpmd/phpmd": "*"
-    },
-    "suggest": {
-    },
-    "autoload": {
-        "psr-4": {
-            "GeniBase\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "GeniBase Contributors",
-            "homepage": "https://github.com/Limych/GeniBase/graphs/contributors"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/Limych/GeniBase/issues",
-        "wiki": "https://github.com/Limych/GeniBase/wiki"
-    },
-    "license": "GPLv2 or later"
+	"name" : "limych/genibase",
+	"description" : "GeniBase is web software you can use to create a genealogical databases.",
+	"license" : "GPL-3.0",
+	"type" : "project",
+	"require" : {
+		"php" : ">=5.5.9",
+		"gedcomx/gedcomx-php" : "~3.1",
+		"silex/silex" : "~2.1",
+		"silex/web-profiler" : "~2.0",
+		"symfony/monolog-bridge" : "~2.8|^3.0",
+		"symfony/twig-bridge" : "~2.8|^3.0",
+		"symfony/console" : "~2.8|^3.0",
+		"leafo/scssphp" : "~0.6",
+		"twbs/bootstrap" : "~4@dev",
+		"FortAwesome/Font-Awesome" : "~4",
+		"nesbot/carbon" : "~1.22",
+		"symfony/web-link" : "~3.3",
+		"symfony/config" : "~2.8|^3.0",
+		"symfony/http-foundation" : "~3.3",
+		"doctrine/dbal" : "~2.5",
+		"euskadi31/cors-service-provider" : "~1.0",
+		"symfony/serializer" : "~2.1|~3.0",
+		"symfony/asset" : "~3.3"
+	},
+	"require-dev" : {
+		"phpunit/phpunit" : ">=3.7 <6",
+		"symfony/debug" : "~2.8|^3.0",
+		"squizlabs/php_codesniffer" : "^2.0 || ~3.0",
+		"phploc/phploc" : "~4.0",
+		"phpmd/phpmd" : "~2.6",
+		"cyberspectrum/pharpiler" : "~1.0",
+		"satooshi/php-coveralls" : "~1.0",
+		"php-console/php-console" : "~3.1",
+		"symfony/browser-kit" : "~2.1|~3.0",
+		"texthtml/whoops-silex" : "~1.0"
+	},
+	"authors" : [{
+			"name" : "Andrey Khrolenok",
+			"email" : "andrey@khrolenok.ru",
+			"homepage" : "https://github.com/Limych/GeniBase"
+		}
+	],
+	"minimum-stability" : "stable",
+	"support" : {
+		"issues" : "https://github.com/Limych/GeniBase/issues",
+		"wiki" : "https://github.com/Limych/GeniBase/wiki"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"" : "src"
+		}
+	},
+	"autoload-dev" : {
+		"psr-4" : {
+			"" : "tests/phpunit"
+		}
+	},
+	"scripts" : {
+		"run" : [
+			"echo 'Started web server on http://localhost:8888'",
+			"php -S localhost:8888 -t web"
+		]
+	},
+	"homepage" : "https://github.com/Limych/GeniBase",
+	"bin" : [
+		"bin/pharpiler"
+	],
+	"repositories" : [{
+			"type" : "git",
+			"url" : "https://github.com/Limych/gedcomx-php",
+			"name" : "Gedcomx-php"
+		}
+	]
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head>
+    <title>{% block title '' %} - My Silex Application</title>
+    
+    {% block stylesheets %}
+        {% if global.debug %}
+    	    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet" />
+    	    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" />
+        {% else %}
+        	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous" />
+    	    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        {% endif %}
+        <!-- {-% stylesheets
+            'css/*.css'
+            filter='scssphp,cssrewrite' output='css/all.css' %}
+            <link rel="stylesheet" href="{-{ asset_url }}" />
+        {-% endstylesheets %} -->
+        <link href="{{ asset('css/main.css') }}" rel="stylesheet" type="text/css" />
+    {% endblock stylesheets %}
+
+	{% block javascripts %}
+        {% if global.debug %}
+            <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.js"></script>
+        {% else %}
+            <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+        {% endif %}
+        <script type="text/javascript">
+        	var _gaq = _gaq || [];
+        	_gaq.push([ '_setAccount', 'UA-XXXXXXXX-X' ]);
+        	_gaq.push([ '_trackPageview' ]);
+        
+        	(function() {
+        		var ga = document.createElement('script');
+        		ga.type = 'text/javascript';
+        		ga.async = true;
+        		ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+        				: 'http://www')
+        				+ '.google-analytics.com/ga.js';
+        		var s = document.getElementsByTagName('script')[0];
+        		s.parentNode.insertBefore(ga, s);
+        	})();
+        </script>
+    {% endblock javascripts %}
+</head><body{% block body_fix %}{% endblock %}>
+    <div class="container">
+        {% block content %}{% endblock %}
+        
+        {% if global.debug %}
+        	<div class="alert alert-warning text-center clearfix" role="alert"><strong>Warning!</strong> Development mode</div>
+        {% endif %}
+    </div>
+</body></html>

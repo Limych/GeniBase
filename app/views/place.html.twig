@@ -1,0 +1,78 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+	<div class="card my-3">
+		{% set bc = '' %}
+    	{% for place in gedcomx.getPlaces() %}
+        	{% if bc is empty %}
+        	    {% set bc = '<li class="breadcrumb-item active"></li>' %}
+        	{% else %}
+        	    {% set bc = '<li class="breadcrumb-item"><a href="' ~ path('place', {'id': place.getId()}) ~ '"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;' ~ place.getNames()[0].getValue() ~ '</a></li>' ~ bc %}
+        	{% endif %}
+    	{% endfor %}
+		<ol class="card-header breadcrumb">
+			{{ bc|raw }}
+		</ol>
+		<div class="card-block">
+        	{% set place = gedcomx.getPlaces()[0] %}
+			{% set show_title = true %}
+			{% set has_subtitle = false %}
+        	{% for name in place.getNames() %}
+        		{% if show_title %}
+    				{% set show_title = false %}
+    		<h2 class="card-title"><i class="fa fa-map-marker" aria-hidden="true"></i> {{ name.getValue() }}</h2>
+			<div class="card-subtitle">
+				{% else %}
+					{% if has_subtitle %}, {% endif %}
+    				{% set has_subtitle = true %}
+    		    {{ name.getValue() }}
+				{% endif %}
+        	{% endfor %}
+			{% if has_subtitle %}
+				<span class="mx-3">&bullet;</span>
+			{% endif %}
+        	{% if place.getTemporalDescription() != null %}
+        		{{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }}
+				<span class="mx-3">&bullet;</span>
+        	{% endif %}
+        	{% if place.getLatitude() %}
+    			<a target="_blank" href="//maps.google.com/maps/place/{{ '%-08s'|format(place.getLatitude()) }},+{{ '%-08s'|format(place.getLongitude()) }}/@{{ place.getLatitude() }},{{ place.getLongitude() }},11z"><i class="fa fa-map-o" aria-hidden="true"></i> на&nbsp;современной карте</a>
+    			<span class="mx-3">&bullet;</span>
+    			<a target="_blank" href="//etomesto.com/map-atlas_russia-1913/?y={{ place.getLatitude() }}&x={{ place.getLongitude() }}"><i class="fa fa-map-o" aria-hidden="true"></i> на&nbsp;старинной карте</a>
+    			<span class="mx-3">&bullet;</span>
+        	{% endif %}
+				<span class="text-nowrap">{{ place.getId() }}</span>
+			</div>
+			<div class="card-text mt-5">
+    			<div>
+            	{% if components %}
+            		Включает в себя:
+            		<ul class="d-inline list-inline">
+            		{% set first_shown = false %}
+                	{% for place in components %}{%
+                	    if first_shown %},</li>{% endif
+                	    %}<li class="list-inline-item"><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>{%
+                	    set first_shown = true
+            	    %}{% endfor %}
+            	    	</li>
+            	    </ul>
+            	{% endif %}
+    			</div>
+            	{% if neighbors %}
+    			<div class="mt-3">
+            		Поблизости также находятся:
+            		<ul class="d-inline list-inline">
+            		{% set first_shown = false %}
+                	{% for place in neighbors %}{%
+                	    if first_shown %},</li>{% endif
+                	    %}<li class="list-inline-item"><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>{%
+                	    set first_shown = true
+            	    %}{% endfor %}
+            	    	</li>
+            	    </ul>
+    			</div>
+            	{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

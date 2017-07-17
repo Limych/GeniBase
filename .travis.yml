@@ -70,6 +70,8 @@ script:
   - grunt $GB_TRAVISCI
 
 after_success:
+  # Build Coveralls reports
+  - travis_retry php vendor/bin/coveralls --coverage_clover=.reports/clover.xml
   # Generate documentation
   - bash .travis.sh
 

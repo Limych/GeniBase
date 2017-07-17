@@ -1,0 +1,5 @@
+{% extends "errors/default.html.twig" %}
+
+{% block title %}404 {{ status_text }}{% endblock %}
+{% block error_header %}<img src="{{ asset('images/gb-logo-err404.png') }}" alt="404" />{% endblock %}
+{% block error_message %}You are found a part of site that&hellip; that was forever lost.{% endblock %}
