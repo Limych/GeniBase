@@ -11,3 +11,5 @@ if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
 }
 
 require_once PHPUNIT_COMPOSER_INSTALL;
+
+require_once './PHPUnitUtil.php';
