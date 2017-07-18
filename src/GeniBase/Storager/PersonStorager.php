@@ -13,7 +13,6 @@ use Gedcomx\Conclusion\Fact;
 /**
  *
  * @author Limych
- *
  */
 class PersonStorager extends SubjectStorager
 {
@@ -25,15 +24,16 @@ class PersonStorager extends SubjectStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $this->makeGbidIfEmpty($entity, $o);
@@ -57,10 +57,13 @@ class PersonStorager extends SubjectStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update($t_persons, $data, [
+            $result = $this->dbs->getDb()->update(
+                $t_persons,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_persons, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -70,8 +73,9 @@ class PersonStorager extends SubjectStorager
         // Save childs
         if (isset($ent['gender'])) {
             $tmp = $o;
-            if (! empty($tmp['makeId_name']))
+            if (! empty($tmp['makeId_name'])) {
                 $tmp['makeId_name'] = 'Gender: ' . $tmp['makeId_name'];
+            }
             $this->newStorager(Gender::class)->save($ent['gender'], $entity, $tmp);
             unset($tmp);
         }
@@ -79,8 +83,9 @@ class PersonStorager extends SubjectStorager
             $tmp = $o;
             $tmp_cnt = 0;
             foreach ($ent['names'] as $name) {
-                if (! empty($o['makeId_name']))
+                if (! empty($o['makeId_name'])) {
                     $tmp['makeId_name'] = 'Name-' . (++$tmp_cnt) . ': ' . $o['makeId_name'];
+                }
                 $this->newStorager(Name::class)->save($name, $entity, $tmp);
             }
             unset($tmp);
@@ -125,7 +130,6 @@ class PersonStorager extends SubjectStorager
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE pn._id = ?", [$_id]);
-
         } elseif (! empty($id = $entity->getId())) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE pn.id = ?", [$id]);
         }
@@ -135,8 +139,9 @@ class PersonStorager extends SubjectStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         if (! empty($result['private'])) {
             settype($result['private'], 'boolean');
@@ -145,7 +150,9 @@ class PersonStorager extends SubjectStorager
             settype($result['living'], 'boolean');
         }
 
-        /** @var Person $entity */
+        /**
+ * @var Person $entity
+*/
         $entity = parent::processRaw($entity, $result);
 
         if (! empty($r = $this->newStorager(Gender::class)->load(null, $entity))) {
@@ -163,8 +170,8 @@ class PersonStorager extends SubjectStorager
 
     /**
      *
-     * @param mixed $entity
-     * @param mixed $context
+     * @param mixed      $entity
+     * @param mixed      $context
      * @param array|null $o
      * @return Gedcomx|false
      *
@@ -176,19 +183,23 @@ class PersonStorager extends SubjectStorager
 
         $o = $this->applyDefaultOptions($o);
 
-        if (false === $psn = $this->load($entity, $context, $o))
+        if (false === $psn = $this->load($entity, $context, $o)) {
             return false;
+        }
 
         $gedcomx->addPerson($psn);
-        if ($o['loadCompanions'])
+        if ($o['loadCompanions']) {
             $gedcomx->embed($this->loadGedcomxCompanions($psn));
+        }
 
         return $gedcomx;
     }
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /** @var Person $entity */
+        /**
+ * @var Person $entity
+*/
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getGender())) {
@@ -207,5 +218,4 @@ class PersonStorager extends SubjectStorager
 
         return $gedcomx;
     }
-
 }

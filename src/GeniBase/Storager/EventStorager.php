@@ -13,7 +13,6 @@ use Gedcomx\Conclusion\PlaceDescription;
 /**
  *
  * @author Limych
- *
  */
 class EventStorager extends SubjectStorager
 {
@@ -27,15 +26,16 @@ class EventStorager extends SubjectStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $this->makeGbidIfEmpty($entity, $o);
@@ -57,18 +57,22 @@ class EventStorager extends SubjectStorager
                 [$data['id']]
             );
             $dt = new DateInfo($ent['date']);
-            if (false !== $r)
+            if (false !== $r) {
                 GeniBaseInternalProperties::setPropertyOf($dt, '_id', $r);
+            }
             if (false !== $dt = $this->newStorager($dt)->save($dt)
-            && ! empty($r = (int) GeniBaseInternalProperties::getPropertyOf($dt, '_id')))
+                && ! empty($r = (int) GeniBaseInternalProperties::getPropertyOf($dt, '_id'))
+            ) {
                 $data['date_id'] = $r;
+            }
         }
         if (isset($ent['place'])) {
             if (isset($ent['place']['description'])) {
                 $data['place_description'] = $ent['place']['description'];
 
                 if (! empty($id = $this->dbs->getIdFromReference($ent['place']['description']))
-                && (! empty($r = (int) $this->dbs->getLidForId($t_places, $id)))) {
+                    && (! empty($r = (int) $this->dbs->getLidForId($t_places, $id)))
+                ) {
                     $data['place_description_id'] = $r;
                 }
             }
@@ -82,10 +86,13 @@ class EventStorager extends SubjectStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update($t_events, $data, [
+            $result = $this->dbs->getDb()->update(
+                $t_events,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_events, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -99,19 +106,26 @@ class EventStorager extends SubjectStorager
                 [$_id]
             );
             if (! empty($ers)) {
-                $ers = array_map(function ($v) {
-                    return $v['_id'];
-                }, $ers);
+                $ers = array_map(
+                    function ($v) {
+                        return $v['_id'];
+                    },
+                    $ers
+                );
             }
             foreach ($ent['roles'] as $er) {
                 $er = new EventRole($er);
-                if (! empty($ers))
+                if (! empty($ers)) {
                     GeniBaseInternalProperties::setPropertyOf($er, '_id', array_shift($ers));
+                }
                 $this->newStorager($er)->save($er, $entity);
             }
             if (! empty($ers)) {
-                $this->dbs->getDb()->executeQuery("DELETE FROM $t_eroles WHERE _id IN (?)", [$ers],
-                    [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+                $this->dbs->getDb()->executeQuery(
+                    "DELETE FROM $t_eroles WHERE _id IN (?)",
+                    [$ers],
+                    [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+                );
             }
         }
 
@@ -124,12 +138,14 @@ class EventStorager extends SubjectStorager
 
         $o = $this->applyDefaultOptions($o);
 
-        if (false === $ev = $this->load($entity, $context, $o))
+        if (false === $ev = $this->load($entity, $context, $o)) {
             return false;
+        }
 
         $gedcomx->addEvent($ev);
-        if ($o['loadCompanions'])
+        if ($o['loadCompanions']) {
             $gedcomx->embed($this->loadGedcomxCompanions($ev));
+        }
 
         return $gedcomx;
     }
@@ -164,7 +180,6 @@ class EventStorager extends SubjectStorager
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE ev._id = ?", [$_id]);
-
         } elseif (! empty($id = $entity->getId())) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE ev.id = ?", [$id]);
         }
@@ -174,8 +189,9 @@ class EventStorager extends SubjectStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         // Unpack data
         $result['place'] = [];
@@ -185,17 +201,22 @@ class EventStorager extends SubjectStorager
         if (! empty($result['place_original'])) {
             $result['place']['original'] = $result['place_original'];
         }
-        if (empty($result['place']))    unset($result['place']);
+        if (empty($result['place'])) {
+            unset($result['place']);
+        }
 
-        /** @var Event $entity */
+        /**
+ * @var Event $entity
+*/
         $entity = parent::processRaw($entity, $result);
 
         // Load childs
         if (isset($result['date_id'])) {
             $dt = new DateInfo();
             GeniBaseInternalProperties::setPropertyOf($dt, '_id', $result['date_id']);
-            if (false !== $dt = $this->newStorager($dt)->load($dt))
+            if (false !== $dt = $this->newStorager($dt)->load($dt)) {
                 $entity->setDate($dt);
+            }
         }
         if (! empty($r = $this->newStorager(EventRole::class)->loadList($entity))) {
             $entity->setRoles($r);
@@ -206,11 +227,14 @@ class EventStorager extends SubjectStorager
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /** @var Event $entity */
+        /**
+ * @var Event $entity
+*/
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-        && ! empty($rid = $this->dbs->getIdFromReference($r))) {
+            && ! empty($rid = $this->dbs->getIdFromReference($r))
+        ) {
             $gedcomx->embed(
                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
             );
@@ -223,5 +247,4 @@ class EventStorager extends SubjectStorager
 
         return $gedcomx;
     }
-
 }

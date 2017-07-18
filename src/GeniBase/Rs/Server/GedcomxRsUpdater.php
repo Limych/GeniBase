@@ -11,7 +11,6 @@ use Gedcomx\Util\FormalDate;
 /**
  *
  * @author Limych
- *        
  */
 class GedcomxRsUpdater extends GedcomxModelVisitorBase
 {
@@ -30,7 +29,9 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
      */
     public function visitPlaceDescription(PlaceDescription $place)
     {
-        /** @var DateInfo $r */
+        /**
+ * @var DateInfo $r
+*/
         if (! empty($r = $place->getTemporalDescription())) {
             array_push($this->contextStack, $place);
             $r->accept($this);
@@ -42,9 +43,11 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
     
     public function visitDate(DateInfo $date)
     {
-        $tv = new TextValue([
+        $tv = new TextValue(
+            [
             'lang'  => 'ru'
-        ]);
+            ]
+        );
         
         if (! empty($d = $date->getFormal())) {
             $fd = new FormalDate();
@@ -71,5 +74,4 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
         
         parent::visitDate($date);
     }
-    
 }

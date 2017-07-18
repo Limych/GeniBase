@@ -21,7 +21,6 @@ use GeniBase\DBase\DBaseService;
 /**
  *
  * @author Limych
- *
  */
 class StoragerFactory
 {
@@ -29,14 +28,15 @@ class StoragerFactory
     /**
      *
      * @param DBaseService $dbs
-     * @param mixed $class
+     * @param mixed        $class
      *
      * @throws \UnexpectedValueException
      */
     static function newStorager(DBaseService $dbs, $class)
     {
-        if (is_object($class))
+        if (is_object($class)) {
             $class = get_class($class);
+        }
 
         switch ($class) {
             case Conclusion::class:
@@ -87,5 +87,4 @@ class StoragerFactory
 
         throw new \UnexpectedValueException('Not supported class: ' . $class);
     }
-
 }

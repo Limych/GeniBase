@@ -5,9 +5,9 @@ namespace GeniBase;
  * Assorted static functions.
  *
  * @author Limych
- *
  */
-class Util {
+class Util
+{
 
     /**
      *
@@ -28,8 +28,8 @@ class Util {
      * This function is used throughout GeniBase to allow for both string
      * or array to be merged into another array.
      *
-     * @param string|array|object $args Value to merge with $defaults.
-     * @param string|array|object $defaults (Optional) Array that serves as the defaults. Default value: null
+     * @param  string|array|object $args     Value to merge with $defaults.
+     * @param  string|array|object $defaults (Optional) Array that serves as the defaults. Default value: null
      * @return array Merged user defined values with defaults.
      */
     public static function parse_args($args, $defaults = null)
@@ -59,7 +59,9 @@ class Util {
 
     public static function is_assoc(array $array)
     {
-        if (array() === $array)  return false;
+        if (array() === $array) {
+            return false;
+        }
         return array_keys($array) !== range(0, count($array) - 1);
     }
 }

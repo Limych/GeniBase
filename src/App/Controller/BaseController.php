@@ -11,19 +11,21 @@ class BaseController extends Container
 
     /**
      *
-     * @param mixed $app
+     * @param mixed  $app
      * @param string $base
      */
     public static function bindRoutes($app, $base)
-    {}  // Empty
+    {
+    }  // Empty
 
     /**
      *
-     * @param mixed $app
+     * @param mixed  $app
      * @param string $base
      */
     public static function bindApiRoutes($app, $base)
-    {}  // Empty
+    {
+    }  // Empty
 
     /**
      *
@@ -31,6 +33,6 @@ class BaseController extends Container
      * @return Statistic
      */
     public function statistic(Application $app)
-    {}  // Empty
-
+    {
+    }  // Empty
 }

@@ -11,6 +11,7 @@ class IdentifierStorager extends GeniBaseStorager
 
     /**
      * {@inheritDoc}
+     *
      * @see \GeniBase\Storager\GeniBaseStorager::getObject()
      */
     protected function getObject($o = null)
@@ -20,14 +21,16 @@ class IdentifierStorager extends GeniBaseStorager
 
     /**
      * {@inheritDoc}
+     *
      * @see \GeniBase\Storager\GeniBaseStorager::save()
-     * 
+     *
      * @throws \UnexpectedValueException
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof Identifier)
+        if (! $entity instanceof Identifier) {
             $entity = $this->getObject($entity);
+        }
             
         $t_ids = $this->dbs->getTableName('identifiers');
             
@@ -58,8 +61,9 @@ class IdentifierStorager extends GeniBaseStorager
 
     /**
      * {@inheritDoc}
+     *
      * @see \GeniBase\Storager\GeniBaseStorager::loadListRaw()
-     * 
+     *
      * @throws \UnexpectedValueException
      */
     protected function loadListRaw($context, $o)
@@ -91,17 +95,14 @@ class IdentifierStorager extends GeniBaseStorager
         foreach ($identifiers as $x) {
             if ($x instanceof Identifier) {
                 $ids[] = $x->getValue();
-                
             } elseif (is_array($x)) {
                 foreach ($x as $y) {
                     if ($y instanceof Identifier) {
                         $ids[] = $y->getValue();
-                        
                     } else {
                         $ids[] = $y;
                     }
                 }
-                
             } else {
                 $ids[] = $x;
             }
@@ -111,10 +112,13 @@ class IdentifierStorager extends GeniBaseStorager
             
         $q = "SELECT id FROM $t_ids WHERE value IN (?) LIMIT 1";
         
-        $result = $this->dbs->getDb()->fetchColumn($q, [$ids], 0,
-            [\Doctrine\DBAL\Connection::PARAM_STR_ARRAY]);
+        $result = $this->dbs->getDb()->fetchColumn(
+            $q,
+            [$ids],
+            0,
+            [\Doctrine\DBAL\Connection::PARAM_STR_ARRAY]
+        );
         
         return $result;
     }
-    
 }

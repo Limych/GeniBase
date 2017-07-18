@@ -21,15 +21,16 @@ class DateInfoStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof DateInfo)
+        if (! $entity instanceof DateInfo) {
             $entity = $this->getObject($entity);
+        }
 
         $t_dates = $this->dbs->getTableName('dates');
 
@@ -48,10 +49,13 @@ class DateInfoStorager extends GeniBaseStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $this->dbs->getDb()->update($t_dates, $data, [
+            $this->dbs->getDb()->update(
+                $t_dates,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_dates, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -71,7 +75,6 @@ class DateInfoStorager extends GeniBaseStorager
                 "SELECT * FROM $table WHERE _id = ?",
                 [$_id]
             );
-
         } elseif (! empty($id = $entity->getId())) {
             $result = $this->dbs->getDb()->fetchAssoc(
                 "SELECT * FROM $table WHERE id = ?",
@@ -86,14 +89,18 @@ class DateInfoStorager extends GeniBaseStorager
     {
         static $tables;
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY)   return; // Skip cleaning now
+        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+            return; // Skip cleaning now
+        }
 
         if (! isset($tables)) {
             // Initialization
             $tmp = array_map(
                 function ($v) {
                     $v = preg_split('/[.:]+/', $v, null, PREG_SPLIT_NO_EMPTY);
-                    if (empty($v[1]))   $v[1] = 'date_id';
+                    if (empty($v[1])) {
+                        $v[1] = 'date_id';
+                    }
                     $v[0] = $this->dbs->getTableName($v[0]);
                     return $v;
                 },
@@ -111,8 +118,9 @@ class DateInfoStorager extends GeniBaseStorager
         $q  = "DELETE LOW_PRIORITY dt FROM $t_dates AS dt WHERE NOT EXISTS ( ";
         $cnt = 0;
         foreach ($tables as $t => $f) {
-            if (1 != ++$cnt)
+            if (1 != ++$cnt) {
                 $q  .= "UNION ";
+            }
             $q  .= "SELECT 1 FROM $t AS t$cnt WHERE t$cnt.$f = dt._id ";
         }
         $q .= ")";
@@ -161,8 +169,9 @@ class DateInfoStorager extends GeniBaseStorager
     {
         static $mdays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-        if (empty($date) || (! $date->isValid() && ($date->getYear() !== 0)))
+        if (empty($date) || (! $date->isValid() && ($date->getYear() !== 0))) {
             return null;
+        }
 
         if ($mdays[12] < 100) {
             // First time initialization
@@ -194,11 +203,9 @@ class DateInfoStorager extends GeniBaseStorager
 
             if (null !== $d = $date->getDay()) {
                 $k += $d - 1;
-
             } elseif ($calcEndOfPeriod) {
                 $k = $ky + $mdays[$m] + intval($isLeap && $m >= 2) - 1;  // Last day of month
             }
-
         } elseif ($calcEndOfPeriod) {
             $my = intval($y / 1000);        // Millenium
             $cy = intval($y / 100) % 1000;  // Century into millenium
@@ -208,5 +215,4 @@ class DateInfoStorager extends GeniBaseStorager
 
         return $sign * $k;
     }
-
 }

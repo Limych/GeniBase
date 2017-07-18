@@ -13,7 +13,6 @@ use Gedcomx\Common\TextValue;
 /**
  *
  * @author Limych
- *
  */
 class GeniBaseStorager
 {
@@ -22,13 +21,15 @@ class GeniBaseStorager
 
     const TABLES_WITH_GBID = 'persons sources places events agents';
 
-    /** @var DBaseService */
+    /**
+     * @var DBaseService
+     */
     protected $dbs;
 
     /**
      *
      * @param DBaseService $dbs
-     * @param mixed $o
+     * @param mixed        $o
      */
     public function __construct(DBaseService $dbs)
     {
@@ -56,8 +57,9 @@ class GeniBaseStorager
     protected function getObject($o = null)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
     }
 
     /**
@@ -76,7 +78,7 @@ class GeniBaseStorager
 
     /**
      *
-     * @param mixed $o
+     * @param mixed          $o
      * @param ExtensibleData $entity
      * @return array
      */
@@ -111,8 +113,9 @@ class GeniBaseStorager
                 break;
         }
 
-        if (empty($pool))
+        if (empty($pool)) {
             return '';
+        }
 
         $token = '';
         $max = strlen($pool);
@@ -125,9 +128,9 @@ class GeniBaseStorager
                 // Predefined hash
                 $rnd = hexdec(substr(md5($data.$i), 0, $bytes*2));
                 $rnd = $rnd & $filter; // discard irrelevant bits
-                while ($rnd >= $max)
+                while ($rnd >= $max) {
                     $rnd -= $max;
-
+                }
             } else {
                 // Random data
                 do {
@@ -191,8 +194,9 @@ class GeniBaseStorager
             $qid = $this->dbs->getDb()->quote($gbid);
             $cnt = 0;
             foreach ($tables as $t) {
-                if (1 != ++$cnt)
+                if (1 != ++$cnt) {
                     $q  .= " UNION ";
+                }
                 $q  .= "SELECT 1 FROM $t WHERE id = " . $qid;
             }
         } while (! empty($q) && (false !== $r = $this->dbs->getDb()->fetchColumn($q)));
@@ -203,16 +207,17 @@ class GeniBaseStorager
     /**
      *
      * @param ExtensibleData $entity
-     * @param array $o
+     * @param array          $o
      */
     public function makeGbidIfEmpty(ExtensibleData &$entity, $o = null)
     {
         if (empty($entity->getId()) && ! $this->detectId($entity)) {
             $name = ! empty($o['makeId_name']) ? $o['makeId_name'] : null;
-            if (! isset($o['makeId_unique']) || ! empty($o['makeId_unique']))
+            if (! isset($o['makeId_unique']) || ! empty($o['makeId_unique'])) {
                 $id = $this->makeGbidUnique($name);
-            else
+            } else {
                 $id = self::makeGbid($name);
+            }
             $entity->setId($id);
         }
     }
@@ -233,7 +238,7 @@ class GeniBaseStorager
     /**
      *
      * @param ExtensibleData $entity
-     * @param array $o
+     * @param array          $o
      */
     public function makeUuidIfEmpty(ExtensibleData &$entity, $o = null)
     {
@@ -245,8 +250,8 @@ class GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
-     * @param mixed $context
+     * @param mixed      $entity
+     * @param mixed      $context
      * @param array|null $o
      * @return Gedcomx|false
      *
@@ -255,14 +260,15 @@ class GeniBaseStorager
     public function loadGedcomx($entity, $context = null, $o = null)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
     }
 
     /**
      *
-     * @param mixed $entity
-     * @param mixed $context
+     * @param mixed      $entity
+     * @param mixed      $context
      * @param array|null $o
      * @return Gedcomx|false
      *
@@ -271,8 +277,9 @@ class GeniBaseStorager
     public function loadListGedcomx($entity, $context = null, $o = null)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
     }
 
     /**
@@ -287,15 +294,16 @@ class GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return object|false
      */
     public function load($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $result = $this->loadRaw($entity, $context, $o);
         return $this->processRaw($this->getObject(), $result);
@@ -303,14 +311,15 @@ class GeniBaseStorager
 
     /**
      *
-     * @param mixed $context
+     * @param mixed      $context
      * @param array|null $o
      * @return object[]|false
      */
     public function loadList($context = null, $o = null)
     {
-        if (! $context instanceof ExtensibleData)
+        if (! $context instanceof ExtensibleData) {
             $context = $this->getObject($context);
+        }
 
         if (is_array($result = $this->loadListRaw($context, $o))) {
             foreach ($result as $k => $r) {
@@ -361,16 +370,17 @@ class GeniBaseStorager
      *
      * @param ExtensibleData $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return array|false
-     * 
+     *
      * @throws \BadMethodCallException
      */
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
             
         return false;
     }
@@ -378,16 +388,17 @@ class GeniBaseStorager
     /**
      *
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return array|false
-     * 
+     *
      * @throws \BadMethodCallException
      */
     protected function loadListRaw($context, $o)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
             
         return false;
     }
@@ -395,29 +406,31 @@ class GeniBaseStorager
     /**
      *
      * @param ExtensibleData $entity
-     * @param array $result
+     * @param array          $result
      * @return object|false
      */
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         $entity->initFromArray($result);
         
-        if (! empty($result['_id']))
+        if (! empty($result['_id'])) {
             GeniBaseInternalProperties::setPropertyOf($entity, '_id', $result['_id']);
+        }
             
         return $entity;
     }
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
-     * 
+     *
      * @throws \BadMethodCallException
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
@@ -425,8 +438,9 @@ class GeniBaseStorager
         $this->garbageCleaning();
         
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
     }
 
     /**
@@ -438,8 +452,9 @@ class GeniBaseStorager
     public function delete(ExtensibleData $entity)
     {
         $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__)
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
     }
 
     /**
@@ -459,23 +474,27 @@ class GeniBaseStorager
     {
         static $cache = [];
 
-        if (isset($cache[$uri]))
+        if (isset($cache[$uri])) {
             return $cache[$uri];
+        }
 
         $t_types = $this->dbs->getTableName('types');
 
         $result = $this->dbs->getDb()->fetchColumn(
             "SELECT _id FROM $t_types WHERE uri = ?",
             [$uri]
-            );
+        );
         if (false !== $result) {
             $cache[$uri] = (int) $result;
             return $cache[$uri];
         }
 
-        $this->dbs->getDb()->insert($t_types, [
+        $this->dbs->getDb()->insert(
+            $t_types,
+            [
             'uri' => $uri
-        ]);
+            ]
+        );
         $cache[$uri] = (int) $this->dbs->getDb()->lastInsertId();
         return $cache[$uri];
     }
@@ -489,8 +508,9 @@ class GeniBaseStorager
     {
         static $cache = [];
 
-        if (isset($cache[$id]))
+        if (isset($cache[$id])) {
             return $cache[$id];
+        }
 
         $t_types = $this->dbs->getTableName('types');
 
@@ -512,22 +532,27 @@ class GeniBaseStorager
     {
         static $cache = [];
 
-        if (isset($cache[$lang]))
+        if (isset($cache[$lang])) {
             return $cache[$lang];
+        }
 
         $t_langs = $this->dbs->getTableName('languages');
 
         $result = $this->dbs->getDb()->fetchColumn(
             "SELECT _id FROM $t_langs WHERE lang = ?",
-            [$lang]);
+            [$lang]
+        );
         if (false !== $result) {
             $cache[$lang] = (int) $result;
             return $cache[$lang];
         }
 
-        $this->dbs->getDb()->insert($t_langs, [
+        $this->dbs->getDb()->insert(
+            $t_langs,
+            [
             'lang' => $lang
-        ]);
+            ]
+        );
         $cache[$lang] = (int) $this->dbs->getDb()->lastInsertId();
         return $cache[$lang];
     }
@@ -541,8 +566,9 @@ class GeniBaseStorager
     {
         static $cache = [];
 
-        if (isset($cache[$id]))
+        if (isset($cache[$id])) {
             return $cache[$id];
+        }
 
         $t_langs = $this->dbs->getTableName('languages');
 
@@ -559,8 +585,8 @@ class GeniBaseStorager
      *
      * @see GeniBaseStorager::saveAllTextValues()
      *
-     * @param string $group
-     * @param mixed $text_value
+     * @param string         $group
+     * @param mixed          $text_value
      * @param ExtensibleData $context
      * @return number
      *
@@ -568,11 +594,13 @@ class GeniBaseStorager
      */
     public function saveTextValue($group, $text_value, ExtensibleData $context)
     {
-        if ($text_value instanceof TextValue)
+        if ($text_value instanceof TextValue) {
             $text_value = $text_value->toArray();
+        }
 
-        if (! empty($group))
+        if (! empty($group)) {
             $text_value['_group'] = $this->getTypeId($group);
+        }
 
         $t_tvs = $this->dbs->getTableName('text_values');
 
@@ -588,11 +616,14 @@ class GeniBaseStorager
         $data['_ref'] = $r;
         
         if (isset($ent['_id'])) {
-            $this->dbs->getDb()->update($t_tvs, $data, [
+            $this->dbs->getDb()->update(
+                $t_tvs,
+                $data,
+                [
                 '_id' => (int) $ent['_id']
-            ]);
+                ]
+            );
             $result = (int) $ent['_id'];
-
         } else {
             try {
                 $this->dbs->getDb()->insert($t_tvs, $data);
@@ -607,15 +638,17 @@ class GeniBaseStorager
 
     /**
      *
-     * @param string $group
-     * @param array[] $text_values
+     * @param string         $group
+     * @param array[]        $text_values
      * @param ExtensibleData $context
      *
      * @throws \UnexpectedValueException
      */
     public function saveAllTextValues($group, $text_values, ExtensibleData $context)
     {
-        if (empty($text_values))    return;
+        if (empty($text_values)) {
+            return;
+        }
 
         $t_tvs = $this->dbs->getTableName('text_values');
 
@@ -627,29 +660,37 @@ class GeniBaseStorager
         $tvs = $this->dbs->getDb()->fetchAll(
             "SELECT _id FROM $t_tvs WHERE _group = ? AND _ref = ? ORDER BY _id",
             [$_group, $_ref]
-            );
+        );
         if (! empty($tvs)) {
-            $tvs = array_map(function ($v) {
-                return (int) $v['_id'];
-            }, $tvs);
+            $tvs = array_map(
+                function ($v) {
+                    return (int) $v['_id'];
+                },
+                $tvs
+            );
         }
         foreach ($text_values as $tv) {
-            if ($tv instanceof TextValue)
+            if ($tv instanceof TextValue) {
                 $tv = $tv->toArray();
+            }
             $tv['_group'] = $_group;
-            if (! empty($tvs))
+            if (! empty($tvs)) {
                 $tv['_id'] = array_shift($tvs);
+            }
             $this->saveTextValue(null, $tv, $context);
         }
         if (! empty($tvs)) {
-            $this->dbs->getDb()->executeQuery("DELETE FROM $t_tvs WHERE _id IN (?)", [$tvs],
-                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            $this->dbs->getDb()->executeQuery(
+                "DELETE FROM $t_tvs WHERE _id IN (?)",
+                [$tvs],
+                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+            );
         }
     }
 
     /**
      *
-     * @param string $group
+     * @param string         $group
      * @param ExtensibleData $context
      * @return array[]|false
      */
@@ -676,7 +717,7 @@ class GeniBaseStorager
 
     /**
      *
-     * @param string $group
+     * @param string         $group
      * @param ExtensibleData $context
      * @return array[]|false
      */
@@ -702,5 +743,4 @@ class GeniBaseStorager
 
         return $result;
     }
-
 }

@@ -22,19 +22,21 @@ class TransitionsProvider
 
     /**
      *
-     * @param string $uri
+     * @param string          $uri
      * @param string|string[] $relations
      */
     public function addTransition($uri, $relations)
     {
-        if (! is_array($relations))
+        if (! is_array($relations)) {
             $relations = preg_split('/[\s,]+/', $relations, -1, PREG_SPLIT_NO_EMPTY);
+        }
 
         foreach ($relations as $rel) {
-            if (! isset($this->transitions[$uri]))
+            if (! isset($this->transitions[$uri])) {
                 $this->transitions[$uri] = [$rel];
-            else
+            } else {
                 $this->transitions[$uri][] = $rel;
+            }
         }
     }
 
@@ -48,7 +50,8 @@ class TransitionsProvider
         foreach ($this->transitions as $uri => $rel) {
             $tr[] = "<$uri>; rel=\"" . join(' ', array_unique($rel)) . "\"";
         }
-        if (! empty($tr))
+        if (! empty($tr)) {
             $response->headers->set('Link', join(', ', $tr));
+        }
     }
 }

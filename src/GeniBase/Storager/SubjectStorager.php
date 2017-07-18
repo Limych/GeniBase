@@ -8,13 +8,13 @@ use Gedcomx\Conclusion\Subject;
 /**
  *
  * @author Limych
- *
  */
 class SubjectStorager extends ConclusionStorager
 {
 
     /**
      * {@inheritDoc}
+     *
      * @see \GeniBase\Storager\ConclusionStorager::getObject()
      */
     protected function getObject($o = null)
@@ -24,13 +24,17 @@ class SubjectStorager extends ConclusionStorager
     
     /**
      * {@inheritDoc}
+     *
      * @see \GeniBase\Storager\GeniBaseStorager::detectId()
      */
     protected function detectId(ExtensibleData &$entity)
     {
-        /** @var Subject $entity */
+        /**
+ * @var Subject $entity
+*/
         if (! empty($r = $entity->getIdentifiers())
-        && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))) {
+            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))
+        ) {
             $entity->setId($id);
             return true;
         }
@@ -40,15 +44,16 @@ class SubjectStorager extends ConclusionStorager
     
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $this->makeUuidIfEmpty($entity, $o);
@@ -68,10 +73,13 @@ class SubjectStorager extends ConclusionStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
-        /** @var Subject $entity */
+        /**
+ * @var Subject $entity
+*/
         $entity = parent::processRaw($entity, $result);
 
         if (! empty($res = $this->newStorager(Identifier::class)->loadList($entity))) {
@@ -80,5 +88,4 @@ class SubjectStorager extends ConclusionStorager
         
         return $entity;
     }
-
 }

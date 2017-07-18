@@ -38,7 +38,8 @@ class ResponsibleListener implements EventSubscriberInterface
         $result = $event->getControllerResult();
 
         if (! is_array($result) && ! ($result instanceof \Gedcomx\Gedcomx)
-        && ! ($result instanceof GeniBaseClass)) {
+            && ! ($result instanceof GeniBaseClass)
+        ) {
             return;
         }
 
@@ -61,15 +62,16 @@ class ResponsibleListener implements EventSubscriberInterface
                         $serializer->serialize($result),
                         200,
                         array('Content-Type' => $type)
-                        );
+                    );
                     $event->setResponse($response);
-
                 } else {
-                    $event->setResponse(new Response(
-                        $this->encoder->encode($result, $format),
-                        200,
-                        array('Content-Type' => $type)
-                    ));
+                    $event->setResponse(
+                        new Response(
+                            $this->encoder->encode($result, $format),
+                            200,
+                            array('Content-Type' => $type)
+                        )
+                    );
                 }
 
                 return;
@@ -79,20 +81,24 @@ class ResponsibleListener implements EventSubscriberInterface
         // HTTP/1.1 recommends returning some data over giving a 406 error,
         // even if that data is not supported by the Accept header.
         if ('HTTP/1.1' === $request->server->get('SERVER_PROTOCOL')) {
-            $event->setResponse(new Response(
-                $this->encoder->encode($result, $default),
-                200,
-                array('Content-Type' => $request->getMimeType($default))
-            ));
+            $event->setResponse(
+                new Response(
+                    $this->encoder->encode($result, $default),
+                    200,
+                    array('Content-Type' => $request->getMimeType($default))
+                )
+            );
 
             return;
         }
 
-        $event->setResponse(new Response(
-            'Not Acceptable',
-            406,
-            array('Content-Type' => 'text/plain')
-        ));
+        $event->setResponse(
+            new Response(
+                'Not Acceptable',
+                406,
+                array('Content-Type' => 'text/plain')
+            )
+        );
     }
 
     public static function getSubscribedEvents()

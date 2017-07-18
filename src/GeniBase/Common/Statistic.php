@@ -4,7 +4,6 @@ namespace GeniBase\Common;
 /**
  *
  * @author Limych
- *
  */
 class Statistic extends GeniBaseClass
 {
@@ -17,8 +16,9 @@ class Statistic extends GeniBaseClass
      */
     public function embed(GeniBaseClass $data)
     {
-        if ($data instanceof Statistic)
+        if ($data instanceof Statistic) {
             $this->statistic = array_merge($this->statistic, $data->toArray());
+        }
     }
 
     /**
@@ -46,13 +46,13 @@ class Statistic extends GeniBaseClass
     /**
      * Sets a known child element of GeniBaseClass from an XML reader.
      *
-     * @param \XMLReader $xml The reader.
+     * @param  \XMLReader $xml The reader.
      * @return bool Whether a child element was set.
      */
-    protected function setKnownChildElement(\XMLReader $xml) {
+    protected function setKnownChildElement(\XMLReader $xml)
+    {
         if (true === $happened = parent::setKnownChildElement($xml)) {
             return true;
-
         } elseif (empty($xml->namespaceURI)) {
             $child = '';
             while ($xml->read() && $xml->hasValue) {
@@ -69,13 +69,13 @@ class Statistic extends GeniBaseClass
     /**
      * Sets a known attribute of GeniBaseClass from an XML reader.
      *
-     * @param \XMLReader $xml The reader.
+     * @param  \XMLReader $xml The reader.
      * @return bool Whether an attribute was set.
      */
-    protected function setKnownAttribute(\XMLReader $xml) {
+    protected function setKnownAttribute(\XMLReader $xml)
+    {
         if (true === $happened = parent::setKnownChildElement($xml)) {
             return true;
-
         } elseif (($xml->localName == 'modified') && empty($xml->namespaceURI)) {
             $this->statistic[$this->lastElement . '_modified'] = $xml->value;
             $happened = true;
@@ -87,8 +87,8 @@ class Statistic extends GeniBaseClass
     /**
      * Writes this GeniBaseClass to an XML writer.
      *
-     * @param \XMLWriter $writer The XML writer.
-     * @param bool $includeNamespaces Whether to write out the namespaces in the element.
+     * @param \XMLWriter $writer            The XML writer.
+     * @param bool       $includeNamespaces Whether to write out the namespaces in the element.
      */
     public function toXml(\XMLWriter $writer, $includeNamespaces = true)
     {
@@ -119,5 +119,4 @@ class Statistic extends GeniBaseClass
             }
         }
     }
-
 }

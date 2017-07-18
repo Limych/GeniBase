@@ -17,10 +17,13 @@ class JsonMapper
     /**
      * Initialize the collection object with the map
      */
-    private static function init(){
-        self::$collection = new Collection(array(
-//             'Gedcomx\Gedcomx' => 'gedcomx',
-        ));
+    private static function init()
+    {
+        self::$collection = new Collection(
+            array(
+            //             'Gedcomx\Gedcomx' => 'gedcomx',
+            )
+        );
     }
 
     /**
@@ -28,7 +31,8 @@ class JsonMapper
      *
      * @return Collection
      */
-    private static function collection(){
+    private static function collection()
+    {
         if (self::$collection == null) {
             self::init();
         }

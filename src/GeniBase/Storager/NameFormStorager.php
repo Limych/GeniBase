@@ -9,7 +9,6 @@ use GeniBase\DBase\GeniBaseInternalProperties;
 /**
  *
  * @author Limych
- *
  */
 class NameFormStorager extends GeniBaseStorager
 {
@@ -23,15 +22,16 @@ class NameFormStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $t_nfs = $this->dbs->getTableName('name_forms');
         $t_nps = $this->dbs->getTableName('name_parts');
@@ -56,10 +56,13 @@ class NameFormStorager extends GeniBaseStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $this->dbs->getDb()->update($t_nfs, $data, [
+            $this->dbs->getDb()->update(
+                $t_nfs,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_nfs, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -70,21 +73,28 @@ class NameFormStorager extends GeniBaseStorager
         $nps = $this->dbs->getDb()->fetchAll(
             "SELECT _id FROM $t_nps WHERE _name_form_id = ?",
             [$_id]
-            );
+        );
         if (! empty($nps)) {
-            $nps = array_map(function ($v) {
-                return (int) $v['_id'];
-            }, $nps);
+            $nps = array_map(
+                function ($v) {
+                    return (int) $v['_id'];
+                },
+                $nps
+            );
         }
         foreach ($ent['parts'] as $np) {
             $np = new NamePart($np);
-            if (! empty($nps))
+            if (! empty($nps)) {
                 GeniBaseInternalProperties::setPropertyOf($np, '_id', array_shift($nps));
+            }
             $this->newStorager($np)->save($np, $entity);
         }
         if (! empty($nps)) {
-            $this->dbs->getDb()->executeQuery("DELETE FROM $t_nps WHERE _id IN (?)", [$nps],
-                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            $this->dbs->getDb()->executeQuery(
+                "DELETE FROM $t_nps WHERE _id IN (?)",
+                [$nps],
+                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+            );
         }
 
         return $entity;
@@ -108,7 +118,7 @@ class NameFormStorager extends GeniBaseStorager
         $qparts['bundles'][]    = "lg._id = nf.lang_id";
 
         $qp = parent::getSqlQueryParts();
-//         $qp['bundles'][0]   = "cn.id = gn.id";
+        //         $qp['bundles'][0]   = "cn.id = gn.id";
         $qparts = array_merge_recursive($qparts, $qp);
 
         return $qparts;
@@ -138,14 +148,17 @@ class NameFormStorager extends GeniBaseStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         if (isset($result['full_text'])) {
             $result['fullText'] = $result['full_text'];
         }
 
-        /** @var NameForm $entity */
+        /**
+ * @var NameForm $entity
+*/
         $entity = parent::processRaw($entity, $result);
 
         if (! empty($r = $this->newStorager(NamePart::class)->loadList($entity))) {
@@ -159,7 +172,9 @@ class NameFormStorager extends GeniBaseStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY)   return; // Skip cleaning now
+        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+            return; // Skip cleaning now
+        }
 
         $t_nfs = $this->dbs->getTableName('name_forms');
         $t_names = $this->dbs->getTableName('names');
@@ -169,5 +184,4 @@ class NameFormStorager extends GeniBaseStorager
 
         $this->dbs->getDb()->query($q);
     }
-
 }

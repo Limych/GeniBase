@@ -4,7 +4,7 @@
 
     <exclude-pattern>*/img/*</exclude-pattern>
     <exclude-pattern>*/images/*</exclude-pattern>
-    <exclude-pattern>*/less/*</exclude-pattern>
+    <exclude-pattern>*/scss/*</exclude-pattern>
     <exclude-pattern>*/css/*</exclude-pattern>
     <exclude-pattern>*/js/*</exclude-pattern>
     <exclude-pattern>*.html</exclude-pattern>
@@ -12,7 +12,7 @@
     <exclude-pattern>*.yml</exclude-pattern>
     <exclude-pattern>*.xml</exclude-pattern>
     <exclude-pattern>*.txt</exclude-pattern>
-    <exclude-pattern>*.less</exclude-pattern>
+    <exclude-pattern>*.scss</exclude-pattern>
     <exclude-pattern>*.css</exclude-pattern>
     <exclude-pattern>*.js</exclude-pattern>
     <exclude-pattern>*.jpg</exclude-pattern>

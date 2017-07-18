@@ -8,15 +8,16 @@ use Silex\Application;
  * Assorted static functions.
  *
  * @author Limych
- *
  */
-class Util {
+class Util
+{
 
-    static function number_format(Application $app, $number, $decimals=2)
+    static function number_format(Application $app, $number, $decimals = 2)
     {
         $last_locale = setlocale(LC_ALL, 0);
-        if (isset($app['locale']))
+        if (isset($app['locale'])) {
             setlocale(LC_ALL, $app['locale']);
+        }
 
         $locale = localeconv();
 
@@ -27,8 +28,12 @@ class Util {
                 break;
         }
 
-        $formatted = number_format($number, $decimals,
-            $locale['decimal_point'], $locale['thousands_sep']);
+        $formatted = number_format(
+            $number,
+            $decimals,
+            $locale['decimal_point'],
+            $locale['thousands_sep']
+        );
 
         switch ($locale_id) {
             case 'ru':
@@ -48,12 +53,13 @@ class Util {
      * Check if more that `$miliseconds` ms remains
      * to error `PHP Fatal error: Maximum execution time exceeded`
      *
-     * @param number $miliseconds
+     * @param  number $miliseconds
      * @return bool
      *
      * @copyright https://stackoverflow.com/users/5747291/martin
      */
-    public static function isRemainingExecutionTimeBiggerThan($miliseconds = 5000) {
+    public static function isRemainingExecutionTimeBiggerThan($miliseconds = 5000)
+    {
         $max_execution_time = ini_get('max_execution_time');
         if ($max_execution_time === 0) {
             // No script time limitation
@@ -62,7 +68,6 @@ class Util {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // On Windows: The real time is measured.
             $spendMiliseconds = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
-
         } else {
             // On Linux: Any time spent on activity that happens outside the execution
             //           of the script such as system calls using system(), stream operations
@@ -74,5 +79,4 @@ class Util {
         $remainingMiliseconds = $max_execution_time * 1000 - $spendMiliseconds;
         return ($remainingMiliseconds >= $miliseconds);
     }
-
 }

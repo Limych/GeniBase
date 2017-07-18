@@ -25,7 +25,9 @@ class PlacesImporterController
         $places = $this->getPlaces();
 
         foreach ($places as $x) {
-            /** @var PlaceDescription $plc */
+            /**
+ * @var PlaceDescription $plc
+*/
             unset($plc);
             $x = preg_split("/\s+>\s+/", $x, null, PREG_SPLIT_NO_EMPTY);
             foreach ($x as $k => $v) {
@@ -63,7 +65,6 @@ class PlacesImporterController
                             'value' => $y . $matches[3],
                         ];
                     }
-
                 } else {
                     $place['names'][] = [
                         'lang'  => 'ru',
@@ -100,5 +101,4 @@ class PlacesImporterController
 
         return $places;
     }
-
 }

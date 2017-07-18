@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
-
 class SvrtImporterController
 {
 
@@ -42,8 +41,9 @@ class SvrtImporterController
     {
         $id = $this->loadImportedId();
 
-        if (false === $json = $this->getData($id))
+        if (false === $json = $this->getData($id)) {
             return new Response(null, 204);
+        }
 
         $overtime = false;
         foreach ($json as $r) {
@@ -78,7 +78,6 @@ class SvrtImporterController
             $store_fpath = $this->getStoreFPath($r->id);
             $period = (! file_exists($store_fpath) ? self::REFRESH_PERIOD : 0);
         } else {
-
             $response = new Response(null, 204);
             $period = 0;
         }
@@ -98,8 +97,9 @@ class SvrtImporterController
 
     protected function saveImportedId($id)
     {
-        if (! isset($this->imported_fpath))
+        if (! isset($this->imported_fpath)) {
             $this->loadImportedId();
+        }
 
         file_put_contents($this->imported_fpath, intval($id));
     }
@@ -125,16 +125,15 @@ class SvrtImporterController
 
         if (file_exists($this->cached_fpath)) {
             $json = file_get_contents($this->cached_fpath);
-
         } else {
             if (file_exists($store_fpath)) {
                 $json = file_get_contents($store_fpath);
-
             } else {
                 $key = $this->app['svrt.1914.token'];
                 $json = file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=$id");
-                if (false === $json)
+                if (false === $json) {
                     return false;
+                }
 
                 file_put_contents($store_fpath, $json);
             }
@@ -150,7 +149,8 @@ class SvrtImporterController
 
     public static function getSvrtAgent($gbs)
     {
-        return $gbs->newStorager(Agent::class)->save([
+        return $gbs->newStorager(Agent::class)->save(
+            [
             'identifiers'   => [
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://www.svrt.ru/',
             ],
@@ -178,12 +178,14 @@ class SvrtImporterController
                     'street' => '2-я Филевская ул., д.5, к.2',
                 ],
             ],
-        ]);
+            ]
+        );
     }
 
     public static function getRslAgent($gbs)
     {
-        return $gbs->newStorager(Agent::class)->save([
+        return $gbs->newStorager(Agent::class)->save(
+            [
             'identifiers'   => [
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://www.rsl.ru/',
             ],
@@ -211,7 +213,8 @@ class SvrtImporterController
                     'street' => 'ул. Воздвиженка, 3/5',
                 ],
             ],
-        ]);
+            ]
+        );
     }
 
     protected function setAgent($agent)
@@ -238,12 +241,18 @@ class SvrtImporterController
                 'х(ут)?\.'      => 'хутор',
                 'сл\.'          => 'слобода',
             ];
-            $patterns = array_map(function ($v) {
-                return '/\b' . $v . '/';
-            }, array_keys($tmp));
-            $replaces = array_map(function ($v) {
-                return ' ' . $v . ' ';
-            }, array_values($tmp));
+            $patterns = array_map(
+                function ($v) {
+                    return '/\b' . $v . '/';
+                },
+                array_keys($tmp)
+            );
+            $replaces = array_map(
+                function ($v) {
+                    return ' ' . $v . ' ';
+                },
+                array_values($tmp)
+            );
             unset($tmp);
 
             $patterns[] = '/\s{2,}/';
@@ -265,7 +274,8 @@ class SvrtImporterController
         /// Sources ///////////////////////////////////////////////////////////////
 
         $title = 'Именные списки убитым, раненым и без вести пропавшим нижним чинам (солдатам)';
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
+        $src = $this->gbs->newStorager(SourceDescription::class)->save(
+            [
             'resourceType'  => ResourceType::COLLECTION,
             'citations' => [[
                 'lang'  => 'ru',
@@ -275,10 +285,12 @@ class SvrtImporterController
                 'lang'  => 'ru',
                 'value' => $title,
             ]],
-        ]);
+            ]
+        );
 
         $title = $r->source;
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
+        $src = $this->gbs->newStorager(SourceDescription::class)->save(
+            [
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
             'citations' => [[
                 'lang'  => 'ru',
@@ -292,7 +304,8 @@ class SvrtImporterController
                 'description'   => '#' . $src->getId(),
             ],
             'sortKey'   => sprintf('%05d', $r->source_nr),
-        ]);
+            ]
+        );
 
         $mediator_id = null;
         if (preg_match('|svrt\.ru/|', $r->source_url)) {
@@ -300,7 +313,8 @@ class SvrtImporterController
         } elseif (preg_match('|rsl\.ru/|', $r->source_url)) {
             $mediator_id = $agent_rsl->getId();
         }
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
+        $src = $this->gbs->newStorager(SourceDescription::class)->save(
+            [
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
             'citations' => [[
                 'lang'  => 'ru',
@@ -309,20 +323,29 @@ class SvrtImporterController
             'componentOf' => [
                 'description'   => '#' . $src->getId(),
             ],
-            'about'    => strtr($r->source_url, array(
+            'about'    => strtr(
+                $r->source_url,
+                array(
                 '{pg}'  => ($r->source_pg + $r->source_pg_corr),
-            )),
+                )
+            ),
             'mediator'  => [
                 'resourceId'    => $mediator_id,
             ],
             'sortKey'   => sprintf('%07d', $r->source_pg),
-        ]);
+            ]
+        );
 
-        $place_description = join("; ", [
+        $place_description = join(
+            "; ",
+            [
             'Какого уезда: ' . $r->region,
             'Какой волости, села, деревни или станицы: ' . $r->place,
-        ]);
-        $source_citation = join("; ", [
+            ]
+        );
+        $source_citation = join(
+            "; ",
+            [
             'Звание: ' . $r->rank,
             'Фамилия, имя и отчество: ' . trim($r->surname . ', ' . $r->name, ', '),
             'Какого вероисповедания: ' . $r->religion,
@@ -330,8 +353,10 @@ class SvrtImporterController
             $place_description,
             'Ранен, убит, в плену или без вести пропал: ' . $r->reason,
             'Когда, год месяц и число: ' . $r->date,
-        ]);
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
+            ]
+        );
+        $src = $this->gbs->newStorager(SourceDescription::class)->save(
+            [
             'resourceType'  => ResourceType::RECORD,
             'citations' => [[
                 'lang'  => 'ru',
@@ -340,12 +365,14 @@ class SvrtImporterController
             'componentOf' => [
                 'description'   => '#' . $src->getId(),
             ],
-        ]);
+            ]
+        );
 
         /// Places ///////////////////////////////////////////////////////////////
 
         $name = 'Российская империя';
-        $plc = $this->gbs->newStorager(PlaceDescription::class)->save([
+        $plc = $this->gbs->newStorager(PlaceDescription::class)->save(
+            [
             'names' => [[
                 'lang'  => 'ru',
                 'value' => $name,
@@ -354,18 +381,22 @@ class SvrtImporterController
                 'original'  => '1721—1917',
                 'formal'    => '+1721-11-02/+1917-09-14',
             ],
-        ]);
+            ]
+        );
 
         foreach (explode(', ', $r->region . ', ' . $r->place) as $rgn) {
-            if (preg_match('/ген\.\-губ\.|нам\./', $rgn))
+            if (preg_match('/ген\.\-губ\.|нам\./', $rgn)) {
                 continue;
+            }
 
             $name = trim(preg_replace($patterns, $replaces, $rgn), "\x00..\x1F ,;");
 
-            if (empty($name))
+            if (empty($name)) {
                 continue;
+            }
 
-            $plc = $this->gbs->newStorager(PlaceDescription::class)->save([
+            $plc = $this->gbs->newStorager(PlaceDescription::class)->save(
+                [
                 'extracted' => true,
                 'names' => [[
                     'lang'  => 'ru',
@@ -374,12 +405,14 @@ class SvrtImporterController
                 'jurisdiction'  => [
                     'resourceId'    => $plc->getId(),
                 ],
-            ]);
+                ]
+            );
         }
 
         /// Person //////////////////////////////////////////////////////////////
 
-        $psn = $this->gbs->newStorager(Person::class)->save([
+        $psn = $this->gbs->newStorager(Person::class)->save(
+            [
             'extracted' => true,
             'identifiers'   => [
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#person=' . $r->id,
@@ -418,9 +451,12 @@ class SvrtImporterController
             'sources'   => [[
                 'description'   => '#' . $src->getId(),
             ]],
-        ], null, [
+            ],
+            null,
+            [
             'makeId_name'   => "Person-1: $source_citation",
-        ]);
+            ]
+        );
 
         /// Events //////////////////////////////////////////////////////////////
 
@@ -433,7 +469,8 @@ class SvrtImporterController
                 $event_type = \Gedcomx\Types\EventType::MILITARYDISCHARGE;
                 break;
         }
-        $evt = $this->gbs->newStorager(Event::class)->save([
+        $evt = $this->gbs->newStorager(Event::class)->save(
+            [
             'extracted' => true,
             'identifiers'   => [
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#event=' . $r->id,
@@ -453,8 +490,11 @@ class SvrtImporterController
             'sources'   => [[
                 'description'   => '#' . $src->getId(),
             ]],
-        ], null, [
+            ],
+            null,
+            [
             'makeId_name'   => "Event-1: $source_citation",
-        ]);
+            ]
+        );
     }
 }

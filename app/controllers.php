@@ -15,27 +15,27 @@ use Symfony\Component\HttpFoundation\Response;
 
 // === Register controllers ===================================================
 
-$app['importer.svrt.controller'] = function() use ($app) {
+$app['importer.svrt.controller'] = function () use ($app) {
     return new Controller\SvrtImporterController($app);
 };
-$app['importer.places.controller'] = function() use ($app) {
+$app['importer.places.controller'] = function () use ($app) {
     return new Controller\PlacesImporterController($app);
 };
 //
-$app['statistic.controller'] = function() use ($app){
+$app['statistic.controller'] = function () use ($app) {
     return new Controller\StatisticController();
 };
 //
-$app['places.controller'] = function() use ($app) {
+$app['places.controller'] = function () use ($app) {
     return new Controller\PlacesController();
 };
-$app['sources.controller'] = function() {
+$app['sources.controller'] = function () {
     return new Controller\SourcesController();
 };
-$app['persons.controller'] = function() use ($app){
+$app['persons.controller'] = function () use ($app) {
     return new Controller\PersonsController();
 };
-$app['events.controller'] = function() use ($app){
+$app['events.controller'] = function () use ($app) {
     return new Controller\EventsController();
 };
 
@@ -43,43 +43,50 @@ $app['events.controller'] = function() use ($app){
 // $routesLoader = new RoutesLoader($app);
 // $routesLoader->bindApiRoutesToControllers();
 
-$app->error(function (\Exception $e, Request $request, $code) use ($app) {
-    if ($app['debug']) {
-        return;
-    }
+$app->error(
+    function (\Exception $e, Request $request, $code) use ($app) {
+        if ($app['debug']) {
+            return;
+        }
 
-    $msg = $e->getMessage();
+        $msg = $e->getMessage();
 
-    if ($app['rest.mode']) {
-        // REST error
-        $app['monolog']->addError($msg);
-        $app['monolog']->addError($e->getTraceAsString());
+        if ($app['rest.mode']) {
+            // REST error
+            $app['monolog']->addError($msg);
+            $app['monolog']->addError($e->getTraceAsString());
 
-        return array(
+            return array(
             'statusCode'    => $code,
             'message'       => $msg
-        );
+            );
+        } else {
+            // Common error
 
-    } else {
-        // Common error
-
-        // 404.html, or 40x.html, or 4xx.html, or default.html
-        $templates = array(
+            // 404.html, or 40x.html, or 4xx.html, or default.html
+            $templates = array(
             'errors/'.$code.'.html.twig',
             'errors/'.substr($code, 0, 2).'x.html.twig',
             'errors/'.substr($code, 0, 1).'xx.html.twig',
             'errors/default.html.twig',
-        );
+            );
 
-        return new Response($app['twig']->resolveTemplate($templates)
-                ->render(array('status_code' => $code, 'status_text' => $msg)), $code);
+            return new Response(
+                $app['twig']->resolveTemplate($templates)
+                ->render(array('status_code' => $code, 'status_text' => $msg)),
+                $code
+            );
+        }
     }
-});
+);
 
 // Register routes
-$app->get('/', function () use ($app) {
-    return $app['twig']->render('index.html.twig', array());
-})
+$app->get(
+    '/',
+    function () use ($app) {
+        return $app['twig']->render('index.html.twig', array());
+    }
+)
 ->bind('homepage');
 
 $app->get('/import/places', "importer.places.controller:import");
@@ -93,19 +100,22 @@ Controller\EventsController::bindRoutes($app, '/events');
 // Register API routes
 $api = $app["controllers_factory"];
 //
-$api->get('/', function () use ($app) {
-    $controllers = explode(' ', 'statistic persons sources places events');
+$api->get(
+    '/',
+    function () use ($app) {
+        $controllers = explode(' ', 'statistic persons sources places events');
 
-    foreach ($controllers as $c) {
-        if (! isset($stat)) {
-            $stat = $app["{$c}.controller"]->statistic($app);
-        } else {
-            $stat->embed($app["{$c}.controller"]->statistic($app));
+        foreach ($controllers as $c) {
+            if (! isset($stat)) {
+                $stat = $app["{$c}.controller"]->statistic($app);
+            } else {
+                $stat->embed($app["{$c}.controller"]->statistic($app));
+            }
         }
-    }
 
-    return $stat;
-})
+        return $stat;
+    }
+)
 ->bind('api_statistic');
 //
 Controller\PlacesController::bindApiRoutes($api, '/places');

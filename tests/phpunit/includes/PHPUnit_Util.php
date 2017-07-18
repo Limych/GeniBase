@@ -6,7 +6,6 @@ namespace GeniBase\Tests;
  * Assorted static functions.
  *
  * @author Limych
- *
  */
 class PHPUnit_Util
 {
@@ -29,4 +28,3 @@ class PHPUnit_Util
         return $method->invokeArgs($_obj, $_args);
     }
 }
-

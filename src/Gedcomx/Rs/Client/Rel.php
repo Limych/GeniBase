@@ -9,241 +9,241 @@
      * The links exposed in this class are a set of predefined constants, which can be used to determine if a link is available on a
      * given resource.
      */
-    class Rel
-    {
-        /****************************
-         * Standard well-known RELs *
-         ****************************/
-        /**
+class Rel
+{
+    /****************************
+     * Standard well-known RELs *
+     ****************************/
+    /**
          * The link that points to oneself.
          */
-        const SELF = "self";
-        /**
+    const SELF = "self";
+    /**
          * A link that points to the next item, such as in a collection or result set.
          */
-        const NEXT = "next";
-        /**
+    const NEXT = "next";
+    /**
          * A link that points to the previous item, such as in a collection or result set.
          */
-        const PREV = "prev";
-        /**
+    const PREV = "prev";
+    /**
          * A link that points to the previous item, such as in a collection or result set.
          */
-        const PREVIOUS = PREV;
-        /**
+    const PREVIOUS = PREV;
+    /**
          * A link that points to the first item, such as in a collection or result set.
          */
-        const FIRST = "first";
-        /**
+    const FIRST = "first";
+    /**
          * A link that points to the last item, such as in a collection or result set.
          */
-        const LAST = "last";
+    const LAST = "last";
 
-        /**************************
-         * GEDCOM-X specific rels *
-         **************************/
-        /**
+    /**************************
+     * GEDCOM-X specific rels *
+     **************************/
+    /**
          * A link that points to the agent resource.
          */
-        const AGENT = "agent";
-        /**
+    const AGENT = "agent";
+    /**
          * A link that points to the ancestry resource.
          */
-        const ANCESTRY = "ancestry";
-        /**
+    const ANCESTRY = "ancestry";
+    /**
          * A link that points to the artifacts resource.
          */
-        const ARTIFACTS = "artifacts";
-        /**
+    const ARTIFACTS = "artifacts";
+    /**
          * A link that points to the children resource.
          */
-        const CHILDREN = "children";
-        /**
+    const CHILDREN = "children";
+    /**
          * A link that points to the child relationships resource.
          */
-        const CHILD_RELATIONSHIPS = "child-relationships";
-        /**
+    const CHILD_RELATIONSHIPS = "child-relationships";
+    /**
          * A link that points to the collection resource.
          */
-        const COLLECTION = "collection";
-        /**
+    const COLLECTION = "collection";
+    /**
          * A link that points to the subcollections resource.
          */
-        const SUBCOLLECTIONS = "subcollections";
-        /**
+    const SUBCOLLECTIONS = "subcollections";
+    /**
          * A link that points to the conclusion resource.
          */
-        const CONCLUSION = "conclusion";
-        /**
+    const CONCLUSION = "conclusion";
+    /**
          * A link that points to the conclusions resource.
          */
-        const CONCLUSIONS = "conclusions";
-        /**
+    const CONCLUSIONS = "conclusions";
+    /**
          * A link that points to the current user person resource.
          */
-        const CURRENT_USER_PERSON = "current-user-person";
-        /**
+    const CURRENT_USER_PERSON = "current-user-person";
+    /**
          * A link that points to the current user resources resource.
          */
-        const CURRENT_USER_RESOURCES = "current-user-resources";
-        /**
+    const CURRENT_USER_RESOURCES = "current-user-resources";
+    /**
          * A link that points to the descendancy resource.
          */
-        const DESCENDANCY = "descendancy";
-        /**
+    const DESCENDANCY = "descendancy";
+    /**
          * A link that points to the description resource.
          */
-        const DESCRIPTION = "description";
-        /**
+    const DESCRIPTION = "description";
+    /**
          * A link that points to the evidence reference resource.
          */
-        const EVIDENCE_REFERENCE = "evidence-reference";
-        /**
+    const EVIDENCE_REFERENCE = "evidence-reference";
+    /**
          * A link that points to the evidence references resource.
          */
-        const EVIDENCE_REFERENCES = "evidence-references";
-        /**
+    const EVIDENCE_REFERENCES = "evidence-references";
+    /**
          * A link that points to the image records resource.
          */
-        const IMAGE_RECORDS = "image-records";
-        /**
+    const IMAGE_RECORDS = "image-records";
+    /**
          * A link that points to the matches resource.
          */
-        const MATCHES = "matches";
-        /**
+    const MATCHES = "matches";
+    /**
          * A link that points to the media reference resource.
          */
-        const MEDIA_REFERENCE = "media-reference";
-        /**
+    const MEDIA_REFERENCE = "media-reference";
+    /**
          * A link that points to the media references resource.
          */
-        const MEDIA_REFERENCES = "media-references";
-        /**
+    const MEDIA_REFERENCES = "media-references";
+    /**
          * A link that points to the note resource.
          */
-        const NOTE = "note";
-        /**
+    const NOTE = "note";
+    /**
          * A link that points to the notes resource.
          */
-        const NOTES = "notes";
-        /**
+    const NOTES = "notes";
+    /**
          * A link that points to the OAuth2 authorization resource.
          */
-        const OAUTH2_AUTHORIZE = "http://oauth.net/core/2.0/endpoint/authorize";
-        /**
+    const OAUTH2_AUTHORIZE = "http://oauth.net/core/2.0/endpoint/authorize";
+    /**
          * A link that points to the OAuth2 token resource.
          */
-        const OAUTH2_TOKEN = "http://oauth.net/core/2.0/endpoint/token";
-        /**
+    const OAUTH2_TOKEN = "http://oauth.net/core/2.0/endpoint/token";
+    /**
          * A link that points to the parent relationships resource.
          */
-        const PARENT_RELATIONSHIPS = "parent-relationships";
-        /**
+    const PARENT_RELATIONSHIPS = "parent-relationships";
+    /**
          * A link that points to the parents resource.
          */
-        const PARENTS = "parents";
-        /**
+    const PARENTS = "parents";
+    /**
          * A link that points to the person1 resource.
          */
-        const PERSON1 = "person1";
-        /**
+    const PERSON1 = "person1";
+    /**
          * A link that points to the person2 resource.
          */
-        const PERSON2 = "person2";
-        /**
+    const PERSON2 = "person2";
+    /**
          * A link that points to the person resource.
          */
-        const PERSON = "person";
-        /**
+    const PERSON = "person";
+    /**
          * A link that points to the persons resource.
          */
-        const PERSONS = "persons";
-        /**
+    const PERSONS = "persons";
+    /**
          * A link that points to the person search resource.
          */
-        const PERSON_SEARCH = "person-search";
-        /**
+    const PERSON_SEARCH = "person-search";
+    /**
          * A link that points to the place resource.
          */
-        const PLACE = "place";
-        /**
+    const PLACE = "place";
+    /**
          * A link that points to the place search resource.
          */
-        const PLACE_SEARCH = "place-search";
-        /**
+    const PLACE_SEARCH = "place-search";
+    /**
          * The A link that points to the place type groups resource.
          */
-        const PLACE_TYPE_GROUPS = "place-type-groups";
-        /**
+    const PLACE_TYPE_GROUPS = "place-type-groups";
+    /**
          * A link that points to the place type group resource.
          */
-        const PLACE_TYPE_GROUP = "place-type-group";
-        /**
+    const PLACE_TYPE_GROUP = "place-type-group";
+    /**
          * A link that points to the place types resource.
          */
-        const PLACE_TYPES = "place-types";
-        /**
+    const PLACE_TYPES = "place-types";
+    /**
          * A link that points to the place type resource.
          */
-        const PLACE_TYPE = "place-type";
-        /**
+    const PLACE_TYPE = "place-type";
+    /**
          * A link that points to the place group resource.
          */
-        const PLACE_GROUP = "place-group";
-        /**
+    const PLACE_GROUP = "place-group";
+    /**
          * A link that points to the place description resource.
          */
-        const PLACE_DESCRIPTION = "place-description";
-        /**
+    const PLACE_DESCRIPTION = "place-description";
+    /**
          * A link that points to the profile resource.
          */
-        const PROFILE = "profile";
-        /**
+    const PROFILE = "profile";
+    /**
          * A link that points to the record resource.
          */
-        const RECORD = "record";
-        /**
+    const RECORD = "record";
+    /**
          * A link that points to the records resource.
          */
-        const RECORDS = "records";
-        /**
+    const RECORDS = "records";
+    /**
          * A link that points to the relationship resource.
          */
-        const RELATIONSHIP = "relationship";
-        /**
+    const RELATIONSHIP = "relationship";
+    /**
          * A link that points to the relationships resource.
          */
-        const RELATIONSHIPS = "relationships";
-        /**
+    const RELATIONSHIPS = "relationships";
+    /**
          * A link that points to the source descriptions resource.
          */
-        const SOURCE_DESCRIPTIONS = "source-descriptions";
-        /**
+    const SOURCE_DESCRIPTIONS = "source-descriptions";
+    /**
          * A link that points to the source reference resource.
          */
-        const SOURCE_REFERENCE = "source-reference";
-        /**
+    const SOURCE_REFERENCE = "source-reference";
+    /**
          * A link that points to the source references resource.
          */
-        const SOURCE_REFERENCES = "source-references";
-        /**
+    const SOURCE_REFERENCES = "source-references";
+    /**
          * A link that points to the source references query resource.
          */
-        const SOURCE_REFERENCES_QUERY = "source-references-query";
-        /**
+    const SOURCE_REFERENCES_QUERY = "source-references-query";
+    /**
          * A link that points to the spouses resource.
          */
-        const SPOUSES = "spouses";
-        /**
+    const SPOUSES = "spouses";
+    /**
          * A link that points to the spouse relationships resource.
          */
-        const SPOUSE_RELATIONSHIPS = "spouse-relationships";
-        /**
+    const SPOUSE_RELATIONSHIPS = "spouse-relationships";
+    /**
          * A link that points to the discussion reference resource.
          */
-        const DISCUSSION_REFERENCE = "discussion-reference";
-        /**
+    const DISCUSSION_REFERENCE = "discussion-reference";
+    /**
          * A link that points to the discussion references resource.
          */
-        const DISCUSSION_REFERENCES = "discussion-references";
-    }
+    const DISCUSSION_REFERENCES = "discussion-references";
+}

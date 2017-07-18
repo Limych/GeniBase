@@ -18,7 +18,6 @@ use Gedcomx\Source\SourceDescription;
 /**
  *
  * @author Limych
- *        
  */
 class GedcomxRsFilter extends GedcomxModelVisitorBase
 {
@@ -67,7 +66,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
     }
 
     /**
-     * 
+     *
      * @param Gedcomx $document
      * @param Gedcomx $supplier
      * @return Gedcomx
@@ -90,12 +89,13 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
     protected function passFilter(ExtensibleData $entity)
     {
         if ($this->mode === self::MODE_COLLECT_IDS) {
-            if (! empty($id = $entity->getId()))
+            if (! empty($id = $entity->getId())) {
                 $this->supplier_ids[] = $id;
-            
+            }
         } elseif ($this->mode === self::MODE_FILTER_NODES) {
-            if (empty($id = $entity->getId()) || ! in_array($id, $this->supplier_ids))
+            if (empty($id = $entity->getId()) || ! in_array($id, $this->supplier_ids)) {
                 return true;
+            }
         }
         return false;
     }
@@ -179,5 +179,4 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitPerson($person);
     }
-    
 }

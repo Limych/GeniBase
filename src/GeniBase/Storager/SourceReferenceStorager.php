@@ -10,7 +10,6 @@ use Gedcomx\Source\SourceReference;
 /**
  *
  * @author Limych
- *
  */
 class SourceReferenceStorager extends GeniBaseStorager
 {
@@ -22,17 +21,18 @@ class SourceReferenceStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      *
      * @throws \UnexpectedValueException
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $t_refs = $this->dbs->getTableName('source_references');
         $t_srcs = $this->dbs->getTableName('sources');
@@ -54,7 +54,8 @@ class SourceReferenceStorager extends GeniBaseStorager
             throw new \UnexpectedValueException('Description reference URI required!');
         }
         if (! empty($id = $this->dbs->getIdFromReference($ent['description']))
-        && (false !== $r = $this->dbs->getLidForId($t_srcs, $id))) {
+            && (false !== $r = $this->dbs->getLidForId($t_srcs, $id))
+        ) {
             $data['description_id'] = (int) $r;
         }
 
@@ -65,7 +66,8 @@ class SourceReferenceStorager extends GeniBaseStorager
             $ent['attribution']['contributor'] = [ 'resourceId' => $r->getId() ];
         }
         if (isset($ent['attribution']['contributor']) && isset($ent['attribution']['contributor']['resourceId'])
-        && (false !== $r = $this->dbs->getLidForId($t_agents, $ent['attribution']['contributor']['resourceId']))) {
+            && (false !== $r = $this->dbs->getLidForId($t_agents, $ent['attribution']['contributor']['resourceId']))
+        ) {
             $data['att_contributor_id'] = $r;
         }
         if (! empty($ent['attribution']['modified'])) {
@@ -78,7 +80,9 @@ class SourceReferenceStorager extends GeniBaseStorager
         // Save data
         parent::save($entity, $context, $o);
 
-        $result = $this->dbs->getDb()->update($t_refs, $data,
+        $result = $this->dbs->getDb()->update(
+            $t_refs,
+            $data,
             Util::array_slice_keys($data, '_source_id', 'description')
         );
         if ($result == 0) {
@@ -96,7 +100,7 @@ class SourceReferenceStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $context
+     * @param mixed      $context
      * @param array|null $o
      * @return ExtensibleData[]|false
      *
@@ -104,12 +108,16 @@ class SourceReferenceStorager extends GeniBaseStorager
      */
     public function loadList($context = null, $o = null)
     {
-        $o = array_merge([
+        $o = array_merge(
+            [
             'is_componentOf' => false,
-        ], (is_array($o) ? $o : []));
+            ],
+            (is_array($o) ? $o : [])
+        );
 
-        if ($context instanceof ExtensibleData)
+        if ($context instanceof ExtensibleData) {
             $context = $context->toArray();
+        }
 
         $t_srefs = $this->dbs->getTableName('source_references');
         $t_srcs = $this->dbs->getTableName('sources');
@@ -133,8 +141,9 @@ class SourceReferenceStorager extends GeniBaseStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         $t_agents = $this->dbs->getTableName('agents');
 
@@ -144,7 +153,8 @@ class SourceReferenceStorager extends GeniBaseStorager
             $ent['attribution'] = [];
         }
         if (isset($ent['att_contributor_id'])
-        && ! empty($r = $this->dbs->getIdForLid($t_agents, $ent['att_contributor_id']))) {
+            && ! empty($r = $this->dbs->getIdForLid($t_agents, $ent['att_contributor_id']))
+        ) {
             $ent['attribution']['contributor'] = [
                 'resourceId' => $r,
             ];

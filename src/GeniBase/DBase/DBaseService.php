@@ -7,7 +7,6 @@ use Gedcomx\Agent\Agent;
 /**
  *
  * @author Limych
- *
  */
 class DBaseService extends Container
 {
@@ -56,8 +55,9 @@ class DBaseService extends Container
      */
     public function getLidForId($table, $id)
     {
-        if (false !== $result = $this['app']['db']->fetchColumn("SELECT _id FROM $table WHERE id = ?", [$id]))
+        if (false !== $result = $this['app']['db']->fetchColumn("SELECT _id FROM $table WHERE id = ?", [$id])) {
             return (int) $result;
+        }
         return $result;
     }
 
@@ -80,11 +80,13 @@ class DBaseService extends Container
      */
     public function getIdFromReference($uri)
     {
-        if (empty($uri))
+        if (empty($uri)) {
             return null;
+        }
 
-        if (preg_match('/\#([\w\-]+)/', $uri, $matches))
+        if (preg_match('/\#([\w\-]+)/', $uri, $matches)) {
             return $matches[1];
+        }
 
         return false;
     }
@@ -106,5 +108,4 @@ class DBaseService extends Container
     {
         return $this->agent;
     }
-
 }

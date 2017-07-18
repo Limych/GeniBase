@@ -9,7 +9,6 @@ use GeniBase\DBase\GeniBaseInternalProperties;
 /**
  *
  * @author Limych
- *
  */
 class NamePartStorager extends GeniBaseStorager
 {
@@ -23,15 +22,16 @@ class NamePartStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $t_nps = $this->dbs->getTableName('name_parts');
 
@@ -51,10 +51,13 @@ class NamePartStorager extends GeniBaseStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $this->dbs->getDb()->update($t_nps, $data, [
+            $this->dbs->getDb()->update(
+                $t_nps,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_nps, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -82,7 +85,7 @@ class NamePartStorager extends GeniBaseStorager
         $qparts['bundles'][]    = "tp._id = np.type_id";
 
         $qp = parent::getSqlQueryParts();
-//         $qp['bundles'][0]   = "cn.id = gn.id";
+        //         $qp['bundles'][0]   = "cn.id = gn.id";
         $qparts = array_merge_recursive($qparts, $qp);
 
         return $qparts;
@@ -114,7 +117,9 @@ class NamePartStorager extends GeniBaseStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY)   return; // Skip cleaning now
+        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+            return; // Skip cleaning now
+        }
 
         $t_nps = $this->dbs->getTableName('name_parts');
         $t_nfs = $this->dbs->getTableName('name_forms');
@@ -124,5 +129,4 @@ class NamePartStorager extends GeniBaseStorager
 
         $this->dbs->getDb()->query($q);
     }
-
 }

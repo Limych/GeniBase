@@ -10,13 +10,16 @@ $console->getDefinition()->addOption(new InputOption('--env', '-e', InputOption:
 $console->setDispatcher($app['dispatcher']);
 $console
     ->register('my-command')
-    ->setDefinition(array(
+    ->setDefinition(
+        array(
         // new InputOption('some-option', null, InputOption::VALUE_NONE, 'Some help'),
-    ))
+        )
+    )
     ->setDescription('My command description')
-    ->setCode(function (InputInterface $input, OutputInterface $output) use ($app) {
-        // do something
-    })
-;
+    ->setCode(
+        function (InputInterface $input, OutputInterface $output) use ($app) {
+            // do something
+        }
+    );
 
 return $console;

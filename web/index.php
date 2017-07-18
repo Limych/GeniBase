@@ -19,10 +19,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @license     GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
- * @copyright   Copyright (c) 2017 by Andrey Khrolenok <andrey@khrolenok.ru>
+ * @license   GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+ * @copyright Copyright (c) 2017 by Andrey Khrolenok <andrey@khrolenok.ru>
  *
- * @package     GeniBase
+ * @package GeniBase
  */
 
 $allow_dev_mode = true;
@@ -30,4 +30,4 @@ $allow_dev_mode = true;
 
 define('BASE_DIR', dirname(__DIR__));
 
-include BASE_DIR.'/app/app.php';
+require BASE_DIR.'/app/app.php';

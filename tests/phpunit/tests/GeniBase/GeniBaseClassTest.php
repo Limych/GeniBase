@@ -55,21 +55,21 @@ EOF;
         $this->assertEquals($expected, $actual);
     }
 
-//     /**
-//      * @covers GeniBase\Common\GeniBaseClass::initFromReader
-//      */
-//     public function testInitFromReader()
-//     {
-//         $reader = new \XMLReader();
-//         $reader->XML($this->xml_content);
-//         $reader->read();
-//         do {
-//             if ($reader->nodeType == \XMLReader::ELEMENT && ($reader->name === 'xml')) {
-//                 $this->object->initFromReader($reader);
-//             }
-//         } while ($reader->read());
-//         // TODO
-//     }
+    //     /**
+    //      * @covers GeniBase\Common\GeniBaseClass::initFromReader
+    //      */
+    //     public function testInitFromReader()
+    //     {
+    //         $reader = new \XMLReader();
+    //         $reader->XML($this->xml_content);
+    //         $reader->read();
+    //         do {
+    //             if ($reader->nodeType == \XMLReader::ELEMENT && ($reader->name === 'xml')) {
+    //                 $this->object->initFromReader($reader);
+    //             }
+    //         } while ($reader->read());
+    //         // TODO
+    //     }
 
     /**
      * @covers GeniBase\Common\GeniBaseClass::toXml

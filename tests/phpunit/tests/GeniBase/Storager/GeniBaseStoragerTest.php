@@ -67,5 +67,4 @@ class GeniBaseStoragerTest extends \PHPUnit_Framework_TestCase
             $data[] = $d;
         }
     }
-
 }

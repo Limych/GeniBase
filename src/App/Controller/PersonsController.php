@@ -15,8 +15,8 @@ class PersonsController extends BaseController
 {
 
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \App\Controller\BaseController::statistic()
      */
     public function statistic(Application $app)
@@ -29,8 +29,9 @@ class PersonsController extends BaseController
 
         $result = $app['db']->fetchAssoc($query);
 
-        if (false !== $result)
+        if (false !== $result) {
             $result = new Statistic($result);
+        }
 
         return $result;
     }
@@ -39,27 +40,30 @@ class PersonsController extends BaseController
     {
         $app->get($base, "persons.controller:statistic");
         $app->get($base.'/{id}', "persons.controller:getOne");
-//         $app->post($base, "persons.controller:save");
-//         $app->put($base.'/{id}', "persons.controller:update");
-//         $app->delete($base.'/{id}', "persons.controller:delete");
+        //         $app->post($base, "persons.controller:save");
+        //         $app->put($base.'/{id}', "persons.controller:update");
+        //         $app->delete($base.'/{id}', "persons.controller:delete");
     }
 
     /**
      *
      * @param Application $app
-     * @param Request $request
-     * @param string $id
+     * @param Request     $request
+     * @param string      $id
      * @return \Symfony\Component\HttpFoundation\Response|\Gedcomx\Gedcomx
      */
     public function getOne(Application $app, Request $request, $id)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], Person::class)
-        ->loadGedcomx([
+        ->loadGedcomx(
+            [
             'id' => $id,
-        ]);
+            ]
+        );
 
-        if (false === $gedcomx)
+        if (false === $gedcomx) {
             return new Response(null, 204);
+        }
 
         if (class_exists(WebLinkExtension::class)) {
             (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
@@ -67,19 +71,19 @@ class PersonsController extends BaseController
         return $gedcomx;
     }
 
-//     public function save(Request $request)
-//     {}  // TODO
+    //     public function save(Request $request)
+    //     {}  // TODO
 
-//     public function update($id, Request $request)
-//     {}  // TODO
+    //     public function update($id, Request $request)
+    //     {}  // TODO
 
-//     public function delete($id)
-//     {}  // TODO
+    //     public function delete($id)
+    //     {}  // TODO
 
-//     public function getDataFromRequest(Request $request)
-//     {
-//         return $note = array(
-//             "note" => $request->request->get("note")
-//         );
-//     }
+    //     public function getDataFromRequest(Request $request)
+    //     {
+    //         return $note = array(
+    //             "note" => $request->request->get("note")
+    //         );
+    //     }
 }

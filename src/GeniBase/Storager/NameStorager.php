@@ -11,7 +11,6 @@ use GeniBase\DBase\GeniBaseInternalProperties;
 /**
  *
  * @author Limych
- *
  */
 class NameStorager extends ConclusionStorager
 {
@@ -25,15 +24,16 @@ class NameStorager extends ConclusionStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $this->makeUuidIfEmpty($entity, $o);
@@ -61,11 +61,14 @@ class NameStorager extends ConclusionStorager
                 [$data['id']]
             );
             $dt = new DateInfo($ent['date']);
-            if (false !== $r)
+            if (false !== $r) {
                 GeniBaseInternalProperties::setPropertyOf($dt, '_id', $r);
+            }
             if (false !== $dt = $this->newStorager($dt)->save($dt)
-            && ! empty($r = (int) GeniBaseInternalProperties::getPropertyOf($dt, '_id')))
+                && ! empty($r = (int) GeniBaseInternalProperties::getPropertyOf($dt, '_id'))
+            ) {
                 $data['date_id'] = $r;
+            }
         }
 
         // Save data
@@ -73,10 +76,13 @@ class NameStorager extends ConclusionStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update($t_names, $data, [
+            $result = $this->dbs->getDb()->update(
+                $t_names,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_names, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -89,19 +95,26 @@ class NameStorager extends ConclusionStorager
             [$_id]
         );
         if (! empty($nfs)) {
-            $nfs = array_map(function ($v) {
-                return (int) $v['_id'];
-            }, $nfs);
+            $nfs = array_map(
+                function ($v) {
+                    return (int) $v['_id'];
+                },
+                $nfs
+            );
         }
         foreach ($ent['nameForms'] as $nf) {
             $nf = new NameForm($nf);
-            if (! empty($nfs))
+            if (! empty($nfs)) {
                 GeniBaseInternalProperties::setPropertyOf($nf, '_id', array_shift($nfs));
+            }
             $this->newStorager($nf)->save($nf, $entity);
         }
         if (! empty($nfs)) {
-            $this->dbs->getDb()->executeQuery("DELETE FROM $t_nfs WHERE _id IN (?)", [$nfs],
-                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            $this->dbs->getDb()->executeQuery(
+                "DELETE FROM $t_nfs WHERE _id IN (?)",
+                [$nfs],
+                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+            );
         }
 
         return $entity;
@@ -137,7 +150,6 @@ class NameStorager extends ConclusionStorager
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE nm._id = ?", [$_id]);
-
         } elseif (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE nm._person_id = ?", [$_person_id]);
         }
@@ -150,8 +162,10 @@ class NameStorager extends ConclusionStorager
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE nm._person_id = ? ORDER BY nm.id",
-                [$_person_id]);
+            $result = $this->dbs->getDb()->fetchAll(
+                "$q WHERE nm._person_id = ? ORDER BY nm.id",
+                [$_person_id]
+            );
         }
 
         return $result;
@@ -159,21 +173,25 @@ class NameStorager extends ConclusionStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         if (isset($result['preferred'])) {
             settype($result['preferred'], 'integer');
         }
 
-        /** @var Name $entity */
+        /**
+ * @var Name $entity
+*/
         $entity = parent::processRaw($entity, $result);
 
         if (isset($result['date_id'])) {
             $dt = new DateInfo();
             GeniBaseInternalProperties::setPropertyOf($dt, '_id', $result['date_id']);
-            if (! empty($dt = $this->newStorager($dt)->load($dt)))
+            if (! empty($dt = $this->newStorager($dt)->load($dt))) {
                 $entity->setDate($dt);
+            }
         }
 
         if (! empty($r = $this->newStorager(NameForm::class)->loadList($entity))) {
@@ -187,7 +205,9 @@ class NameStorager extends ConclusionStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY)   return; // Skip cleaning now
+        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+            return; // Skip cleaning now
+        }
 
         $t_names = $this->dbs->getTableName('names');
         $t_psns = $this->dbs->getTableName('persons');
@@ -197,5 +217,4 @@ class NameStorager extends ConclusionStorager
 
         $this->dbs->getDb()->query($q);
     }
-
 }

@@ -17,8 +17,8 @@ class PlacesController extends BaseController
 {
 
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \App\Controller\BaseController::statistic()
      */
     public function statistic(Application $app)
@@ -31,15 +31,18 @@ class PlacesController extends BaseController
 
         $result = $app['db']->fetchAssoc($query);
 
-        if (false !== $result)
+        if (false !== $result) {
             $result = new Statistic($result);
+        }
 
         return $result;
     }
 
     public static function bindRoutes($app, $base)
     {
-        /** @var Application $app */
+        /**
+ * @var Application $app
+*/
         $app->get($base, "places.controller:showPlace");
         $app->get($base.'/{id}', "places.controller:showPlace")->bind('place');
     }
@@ -49,27 +52,30 @@ class PlacesController extends BaseController
         $app->get($base, "places.controller:getComponents");
         $app->get($base.'/{id}', "places.controller:getOne");
         $app->get($base.'/{id}/components', "places.controller:getComponents");
-//         $app->post($base, "places.controller:save");
-//         $app->put($base.'/{id}', "places.controller:update");
-//         $app->delete($base.'/{id}', "places.controller:delete");
+        //         $app->post($base, "places.controller:save");
+        //         $app->put($base.'/{id}', "places.controller:update");
+        //         $app->delete($base.'/{id}', "places.controller:delete");
     }
 
     /**
      *
      * @param Application $app
-     * @param Request $request
-     * @param string $id
+     * @param Request     $request
+     * @param string      $id
      * @return \Symfony\Component\HttpFoundation\Response|\Gedcomx\Gedcomx
      */
     public function getOne(Application $app, Request $request, $id)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
-        ->loadGedcomx([
+        ->loadGedcomx(
+            [
             'id' => $id,
-        ]);
+            ]
+        );
 
-        if (false === $gedcomx)
+        if (false === $gedcomx) {
             return new Response(null, 204);
+        }
 
         GedcomxRsUpdater::update($gedcomx);
 
@@ -87,12 +93,17 @@ class PlacesController extends BaseController
     public function getComponents(Application $app, $id = null)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
-        ->loadListGedcomx([
+        ->loadListGedcomx(
+            [
             'id' => $id,
-        ], null, 'loadCompanions=0');
+            ],
+            null,
+            'loadCompanions=0'
+        );
 
-        if (false === $gedcomx)
+        if (false === $gedcomx) {
             return new Response(null, 204);
+        }
 
         GedcomxRsUpdater::update($gedcomx);
 
@@ -102,70 +113,79 @@ class PlacesController extends BaseController
     /**
      * @todo
      */
-//     public function save(Request $request)
-//     {
+    //     public function save(Request $request)
+    //     {
 
-//         $note = $this->getDataFromRequest($request);
-//         return array("id" => $this['service']->save($note));
+    //         $note = $this->getDataFromRequest($request);
+    //         return array("id" => $this['service']->save($note));
 
-//     }
-
-    /**
-     * @todo
-     */
-//     public function update($id, Request $request)
-//     {
-//         $note = $this->getDataFromRequest($request);
-//         $this['service']->update($id, $note);
-//         return $note;
-
-//     }
+    //     }
 
     /**
      * @todo
      */
-//     public function delete($id)
-//     {
+    //     public function update($id, Request $request)
+    //     {
+    //         $note = $this->getDataFromRequest($request);
+    //         $this['service']->update($id, $note);
+    //         return $note;
 
-//         return $this['service']->delete($id);
+    //     }
 
-//     }
+    /**
+     * @todo
+     */
+    //     public function delete($id)
+    //     {
 
-//     public function getDataFromRequest(Request $request)
-//     {
-//         return $note = array(
-//             "note" => $request->request->get("note")
-//         );
-//     }
+    //         return $this['service']->delete($id);
+
+    //     }
+
+    //     public function getDataFromRequest(Request $request)
+    //     {
+    //         return $note = array(
+    //             "note" => $request->request->get("note")
+    //         );
+    //     }
 
     /**
      *
      * @param Application $app
-     * @param Request $request
-     * @param string $id
+     * @param Request     $request
+     * @param string      $id
      * @return \Symfony\Component\HttpFoundation\Response|\Gedcomx\Gedcomx
      */
     public function showPlace(Application $app, Request $request, $id = null)
     {
         $storager = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class);
         if (empty($id)) {
-            $gedcomx = $storager->loadListGedcomx([
+            $gedcomx = $storager->loadListGedcomx(
+                [
                 'id' => $id,
-            ]);
+                ]
+            );
         } else {
-            $gedcomx = $storager->loadGedcomx([
+            $gedcomx = $storager->loadGedcomx(
+                [
                 'id' => $id,
-            ]);
+                ]
+            );
         }
 
-        if (false === $gedcomx)
+        if (false === $gedcomx) {
             return new Response(null, 204);
+        }
 
         GedcomxRsUpdater::update($gedcomx);
 
-        $gedcomx2 = $storager->loadListGedcomx([
+        $gedcomx2 = $storager->loadListGedcomx(
+            [
             'id' => $gedcomx->getPlaces()[0]->getId(),
-        ], null, 'loadCompanions=0');
+            ],
+            null,
+            'loadCompanions=0'
+        );
 
         $gedcomx3 = GedcomxRsFilter::filter(
             $storager->loadNeighboringPlacesGedcomx($gedcomx->getPlaces()[0], 'loadCompanions=0'),
@@ -173,11 +193,13 @@ class PlacesController extends BaseController
             $gedcomx2
         );
 
-        return $app['twig']->render('place.html.twig', [
+        return $app['twig']->render(
+            'place.html.twig',
+            [
             'gedcomx' => $gedcomx,
             'components' => $gedcomx2->getPlaces(),
             'neighbors' => $gedcomx3->getPlaces(),
-        ]);
+            ]
+        );
     }
-
 }

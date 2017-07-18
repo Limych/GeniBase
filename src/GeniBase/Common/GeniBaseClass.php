@@ -4,7 +4,6 @@ namespace GeniBase\Common;
 /**
  *
  * @author Limych
- *
  */
 class GeniBaseClass
 {
@@ -15,7 +14,7 @@ class GeniBaseClass
      * Constructs a GeniBaseClass from a (parsed) JSON hash
      *
      * @param mixed $o Either an array (JSON), an XMLReader or
-     *          another instance of GeniBaseClass or a subclass.
+     *                 another instance of GeniBaseClass or a subclass.
      *
      * @throws \Exception
      */
@@ -27,7 +26,6 @@ class GeniBaseClass
 
         if (is_array($o)) {
             $this->initFromArray($o);
-
         } elseif ($o instanceof \XMLReader) {
             $success = true;
             while ($success && $o->nodeType != \XMLReader::ELEMENT) {
@@ -47,7 +45,8 @@ class GeniBaseClass
      * @param GeniBaseClass $data
      */
     public function embed(GeniBaseClass $data)
-    {}  // Empty
+    {
+    }  // Empty
 
     /**
      * Initializes this GeniBaseClass from an associative array
@@ -55,7 +54,8 @@ class GeniBaseClass
      * @param array $o
      */
     public function initFromArray(array $o)
-    {}  // Empty
+    {
+    }  // Empty
 
     /**
      * Returns the associative array for this GeniBaseClass
@@ -101,8 +101,7 @@ class GeniBaseClass
             while ($xml->nodeType != \XMLReader::END_ELEMENT) {
                 if ($xml->nodeType != \XMLReader::ELEMENT) {
                     //no-op: skip any insignificant whitespace, comments, etc.
-                }
-                else if (!$this->setKnownChildElement($xml)) {
+                } elseif (!$this->setKnownChildElement($xml)) {
                     $n = $xml->localName;
                     $ns = $xml->namespaceURI;
                     $elementIsEmpty = $xml->isEmptyElement;
@@ -133,9 +132,9 @@ class GeniBaseClass
                                         $moreAttributes = $xml->moveToNextAttribute();
                                     }
                                 }
-                            } else if ($xml->nodeType == \XMLReader::TEXT) {
+                            } elseif ($xml->nodeType == \XMLReader::TEXT) {
                                 $dom->textContent = $xml->value;
-                            } else if ($xml->nodeType == \XMLReader::END_ELEMENT) {
+                            } elseif ($xml->nodeType == \XMLReader::END_ELEMENT) {
                                 $dom = $dom->parentNode;
                             }
                         }
@@ -150,28 +149,30 @@ class GeniBaseClass
     /**
      * Sets a known child element of GeniBaseClass from an XML reader.
      *
-     * @param \XMLReader $xml The reader.
+     * @param  \XMLReader $xml The reader.
      * @return bool Whether a child element was set.
      */
-    protected function setKnownChildElement(\XMLReader $xml) {
+    protected function setKnownChildElement(\XMLReader $xml)
+    {
         return false;
     }
 
     /**
      * Sets a known attribute of GeniBaseClass from an XML reader.
      *
-     * @param \XMLReader $xml The reader.
+     * @param  \XMLReader $xml The reader.
      * @return bool Whether an attribute was set.
      */
-    protected function setKnownAttribute(\XMLReader $xml) {
+    protected function setKnownAttribute(\XMLReader $xml)
+    {
         return false;
     }
 
     /**
      * Writes this GeniBaseClass to an XML writer.
      *
-     * @param \XMLWriter $writer The XML writer.
-     * @param bool $includeNamespaces Whether to write out the namespaces in the element.
+     * @param \XMLWriter $writer            The XML writer.
+     * @param bool       $includeNamespaces Whether to write out the namespaces in the element.
      */
     public function toXml(\XMLWriter $writer, $includeNamespaces = true)
     {
@@ -187,6 +188,6 @@ class GeniBaseClass
      * @param \XMLWriter $writer The XML writer.
      */
     public function writeXmlContents(\XMLWriter $writer)
-    {}  // Empty
-
+    {
+    }  // Empty
 }

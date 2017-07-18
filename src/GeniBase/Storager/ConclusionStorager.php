@@ -12,7 +12,6 @@ use Gedcomx\Agent\Agent;
 /**
  *
  * @author Limych
- *
  */
 class ConclusionStorager extends GeniBaseStorager
 {
@@ -24,15 +23,16 @@ class ConclusionStorager extends GeniBaseStorager
 
     /**
      *
-     * @param mixed $entity
+     * @param mixed          $entity
      * @param ExtensibleData $context
-     * @param array|null $o
+     * @param array|null     $o
      * @return ExtensibleData|false
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData)
+        if (! $entity instanceof ExtensibleData) {
             $entity = $this->getObject($entity);
+        }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $this->makeUuidIfEmpty($entity, $o);
@@ -57,7 +57,8 @@ class ConclusionStorager extends GeniBaseStorager
             $ent['attribution']['contributor'] = [ 'resourceId' => $r->getId() ];
         }
         if (isset($ent['attribution']['contributor']) && isset($ent['attribution']['contributor']['resourceId'])
-        && (false !== $r = $this->dbs->getLidForId($t_agents, $ent['attribution']['contributor']['resourceId']))) {
+            && (false !== $r = $this->dbs->getLidForId($t_agents, $ent['attribution']['contributor']['resourceId']))
+        ) {
             $data['att_contributor_id'] = $r;
         }
         if (! empty($ent['attribution']['modified'])) {
@@ -72,10 +73,13 @@ class ConclusionStorager extends GeniBaseStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update($t_cons, $data, [
+            $result = $this->dbs->getDb()->update(
+                $t_cons,
+                $data,
+                [
                 '_id' => $_id
-            ]);
-
+                ]
+            );
         } else {
             $this->dbs->getDb()->insert($t_cons, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -125,7 +129,6 @@ class ConclusionStorager extends GeniBaseStorager
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE cn._id = ?", [$_id]);
-
         } elseif (! empty($id = $entity->getId())) {
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE cn.id = ?", [$id]);
         }
@@ -135,23 +138,27 @@ class ConclusionStorager extends GeniBaseStorager
 
     protected function processRaw($entity, $result)
     {
-        if (! is_array($result))
+        if (! is_array($result)) {
             return $result;
+        }
 
         $t_agents = $this->dbs->getTableName('agents');
 
         if (isset($result['confidence_id'])
-        && (false !== $r = $this->getType($result['confidence_id']))) {
+            && (false !== $r = $this->getType($result['confidence_id']))
+        ) {
             $result['confidence'] = $r;
         }
         if (isset($result['lang_id'])
-        && (false !== $r = $this->getLang($result['lang_id']))) {
+            && (false !== $r = $this->getLang($result['lang_id']))
+        ) {
             $result['lang'] = $r;
         }
 
         $result['attribution'] = [];
         if (isset($result['att_contributor_id'])
-        && ! empty($r = $this->dbs->getIdForLid($t_agents, $result['att_contributor_id']))) {
+            && ! empty($r = $this->dbs->getIdForLid($t_agents, $result['att_contributor_id']))
+        ) {
             $result['attribution']['contributor'] = [
                 'resourceId' => $r,
             ];
@@ -162,32 +169,38 @@ class ConclusionStorager extends GeniBaseStorager
         if (! empty($result['att_changeMessage'])) {
             $result['attribution']['changeMessage'] = $result['att_changeMessage'];
         }
-        if (empty($result['attribution']))
+        if (empty($result['attribution'])) {
             unset($result['attribution']);
+        }
 
         $entity = parent::processRaw($entity, $result);
 
         $res = $this->newStorager(SourceReference::class)->loadList($entity);
-        if (! empty($res))
+        if (! empty($res)) {
             $entity->setSources($res);
+        }
 
         return $entity;
     }
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /** @var Conclusion $entity */
+        /**
+ * @var Conclusion $entity
+*/
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getAttribution()) && ! empty($r = $r->getContributor())
-        && ! empty($rid = $r->getResourceId())) {
+            && ! empty($rid = $r->getResourceId())
+        ) {
             $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
         }
 
         if (! empty($list = $entity->getSources())) {
             foreach ($list as $ent) {
                 if (! empty($r = $ent->getDescriptionRef())
-                && ! empty($rid = $this->dbs->getIdFromReference($r))) {
+                    && ! empty($rid = $this->dbs->getIdFromReference($r))
+                ) {
                     $gedcomx->embed(
                         $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $rid ])
                     );
@@ -198,5 +211,4 @@ class ConclusionStorager extends GeniBaseStorager
 
         return $gedcomx;
     }
-
 }
