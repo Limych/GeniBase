@@ -23,7 +23,7 @@
 		"symfony/asset" : "~3.3"
 	},
 	"require-dev" : {
-		"phpunit/phpunit" : ">=3.7 <6",
+		"phpunit/phpunit" : "*",
 		"silex/web-profiler" : "~2.0",
 		"symfony/debug" : "~2.8|^3.0",
 		"phploc/phploc" : "~2.1 || ~4.0",
@@ -32,7 +32,12 @@
 		"php-console/php-console" : "~3.1",
 		"symfony/browser-kit" : "~2.1|~3.0",
 		"texthtml/whoops-silex" : "~1.0",
-		"squizlabs/php_codesniffer" : "~3.0"
+		"squizlabs/php_codesniffer" : "*",
+		"apigen/apigen" : "~4.1",
+		"phpmd/phpmd" : "*",
+		"sebastian/phpcpd" : "*",
+		"sebastian/phpdcd" : "*",
+		"apigen/theme-bootstrap" : "*"
 	},
 	"authors" : [{
 			"name" : "Andrey Khrolenok",
@@ -56,10 +61,9 @@
 			"echo 'Started web server on http://localhost:8888'",
 			"php -S localhost:8888 -t web"
 		],
-		"install-devtools" : "cd devtools && composer update --no-interaction",
 		"sca" : [
-			"php devtools/vendor/bin/phpcs --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php src",
-			"php devtools/vendor/bin/phpmd src text build/config/phpmd.xml"
+			"php vendor/bin/phpcs --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php src",
+			"php vendor/bin/phpmd src text build/config/phpmd.xml"
 		]
 	},
 	"homepage" : "https://github.com/Limych/GeniBase",
@@ -70,6 +74,10 @@
 			"type" : "git",
 			"url" : "https://github.com/Limych/gedcomx-php",
 			"name" : "Gedcomx-php"
+		}, {
+			"type" : "git",
+			"url" : "https://github.com/jimmyz/ThemeBootstrap.git",
+			"name" : "apigen/theme-bootstrap"
 		}
 	]
 }

@@ -10,8 +10,8 @@ vendor/
 # Files and folders related to build/test tools
 .maintenance
 /npm-debug.log
-/var/logs/*
-!/var/logs/.gitkeep
+logs/
+!logs/.gitkeep
 
 # Ignore other .gitignore files to allow for personal customizations
 .gitignore

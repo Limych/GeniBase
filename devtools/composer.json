@@ -1,8 +1,0 @@
-{
-	"require" : {
-		"php" : "^5.3.6 || ^7.0",
-		"apigen/apigen" : "^2.8",
-		"phpmd/phpmd" : "^2.3",
-		"squizlabs/php_codesniffer" : "^1.4"
-	}
-}
