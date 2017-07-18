@@ -45,7 +45,7 @@ before_script:
 # Script, failures in this section will result in build status 'failed'
 script:
   - |
-    if [ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" ]; then
+    if [[ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" ]]; then
       phpunit --coverage-clover=build/logs/clover.xml;
     else
       phpunit;
@@ -54,15 +54,12 @@ script:
 after_success:
   # Build Coveralls reports
   - |
-    if [ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" ]; then
+    if [[ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" ]]; then
       php vendor/bin/coveralls -v;
     fi
   # Generate documentation
   - |
-    if [ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" ]
-    && [ "$TRAVIS_REPO_SLUG" == "$GH_REPO_SLUG" ]
-    && [ $TRAVIS_BRANCH = 'master' ]
-    && [ $TRAVIS_PULL_REQUEST = 'false' ]; then
+    if [[ "$TRAVIS_PHP_VERSION" == "$DOCS_PHP_VERSION" && "$TRAVIS_REPO_SLUG" == "$GH_REPO_SLUG" && $TRAVIS_BRANCH = 'master' && $TRAVIS_PULL_REQUEST = 'false' ]]; then
       sh docs.sh;
     fi
     
