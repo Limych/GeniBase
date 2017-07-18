@@ -31,9 +31,7 @@ use Gedcomx\Gedcomx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-if (! defined('BASE_DIR')) {
-    define('BASE_DIR', dirname(__DIR__));
-}
+require_once 'bootstrap.php';
 
 require_once BASE_DIR.'/vendor/autoload.php';
 
