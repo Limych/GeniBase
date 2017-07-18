@@ -34,7 +34,7 @@ EOF;
     }
 
     /**
-     * @covers GeniBase\GeniBaseClass::toArray
+     * @covers GeniBase\Common\GeniBaseClass::toArray
      */
     public function testToArray()
     {
@@ -45,7 +45,7 @@ EOF;
     }
 
     /**
-     * @covers GeniBase\GeniBaseClass::toJson
+     * @covers GeniBase\Common\GeniBaseClass::toJson
      */
     public function testToJson()
     {
@@ -55,23 +55,24 @@ EOF;
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * @covers GeniBase\GeniBaseClass::initFromReader
-     */
-    public function testInitFromReader()
-    {
-        $reader = new \XMLReader();
-        $reader->XML($this->xml_content);
-        $reader->read();
-        do {
-            if ($reader->nodeType == \XMLReader::ELEMENT && ($reader->name === 'xml')) {
-                $this->object->initFromReader($reader);
-            }
-        } while ($reader->read());
-    }
+//     /**
+//      * @covers GeniBase\Common\GeniBaseClass::initFromReader
+//      */
+//     public function testInitFromReader()
+//     {
+//         $reader = new \XMLReader();
+//         $reader->XML($this->xml_content);
+//         $reader->read();
+//         do {
+//             if ($reader->nodeType == \XMLReader::ELEMENT && ($reader->name === 'xml')) {
+//                 $this->object->initFromReader($reader);
+//             }
+//         } while ($reader->read());
+//         // TODO
+//     }
 
     /**
-     * @covers GeniBase\GeniBaseClass::toXml
+     * @covers GeniBase\Common\GeniBaseClass::toXml
      */
     public function testToXml()
     {

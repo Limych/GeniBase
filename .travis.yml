@@ -30,8 +30,6 @@ matrix:
 
 install:
   - mkdir -p build/logs
-  - composer self-update
-  - composer install -n --prefer-source
   - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction
   - if [[ "$CHECKS" = "yes" ]]; then travis_retry composer install-devtools; fi;
 

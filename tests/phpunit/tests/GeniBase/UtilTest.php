@@ -2,8 +2,8 @@
 namespace GeniBase\Tests;
 
 
-use PHPUnit\Framework\TestCase;
 use GeniBase\Util;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Util.
@@ -12,7 +12,7 @@ use GeniBase\Util;
 class UtilTest extends TestCase
 {
     /**
-     * @covers GeniBase\Server\Util::array_slice_keys
+     * @covers GeniBase\Util::array_slice_keys
      */
     public function testArray_slice_keys()
     {

@@ -2,9 +2,30 @@
 <ruleset name="GeniBase">
     <description>The coding standard for GeniBase project</description>
 
-    <file>./src</file>
-    <file>./tests/phpunit</file>
+    <exclude-pattern>*/img/*</exclude-pattern>
+    <exclude-pattern>*/images/*</exclude-pattern>
+    <exclude-pattern>*/less/*</exclude-pattern>
+    <exclude-pattern>*/css/*</exclude-pattern>
+    <exclude-pattern>*/js/*</exclude-pattern>
+    <exclude-pattern>*.html</exclude-pattern>
+    <exclude-pattern>*.twig</exclude-pattern>
+    <exclude-pattern>*.yml</exclude-pattern>
+    <exclude-pattern>*.xml</exclude-pattern>
+    <exclude-pattern>*.txt</exclude-pattern>
+    <exclude-pattern>*.less</exclude-pattern>
+    <exclude-pattern>*.css</exclude-pattern>
+    <exclude-pattern>*.js</exclude-pattern>
+    <exclude-pattern>*.jpg</exclude-pattern>
+    <exclude-pattern>*.jpeg</exclude-pattern>
+    <exclude-pattern>*.png</exclude-pattern>
+    <exclude-pattern>*.gif</exclude-pattern>
 
-    <rule ref="PSR1" />
-    <rule ref="PSR2" />
+    <!-- Include the whole PSR-2 standard -->
+    <rule ref="PSR2"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="140"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
 </ruleset>
