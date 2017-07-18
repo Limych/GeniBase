@@ -26,9 +26,7 @@
 		"phpunit/phpunit" : ">=3.7 <6",
 		"silex/web-profiler" : "~2.0",
 		"symfony/debug" : "~2.8|^3.0",
-		"squizlabs/php_codesniffer" : "^2.0 || ~3.0",
 		"phploc/phploc" : "~2.1 || ~4.0",
-		"phpmd/phpmd" : "~2.6",
 		"cyberspectrum/pharpiler" : "~1.0",
 		"satooshi/php-coveralls" : "~1.0",
 		"php-console/php-console" : "~3.1",
@@ -56,6 +54,12 @@
 		"run" : [
 			"echo 'Started web server on http://localhost:8888'",
 			"php -S localhost:8888 -t web"
+		],
+		"install-devtools" : "cd devtools && composer update --no-interaction",
+		"sca" : [
+			"php devtools/vendor/bin/php-cs-fixer fix --dry-run -vv",
+			"php devtools/vendor/bin/phpcs --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php src",
+			"php devtools/vendor/bin/phpmd src text build/config/phpmd.xml"
 		]
 	},
 	"homepage" : "https://github.com/Limych/GeniBase",

@@ -1,5 +1,5 @@
 # External libraries
-/vendor/
+vendor/
 /composer.phar
 
 # Configuration files with possibly sensitive information
@@ -9,7 +9,6 @@
 
 # Files and folders related to build/test tools
 .maintenance
-/build/
 /npm-debug.log
 /var/logs/*
 !/var/logs/.gitkeep

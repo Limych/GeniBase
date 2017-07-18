@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 class DateTest extends TestCase
 {
     /**
-     * @covers GeniBase\Server\Util\Date::expand
+     * @covers GeniBase\Util\Date::expand
      */
     public function testExpand()
     {

@@ -39,9 +39,9 @@ class DateStoragerTest extends TestCase
     }
 
     /**
-     * @covers \GeniBase\Storager\DateInfoStorager::calcIntDate
+     * @covers \GeniBase\Storager\DateInfoStorager::calcDayOfEpoch
      */
-    public function testCalcIntDate()
+    public function testCalcDayOfEpoch()
     {
         static $tests = [
             '+0001-01-01'   => [    1,      1],     '-0000-01-01'   => [   -1,     -1],
