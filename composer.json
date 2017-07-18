@@ -57,7 +57,6 @@
 		],
 		"install-devtools" : "cd devtools && composer update --no-interaction",
 		"sca" : [
-			"php devtools/vendor/bin/php-cs-fixer fix --dry-run -vv",
 			"php devtools/vendor/bin/phpcs --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php src",
 			"php devtools/vendor/bin/phpmd src text build/config/phpmd.xml"
 		]
