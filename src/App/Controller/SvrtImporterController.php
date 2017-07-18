@@ -227,7 +227,6 @@ class SvrtImporterController
         if (! isset($patterns)) {
             $tmp = [
                 'губ\.'         => 'губерния',
-                'нам\.'         => 'наместничество',
                 'обл\.'         => 'область',
                 'у\.'           => 'уезд',
                 'в(ол)?\.'      => 'волость',
@@ -358,7 +357,7 @@ class SvrtImporterController
         ]);
 
         foreach (explode(', ', $r->region . ', ' . $r->place) as $rgn) {
-            if (preg_match('/ген\.\-губ\./', $rgn))
+            if (preg_match('/ген\.\-губ\.|нам\./', $rgn))
                 continue;
 
             $name = trim(preg_replace($patterns, $replaces, $rgn), "\x00..\x1F ,;");

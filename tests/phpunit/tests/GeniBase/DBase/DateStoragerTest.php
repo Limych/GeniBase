@@ -3,11 +3,8 @@
 namespace GeniBase\Tests\DBase;
 
 use Gedcomx\Util\SimpleDate;
-use PHPUnit\Framework\TestCase;
 use GeniBase\Storager\DateInfoStorager;
-use GeniBase\Tests\Util\PHPUnitUtil;
-use Gedcomx\Conclusion\DateInfo;
-use GeniBase\DBaseService;
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
 /**
@@ -29,7 +26,7 @@ class DateStoragerTest extends TestCase
     {
         $app = new Container();
         $app['dbs.options.initializer'] = $app->protect(function () {});
-        $this->object = new DateInfoStorager(new DBaseService($app));
+        $this->object = new DateInfoStorager(new \GeniBase\DBase\DBaseService($app));
     }
 
     /**

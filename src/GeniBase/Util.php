@@ -1,6 +1,12 @@
 <?php
 namespace GeniBase;
 
+/**
+ * Assorted static functions.
+ *
+ * @author Limych
+ *
+ */
 class Util {
 
     /**

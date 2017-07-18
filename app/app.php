@@ -27,6 +27,7 @@
 
 namespace App;
 
+use Gedcomx\Gedcomx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -35,7 +36,6 @@ if (! defined('BASE_DIR')) {
 }
 
 require_once BASE_DIR.'/vendor/autoload.php';
-@require_once BASE_DIR.'/../gedcomx-php/vendor/autoload.php';
 
 // This check prevents access to debug front controllers that are deployed by accident to production servers.
 // Feel free to remove this, extend it, or make something more sophisticated.
@@ -101,16 +101,16 @@ if ($dev_mode) {
 // Register controlers
 require BASE_DIR.'/app/controllers.php';
 
-// Accepting JSON and Gedcomx
+// Accepting JSON and Gedcomx (JSON and XML)
 $app['rest.mode'] = $app['gedcomx.mode'] = false;
 $app->before(function (Request $request) use ($app) {
     // Add Gedcomx formats
     $tmp = $request->getMimeTypes('json');
-    $tmp[] = 'application/x-gedcomx-v1+json';
+    $tmp[] = Gedcomx::JSON_MEDIA_TYPE;
     $request->setFormat('json', $tmp);
     //
     $tmp = $request->getMimeTypes('xml');
-    $tmp[] = 'application/x-gedcomx-v1+xml';
+    $tmp[] = Gedcomx::XML_MEDIA_TYPE;
     $request->setFormat('xml', $tmp);
 
     $content_type = $request->headers->get('Content-Type');
