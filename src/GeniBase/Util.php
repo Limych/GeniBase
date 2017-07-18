@@ -15,7 +15,7 @@ class Util
      * @param mixed $_
      * @return array
      */
-    public static function array_slice_keys(array $array, $_)
+    public static function arraySliceKeys(array $array, $_)
     {
         $keys = func_get_args();
         $a = array_shift($keys);
@@ -32,7 +32,7 @@ class Util
      * @param  string|array|object $defaults (Optional) Array that serves as the defaults. Default value: null
      * @return array Merged user defined values with defaults.
      */
-    public static function parse_args($args, $defaults = null)
+    public static function parseArgs($args, $defaults = null)
     {
         if (is_object($args)) {
             $r = get_object_vars($args);
@@ -57,7 +57,7 @@ class Util
         return $r;
     }
 
-    public static function is_assoc(array $array)
+    public static function isAssoc(array $array)
     {
         if (array() === $array) {
             return false;

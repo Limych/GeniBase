@@ -16,28 +16,28 @@ class PlaceDescriptionStorager extends SubjectStorager
 {
 
     const GROUP_NAMES   = 'http://genibase/PlaceName';
-    
+
     const UPDATE_GEO_PROBABILITY    = 1;    // of 10 000
 
     protected function getObject($o = null)
     {
         return new PlaceDescription($o);
     }
-    
+
     public function getDefaultOptions(ExtensibleData $entity = null)
     {
         $def = parent::getDefaultOptions();
-        
+
         $this->updateGeoCoordinates();
-        
+
         $def['neighboring_distance'] = 100;
-        
+
         $def['makeId_unique'] = false;
-        
+
         if (! empty($entity)) {
             /**
- * @var PlaceDescription $entity
-*/
+             * @var PlaceDescription $entity
+             */
             if (! empty($entity->getLatitude()) && ! empty($entity->getLongitude())) {
                 $def['makeId_name'] = $entity->getLatitude() . ',' . $entity->getLongitude();
             } elseif (! empty($r = $entity->getNames())) {
@@ -53,10 +53,10 @@ class PlaceDescriptionStorager extends SubjectStorager
                 }
             }
         }
-        
+
         return $def;
     }
-    
+
     /**
      *
      * @param mixed          $entity
@@ -77,7 +77,7 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id', 'latitude', 'longitude');
+        $data = Util::arraySliceKeys($ent, 'id', 'latitude', 'longitude');
 
         if (isset($ent['type']) && (false !== $r = $this->getTypeId($ent['type_id']))) {
             $data['type_id'] = $r;
@@ -135,7 +135,7 @@ class PlaceDescriptionStorager extends SubjectStorager
             $_id = (int) $this->dbs->getDb()->lastInsertId();
         }
         GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
+
         // Save childs
         foreach ($ent['names'] as $name) {
             $this->saveAllTextValues(self::GROUP_NAMES, $ent['names'], $entity);
@@ -257,7 +257,7 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         return $entity;
     }
-    
+
     /**
      *
      * @param mixed      $context
@@ -267,18 +267,18 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function loadNeighboringPlaces($context, $o = null)
     {
         $o = $this->applyDefaultOptions($o);
-        
+
         if (! $context instanceof ExtensibleData) {
             $context = $this->getObject($context);
         }
 
         $t_places = $this->dbs->getTableName('places');
-        
+
         $this->dbs->getDb()->executeQuery(
             "CALL geobox_pt(POINT(?, ?), ?, @top_lft, @bot_rgt)",
             [$context->getLatitude(), $context->getLongitude(), $o['neighboring_distance']]
         );
-        
+
         $q = $this->getSqlQuery('SELECT', ['geodist(?, ?, pl.latitude, pl.longitude) AS _dist']);
         $result = $this->dbs->getDb()->fetchAll(
             "$q WHERE pl.id != ? AND pl.latitude AND pl.longitude " .
@@ -288,7 +288,7 @@ class PlaceDescriptionStorager extends SubjectStorager
             "ORDER BY _dist",
             [$context->getLatitude(), $context->getLongitude(), $context->getId(), $o['neighboring_distance']]
         );
-            
+
         if (is_array($result)) {
             foreach ($result as $k => $r) {
                 $result[$k] = $this->processRaw($this->getObject(), $r);
@@ -297,7 +297,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
         return $result;
     }
-    
+
     /**
      *
      * @param mixed      $entity
@@ -411,10 +411,10 @@ class PlaceDescriptionStorager extends SubjectStorager
 
     public function updateGeoCoordinates()
     {
-        //         if (mt_rand(1, 10000) > self::UPDATE_GEO_PROBABILITY)   return; // Skip cleaning now
-        
+//         if (mt_rand(1, 10000) > self::UPDATE_GEO_PROBABILITY)   return; // Skip cleaning now
+
         $t_places = $this->dbs->getTableName('places');
-        
+
         $place_id = $this->dbs->getDb()->fetchColumn(
             "SELECT _id FROM $t_places AS p1 " .
             "WHERE p1._calculatedGeo = 1 OR (p1.latitude IS NULL AND p1.longitude IS NULL) " .

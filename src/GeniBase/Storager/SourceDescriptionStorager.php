@@ -109,7 +109,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id', 'about', 'sortKey');
+        $data = Util::arraySliceKeys($ent, 'id', 'about', 'sortKey');
 
         if (isset($ent['mediaType']) && (false !== $r = $this->getTypeId($ent['mediaType']))) {
             $data['mediaType_id'] = $r;

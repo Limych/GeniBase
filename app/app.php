@@ -52,17 +52,8 @@ if (! $dev_mode) {
 // Initialize Silex framework
 $app = new \Silex\Application();
 
-// Twig templates
-$app->register(new \Silex\Provider\TwigServiceProvider());
-$app['twig'] = $app->extend(
-    'twig',
-    function ($twig, $app) {
-        // add custom globals, filters, tags, ...
-        $twig->addGlobal('min', $app['debug'] ? '' : '.min');
-
-        return $twig;
-    }
-);
+// Register providers
+require BASE_DIR.'/app/providers.php';
 
 // Load configs
 require BASE_DIR.'/app/configs/prod.php';
@@ -70,16 +61,9 @@ if ($dev_mode) {
     include BASE_DIR.'/app/configs/dev.php';
 }
 
-// Register providers
-require BASE_DIR.'/app/providers.php';
-
-// Register services
-$app['gb.db']  = function () use ($app) {
-    return new \GeniBase\DBase\DBaseService($app);
-};
-
+// Register database provider
+$app->register(new \Silex\Provider\DoctrineServiceProvider());
 if ($dev_mode) {
-    // Register SQL logger
     $logger = new \Doctrine\DBAL\Logging\DebugStack();
     $app['db.config']->setSQLLogger($logger);
     $app->error(
@@ -90,8 +74,8 @@ if ($dev_mode) {
                 $app['monolog']->err(
                     $query['sql'],
                     array(
-                    'params' => $query['params'],
-                    'types' => $query['types']
+                        'params' => $query['params'],
+                        'types' => $query['types']
                     )
                 );
             }
@@ -102,16 +86,21 @@ if ($dev_mode) {
             // Log all queries as DEBUG.
             foreach ($logger->queries as $query) {
                 $app['monolog']->debug(
-                    'SQL: ' . $query['sql'],
+                    $query['sql'],
                     array(
-                    'params' => $query['params'],
-                    'types' => $query['types']
+                        'params' => $query['params'],
+                        'types' => $query['types']
                     )
                 );
             }
         }
     );
 }
+
+// Register services
+$app['gb.db']  = function () use ($app) {
+    return new \GeniBase\DBase\DBaseService($app);
+};
 
 // Register controlers
 require BASE_DIR.'/app/controllers.php';

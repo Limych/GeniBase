@@ -43,7 +43,7 @@ class NameStorager extends ConclusionStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id');
+        $data = Util::arraySliceKeys($ent, 'id');
 
         if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
             throw new \UnexpectedValueException('Context local ID required!');

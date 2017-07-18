@@ -11,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 class UtilTest extends TestCase
 {
     /**
-     * @covers GeniBase\Util::array_slice_keys
+     * @covers GeniBase\Util::arraySliceKeys
      */
-    public function testArray_slice_keys()
+    public function testArraySliceKeys()
     {
         $array = [
             1       => 'data',
@@ -26,7 +26,7 @@ class UtilTest extends TestCase
             [
                 'key'   => 1,
             ],
-            Util::array_slice_keys($array, 'key')
+            Util::arraySliceKeys($array, 'key')
         );
         $this->assertEquals(
             [
@@ -34,7 +34,7 @@ class UtilTest extends TestCase
                 2       => 2,
                 'key2'  => 'data',
             ],
-            Util::array_slice_keys($array, 1, 2, 'key2')
+            Util::arraySliceKeys($array, 1, 2, 'key2')
         );
     }
 }

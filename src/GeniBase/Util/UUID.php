@@ -35,7 +35,7 @@ class UUID
      */
     public static function v3($namespace, $name)
     {
-        if (!self::is_valid($namespace)) {
+        if (!self::isValid($namespace)) {
             return false;
         }
 
@@ -111,7 +111,7 @@ class UUID
      */
     public static function v5($namespace, $name)
     {
-        if (!self::is_valid($namespace)) {
+        if (!self::isValid($namespace)) {
             return false;
         }
 
@@ -147,7 +147,7 @@ class UUID
         );
     }
 
-    public static function is_valid($uuid)
+    public static function isValid($uuid)
     {
         return preg_match(
             '/^\{?[0-9a-f]{8}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?'.

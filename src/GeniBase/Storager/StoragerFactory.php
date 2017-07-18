@@ -3,19 +3,19 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Agent\Agent;
 use Gedcomx\Conclusion\Conclusion;
-use Gedcomx\Conclusion\Name;
-use Gedcomx\Source\SourceReference;
 use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\Event;
 use Gedcomx\Conclusion\EventRole;
 use Gedcomx\Conclusion\Fact;
-use Gedcomx\Conclusion\Identifier;
-use Gedcomx\Conclusion\Person;
 use Gedcomx\Conclusion\Gender;
+use Gedcomx\Conclusion\Identifier;
+use Gedcomx\Conclusion\Name;
 use Gedcomx\Conclusion\NameForm;
 use Gedcomx\Conclusion\NamePart;
+use Gedcomx\Conclusion\Person;
 use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Source\SourceDescription;
+use Gedcomx\Source\SourceReference;
 use GeniBase\DBase\DBaseService;
 
 /**
@@ -32,7 +32,7 @@ class StoragerFactory
      *
      * @throws \UnexpectedValueException
      */
-    static function newStorager(DBaseService $dbs, $class)
+    public static function newStorager(DBaseService $dbs, $class)
     {
         if (is_object($class)) {
             $class = get_class($class);

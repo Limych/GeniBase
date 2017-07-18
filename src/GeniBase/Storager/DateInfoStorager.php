@@ -36,7 +36,7 @@ class DateInfoStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'original', 'formal');
+        $data = Util::arraySliceKeys($ent, 'original', 'formal');
         if (isset($data['formal'])) {
             $period = self::calcPeriodInDays($data['formal']);
 

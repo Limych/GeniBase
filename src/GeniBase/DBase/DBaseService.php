@@ -1,8 +1,8 @@
 <?php
 namespace GeniBase\DBase;
 
-use Pimple\Container;
 use Gedcomx\Agent\Agent;
+use Pimple\Container;
 
 /**
  *
@@ -40,8 +40,6 @@ class DBaseService extends Container
      */
     public function getTableName($table)
     {
-        $this['app']['dbs.options.initializer']();
-
         $prefix = isset($this['app']['dbs.options']['default']['prefix'])
                 ? $this['app']['dbs.options']['default']['prefix'] : '';
         return $prefix.$table;

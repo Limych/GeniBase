@@ -12,7 +12,7 @@ use Silex\Application;
 class Util
 {
 
-    static function number_format(Application $app, $number, $decimals = 2)
+    public static function numberFormat(Application $app, $number, $decimals = 2)
     {
         $last_locale = setlocale(LC_ALL, 0);
         if (isset($app['locale'])) {

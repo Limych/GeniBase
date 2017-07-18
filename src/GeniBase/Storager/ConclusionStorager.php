@@ -42,7 +42,7 @@ class ConclusionStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id');
+        $data = Util::arraySliceKeys($ent, 'id');
         if (isset($ent['confidence']) && (false !== $r = $this->getTypeId($ent['confidence']))) {
             $data['confidence_id'] = $r;
         }

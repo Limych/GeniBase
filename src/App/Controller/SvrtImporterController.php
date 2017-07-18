@@ -57,7 +57,7 @@ class SvrtImporterController
                     throw new \LogicException("Undefined logic for source type " . $r->source_type_id);
 
                 case 1:
-                    $this->import_killed($r);
+                    $this->importKilled($r);
                     break;
             }
 
@@ -223,7 +223,7 @@ class SvrtImporterController
         $this->app['gb.db']->setAgent($this->agent);
     }
 
-    protected function import_killed($r)
+    protected function importKilled($r)
     {
         static $patterns, $replaces;
 
@@ -318,7 +318,7 @@ class SvrtImporterController
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
             'citations' => [[
                 'lang'  => 'ru',
-                'value' => 'Страница ' . Util::number_format($app, $r->source_pg, 0) . '. ' . $r->source,
+                'value' => 'Страница ' . Util::numberFormat($app, $r->source_pg, 0) . '. ' . $r->source,
             ]],
             'componentOf' => [
                 'description'   => '#' . $src->getId(),

@@ -46,7 +46,7 @@ class EventStorager extends SubjectStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id');
+        $data = Util::arraySliceKeys($ent, 'id');
 
         if (isset($ent['type'])) {
             $data['type_id'] = $this->getTypeId($ent['type']);

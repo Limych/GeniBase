@@ -37,7 +37,7 @@ class NamePartStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'value');
+        $data = Util::arraySliceKeys($ent, 'value');
         if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
             throw new \UnexpectedValueException('Context local ID required!');
         }

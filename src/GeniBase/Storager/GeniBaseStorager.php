@@ -84,7 +84,7 @@ class GeniBaseStorager
      */
     public function applyDefaultOptions($o, ExtensibleData $entity = null)
     {
-        return Util::parse_args($o, $this->getDefaultOptions($entity));
+        return Util::parseArgs($o, $this->getDefaultOptions($entity));
     }
 
     public static function hash($type = 'alnum', $length = 8, $data = null)
@@ -605,7 +605,7 @@ class GeniBaseStorager
         $t_tvs = $this->dbs->getTableName('text_values');
 
         $ent = $text_value;
-        $data = Util::array_slice_keys($ent, 'value', '_group');
+        $data = Util::arraySliceKeys($ent, 'value', '_group');
 
         if (! empty($ent['lang']) && (false !== $result = $this->getLangId($ent['lang']))) {
             $data['lang_id'] = $result;

@@ -36,7 +36,7 @@ class IdentifierStorager extends GeniBaseStorager
             
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'value');
+        $data = Util::arraySliceKeys($ent, 'value');
         if (empty($id = $context->getId())) {
             throw new \UnexpectedValueException('Context ID required!');
         } else {

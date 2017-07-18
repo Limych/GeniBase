@@ -85,7 +85,7 @@ class AgentStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'id');
+        $data = Util::arraySliceKeys($ent, 'id');
 
         if (! empty($ent['addresses'])) {
             $data['addresses_json'] = json_encode($ent['addresses']);

@@ -62,7 +62,7 @@
 			"php -S localhost:8888 -t web"
 		],
 		"sca" : [
-			"php vendor/bin/phpcs --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php src",
+			"php vendor/bin/phpcs app src tests/phpunit/tests --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php",
 			"php vendor/bin/phpmd src text build/config/phpmd.xml"
 		]
 	},

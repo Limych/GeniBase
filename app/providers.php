@@ -28,60 +28,39 @@
 namespace App;
 
 use Silex\Provider\WebProfilerServiceProvider;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use WhoopsSilex\WhoopsServiceProvider;
 
 // === Register providers =====================================================
 
 // Logging
-$app->register(new \Silex\Provider\MonologServiceProvider);
+$app->register(new \Silex\Provider\MonologServiceProvider([
+    'monolog.level' => ($dev_mode ? \Monolog\Logger::DEBUG : \Monolog\Logger::ERROR),
+]));
 // Delete old logs
-@unlink(dirname($app['monolog.logfile']) . \Carbon\Carbon::now()->subWeeks(7)->format('Y-m-d') . '.log');
+@unlink(dirname($app['monolog.logfile']) . '/' . \Carbon\Carbon::now()->subWeeks(7)->format('Y-m-d') . '.log');
 
 if ($dev_mode) {
     $app->register(new WhoopsServiceProvider);
+}
+
+// Register Twig templates
+$app->register(new \Silex\Provider\TwigServiceProvider());
+$app['twig'] = $app->extend(
+    'twig',
+    function ($twig, $app) {
+        // add custom globals, filters, tags, ...
+        $twig->addGlobal('min', $app['debug'] ? '' : '.min');
+
+        return $twig;
+    }
+);
+
+if ($dev_mode) {
     $app->register(new WebProfilerServiceProvider);
 }
 
 $app->register(new \Euskadi31\Silex\Provider\CorsServiceProvider);
 $app->register(new \Silex\Provider\ServiceControllerServiceProvider);
-
-$app->register(new \Silex\Provider\DoctrineServiceProvider());
-if ($dev_mode) {
-    $logger = new \Doctrine\DBAL\Logging\DebugStack();
-    $app['db.config']->setSQLLogger($logger);
-    $app->error(
-        function (\Exception $e, $code) use ($app, $logger) {
-            if ($e instanceof \PDOException and count($logger->queries)) {
-                // We want to log the query as an ERROR for PDO exceptions!
-                $query = array_pop($logger->queries);
-                $app['monolog']->err(
-                    $query['sql'],
-                    array(
-                    'params' => $query['params'],
-                    'types' => $query['types']
-                    )
-                );
-            }
-        }
-    );
-        $app->after(
-            function (Request $request, Response $response) use ($app, $logger) {
-                // Log all queries as DEBUG.
-                foreach ($logger->queries as $query) {
-                    $app['monolog']->debug(
-                        $query['sql'],
-                        array(
-                        'params' => $query['params'],
-                        'types' => $query['types']
-                        )
-                    );
-                }
-            }
-        );
-}
-
 $app->register(new \Silex\Provider\HttpCacheServiceProvider());
 $app->register(new \Silex\Provider\AssetServiceProvider());
 $app->register(new \Silex\Provider\LocaleServiceProvider());

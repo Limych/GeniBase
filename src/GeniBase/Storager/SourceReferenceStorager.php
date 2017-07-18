@@ -40,7 +40,7 @@ class SourceReferenceStorager extends GeniBaseStorager
 
         // Prepare data to save
         $ent = $entity->toArray();
-        $data = Util::array_slice_keys($ent, 'description');
+        $data = Util::arraySliceKeys($ent, 'description');
 
         if (! empty($r = $context->getId())) {
             $data['_source_id'] = $r;
@@ -83,7 +83,7 @@ class SourceReferenceStorager extends GeniBaseStorager
         $result = $this->dbs->getDb()->update(
             $t_refs,
             $data,
-            Util::array_slice_keys($data, '_source_id', 'description')
+            Util::arraySliceKeys($data, '_source_id', 'description')
         );
         if ($result == 0) {
             try {
