@@ -1,8 +1,8 @@
 <?php
 namespace GeniBase\Tests;
 
+use GeniBase\Common\GeniBaseClass;
 use PHPUnit\Framework\TestCase;
-use GeniBase\GeniBaseClass;
 
 /**
  * Test class for GeniBaseClass.

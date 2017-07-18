@@ -1,11 +1,14 @@
 <?php
 
+namespace GeniBase\Tests;
+
 /**
+ * Assorted static functions.
  *
  * @author Limych
  *
  */
-class PHPUnitUtil
+class PHPUnit_Util
 {
 
     /**

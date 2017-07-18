@@ -4,6 +4,7 @@ namespace GeniBase\Tests\DBase;
 
 use Gedcomx\Util\SimpleDate;
 use GeniBase\Storager\DateInfoStorager;
+use GeniBase\Tests\PHPUnit_Util;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
@@ -71,14 +72,14 @@ class DateStoragerTest extends TestCase
         foreach ($tests as $testDate => $expected) {
             $date->parse($testDate);
 
-            $actual = PHPUnitUtil::callMethod($this->object, 'calcDayOfEpoch', $date);
+            $actual = PHPUnit_Util::callMethod($this->object, 'calcDayOfEpoch', $date);
             $this->assertEquals(
                 $expected[0],
                 $actual,
                 $testDate
             );
 
-            $actual = PHPUnitUtil::callMethod($this->object, 'calcDayOfEpoch', $date, true);
+            $actual = PHPUnit_Util::callMethod($this->object, 'calcDayOfEpoch', $date, true);
             $this->assertEquals(
                 $expected[1],
                 $actual,
@@ -106,7 +107,7 @@ class DateStoragerTest extends TestCase
         ];
 
         foreach ($tests as $testDate => $expected) {
-            $actual = PHPUnitUtil::callMethod($this->object, 'calcPeriodInDays', $testDate);
+            $actual = PHPUnit_Util::callMethod($this->object, 'calcPeriodInDays', $testDate);
             $this->assertEquals(
                 $expected,
                 $actual,
