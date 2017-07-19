@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Class GeniBase\Storager\GeniBaseStorager | GeniBase</title>
+
+	<link rel="stylesheet" href="resources/bootstrap.min.css?d2333a926ae25bbd3056814f13fec0843468e49e">
+	<link rel="stylesheet" href="resources/style.css?8858a9a36811d4b6239b9c044716826af1fed474">
+
+</head>
+
+<body>
+	<nav id="navigation" class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a href="index.html" class="navbar-brand">GeniBase</a>
+			</div>
+			<div class="collapse navbar-collapse">
+
+                <form id="search" class="navbar-form navbar-left" role="search">
+                    <input type="hidden" name="cx" value="">
+                    <input type="hidden" name="ie" value="UTF-8">
+                    <div class="form-group">
+                        <input type="text" name="q" class="search-query form-control" placeholder="Search">
+					</div>
+				</form>
+
+				<ul class="nav navbar-nav">
+					<li>
+						<a href="namespace-GeniBase.Storager.html" title="Summary of GeniBase\Storager"><span>Namespace</span></a>
+					</li>
+					<li class="active">
+<span>Class</span>					</li>
+
+
+
+
+
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div id="left">
+	<div id="menu">
+
+		<div id="groups">
+				<h3>Namespaces</h3>
+			<ul>
+					<li>
+						<a href="namespace-App.html">
+							App<span></span>
+						</a>
+							<ul>
+					<li>
+						<a href="namespace-App.Controller.html">
+							Controller						</a>
+							</li>
+					<li>
+						<a href="namespace-App.Provider.html">
+							Provider						</a>
+							</li>
+								</ul></li>
+					<li>
+						<a href="namespace-Gedcomx.html">
+							Gedcomx<span></span>
+						</a>
+							<ul>
+					<li>
+						<a href="namespace-Gedcomx.Rs.html">
+							Rs<span></span>
+						</a>
+							<ul>
+					<li>
+						<a href="namespace-Gedcomx.Rs.Client.html">
+							Client						</a>
+							</li>
+								</ul></li></ul></li>
+					<li class="active">
+						<a href="namespace-GeniBase.html">
+							GeniBase<span></span>
+						</a>
+							<ul>
+					<li>
+						<a href="namespace-GeniBase.Common.html">
+							Common						</a>
+							</li>
+					<li>
+						<a href="namespace-GeniBase.DBase.html">
+							DBase						</a>
+							</li>
+					<li>
+						<a href="namespace-GeniBase.Rs.html">
+							Rs<span></span>
+						</a>
+							<ul>
+					<li>
+						<a href="namespace-GeniBase.Rs.Server.html">
+							Server						</a>
+							</li>
+								</ul></li>
+					<li class="active">
+						<a href="namespace-GeniBase.Storager.html">
+							Storager						</a>
+							</li>
+					<li>
+						<a href="namespace-GeniBase.Util.html">
+							Util						</a>
+							</li>
+								</ul></li>
+			</ul>
+		</div>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-GeniBase.Storager.AgentStorager.html">AgentStorager</a></li>
+				<li><a href="class-GeniBase.Storager.ConclusionStorager.html">ConclusionStorager</a></li>
+				<li><a href="class-GeniBase.Storager.DateInfoStorager.html">DateInfoStorager</a></li>
+				<li><a href="class-GeniBase.Storager.EventRoleStorager.html">EventRoleStorager</a></li>
+				<li><a href="class-GeniBase.Storager.EventStorager.html">EventStorager</a></li>
+				<li><a href="class-GeniBase.Storager.FactStorager.html">FactStorager</a></li>
+				<li><a href="class-GeniBase.Storager.GenderStorager.html">GenderStorager</a></li>
+				<li class="active"><a href="class-GeniBase.Storager.GeniBaseStorager.html">GeniBaseStorager</a></li>
+				<li><a href="class-GeniBase.Storager.IdentifierStorager.html">IdentifierStorager</a></li>
+				<li><a href="class-GeniBase.Storager.NameFormStorager.html">NameFormStorager</a></li>
+				<li><a href="class-GeniBase.Storager.NamePartStorager.html">NamePartStorager</a></li>
+				<li><a href="class-GeniBase.Storager.NameStorager.html">NameStorager</a></li>
+				<li><a href="class-GeniBase.Storager.PersonStorager.html">PersonStorager</a></li>
+				<li><a href="class-GeniBase.Storager.PlaceDescriptionStorager.html">PlaceDescriptionStorager</a></li>
+				<li><a href="class-GeniBase.Storager.SourceDescriptionStorager.html">SourceDescriptionStorager</a></li>
+				<li><a href="class-GeniBase.Storager.SourceReferenceStorager.html">SourceReferenceStorager</a></li>
+				<li><a href="class-GeniBase.Storager.StoragerFactory.html">StoragerFactory</a></li>
+				<li><a href="class-GeniBase.Storager.SubjectStorager.html">SubjectStorager</a></li>
+			</ul>
+
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+	<div id="rightInner">
+<div id="content" class="class">
+	<h1>Class GeniBaseStorager</h1>
+
+
+
+
+
+	<div>
+		<h3>Direct known subclasses</h3>
+		<p class="elementList">
+			<code><a href="class-GeniBase.Storager.AgentStorager.html">GeniBase\Storager\AgentStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.ConclusionStorager.html">GeniBase\Storager\ConclusionStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.DateInfoStorager.html">GeniBase\Storager\DateInfoStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.IdentifierStorager.html">GeniBase\Storager\IdentifierStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.NameFormStorager.html">GeniBase\Storager\NameFormStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.NamePartStorager.html">GeniBase\Storager\NamePartStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.SourceDescriptionStorager.html">GeniBase\Storager\SourceDescriptionStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.SourceReferenceStorager.html">GeniBase\Storager\SourceReferenceStorager</a></code>
+		</p>
+	</div>
+
+	<div>
+		<h3>Indirect known subclasses</h3>
+		<p class="elementList">
+			<code><a href="class-GeniBase.Storager.EventRoleStorager.html">GeniBase\Storager\EventRoleStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.EventStorager.html">GeniBase\Storager\EventStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.FactStorager.html">GeniBase\Storager\FactStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.GenderStorager.html">GeniBase\Storager\GenderStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.NameStorager.html">GeniBase\Storager\NameStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.PersonStorager.html">GeniBase\Storager\PersonStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.PlaceDescriptionStorager.html">GeniBase\Storager\PlaceDescriptionStorager</a></code>, 
+			<code><a href="class-GeniBase.Storager.SubjectStorager.html">GeniBase\Storager\SubjectStorager</a></code>
+		</p>
+	</div>
+
+
+
+
+
+	<div class="alert alert-info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-GeniBase.html">GeniBase</a>\<a href="namespace-GeniBase.Storager.html">Storager</a><br>
+		
+
+				<b>Author:</b>
+				Limych<br>
+			<b>Located at</b> <a href="source-class-GeniBase.Storager.GeniBaseStorager.html#13-746" title="Go to source code">GeniBase/Storager/GeniBaseStorager.php</a>
+		<br>
+	</div>
+
+
+
+		<div class="panel panel-default">
+			<div class="panel-heading"><h2>Methods summary</h2></div>
+			<table class="summary table table-bordered table-striped methods" id="methods">
+		<tr data-order="__construct" id="___construct">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#___construct">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#29-37" title="Go to source code">__construct</a>( <span><code><a href="class-GeniBase.DBase.DBaseService.html">GeniBase\DBase\DBaseService</a></code> <var>$dbs</var></span>, <span>mixed <var>$o</var>,…</span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$dbs</var></dt>
+						<dd></dd>
+						<dt><var>$o</var>,…</dt>
+						<dd></dd>
+					</dl></div>
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="newStorager" id="_newStorager">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_newStorager">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#39-48" title="Go to source code">newStorager</a>( <span>mixed <var>$class</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$class</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+					<h4>Throws</h4>
+					<div class="list">
+						UnexpectedValueException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getDefaultOptions" id="_getDefaultOptions">
+
+			<td class="attributes"><code>
+				 public 
+				array
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getDefaultOptions">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#65-77" title="Go to source code">getDefaultOptions</a>( <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$entity</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						array
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="applyDefaultOptions" id="_applyDefaultOptions">
+
+			<td class="attributes"><code>
+				 public 
+				array
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_applyDefaultOptions">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#79-88" title="Go to source code">applyDefaultOptions</a>( <span>mixed <var>$o</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$entity</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						array
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="hash" id="_hash">
+
+			<td class="attributes"><code>
+				 public static
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_hash">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#90-144" title="Go to source code">hash</a>( <span> <var>$type</var> = <span class="php-quote">'alnum'</span></span>, <span> <var>$length</var> = <span class="php-num">8</span></span>, <span> <var>$data</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="makeGbid" id="_makeGbid" class="deprecated">
+
+			<td class="attributes"><code>
+				 public static
+				string
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_makeGbid">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#156-167" title="Go to source code">makeGbid</a>( <span>string <var>$name</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Deprecated</h4>
+					<div class="list">
+							It's preferable to use GeniBaseStorager::makeGbidUnique() instead.<br>
+					</div>
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$name</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						string
+					</div>
+
+
+					<h4>See</h4>
+					<div class="list">
+							<code><a href="class-GeniBase.Storager.GeniBaseStorager.html#_makeGbidUnique">GeniBase\Storager\GeniBaseStorager::makeGbidUnique()</a></code><br>
+					</div>
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="makeGbidUnique" id="_makeGbidUnique">
+
+			<td class="attributes"><code>
+				 public 
+				string
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_makeGbidUnique">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#169-205" title="Go to source code">makeGbidUnique</a>( <span>string <var>$name</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$name</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						string
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="makeGbidIfEmpty" id="_makeGbidIfEmpty">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_makeGbidIfEmpty">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#207-223" title="Go to source code">makeGbidIfEmpty</a>( <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>&amp; $entity</var></span>, <span>array <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="makeUuid" id="_makeUuid">
+
+			<td class="attributes"><code>
+				 public static
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_makeUuid">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#225-236" title="Go to source code">makeUuid</a>( <span>string <var>$name</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$name</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+
+					<h4>See</h4>
+					<div class="list">
+							<code><a href="class-GeniBase.Storager.GeniBaseStorager.html#_makeUuidIfEmpty">GeniBase\Storager\GeniBaseStorager::makeUuidIfEmpty()</a></code><br>
+					</div>
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="makeUuidIfEmpty" id="_makeUuidIfEmpty">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_makeUuidIfEmpty">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#238-249" title="Go to source code">makeUuidIfEmpty</a>( <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>&amp; $entity</var></span>, <span>array <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadGedcomx" id="_loadGedcomx">
+
+			<td class="attributes"><code>
+				 public 
+				Gedcomx\Gedcomx|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadGedcomx">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#251-266" title="Go to source code">loadGedcomx</a>( <span>mixed <var>$entity</var></span>, <span>mixed <var>$context</var> = <span class="php-keyword1">null</span></span>, <span>array|null <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						Gedcomx\Gedcomx|false
+					</div>
+
+					<h4>Throws</h4>
+					<div class="list">
+						BadMethodCallException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadListGedcomx" id="_loadListGedcomx">
+
+			<td class="attributes"><code>
+				 public 
+				Gedcomx\Gedcomx|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadListGedcomx">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#268-283" title="Go to source code">loadListGedcomx</a>( <span>mixed <var>$entity</var></span>, <span>mixed <var>$context</var> = <span class="php-keyword1">null</span></span>, <span>array|null <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						Gedcomx\Gedcomx|false
+					</div>
+
+					<h4>Throws</h4>
+					<div class="list">
+						BadMethodCallException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadGedcomxCompanions" id="_loadGedcomxCompanions">
+
+			<td class="attributes"><code>
+				 public 
+				Gedcomx\Gedcomx
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadGedcomxCompanions">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#285-293" title="Go to source code">loadGedcomxCompanions</a>( <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$entity</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						Gedcomx\Gedcomx
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="load" id="_load">
+
+			<td class="attributes"><code>
+				 public 
+				object|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_load">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#295-310" title="Go to source code">load</a>( <span>mixed <var>$entity</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var> = <span class="php-keyword1">null</span></span>, <span>array|null <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						object|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadList" id="_loadList">
+
+			<td class="attributes"><code>
+				 public 
+				object[]|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadList">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#312-330" title="Go to source code">loadList</a>( <span>mixed <var>$context</var> = <span class="php-keyword1">null</span></span>, <span>array|null <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						object[]|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="save" id="_save">
+
+			<td class="attributes"><code>
+				 public 
+				Gedcomx\Common\ExtensibleData|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_save">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#427-444" title="Go to source code">save</a>( <span>mixed <var>$entity</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var> = <span class="php-keyword1">null</span></span>, <span>array|null <var>$o</var> = <span class="php-keyword1">null</span></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+						<dt><var>$o</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						Gedcomx\Common\ExtensibleData|false
+					</div>
+
+					<h4>Throws</h4>
+					<div class="list">
+						BadMethodCallException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="delete" id="_delete">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_delete">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#446-458" title="Go to source code">delete</a>( <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$entity</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$entity</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+					<h4>Throws</h4>
+					<div class="list">
+						BadMethodCallException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getTypeId" id="_getTypeId">
+
+			<td class="attributes"><code>
+				 public 
+				number
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getTypeId">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#468-500" title="Go to source code">getTypeId</a>( <span>string <var>$uri</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$uri</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						number
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getType" id="_getType">
+
+			<td class="attributes"><code>
+				 public 
+				string|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getType">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#502-524" title="Go to source code">getType</a>( <span>number <var>$id</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$id</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						string|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getLangId" id="_getLangId">
+
+			<td class="attributes"><code>
+				 public 
+				number|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getLangId">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#526-558" title="Go to source code">getLangId</a>( <span>string <var>$lang</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$lang</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						number|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="getLang" id="_getLang">
+
+			<td class="attributes"><code>
+				 public 
+				string|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_getLang">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#560-582" title="Go to source code">getLang</a>( <span>number <var>$id</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$id</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						string|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="saveTextValue" id="_saveTextValue">
+
+			<td class="attributes"><code>
+				 public 
+				number
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_saveTextValue">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#584-637" title="Go to source code">saveTextValue</a>( <span>string <var>$group</var></span>, <span>mixed <var>$text_value</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$group</var></dt>
+						<dd></dd>
+						<dt><var>$text_value</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						number
+					</div>
+
+					<h4>Throws</h4>
+					<div class="list">
+						UnexpectedValueException
+					</div>
+
+					<h4>See</h4>
+					<div class="list">
+							<code><a href="class-GeniBase.Storager.GeniBaseStorager.html#_saveAllTextValues">GeniBase\Storager\GeniBaseStorager::saveAllTextValues()</a></code><br>
+					</div>
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="saveAllTextValues" id="_saveAllTextValues">
+
+			<td class="attributes"><code>
+				 public 
+				
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_saveAllTextValues">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#639-689" title="Go to source code">saveAllTextValues</a>( <span>string <var>$group</var></span>, <span>array[] <var>$text_values</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$group</var></dt>
+						<dd></dd>
+						<dt><var>$text_values</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+					</dl></div>
+
+
+					<h4>Throws</h4>
+					<div class="list">
+						UnexpectedValueException
+					</div>
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadTextValue" id="_loadTextValue">
+
+			<td class="attributes"><code>
+				 public 
+				array[]|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadTextValue">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#691-716" title="Go to source code">loadTextValue</a>( <span>string <var>$group</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$group</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						array[]|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+		<tr data-order="loadAllTextValues" id="_loadAllTextValues">
+
+			<td class="attributes"><code>
+				 public 
+				array[]|false
+				
+				</code>
+			</td>
+
+			<td class="name"><div>
+			<a class="anchor" href="#_loadAllTextValues">#</a>
+			<code><a href="source-class-GeniBase.Storager.GeniBaseStorager.html#718-745" title="Go to source code">loadAllTextValues</a>( <span>string <var>$group</var></span>, <span>Gedcomx\Gedcomx\Common\ExtensibleData <var>$context</var></span> )</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+
+					<h4>Parameters</h4>
+					<div class="list"><dl>
+						<dt><var>$group</var></dt>
+						<dd></dd>
+						<dt><var>$context</var></dt>
+						<dd></dd>
+					</dl></div>
+
+					<h4>Returns</h4>
+					<div class="list">
+						array[]|false
+					</div>
+
+
+
+
+			</div>
+			</div></td>
+		</tr>
+			</table>
+		</div>
+
+
+
+
+
+
+
+
+		<div class="panel panel-default">
+            <div class="panel-heading"><h2>Constants summary</h2></div>
+			<table class="summary table table-bordered table-striped constants" id="constants">
+			<tr data-order="GBID_LENGTH" id="GBID_LENGTH">
+
+				<td class="attributes"><code>integer</code></td>
+				<td class="name">
+					<code>
+						<a href="source-class-GeniBase.Storager.GeniBaseStorager.html#20" title="Go to source code"><b>GBID_LENGTH</b></a>
+					</code>
+
+					<div class="description short">
+						
+					</div>
+
+					<div class="description detailed hidden">
+						
+
+					</div>
+				</td>
+				<td class="value">
+					<div>
+						<a href="#GBID_LENGTH" class="anchor">#</a>
+						<code><span class="php-num">12</span></code>
+					</div>
+				</td>
+			</tr>
+			<tr data-order="TABLES_WITH_GBID" id="TABLES_WITH_GBID">
+
+				<td class="attributes"><code>string</code></td>
+				<td class="name">
+					<code>
+						<a href="source-class-GeniBase.Storager.GeniBaseStorager.html#22" title="Go to source code"><b>TABLES_WITH_GBID</b></a>
+					</code>
+
+					<div class="description short">
+						
+					</div>
+
+					<div class="description detailed hidden">
+						
+
+					</div>
+				</td>
+				<td class="value">
+					<div>
+						<a href="#TABLES_WITH_GBID" class="anchor">#</a>
+						<code><span class="php-quote">'persons sources places events agents'</span></code>
+					</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+
+
+
+
+</div>
+	</div>
+
+	<div id="footer">
+		GeniBase API documentation generated by <a href="http://apigen.org">ApiGen</a>
+	</div>
+</div>
+<script src="resources/combined.js"></script>
+<script src="elementlist.js"></script>
+</body>
+</html>
