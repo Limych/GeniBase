@@ -13,30 +13,32 @@ use Symfony\Component\HttpFoundation\Response;
 
 //Request::setTrustedProxies(array('127.0.0.1'));
 
+/** @var \Silex\Application $app */
+
 // === Register controllers ===================================================
 
 $app['importer.svrt.controller'] = function () use ($app) {
-    return new Controller\SvrtImporterController($app);
+    return new SvrtImporterController($app);
 };
 $app['importer.places.controller'] = function () use ($app) {
-    return new Controller\PlacesImporterController($app);
+    return new PlacesImporterController($app);
 };
 //
 $app['statistic.controller'] = function () use ($app) {
-    return new Controller\StatisticController();
+    return new StatisticController();
 };
 //
 $app['places.controller'] = function () use ($app) {
-    return new Controller\PlacesController();
+    return new PlacesController();
 };
 $app['sources.controller'] = function () {
-    return new Controller\SourcesController();
+    return new SourcesController();
 };
 $app['persons.controller'] = function () use ($app) {
-    return new Controller\PersonsController();
+    return new PersonsController();
 };
 $app['events.controller'] = function () use ($app) {
-    return new Controller\EventsController();
+    return new EventsController();
 };
 
 // Register routes
@@ -92,10 +94,10 @@ $app->get(
 $app->get('/import/places', "importer.places.controller:import");
 $app->get('/import/svrt', "importer.svrt.controller:import");
 //
-Controller\PlacesController::bindRoutes($app, '/places');
-Controller\SourcesController::bindRoutes($app, '/sources');
-Controller\PersonsController::bindRoutes($app, '/persons');
-Controller\EventsController::bindRoutes($app, '/events');
+PlacesController::bindRoutes($app, '/places');
+SourcesController::bindRoutes($app, '/sources');
+PersonsController::bindRoutes($app, '/persons');
+EventsController::bindRoutes($app, '/events');
 
 // Register API routes
 $api = $app["controllers_factory"];
@@ -118,9 +120,9 @@ $api->get(
 )
 ->bind('api_statistic');
 //
-Controller\PlacesController::bindApiRoutes($api, '/places');
-Controller\SourcesController::bindApiRoutes($api, '/sources');
-Controller\PersonsController::bindApiRoutes($api, '/persons');
-Controller\EventsController::bindApiRoutes($api, '/events');
+PlacesController::bindApiRoutes($api, '/places');
+SourcesController::bindApiRoutes($api, '/sources');
+PersonsController::bindApiRoutes($api, '/persons');
+EventsController::bindApiRoutes($api, '/events');
 //
 $app->mount($app["api.endpoint"].'/'.$app["api.version"], $api);

@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\ApiLinksUpdater;
 use Gedcomx\Rs\Client\Rel;
 use Gedcomx\Source\SourceDescription;
 use GeniBase\Common\Statistic;
@@ -61,6 +62,8 @@ class SourcesController extends BaseController
             return new Response(null, 204);
         }
 
+        ApiLinksUpdater::update2($app, $request, $gedcomx);
+
         if (class_exists(WebLinkExtension::class)) {
             (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
         }
@@ -86,6 +89,8 @@ class SourcesController extends BaseController
         if (false === $gedcomx) {
             return new Response(null, 204);
         }
+
+        ApiLinksUpdater::update2($app, $request, $gedcomx);
 
         return $gedcomx;
     }

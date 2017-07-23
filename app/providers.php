@@ -66,5 +66,6 @@ $app->register(new \Silex\Provider\AssetServiceProvider());
 $app->register(new \Silex\Provider\LocaleServiceProvider());
 $app->register(new \Silex\Provider\TranslationServiceProvider());
 $app->register(new \Silex\Provider\HttpFragmentServiceProvider());
+$app->register(new \Silex\Provider\RoutingServiceProvider());
 
 $app->register(new Provider\ResponsibleServiceProvider());

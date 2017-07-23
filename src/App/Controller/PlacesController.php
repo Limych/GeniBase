@@ -12,6 +12,7 @@ use Silex\Application;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\ApiLinksUpdater;
 
 class PlacesController extends BaseController
 {
@@ -40,15 +41,14 @@ class PlacesController extends BaseController
 
     public static function bindRoutes($app, $base)
     {
-        /**
- * @var Application $app
-*/
+        /** @var Application $app */
         $app->get($base, "places.controller:showPlace");
         $app->get($base.'/{id}', "places.controller:showPlace")->bind('place');
     }
 
     public static function bindApiRoutes($app, $base)
     {
+        /** @var ControllerCollection $app */
         $app->get($base, "places.controller:getComponents");
         $app->get($base.'/{id}', "places.controller:getOne");
         $app->get($base.'/{id}/components', "places.controller:getComponents");
@@ -77,7 +77,7 @@ class PlacesController extends BaseController
             return new Response(null, 204);
         }
 
-        GedcomxRsUpdater::update($gedcomx);
+        ApiLinksUpdater::update2($app, $request, $gedcomx);
 
         if (class_exists(WebLinkExtension::class)) {
             (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
@@ -90,7 +90,7 @@ class PlacesController extends BaseController
      * @param string $id
      * @return array|Response
      */
-    public function getComponents(Application $app, $id = null)
+    public function getComponents(Application $app, Request $request, $id = null)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
         ->loadListGedcomx(
@@ -105,7 +105,7 @@ class PlacesController extends BaseController
             return new Response(null, 204);
         }
 
-        GedcomxRsUpdater::update($gedcomx);
+        ApiLinksUpdater::update2($app, $request, $gedcomx);
 
         return $gedcomx;
     }

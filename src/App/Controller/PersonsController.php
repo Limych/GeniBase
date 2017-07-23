@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\ApiLinksUpdater;
 use Gedcomx\Conclusion\Person;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
@@ -64,6 +65,8 @@ class PersonsController extends BaseController
         if (false === $gedcomx) {
             return new Response(null, 204);
         }
+
+        ApiLinksUpdater::update2($app, $request, $gedcomx);
 
         if (class_exists(WebLinkExtension::class)) {
             (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
