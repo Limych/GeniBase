@@ -10,7 +10,9 @@
     <description>My custom rule set that checks my code...</description>
 
     <!-- Import the entire unused code rule set -->
-    <rule ref="rulesets/unusedcode.xml" />
+    <rule ref="rulesets/unusedcode.xml">
+        <exclude name="UnusedFormalParameter" />
+    </rule>
     <rule ref="rulesets/design.xml/CouplingBetweenObjects">
         <properties>
             <property name="minimum" value="14" />
@@ -19,6 +21,7 @@
     <rule ref="rulesets/naming.xml">
         <exclude name="ShortVariable"/>
         <exclude name="LongVariable"/>
+        <exclude name="ShortMethodName"/>
     </rule>
     <rule ref="rulesets/naming.xml/ShortVariable">
         <properties>
@@ -28,6 +31,11 @@
     <rule ref="rulesets/naming.xml/LongVariable">
         <properties>
             <property name="maximum" value="30" />
+        </properties>
+    </rule>
+    <rule ref="rulesets/naming.xml/ShortMethodName">
+        <properties>
+            <property name="minimum" value="2" />
         </properties>
     </rule>
 

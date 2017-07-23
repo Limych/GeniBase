@@ -1,5 +1,21 @@
 {% extends "layout.html.twig" %}
 
 {% block content %}
-    Welcome to your new Silex Application!
+    <h2>View</h2>
+    <ul>
+      <li><a href="/places">Places</a></li>
+    </ul>
+    <h2>API</h2>
+    <ul>
+      <li><a href="/api/v1/">Root</a></li>
+      <li><a href="/api/v1/places">Places</a></li>
+      <li><a href="/api/v1/sources">Sources</a></li>
+      <li><a href="/api/v1/persons">Persons</a></li>
+      <li><a href="/api/v1/events">Events</a></li>
+    </ul>
+    <h2>Import</h2>
+    <ul>
+      <li><a href="/import/places">Import places</a></li>
+      <li><a href="/import/svrt">Import data from 1914.svrt.ru</a></li>
+    </ul>
 {% endblock %}

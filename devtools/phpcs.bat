@@ -8,4 +8,4 @@ call "%BIN_TARGET%" app src tests\phpunit\tests %OPTS% >"%LOG_TARGET%"
 
 type "%LOG_TARGET%"
 echo.
-pause
+rem pause

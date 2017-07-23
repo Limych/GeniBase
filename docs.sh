@@ -7,7 +7,7 @@ wget http://www.apigen.org/apigen.phar
 git clone https://github.com/jimmyz/ThemeBootstrap.git ../ApiGenTheme
 
 # Generate docs
-php apigen.phar generate -s src -d ../docs --access-levels="public" --title="GeniBase" --template-config="../ApiGenTheme/src/config.neon"
+php apigen.phar generate -s src -s app -d ../docs --access-levels="public" --title="GeniBase" --template-config="../ApiGenTheme/src/config.neon"
 
 # Set identity
 git config --global user.email "travis@travis-ci.org"

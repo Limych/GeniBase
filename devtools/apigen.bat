@@ -6,4 +6,4 @@ SET OPTS=%*
 call "%BIN_TARGET%" %OPTS%
 
 echo.
-pause
+rem pause
