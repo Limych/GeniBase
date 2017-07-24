@@ -40,3 +40,7 @@ $app['db.options'] = array(
 // === Translator =============================================================
 
 $app['translator.resource'] = BASE_DIR . '/app/lang/';
+
+// === Importer configs =======================================================
+
+$app['svrt.1914.store'] = BASE_DIR.'/var/store';
