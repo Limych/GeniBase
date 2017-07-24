@@ -3,6 +3,7 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use GeniBase\Util;
+use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\Fact;
 use Gedcomx\Conclusion\DateInfo;
@@ -71,7 +72,7 @@ class FactStorager extends ConclusionStorager
             if (isset($ent['place']['description'])) {
                 $data['place_description'] = $ent['place']['description'];
 
-                if (! empty($id = $this->dbs->getIdFromReference($ent['place']['description']))
+                if (! empty($id = DBaseService::getIdFromReference($ent['place']['description']))
                     && (false !== $r = $this->dbs->getLidForId($t_places, $id))
                 ) {
                     $data['place_description_id'] = (int) $r;
@@ -99,7 +100,7 @@ class FactStorager extends ConclusionStorager
             $_id = (int) $this->dbs->getDb()->lastInsertId();
         }
         GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
+
         return $entity;
     }
 
@@ -188,7 +189,7 @@ class FactStorager extends ConclusionStorager
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = $this->dbs->getIdFromReference($r))
+            && ! empty($rid = DBaseService::getIdFromReference($r))
         ) {
             $gedcomx->embed(
                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])

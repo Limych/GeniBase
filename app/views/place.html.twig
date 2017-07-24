@@ -41,34 +41,40 @@
     			<a target="_blank" href="//etomesto.com/map-atlas_russia-1913/?y={{ place.getLatitude() }}&x={{ place.getLongitude() }}"><i class="fa fa-map-o" aria-hidden="true"></i> на&nbsp;старинной карте</a>
     			<span class="mx-3">&bullet;</span>
         	{% endif %}
-				<span class="text-nowrap">{{ place.getId() }}</span>
+            {% if place.getConfidence() %}
+                <span class="confidence">Достоверность:
+                {% if place.getConfidence() == "http://gedcomx.org/High" %}
+                    <span class="high">Высокая</span>
+                {% elseif place.getConfidence() == "http://gedcomx.org/Medium" %}
+                    <span class="medium">Средняя</span>
+                {% elseif place.getConfidence() == "http://gedcomx.org/Low" %}
+                    <span class="low">Низкая</span>
+                {% endif %}
+                </span>
+                <span class="mx-3">&bullet;</span>
+            {% endif %}
+                <span class="text-nowrap">{{ place.getId() }}</span>
 			</div>
 			<div class="card-text mt-5">
     			<div>
             	{% if components %}
             		Включает в себя:
-            		<ul class="d-inline list-inline">
+            		<ul class="list-unstyled component-refs">
             		{% set first_shown = false %}
-                	{% for place in components %}{%
-                	    if first_shown %},</li>{% endif
-                	    %}<li class="list-inline-item"><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>{%
-                	    set first_shown = true
-            	    %}{% endfor %}
-            	    	</li>
+                	{% for place in components %}
+					    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a></li>
+            	    {% endfor %}
             	    </ul>
             	{% endif %}
     			</div>
             	{% if neighbors %}
     			<div class="mt-3">
             		Поблизости также находятся:
-            		<ul class="d-inline list-inline">
+            		<ul class="list-unstyled component-refs">
             		{% set first_shown = false %}
-                	{% for place in neighbors %}{%
-                	    if first_shown %},</li>{% endif
-                	    %}<li class="list-inline-item"><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>{%
-                	    set first_shown = true
-            	    %}{% endfor %}
-            	    	</li>
+                	{% for place in neighbors %}
+					    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a></li>
+            	    {% endfor %}
             	    </ul>
     			</div>
             	{% endif %}

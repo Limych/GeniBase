@@ -5,6 +5,7 @@ use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Event;
 use GeniBase\Util;
+use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\EventRole;
@@ -70,7 +71,7 @@ class EventStorager extends SubjectStorager
             if (isset($ent['place']['description'])) {
                 $data['place_description'] = $ent['place']['description'];
 
-                if (! empty($id = $this->dbs->getIdFromReference($ent['place']['description']))
+                if (! empty($id = DBaseService::getIdFromReference($ent['place']['description']))
                     && (! empty($r = (int) $this->dbs->getLidForId($t_places, $id)))
                 ) {
                     $data['place_description_id'] = $r;
@@ -98,7 +99,7 @@ class EventStorager extends SubjectStorager
             $_id = (int) $this->dbs->getDb()->lastInsertId();
         }
         GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
+
         // Save childs
         if (! empty($ent['roles'])) {
             $ers = $this->dbs->getDb()->fetchAll(
@@ -233,7 +234,7 @@ class EventStorager extends SubjectStorager
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = $this->dbs->getIdFromReference($r))
+            && ! empty($rid = DBaseService::getIdFromReference($r))
         ) {
             $gedcomx->embed(
                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])

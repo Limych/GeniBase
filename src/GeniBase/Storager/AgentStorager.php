@@ -265,25 +265,23 @@ class AgentStorager extends GeniBaseStorager
 
         $gedcomx->addAgent($ag);
         // TODO: people
-        //         $gedcomx->embed($this->loadGedcomxCompanions($ag));
+//         $gedcomx->embed($this->loadGedcomxCompanions($ag));
 
         return $gedcomx;
     }
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var Agent$entity
-*/
+        /** @var Agent$entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         // TODO: people
-        //         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-        //         && ! empty($rid = $this->dbs->getIdFromReference($r))) {
-        //             $gedcomx->embed(
-        //                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
-        //                 );
-        //         }
+//         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
+//         && ! empty($rid = DBaseService::getIdFromReference($r))) {
+//             $gedcomx->embed(
+//                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
+//                 );
+//         }
 
         return $gedcomx;
     }

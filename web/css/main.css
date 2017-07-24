@@ -15,3 +15,21 @@
     /* bring your own prefixes */
     transform: translate(-50%, -50%);
 }
+
+.confidence .high   {
+	color: green;
+}
+
+.confidence .medium   {
+	color: brown;
+}
+
+.confidence .low   {
+	color: red;
+}
+
+.component-refs {
+            columns: 12rem auto;
+	   -moz-columns: 12rem auto;
+	-webkit-columns: 12rem auto;
+}

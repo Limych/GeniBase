@@ -72,7 +72,7 @@ class GeniBaseStorager
         return [
             'makeId_name'       => null,
             'makeId_unique'     => true,
-            'loadCompanions'    => true,
+            'loadCompanions'    => false,
         ];
     }
 
@@ -381,7 +381,7 @@ class GeniBaseStorager
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
         }
-            
+
         return false;
     }
 
@@ -399,7 +399,7 @@ class GeniBaseStorager
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
         }
-            
+
         return false;
     }
 
@@ -416,11 +416,11 @@ class GeniBaseStorager
         }
 
         $entity->initFromArray($result);
-        
+
         if (! empty($result['_id'])) {
             GeniBaseInternalProperties::setPropertyOf($entity, '_id', $result['_id']);
         }
-            
+
         return $entity;
     }
 
@@ -436,7 +436,7 @@ class GeniBaseStorager
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
         $this->garbageCleaning();
-        
+
         $class = get_class($this);
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
@@ -614,7 +614,7 @@ class GeniBaseStorager
             throw new \UnexpectedValueException('Context local ID required!');
         }
         $data['_ref'] = $r;
-        
+
         if (isset($ent['_id'])) {
             $this->dbs->getDb()->update(
                 $t_tvs,
@@ -738,6 +738,51 @@ class GeniBaseStorager
         if (false !== $result = $this->dbs->getDb()->fetchAll($q, [$_group, $_ref])) {
             foreach ($result as $k => $v) {
                 $result[$k] = new TextValue($v);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     *
+     * @param string         $group
+     * @param ExtensibleData $context
+     * @return array[]|false
+     */
+    public function searchRefByTextValues($group, $textValues)
+    {
+        $_group = $this->getTypeId($group);
+        if (! is_array($textValues))    $textValues = [$textValues];
+
+        $t_tvs = $this->dbs->getTableName('text_values');
+        $t_langs = $this->dbs->getTableName('languages');
+
+        $q = "SELECT tv._ref FROM $t_tvs AS tv ";
+        $qw = "WHERE tv._group = ?";
+        $data = [$_group];
+
+        $qwtv = [];
+        $qwl = false;
+        /** @var TextValue $tv */
+        foreach ($textValues as $tv) {
+            $tmp = 'tv.value = ?';
+            $data[] = $tv->getValue();
+            if (! empty($lang = $tv->getLang())) {
+                if (! $qwl) {
+                    $q .= "LEFT JOIN $t_langs AS l ON (tv.lang_id = l._id) ";
+                    $qwl = true;
+                }
+                $tmp = "($tmp AND l.lang = ?)";
+                $data[] = $tv->getLang();
+            }
+            $qwtv[] = $tmp;
+        }
+        if (! empty($qwtv)) $qw .= ' AND (' . implode(' OR ', $qwtv). ')';
+
+        if (false !== $result = $this->dbs->getDb()->fetchAll($q . $qw, $data)) {
+            foreach ($result as $k => $v) {
+                $result[$k] = (int) $v['_ref'];
             }
         }
 

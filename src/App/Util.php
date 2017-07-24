@@ -3,6 +3,7 @@
 namespace App;
 
 use Silex\Application;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Assorted static functions.
@@ -47,6 +48,27 @@ class Util
 
         setlocale(LC_ALL, $last_locale);
         return $formatted;
+    }
+
+    /**
+     *
+     * @return number $miliseconds
+     */
+    public static function executionTime()
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // On Windows: The real time is measured.
+            $spendMiliseconds = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
+
+        } else {
+            // On Linux: Any time spent on activity that happens outside the execution
+            //           of the script such as system calls using system(), stream operations
+            //           database queries, etc. is not included.
+            //           @see http://php.net/manual/en/function.set-time-limit.php
+            $resourceUsages = getrusage();
+            $spendMiliseconds = $resourceUsages['ru_utime.tv_sec'] * 1000 + $resourceUsages['ru_utime.tv_usec'] / 1000;
+        }
+        return (int) $spendMiliseconds;
     }
 
     /**

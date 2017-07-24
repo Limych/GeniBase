@@ -76,7 +76,7 @@ class DBaseService extends Container
      * @return NULL|string|false
      * @deprecated
      */
-    public function getIdFromReference($uri)
+    public static function getIdFromReference($uri)
     {
         if (empty($uri)) {
             return null;

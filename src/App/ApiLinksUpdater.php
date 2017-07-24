@@ -6,6 +6,8 @@ use Gedcomx\Rs\Client\Rel;
 use GeniBase\Rs\Server\GedcomxRsUpdater;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
+use GeniBase\DBase\DBaseService;
+use Gedcomx\Conclusion\Fact;
 
 /**
  *
@@ -55,6 +57,21 @@ class ApiLinksUpdater extends GedcomxRsUpdater
 
     /**
      * {@inheritDoc}
+     * @see \Gedcomx\Rt\GedcomxModelVisitorBase::visitFact()
+     */
+    public function visitFact(Fact $fact)
+    {
+        if (! empty($rel = $fact->getPlace())) {
+            $fact->addLinkRelation(Rel::PLACE_DESCRIPTION,
+                $this->api_root.'/places/' . DBaseService::getIdFromReference($rel->getDescriptionRef())
+            );
+        }
+
+        parent::visitFact($fact);
+    }
+
+    /**
+     * {@inheritDoc}
      * @see \Gedcomx\Rt\GedcomxModelVisitorBase::visitEvent()
      */
     public function visitEvent(\Gedcomx\Conclusion\Event $event)
@@ -87,4 +104,16 @@ class ApiLinksUpdater extends GedcomxRsUpdater
         parent::visitSourceDescription($sourceDescription);
     }
 
+    /**
+     * {@inheritDoc}
+     * @see \Gedcomx\Rt\GedcomxModelVisitorBase::visitSourceReference()
+     */
+    public function visitSourceReference(\Gedcomx\Source\SourceReference $sourceReference)
+    {
+        $sourceReference->addLinkRelation(Rel::DESCRIPTION,
+            $this->api_root.'/sources/' . DBaseService::getIdFromReference($sourceReference->getDescriptionRef())
+        );
+
+        parent::visitSourceReference($sourceReference);
+    }
 }

@@ -93,13 +93,7 @@ class PlacesController extends BaseController
     public function getComponents(Application $app, Request $request, $id = null)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
-        ->loadListGedcomx(
-            [
-            'id' => $id,
-            ],
-            null,
-            'loadCompanions=0'
-        );
+        ->loadListGedcomx([     'id' => $id     ]);
 
         if (false === $gedcomx) {
             return new Response(null, 204);
@@ -160,17 +154,13 @@ class PlacesController extends BaseController
     {
         $storager = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class);
         if (empty($id)) {
-            $gedcomx = $storager->loadListGedcomx(
-                [
+            $gedcomx = $storager->loadListGedcomx([
                 'id' => $id,
-                ]
-            );
+            ]);
         } else {
-            $gedcomx = $storager->loadGedcomx(
-                [
+            $gedcomx = $storager->loadGedcomx([
                 'id' => $id,
-                ]
-            );
+            ]);
         }
 
         if (false === $gedcomx) {
@@ -179,16 +169,10 @@ class PlacesController extends BaseController
 
         GedcomxRsUpdater::update($gedcomx);
 
-        $gedcomx2 = $storager->loadListGedcomx(
-            [
-            'id' => $gedcomx->getPlaces()[0]->getId(),
-            ],
-            null,
-            'loadCompanions=0'
-        );
+        $gedcomx2 = $storager->loadListGedcomx([        'id' => $gedcomx->getPlaces()[0]->getId()       ]);
 
         $gedcomx3 = GedcomxRsFilter::filter(
-            $storager->loadNeighboringPlacesGedcomx($gedcomx->getPlaces()[0], 'loadCompanions=0'),
+            $storager->loadNeighboringPlacesGedcomx($gedcomx->getPlaces()[0]),
             $gedcomx,
             $gedcomx2
         );

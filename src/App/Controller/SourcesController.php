@@ -75,16 +75,10 @@ class SourcesController extends BaseController
      * @param string $id
      * @return array|Response
      */
-    public function getComponents(Application $app, $id = null)
+    public function getComponents(Application $app, Request $request, $id = null)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], SourceDescription::class)
-        ->loadListGedcomx(
-            [
-            'id' => $id,
-            ],
-            null,
-            'loadCompanions=0'
-        );
+            ->loadListGedcomx([     'id' => $id     ]);
 
         if (false === $gedcomx) {
             return new Response(null, 204);

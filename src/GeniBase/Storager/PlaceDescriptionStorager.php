@@ -34,6 +34,8 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $def['makeId_unique'] = false;
 
+        $def['loadJurisdictions'] = true;
+
         if (! empty($entity)) {
             /**
              * @var PlaceDescription $entity
@@ -55,6 +57,48 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
 
         return $def;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\SubjectStorager::detectId()
+     */
+    protected function detectId(ExtensibleData &$entity)
+    {
+        if (parent::detectId($entity))  return true;
+
+        /** @var PlaceDescription $entity */
+
+        $t_places = $this->dbs->getTableName('places');
+
+        if (! empty($refs = $this->searchRefByTextValues(self::GROUP_NAMES, $entity->getNames()))) {
+            $q = $this->getSqlQuery() . ' WHERE pl._id IN (?)';
+            if (! empty($jur = $entity->getJurisdiction())) {
+                if (! empty($ref = $jur->getResourceId())) {
+                    $q .= ' AND jurisdiction_id = ' . $this->dbs->getLidForId($t_places, $ref);
+                } elseif (! empty($ref = $jur->getResource())) {
+                    $q .= ' AND jurisdiction_uri = ' . $this->dbs->getDb()->quote($ref);
+                }
+            } else {
+                $q .= ' AND jurisdiction_id IS NULL AND jurisdiction_uri IS NULL';
+            }
+            $result = $this->dbs->getDb()->fetchAll($q, [$refs], [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            if (is_array($result)) {
+                $candidate = null;
+                foreach ($result as $k => $r) {
+                    $place = $this->processRaw($this->getObject(), $r);
+                    if (empty($entity->getId()) || (self::confidenceCmp($entity, $place) < 0)) {
+                        $candidate = clone $entity;
+                        $candidate->embed($place);
+                        $candidate->setId($place->getId());
+                    }
+                }
+                if (! empty($candidate))    $entity = $candidate;
+            }
+            return ! empty($entity->getId());
+        }
+
+        return false;
     }
 
     /**
@@ -123,13 +167,9 @@ class PlaceDescriptionStorager extends SubjectStorager
         parent::save($entity, $context, $o);
 
         if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update(
-                $t_places,
-                $data,
-                [
+            $result = $this->dbs->getDb()->update($t_places, $data, [
                 '_id' => $_id
-                ]
-            );
+            ]);
         } else {
             $this->dbs->getDb()->insert($t_places, $data);
             $_id = (int) $this->dbs->getDb()->lastInsertId();
@@ -237,9 +277,7 @@ class PlaceDescriptionStorager extends SubjectStorager
             unset($result['jurisdiction']);
         }
 
-        /**
- * @var PlaceDescription $entity
-*/
+        /** @var PlaceDescription $entity */
         $entity = parent::processRaw($entity, $result);
 
         if (isset($result['temporalDescription_id'])) {
@@ -320,6 +358,8 @@ class PlaceDescriptionStorager extends SubjectStorager
         $gedcomx->addPlace($pd);
         if ($o['loadCompanions']) {
             $gedcomx->embed($this->loadGedcomxCompanions($pd));
+        } elseif ($o['loadJurisdictions']) {
+            $gedcomx->embed($this->loadGedcomxJurisdictions($pd));
         }
 
         return $gedcomx;
@@ -395,10 +435,23 @@ class PlaceDescriptionStorager extends SubjectStorager
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var PlaceDescription $entity
-*/
+        /** @var PlaceDescription $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
+
+        if (! empty($r = $entity->getJurisdiction()) && ! empty($rid = $r->getResourceId())) {
+            $gedcomx->embed(
+                $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
+            );
+        }
+
+        return $gedcomx;
+    }
+
+    public function loadGedcomxJurisdictions(ExtensibleData $entity)
+    {
+        /** @var PlaceDescription $entity */
+
+        $gedcomx = new Gedcomx();
 
         if (! empty($r = $entity->getJurisdiction()) && ! empty($rid = $r->getResourceId())) {
             $gedcomx->embed(

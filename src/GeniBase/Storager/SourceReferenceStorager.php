@@ -4,6 +4,7 @@ namespace GeniBase\Storager;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Gedcomx\Common\ExtensibleData;
 use GeniBase\Util;
+use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceReference;
 
@@ -53,7 +54,7 @@ class SourceReferenceStorager extends GeniBaseStorager
         if (! isset($ent['description'])) {
             throw new \UnexpectedValueException('Description reference URI required!');
         }
-        if (! empty($id = $this->dbs->getIdFromReference($ent['description']))
+        if (! empty($id = DBaseService::getIdFromReference($ent['description']))
             && (false !== $r = $this->dbs->getLidForId($t_srcs, $id))
         ) {
             $data['description_id'] = (int) $r;

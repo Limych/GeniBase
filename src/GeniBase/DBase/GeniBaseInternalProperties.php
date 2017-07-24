@@ -11,7 +11,7 @@ class GeniBaseInternalProperties
 {
 
     protected $properties;
-    
+
     /**
      *
      * @param mixed[] $properties
@@ -66,7 +66,7 @@ class GeniBaseInternalProperties
         }
         $this->properties[$key] = $value;
     }
-    
+
     /**
      *
      * @param ExtensibleData $object
@@ -78,10 +78,10 @@ class GeniBaseInternalProperties
  * @var self $ex
 */
         $ex = $object->findExtensionOfType(self::class);
-        
+
         return (null === $ex) ? array() : $ex->getProperties();
     }
-    
+
     /**
      *
      * @param ExtensibleData $object
@@ -99,7 +99,7 @@ class GeniBaseInternalProperties
             $ex->setProperties($properties);
         }
     }
-    
+
     /**
      *
      * @param ExtensibleData $object
@@ -112,7 +112,7 @@ class GeniBaseInternalProperties
  * @var self $ex
 */
         $ex = $object->findExtensionOfType(self::class);
-        
+
         return (null === $ex) ? null : $ex->getProperty($key);
     }
 
@@ -124,9 +124,7 @@ class GeniBaseInternalProperties
      */
     public static function setPropertyOf(ExtensibleData $object, $key, $value)
     {
-        /**
- * @var self $ex
-*/
+        /** @var self $ex */
         $ex = $object->findExtensionOfType(self::class);
         if (null === $ex) {
             $object->addExtensionElement(

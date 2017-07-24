@@ -4,10 +4,10 @@ namespace App;
 use App\Controller\EventsController;
 use App\Controller\PersonsController;
 use App\Controller\PlacesController;
-use App\Controller\PlacesImporterController;
 use App\Controller\SourcesController;
 use App\Controller\StatisticController;
-use App\Controller\SvrtImporterController;
+use App\Controller\Importer\PlacesImporter;
+use App\Controller\Importer\SvrtImporter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,11 +17,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 // === Register controllers ===================================================
 
-$app['importer.svrt.controller'] = function () use ($app) {
-    return new SvrtImporterController($app);
+$app['svrt.importer'] = function () use ($app) {
+    return new SvrtImporter($app);
 };
-$app['importer.places.controller'] = function () use ($app) {
-    return new PlacesImporterController($app);
+$app['places.importer'] = function () use ($app) {
+    return new PlacesImporter($app);
 };
 //
 $app['statistic.controller'] = function () use ($app) {
@@ -91,8 +91,8 @@ $app->get(
 )
 ->bind('homepage');
 
-$app->get('/import/places', "importer.places.controller:import");
-$app->get('/import/svrt', "importer.svrt.controller:import");
+$app->get('/import/places', "places.importer:import");
+$app->get('/import/svrt', "svrt.importer:import");
 //
 PlacesController::bindRoutes($app, '/places');
 SourcesController::bindRoutes($app, '/sources');

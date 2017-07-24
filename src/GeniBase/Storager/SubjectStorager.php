@@ -21,7 +21,7 @@ class SubjectStorager extends ConclusionStorager
     {
         return new Subject($o);
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -29,19 +29,18 @@ class SubjectStorager extends ConclusionStorager
      */
     protected function detectId(ExtensibleData &$entity)
     {
-        /**
- * @var Subject $entity
-*/
+        if (parent::detectId($entity))  return true;
+
+        /** @var Subject $entity */
         if (! empty($r = $entity->getIdentifiers())
-            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))
-        ) {
+        && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))) {
             $entity->setId($id);
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      *
      * @param mixed          $entity
@@ -67,7 +66,7 @@ class SubjectStorager extends ConclusionStorager
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }
         }
-        
+
         return $entity;
     }
 
@@ -77,15 +76,13 @@ class SubjectStorager extends ConclusionStorager
             return $result;
         }
 
-        /**
- * @var Subject $entity
-*/
+        /** @var Subject $entity */
         $entity = parent::processRaw($entity, $result);
 
         if (! empty($res = $this->newStorager(Identifier::class)->loadList($entity))) {
             $entity->setIdentifiers($res);
         }
-        
+
         return $entity;
     }
 }

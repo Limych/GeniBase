@@ -5,6 +5,7 @@ use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Identifier;
 use GeniBase\Util;
+use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceDescription;
 use Gedcomx\Source\SourceReference;
@@ -48,7 +49,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
                 } elseif (! empty($r = $entity->getCitations())) {
                     $name[] = $r[0]->getValue();
                 }
-                
+
                 if (! empty($r = $entity->getComponentOf())) {
                     $name[] = $r->getDescriptionRef();
                 }
@@ -84,7 +85,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
             $entity->setId($id);
             return true;
         }
-            
+
         return false;
     }
 
@@ -130,7 +131,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
         if (isset($ent['mediator'])) {
             if (isset($ent['mediator']['resource']) && empty($ent['mediator']['resourceId'])
-                && ! empty($id = $this->dbs->getIdFromReference($ent['mediator']['resource']))
+                && ! empty($id = DBaseService::getIdFromReference($ent['mediator']['resource']))
             ) {
                     $ent['mediator']['resourceId'] = $id;
             }
@@ -143,7 +144,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
         if (isset($ent['repository'])) {
             if (isset($ent['repository']['resource']) && empty($ent['repository']['resourceId'])
-                && ! empty($id = $this->dbs->getIdFromReference($ent['repository']['resource']))
+                && ! empty($id = DBaseService::getIdFromReference($ent['repository']['resource']))
             ) {
                 $ent['repository']['resourceId'] = $id;
             }
@@ -189,7 +190,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
             $_id = (int) $this->dbs->getDb()->lastInsertId();
         }
         GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
+
         // Save childs
         if (isset($ent['componentOf'])) {
             $this->newStorager(SourceReference::class)->save(
@@ -223,7 +224,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }
         }
-        
+
         return $entity;
     }
 
@@ -299,7 +300,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
             $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
         }
         if (! empty($r = $entity->getComponentOf()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = $this->dbs->getIdFromReference($r))
+            && ! empty($rid = DBaseService::getIdFromReference($r))
         ) {
             $gedcomx->embed(
                 $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $rid ])
@@ -473,7 +474,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         if (! empty($res = $this->newStorager(Identifier::class)->loadList($entity))) {
             $entity->setIdentifiers($res);
         }
-                
+
         return $entity;
     }
 }

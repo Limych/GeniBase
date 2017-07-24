@@ -1,15 +1,20 @@
 <?php
-namespace App\Controller;
+namespace App\Controller\Importer;
 
+use App\Util;
 use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Util\FormalDate;
 use GeniBase\Storager\GeniBaseStorager;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Cookie;
 
-class PlacesImporterController
+class PlacesImporter
 {
+
+    const OVERTIME_COOKIE   = 'PlacesImporter';
 
     protected $app;
     protected $gbs;
@@ -22,7 +27,9 @@ class PlacesImporterController
 
     protected function parsePlace($raw, $parentPlace)
     {
-        $place = [];
+        $place = [
+            'confidence'    => \Gedcomx\Types\ConfidenceLevel::HIGH,
+        ];
 
         // Parse for dates of existence
         if (preg_match("/(.*?)\s*\{(.+)\}\s*(.*)/", $raw, $matches)) {
@@ -74,12 +81,22 @@ class PlacesImporterController
 
     public function import(Request $request)
     {
-        $places = $this->getPlaces();
+        $start = $request->cookies->getInt(self::OVERTIME_COOKIE);
 
-        foreach ($places as $x) {
+        $places = $this->getPlaces();
+        $count = count($places);
+
+        for ($cnt = $start; $cnt < $count; $cnt++) {
+            if (Util::executionTime() > 10000) {
+                $response = new Response("<progress value='$cnt' max='$count'>$cnt records</progress>");
+                $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, $cnt));
+                $response->headers->set('Refresh', '0; url=' . $request->getUri());
+                return $response;
+            }
+
             /** @var PlaceDescription $plc */
             unset($plc);
-            $x = preg_split("/\s+>\s+/", $x, null, PREG_SPLIT_NO_EMPTY);
+            $x = preg_split("/\s+>\s+/", $places[$cnt], null, PREG_SPLIT_NO_EMPTY);
             foreach ($x as $v) {
                 $place = $this->parsePlace($v, $plc);
                 $plc = $this->gbs->newStorager(PlaceDescription::class)->save($place);
@@ -90,6 +107,7 @@ class PlacesImporterController
         $subRequest = Request::create($url);
         $response = $this->app->handle($subRequest, HttpKernelInterface::SUB_REQUEST, false);
 
+        $response->headers->clearCookie(self::OVERTIME_COOKIE);
         return $response;
     }
 

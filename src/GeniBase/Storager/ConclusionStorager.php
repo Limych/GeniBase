@@ -8,6 +8,8 @@ use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceReference;
 use Gedcomx\Source\SourceDescription;
 use Gedcomx\Agent\Agent;
+use Gedcomx\Types\ConfidenceLevel;
+use GeniBase\DBase\DBaseService;
 
 /**
  *
@@ -19,6 +21,29 @@ class ConclusionStorager extends GeniBaseStorager
     protected function getObject($o = null)
     {
         return new Conclusion($o);
+    }
+
+    protected static function confidenceCmp(Conclusion $a, Conclusion $b)
+    {
+        $result = 0;
+
+        if (! empty($confA = $a->getConfidence()) && ! empty($confB = $b->getConfidence())) {
+            switch ($confA) {
+                default:
+                case ConfidenceLevel::LOW:      $confA = 1; break;
+                case ConfidenceLevel::MEDIUM:   $confA = 2; break;
+                case ConfidenceLevel::HIGH:     $confA = 3; break;
+            }
+            switch ($confB) {
+                default:
+                case ConfidenceLevel::LOW:      $confB = 1; break;
+                case ConfidenceLevel::MEDIUM:   $confB = 2; break;
+                case ConfidenceLevel::HIGH:     $confB = 3; break;
+            }
+            $result = ($confA < $confB ? -1 : ($confA > $confB ? 1 : 0));
+        }
+
+        return $result;
     }
 
     /**
@@ -85,7 +110,7 @@ class ConclusionStorager extends GeniBaseStorager
             $_id = (int) $this->dbs->getDb()->lastInsertId();
         }
         GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
+
         // Save childs
         if (!empty($ent['sources'])) {
             foreach ($ent['sources'] as $src) {
@@ -185,22 +210,18 @@ class ConclusionStorager extends GeniBaseStorager
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var Conclusion $entity
-*/
+        /** @var Conclusion $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getAttribution()) && ! empty($r = $r->getContributor())
-            && ! empty($rid = $r->getResourceId())
-        ) {
+        && ! empty($rid = $r->getResourceId())) {
             $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
         }
 
         if (! empty($list = $entity->getSources())) {
             foreach ($list as $ent) {
                 if (! empty($r = $ent->getDescriptionRef())
-                    && ! empty($rid = $this->dbs->getIdFromReference($r))
-                ) {
+                && ! empty($rid = DBaseService::getIdFromReference($r))) {
                     $gedcomx->embed(
                         $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $rid ])
                     );
