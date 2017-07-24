@@ -128,8 +128,7 @@ class SvrtImporter
         } else {
             if (file_exists($store_fpath)) {
                 $json = file_get_contents($store_fpath);
-            } else {
-                $key = $this->app['svrt.1914.token'];
+            } elseif (! empty($key = $this->app['svrt.1914.token'])) {
                 $json = file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=$id");
                 if (false === $json) {
                     return false;
