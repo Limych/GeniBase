@@ -3,7 +3,6 @@
 namespace App;
 
 use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Assorted static functions.
@@ -59,7 +58,6 @@ class Util
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // On Windows: The real time is measured.
             $spendMiliseconds = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
-
         } else {
             // On Linux: Any time spent on activity that happens outside the execution
             //           of the script such as system calls using system(), stream operations

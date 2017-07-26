@@ -4,13 +4,12 @@ namespace GeniBase\Storager;
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Identifier;
-use GeniBase\Util;
-use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceDescription;
 use Gedcomx\Source\SourceReference;
 use Gedcomx\Source\SourceCitation;
 use Gedcomx\Agent\Agent;
+use GeniBase\Util\IDateTime;
 
 /**
  *
@@ -30,15 +29,13 @@ class SourceDescriptionStorager extends GeniBaseStorager
         return new SourceDescription($o);
     }
 
-    public function getDefaultOptions(ExtensibleData $entity = null)
+    public function getDefaultOptions($entity = null)
     {
         $def = parent::getDefaultOptions();
 
         $def['makeId_unique'] = false;
 
-        /**
- * @var SourceDescription $entity
-*/
+        /** @var SourceDescription $entity */
         if (! empty($entity)) {
             $name = [];
             if (! empty($r = $entity->getIdentifiers())) {
@@ -76,9 +73,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
     protected function detectId(ExtensibleData &$entity)
     {
-        /**
- * @var SourceDescription $entity
-*/
+        /** @var SourceDescription $entity */
         if (! empty($r = $entity->getIdentifiers())
             && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))
         ) {
@@ -90,6 +85,65 @@ class SourceDescriptionStorager extends GeniBaseStorager
     }
 
     /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
+     */
+    protected function getTableName()
+    {
+        return $this->dbs->getTableName('sources');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        $this->makeGbidIfEmpty($entity, $o);
+
+        $data = parent::packData4Save($entity, $context, $o);
+
+        $t_agents = $this->dbs->getTableName('agents');
+
+        /** @var SourceDescription $entity */
+        if (! empty($res = $entity->getAbout())) {
+            $data['about'] = $res;
+        }
+        if (! empty($res = $entity->getSortKey())) {
+            $data['sortKey'] = $res;
+        }
+        if (! empty($res = $entity->getMediaType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['mediaType_id'] = $res;
+        }
+        if (! empty($res = $entity->getResourceType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['resourceType_id'] = $res;
+        }
+        if (! empty($res = $entity->getCreated())) {
+            $data['created'] = date(IDateTime::SQL, strtotime($res));
+        }
+        if (! empty($res = $entity->getModified())) {
+            $data['modified'] = date(IDateTime::SQL, strtotime($res));
+        }
+        // TODO: coverage
+        if (! empty($res = $entity->getRights())) {
+            $data['rights_json'] = json_encode($res);
+        }
+        if (! empty($res = $entity->getMediator())
+            && ! empty($res = $this->getResourceIdFromUri($t_agents, $res))
+        ) {
+            $data['mediator_id'] = $res;
+        }
+        if (! empty($res = $entity->getRepository())
+            && ! empty($res = $this->getResourceIdFromUri($t_agents, $res))
+        ) {
+            $data['repository_id'] = $res;
+        }
+        $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
+
+        return $data;
+    }
+
+    /**
      *
      * @param mixed          $entity
      * @param ExtensibleData $context
@@ -98,133 +152,44 @@ class SourceDescriptionStorager extends GeniBaseStorager
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
         }
-
-        $o = $this->applyDefaultOptions($o, $entity);
-        $this->makeGbidIfEmpty($entity, $o);
-
-        $t_srcs = $this->dbs->getTableName('sources');
-        $t_agents = $this->dbs->getTableName('agents');
-
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'id', 'about', 'sortKey');
-
-        if (isset($ent['mediaType']) && (false !== $r = $this->getTypeId($ent['mediaType']))) {
-            $data['mediaType_id'] = $r;
-        }
-        if (isset($ent['resourceType']) && (false !== $r = $this->getTypeId($ent['resourceType']))) {
-            $data['resourceType_id'] = $r;
-        }
-        if (! empty($ent['created'])) {
-            $data['created'] = date('Y-m-d H:i:s', strtotime($ent['created']));
-        }
-        if (! empty($ent['modified'])) {
-            $data['modified'] = date('Y-m-d H:i:s', strtotime($ent['modified']));
-        }
-        // TODO: coverage
-        if (! empty($ent['rights'])) {
-            $data['rights_json'] = json_encode($ent['rights']);
-        }
-
-        if (isset($ent['mediator'])) {
-            if (isset($ent['mediator']['resource']) && empty($ent['mediator']['resourceId'])
-                && ! empty($id = DBaseService::getIdFromReference($ent['mediator']['resource']))
-            ) {
-                    $ent['mediator']['resourceId'] = $id;
-            }
-            if (isset($ent['mediator']['resourceId'])
-                && ! empty($r = $this->dbs->getLidForId($t_agents, $ent['mediator']['resourceId']))
-            ) {
-                    $data['mediator_id'] = $r;
-            }
-        }
-
-        if (isset($ent['repository'])) {
-            if (isset($ent['repository']['resource']) && empty($ent['repository']['resourceId'])
-                && ! empty($id = DBaseService::getIdFromReference($ent['repository']['resource']))
-            ) {
-                $ent['repository']['resourceId'] = $id;
-            }
-            if (isset($ent['repository']['resourceId'])
-                && ! empty($r = $this->dbs->getLidForId($t_agents, $ent['repository']['resourceId']))
-            ) {
-                $data['repository_id'] = $r;
-            }
-        }
-
-        if (empty($ent['attribution'])) {
-            $ent['attribution'] = [];
-        }
-        if (! isset($ent['attribution']['contributor']) && ! empty($r = $this->dbs->getAgent())) {
-            $ent['attribution']['contributor'] = [ 'resourceId' => $r->getId() ];
-        }
-        if (isset($ent['attribution']['contributor']) && isset($ent['attribution']['contributor']['resourceId'])
-            && (false !== $r = $this->dbs->getLidForId($t_agents, $ent['attribution']['contributor']['resourceId']))
-        ) {
-            $data['att_contributor_id'] = $r;
-        }
-        if (! empty($ent['attribution']['modified'])) {
-            $data['att_modified'] = date('Y-m-d H:i:s', strtotime($ent['attribution']['modified']));
-        }
-        if (! empty($ent['attribution']['changeMessage'])) {
-            $data['att_changeMessage'] = $ent['attribution']['changeMessage'];
-        }
-
-        // Save data
-        $_id = (int) $this->dbs->getLidForId($t_srcs, $data['id']);
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update(
-                $t_srcs,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_srcs, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
-        }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
+        /** @var SourceDescription $entity */
+        $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (isset($ent['componentOf'])) {
-            $this->newStorager(SourceReference::class)->save(
-                $ent['componentOf'],
-                $entity,
-                [
+        if (! empty($res = $entity->getComponentOf())) {
+            $this->newStorager(SourceReference::class)->save($res, $entity, [
                 'is_componentOf'    => true,
-                ]
-            );
+            ]);
         }
-        if (! empty($ent['sources'])) {
-            foreach ($ent['sources'] as $src) {
+        if (! empty($res = $entity->getSources())) {
+            foreach ($res as $src) {
                 $this->newStorager(SourceReference::class)->save($src, $entity);
             }
         }
-
-        if (isset($ent['citations'])) {
-            $this->saveAllTextValues(self::GROUP_CITATIONS, $ent['citations'], $entity);
+        if (! empty($res = $entity->getCitations())) {
+            $this->saveAllTextValues(self::GROUP_CITATIONS, $res, $entity);
         }
-        if (isset($ent['titles'])) {
-            $this->saveAllTextValues(self::GROUP_TITLES, $ent['titles'], $entity);
+        if (! empty($res = $entity->getTitles())) {
+            $this->saveAllTextValues(self::GROUP_TITLES, $res, $entity);
         }
-        if (isset($ent['titleLabel'])) {
-            $this->saveTextValue(self::GROUP_TITLE_LABEL, $ent['titleLabel'], $entity);
+        if (! empty($res = $entity->getTitleLabel())) {
+            $this->saveTextValue(self::GROUP_TITLE_LABEL, $res, $entity);
         }
-        if (isset($ent['descriptions'])) {
-            $this->saveAllTextValues(self::GROUP_DESCRIPTION, $ent['descriptions'], $entity);
+        if (! empty($res = $entity->getDescriptions())) {
+            $this->saveAllTextValues(self::GROUP_DESCRIPTION, $res, $entity);
         }
-        if (! empty($r = $entity->getIdentifiers())) {
-            foreach ($r as $id) {
+        if (! empty($res = $entity->getIdentifiers())) {
+            foreach ($res as $id) {
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return $entity;
     }
 
@@ -264,18 +229,18 @@ class SourceDescriptionStorager extends GeniBaseStorager
      *
      * @throws \LogicException
      */
-    public function loadListGedcomx($entity, $context = null, $o = null)
+    public function loadComponentsGedcomx($entity, $context = null, $o = null)
     {
         $gedcomx = new Gedcomx();
         $companions = [];
 
         $o = $this->applyDefaultOptions($o);
 
-        if (false === $result = $this->loadList($entity, $context, $o)) {
+        if (false === $res = $this->loadComponents($entity, $o)) {
             return false;
         }
 
-        foreach ($result as $sd) {
+        foreach ($res as $sd) {
             $gedcomx->addSourceDescription($sd);
             if ($o['loadCompanions']) {
                 $companions[] = $this->loadGedcomxCompanions($sd);
@@ -291,31 +256,29 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var SourceDescription $entity
-*/
+        /** @var SourceDescription $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getMediator()) && ! empty($rid = $r->getResourceId())) {
-            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
+        if (! empty($res = $entity->getMediator()) && ! empty($res = $res->getResourceId())) {
+            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $res ]));
         }
-        if (! empty($r = $entity->getComponentOf()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = DBaseService::getIdFromReference($r))
+        if (! empty($res = $entity->getComponentOf()) && ! empty($res = $res->getDescriptionRef())
+            && ! empty($res = GeniBaseStorager::getIdFromReference($res))
         ) {
             $gedcomx->embed(
-                $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $rid ])
+                $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $res ])
             );
         }
-        if (! empty($r = $entity->getAttribution()) && ! empty($r = $r->getContributor())
-            && ! empty($rid = $r->getResourceId())
+        if (! empty($res = $entity->getAttribution()) && ! empty($res = $res->getContributor())
+            && ! empty($res = $res->getResourceId())
         ) {
-            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
+            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $res ]));
         }
 
-        if (! empty($r = $entity->getRepository()) && ! empty($r = $r->getContributor())
-            && ! empty($rid = $r->getResourceId())
+        if (! empty($res = $entity->getRepository()) && ! empty($res = $res->getContributor())
+            && ! empty($res = $res->getResourceId())
         ) {
-            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
+            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $res ]));
         }
 
         return $gedcomx;
@@ -345,7 +308,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         return $result;
     }
 
-    protected function loadListRaw($context, $o)
+    protected function loadComponentsRaw($context, $o)
     {
         $table = $this->dbs->getTableName('sources');
         $t_refs = $this->dbs->getTableName('source_references');
@@ -354,12 +317,12 @@ class SourceDescriptionStorager extends GeniBaseStorager
         if (empty($id = $context->getId())) {
             $result = $this->dbs->getDb()->fetchAll(
                 "SELECT * FROM $table AS t WHERE NOT EXISTS ( " .
-                "SELECT 1 FROM $t_refs AS ref WHERE ref._source_id = t.id AND is_componentOf = 1 ) " .
+                "SELECT 1 FROM $t_refs AS ref WHERE ref._source_id = t._id AND is_componentOf = 1 ) " .
                 "ORDER BY sortKey"
             );
-        } elseif (false !== $_ref = $this->dbs->getLidForId($table, $id)) {
+        } elseif (false !== $_ref = $this->dbs->getInternalId($table, $id)) {
             $result = $this->dbs->getDb()->fetchAll(
-                "SELECT * FROM $table AS t WHERE id IN ( " .
+                "SELECT * FROM $table AS t WHERE _id IN ( " .
                 "SELECT _source_id FROM $t_refs AS ref WHERE is_componentOf = 1 AND description_id = ? ) " .
                 "ORDER BY sortKey",
                 [(int) $_ref]
@@ -369,7 +332,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         return $result;
     }
 
-    protected function processRaw($entity, $result)
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
@@ -378,14 +341,14 @@ class SourceDescriptionStorager extends GeniBaseStorager
         $t_agents = $this->dbs->getTableName('agents');
 
         if (isset($result['mediaType_id'])
-            && (false !== $r = $this->getType($result['mediaType_id']))
+            && (false !== $res = $this->dbs->getType($result['mediaType_id']))
         ) {
-            $result['mediaType'] = $r;
+            $result['mediaType'] = $res;
         }
         if (isset($result['resourceType_id'])
-            && (false !== $r = $this->getType($result['resourceType_id']))
+            && (false !== $res = $this->dbs->getType($result['resourceType_id']))
         ) {
-            $result['resourceType'] = $r;
+            $result['resourceType'] = $res;
         }
         if (! empty($result['created'])) {
             $result['created'] = date(DATE_W3C, strtotime($result['created']));
@@ -400,9 +363,9 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
         $result['repository'] = [];
         if (isset($result['repository_id'])
-            && (false !== $r = $this->dbs->getIdForLid($t_agents, $result['repository_id']))
+            && (false !== $res = $this->dbs->getIdForInternalId($result['repository_id']))
         ) {
-            $result['repository']['resourceId'] = $r;
+            $result['repository']['resourceId'] = $res;
         }
         if (empty($result['repository'])) {
             unset($result['repository']);
@@ -410,36 +373,24 @@ class SourceDescriptionStorager extends GeniBaseStorager
 
         $result['mediator'] = [];
         if (isset($result['mediator_id'])
-            && (false !== $r = $this->dbs->getIdForLid($t_agents, $result['mediator_id']))
+            && (false !== $res = $this->dbs->getIdForInternalId($result['mediator_id']))
         ) {
-            $result['mediator']['resourceId'] = $r;
+            $result['mediator']['resourceId'] = $res;
         }
         if (empty($result['mediator'])) {
             unset($result['mediator']);
         }
 
-        $result['attribution'] = [];
-        if (isset($result['att_contributor_id'])
-            && ! empty($r = $this->dbs->getIdForLid($t_agents, $result['att_contributor_id']))
-        ) {
-            $result['attribution']['contributor'] = [
-                'resourceId' => $r,
-            ];
-        }
-        if (! empty($result['att_modified'])) {
-            $result['attribution']['modified'] = date(DATE_W3C, strtotime($result['att_modified']));
-        }
-        if (! empty($result['att_changeMessage'])) {
-            $result['attribution']['changeMessage'] = $result['att_changeMessage'];
-        }
-        if (empty($result['attribution'])) {
-            unset($result['attribution']);
+        /** @var SourceDescription $entity */
+        $entity = parent::unpackLoadedData($entity, $result);
+
+        if (! empty($res = self::unpackAttribution($result))) {
+            $entity->setAttribution($res);
         }
 
-        $entity = parent::processRaw($entity, $result);
-
+        // Load childs
         $res = $this->newStorager(SourceReference::class)
-            ->loadList(
+            ->loadComponents(
                 $entity,
                 [
                 'is_componentOf'    => true,
@@ -449,7 +400,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
             $entity->setComponentOf($res[0]);
         }
 
-        $res = $this->newStorager(SourceReference::class)->loadList($entity);
+        $res = $this->newStorager(SourceReference::class)->loadComponents($entity);
         if (! empty($res)) {
             $entity->setSources($res);
         }
@@ -471,7 +422,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         if (! empty($res = $this->loadAllTextValues(self::GROUP_DESCRIPTION, $entity))) {
             $entity->setDescriptions($res);
         }
-        if (! empty($res = $this->newStorager(Identifier::class)->loadList($entity))) {
+        if (! empty($res = $this->newStorager(Identifier::class)->loadComponents($entity))) {
             $entity->setIdentifiers($res);
         }
 

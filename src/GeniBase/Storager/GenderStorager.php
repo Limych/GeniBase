@@ -3,7 +3,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Gender;
-use GeniBase\Util;
 use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
@@ -21,76 +20,50 @@ class GenderStorager extends ConclusionStorager
     }
 
     /**
-     *
-     * @param mixed          $entity
-     * @param ExtensibleData $context
-     * @param array|null     $o
-     * @return ExtensibleData|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
      */
-    public function save($entity, ExtensibleData $context = null, $o = null)
+    protected function getTableName()
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
-        }
+        return $this->dbs->getTableName('genders');
+    }
 
-        $o = $this->applyDefaultOptions($o, $entity);
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     *
+     * @throws \UnexpectedValueException
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
         $this->makeUuidIfEmpty($entity, $o);
 
-        $t_genders = $this->dbs->getTableName('genders');
+        $data = parent::packData4Save($entity, $context, $o);
 
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'id');
+        $t_places = $this->getTableName();
+        $t_sources = $this->dbs->getTableName('sources');
 
-        if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+        /** @var Gender $entity */
+        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
-        $data['_person_id'] = $r;
-        if (isset($ent['type'])) {
-            $data['type_id'] = $this->getTypeId($ent['type']);
+        $data['_person_id'] = $res;
+        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['type_id'] = $res;
         }
 
-        // Save data
-        $_id = $this->dbs->getLidForId($t_genders, $data['id']);
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update(
-                $t_genders,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_genders, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
-        }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
-        return $entity;
+        return $data;
     }
 
     protected function getSqlQueryParts()
     {
-        $t_genders = $this->dbs->getTableName('genders');
         $t_types = $this->dbs->getTableName('types');
 
-        $qparts = [
-            'fields'    => [],  'tables'    => [],  'bundles'   => [],
-        ];
-
-        $qparts['fields'][]     = "gn.*";
-        $qparts['tables'][]     = "$t_genders AS gn";
-        $qparts['bundles'][]    = "";
+        $qparts = parent::getSqlQueryParts();
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp2._id = gn.type_id";
-
-        $qp = parent::getSqlQueryParts();
-        $qp['bundles'][0]   = "cn.id = gn.id";
-        $qparts = array_merge_recursive($qparts, $qp);
+        $qparts['bundles'][]    = "tp._id = t.type_id";
 
         return $qparts;
     }
@@ -103,7 +76,7 @@ class GenderStorager extends ConclusionStorager
             $result = $this->dbs->getDb()->fetchAssoc("$q WHERE gn._id = ?", [$_id]);
         } elseif (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
             $result = $this->dbs->getDb()->fetchAssoc(
-                "$q WHERE gn._person_id = ?",
+                "$q WHERE t._person_id = ?",
                 [$_person_id]
             );
         }
@@ -115,7 +88,7 @@ class GenderStorager extends ConclusionStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+        if (! defined('DEBUG_SECONDARY') && mt_rand(1, 10000) > self::GC_PROBABILITY) {
             return; // Skip cleaning now
         }
 

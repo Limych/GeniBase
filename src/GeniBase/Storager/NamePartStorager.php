@@ -3,7 +3,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\NamePart;
-use GeniBase\Util;
 use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
@@ -21,72 +20,48 @@ class NamePartStorager extends GeniBaseStorager
     }
 
     /**
-     *
-     * @param mixed          $entity
-     * @param ExtensibleData $context
-     * @param array|null     $o
-     * @return ExtensibleData|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
      */
-    public function save($entity, ExtensibleData $context = null, $o = null)
+    protected function getTableName()
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
+        return $this->dbs->getTableName('name_parts');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     *
+     * @throws \UnexpectedValueException
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        $data = parent::packData4Save($entity, $context, $o);
+
+        /** @var NamePart $entity */
+        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+            throw new \UnexpectedValueException('Context internal ID required!');
+        }
+        $data['_name_form_id'] = (int) $res;
+        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['type_id'] = $res;
+        }
+        if (! empty($res = $entity->getValue())) {
+            $data['value'] = $res;
         }
 
-        $t_nps = $this->dbs->getTableName('name_parts');
-
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'value');
-        if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
-        }
-        $data['_name_form_id'] = (int) $r;
-        if (isset($ent['type'])) {
-            $data['type_id'] = $this->getTypeId($ent['type']);
-        }
-
-        // Save data
-        $_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id');
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $this->dbs->getDb()->update(
-                $t_nps,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_nps, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
-        }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
-        return $entity;
+        return $data;
     }
 
     protected function getSqlQueryParts()
     {
-        $t_nparts = $this->dbs->getTableName('name_parts');
         $t_types = $this->dbs->getTableName('types');
 
-        $qparts = [
-            'fields'    => [],  'tables'    => [],  'bundles'   => [],
-        ];
-
-        $qparts['fields'][]     = "np.*";
-        $qparts['tables'][]     = "$t_nparts AS np";
-        $qparts['bundles'][]    = "";
+        $qparts = parent::getSqlQueryParts();
 
         $qparts['fields'][]     = "tp.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp";
-        $qparts['bundles'][]    = "tp._id = np.type_id";
-
-        $qp = parent::getSqlQueryParts();
-        //         $qp['bundles'][0]   = "cn.id = gn.id";
-        $qparts = array_merge_recursive($qparts, $qp);
+        $qparts['bundles'][]    = "tp._id = t.type_id";
 
         return $qparts;
     }
@@ -102,7 +77,7 @@ class NamePartStorager extends GeniBaseStorager
         return $result;
     }
 
-    protected function loadListRaw($context, $o)
+    protected function loadComponentsRaw($context, $o)
     {
         $q = $this->getSqlQuery();
         $result = false;
@@ -117,7 +92,7 @@ class NamePartStorager extends GeniBaseStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+        if (! defined('DEBUG_SECONDARY') && mt_rand(1, 10000) > self::GC_PROBABILITY) {
             return; // Skip cleaning now
         }
 

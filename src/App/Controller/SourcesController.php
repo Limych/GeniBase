@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-use App\ApiLinksUpdater;
+use App\Rs\ApiLinksUpdater;
 use Gedcomx\Rs\Client\Rel;
 use Gedcomx\Source\SourceDescription;
 use GeniBase\Common\Statistic;
@@ -58,7 +58,7 @@ class SourcesController extends BaseController
             ]
         );
 
-        if (false === $gedcomx) {
+        if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
         }
 
@@ -78,9 +78,9 @@ class SourcesController extends BaseController
     public function getComponents(Application $app, Request $request, $id = null)
     {
         $gedcomx = StoragerFactory::newStorager($app['gb.db'], SourceDescription::class)
-            ->loadListGedcomx([     'id' => $id     ]);
+            ->loadComponentsGedcomx([     'id' => $id     ]);
 
-        if (false === $gedcomx) {
+        if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
         }
 

@@ -3,7 +3,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\EventRole;
-use GeniBase\Util;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\Person;
 
@@ -22,82 +21,61 @@ class EventRoleStorager extends ConclusionStorager
     }
 
     /**
-     *
-     * @param mixed          $entity
-     * @param ExtensibleData $context
-     * @param array|null     $o
-     * @return ExtensibleData|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
      */
-    public function save($entity, ExtensibleData $context = null, $o = null)
+    protected function getTableName()
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
+        return $this->dbs->getTableName('event_roles');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     *
+     * @throws \UnexpectedValueException
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
         }
+        $data = parent::packData4Save($entity, $context, $o);
 
-        $o = $this->applyDefaultOptions($o, $entity);
-        $this->makeUuidIfEmpty($entity, $o);
-
-        $t_eroles = $this->dbs->getTableName('event_roles');
         $t_persons = $this->dbs->getTableName('persons');
 
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'id', 'details');
-        if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+        /** @var EventRole $entity */
+        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
-        $data['_event_id'] = $r;
-        if (isset($ent['type'])) {
-            $data['type_id'] = $this->getTypeId($ent['type']);
+        $data['_event_id'] = $res;
+        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['type_id'] = $res;
         }
-        if (! isset($ent['person']) || ! isset($ent['person']['resourceId'])) {
-            throw new \UnexpectedValueException('Person reference URI required!');
+        if (empty($res = $entity->getPerson()) || empty($res = $res->getResourceId())) {
+            throw new \UnexpectedValueException('Person reference ID required!');
+        } elseif (! empty($res = $this->dbs->getInternalId($t_persons, $res))) {
+            $data['person_id'] = $res;
         }
-        if (! empty($r = (int) $this->dbs->getLidForId($t_persons, $ent['person']['resourceId']))) {
-            $data['person_id'] = $r;
+        if (! empty($res = $entity->getDetails())) {
+            $data['details'] = $res;
         }
 
-        // Save data
-        $_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id');
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $this->dbs->getDb()->update(
-                $t_eroles,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_eroles, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
         }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
-        return $entity;
+        return $data;
     }
 
     protected function getSqlQueryParts()
     {
-        $t_eroles = $this->dbs->getTableName('event_roles');
         $t_types = $this->dbs->getTableName('types');
 
-        $qparts = [
-            'fields'    => [],  'tables'    => [],  'bundles'   => [],
-        ];
-
-        $qparts['fields'][]     = "er.*";
-        $qparts['tables'][]     = "$t_eroles AS er";
-        $qparts['bundles'][]    = "";
+        $qparts = parent::getSqlQueryParts();
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp2._id = er.type_id";
-
-        $qp = parent::getSqlQueryParts();
-        $qp['bundles'][0]   = "cn.id = er.id";
-        $qparts = array_merge_recursive($qparts, $qp);
+        $qparts['bundles'][]    = "tp2._id = t.type_id";
 
         return $qparts;
     }
@@ -107,26 +85,26 @@ class EventRoleStorager extends ConclusionStorager
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE er._id = ?", [$_id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
         } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE er.id = ?", [$id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
         }
 
         return $result;
     }
 
-    protected function loadListRaw($context, $o)
+    protected function loadComponentsRaw($context, $o)
     {
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE er._event_id = ?", [$_id]);
+            $result = $this->dbs->getDb()->fetchAll("$q WHERE t._event_id = ?", [$_id]);
         }
 
         return $result;
     }
 
-    protected function processRaw($entity, $result)
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
@@ -137,31 +115,27 @@ class EventRoleStorager extends ConclusionStorager
         // Unpack data
         $result['person'] = [];
         if (! empty($result['person_id'])
-            && ! empty($rid = $this->dbs->getIdForLid($t_persons, $result['person_id']))
+            && ! empty($res = $this->dbs->getPublicId($t_persons, $result['person_id']))
         ) {
-            $result['person']['resourceId'] = $rid;
+            $result['person']['resourceId'] = $res;
         }
         if (empty($result['person'])) {
             unset($result['person']);
         }
 
-        /**
- * @var EventRole $entity
-*/
-        $entity = parent::processRaw($entity, $result);
+        /** @var EventRole $entity */
+        $entity = parent::unpackLoadedData($entity, $result);
 
         return $entity;
     }
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var EventRole $entity
-*/
+        /** @var EventRole $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getPerson()) && ! empty($rid = $r->getResourceId())) {
-            $gedcomx->embed($this->newStorager(Person::class)->loadGedcomx([ 'id' => $rid ]));
+        if (! empty($res = $entity->getPerson()) && ! empty($res = $res->getResourceId())) {
+            $gedcomx->embed($this->newStorager(Person::class)->loadGedcomx([ 'id' => $res ]));
         }
 
         return $gedcomx;
@@ -169,9 +143,15 @@ class EventRoleStorager extends ConclusionStorager
 
     protected function garbageCleaning()
     {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+        if (! defined('DEBUG_SECONDARY') && mt_rand(1, 10000) > self::GC_PROBABILITY) {
+            if (defined('DEBUG_PROFILE')) {
+                \App\Util\Profiler::stopTimer(__METHOD__);
+            }
             return; // Skip cleaning now
         }
 
@@ -182,5 +162,8 @@ class EventRoleStorager extends ConclusionStorager
             "SELECT 1 FROM $t_events AS ev WHERE ev._id = er._event_id )";
 
         $this->dbs->getDb()->query($q);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
     }
 }

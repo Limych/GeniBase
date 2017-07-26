@@ -2,10 +2,8 @@
 
 // enable the debug mode
 $app['debug'] = true;
-
-// === Logging ================================================================
-
-$app['monolog.level'] = Monolog\Logger::DEBUG;
+// $app['debug.secondary'] = true;
+// $app['debug.profile'] = true;
 
 // === Profiler ===============================================================
 

@@ -4,26 +4,16 @@ namespace App\Controller\Importer;
 use App\Util;
 use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Util\FormalDate;
-use GeniBase\Storager\GeniBaseStorager;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
+use GeniBase\Types\PlaceTypes;
+use Silex\Application;
 
-class PlacesImporter
+class PlacesImporter extends GeniBaseImporter
 {
 
     const OVERTIME_COOKIE   = 'PlacesImporter';
-
-    protected $app;
-    protected $gbs;
-
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-        $this->gbs = new GeniBaseStorager($app['gb.db']);
-    }
 
     protected function parsePlace($raw, $parentPlace)
     {
@@ -81,33 +71,47 @@ class PlacesImporter
 
     public function import(Request $request)
     {
+        $place_types = [
+            PlaceTypes::COUNTRY,
+            PlaceTypes::FIRST_LEVEL,
+            PlaceTypes::SECOND_LEVEL,
+            PlaceTypes::THIRD_LEVEL,
+        ];
+
         $start = $request->cookies->getInt(self::OVERTIME_COOKIE);
 
         $places = $this->getPlaces();
         $count = count($places);
 
+        $overtime = false;
         for ($cnt = $start; $cnt < $count; $cnt++) {
             if (Util::executionTime() > 10000) {
-                $response = new Response("<progress value='$cnt' max='$count'>$cnt records</progress>");
-                $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, $cnt));
-                $response->headers->set('Refresh', '0; url=' . $request->getUri());
-                return $response;
+                $overtime = true;
+                break;
             }
 
             /** @var PlaceDescription $plc */
             unset($plc);
-            $x = preg_split("/\s+>\s+/", $places[$cnt], null, PREG_SPLIT_NO_EMPTY);
-            foreach ($x as $v) {
-                $place = $this->parsePlace($v, $plc);
+            $segments = preg_split("/\s+>\s+/", $places[$cnt], null, PREG_SPLIT_NO_EMPTY);
+            $max = count($segments) - 1;
+            for ($i = 0; $i <= $max; $i++) {
+                $place = $this->parsePlace($segments[$i], $plc);
+                if ($i == $max) {
+                    $place['type'] = PlaceTypes::SETTLEMENT;
+                } else {
+                    $place['type'] = $place_types[$i];
+                }
                 $plc = $this->gbs->newStorager(PlaceDescription::class)->save($place);
             }
         }
 
-        $url = $this->app['url_generator']->generate('api_statistic');
-        $subRequest = Request::create($url);
-        $response = $this->app->handle($subRequest, HttpKernelInterface::SUB_REQUEST, false);
-
-        $response->headers->clearCookie(self::OVERTIME_COOKIE);
+        $response = new Response("<div><progress value='$cnt' max='$count'></progress> $cnt of $count places</div>");
+        if ($overtime) {
+            $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, $cnt));
+            $response->headers->set('Refresh', '0; url=' . $request->getUri());
+        } else {
+            $response->headers->clearCookie(self::OVERTIME_COOKIE);
+        }
         return $response;
     }
 
@@ -122,5 +126,25 @@ class PlacesImporter
         }
 
         return $places;
+    }
+
+    public function updatePlaceGeoCoordinates(Application $app, Request $request)
+    {
+        $plc = $this->gbs->newStorager(PlaceDescription::class);
+
+        $t_places = $app['gb.db']->getTableName('places');
+
+        $query = "SELECT _id FROM $t_places AS p1 " .
+            "WHERE p1._calculatedGeo = 1 OR (p1.latitude IS NULL AND p1.longitude IS NULL " .
+            "AND EXISTS ( SELECT 1 FROM $t_places AS p2 WHERE " .
+            "p2.jurisdiction_id = p1._id AND p2.latitude AND p2.longitude " .
+            ")) ORDER BY RAND()";
+        $result = $app['db']->fetchAll($query);
+        foreach ($result as $res) {
+            $plc->updatePlaceGeoCoordinates($res['_id']);
+        }
+
+        $response = new Response('Done.');
+        return $response;
     }
 }

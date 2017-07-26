@@ -7,32 +7,33 @@
         	{% if bc is empty %}
         	    {% set bc = '<li class="breadcrumb-item active"></li>' %}
         	{% else %}
-        	    {% set bc = '<li class="breadcrumb-item"><a href="' ~ path('place', {'id': place.getId()}) ~ '"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;' ~ place.getNames()[0].getValue() ~ '</a></li>' ~ bc %}
+        	    {% set bc = '<li class="breadcrumb-item"><a href="' ~ path('place', {'id': place.getId()}) ~ '"><i class="fa fa-map-marker mr-1" aria-hidden="true"></i>' ~ place.getNames()[0].getValue() ~ '</a></li>' ~ bc %}
         	{% endif %}
     	{% endfor %}
-		<ol class="card-header breadcrumb">
+		<ol class="card-header breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ path('places-root') }}"><i class="fa fa-globe mr-1" aria-hidden="true"></i>Весь мир</a></li>
 			{{ bc|raw }}
 		</ol>
+        {% set place = gedcomx.getPlaces()[0] %}
+        {% if place.getLatitude() %}
+		<div class="card-img-top place-map" style="background-image:url('{{ place_map(place.getLatitude(), place.getLongitude(), map_zoom) }}')"></div>
+		{% endif %}
 		<div class="card-block">
-        	{% set place = gedcomx.getPlaces()[0] %}
-			{% set show_title = true %}
-			{% set has_subtitle = false %}
-        	{% for name in place.getNames() %}
-        		{% if show_title %}
-    				{% set show_title = false %}
-    		<h2 class="card-title"><i class="fa fa-map-marker" aria-hidden="true"></i> {{ name.getValue() }}</h2>
+            <h2 class="card-title"><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>{%
+            set firstName = true %}{%
+            set hasSinonims = false %}{%
+            for name in place.getNames() %}{%
+                if not firstName %}{% 
+                    if hasSinonims %}, {% else %} <small>({% endif %}{% 
+                    set hasSinonims = true %}{% 
+                endif %}{{ 
+                name.getValue() }}{% 
+                set firstName = false %}{% 
+            endfor %}{% 
+            if hasSinonims %})</small>{% endif %}</h2>
 			<div class="card-subtitle">
-				{% else %}
-					{% if has_subtitle %}, {% endif %}
-    				{% set has_subtitle = true %}
-    		    {{ name.getValue() }}
-				{% endif %}
-        	{% endfor %}
-			{% if has_subtitle %}
-				<span class="mx-3">&bullet;</span>
-			{% endif %}
         	{% if place.getTemporalDescription() != null %}
-        		{{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }}
+        		{{ place.getTemporalDescription().getNormalizedExtensions()[1].getValue() }}
 				<span class="mx-3">&bullet;</span>
         	{% endif %}
         	{% if place.getLatitude() %}
@@ -44,36 +45,70 @@
             {% if place.getConfidence() %}
                 <span class="confidence">Достоверность:
                 {% if place.getConfidence() == "http://gedcomx.org/High" %}
-                    <span class="high">Высокая</span>
+                    <span class="high"><i class="fa fa-certificate mr-1" aria-hidden="true"></i>Высокая</span>
                 {% elseif place.getConfidence() == "http://gedcomx.org/Medium" %}
-                    <span class="medium">Средняя</span>
+                    <span class="medium"><i class="fa fa-certificate mr-1" aria-hidden="true"></i>Средняя</span>
                 {% elseif place.getConfidence() == "http://gedcomx.org/Low" %}
-                    <span class="low">Низкая</span>
+                    <span class="low"><i class="fa fa-certificate mr-1" aria-hidden="true"></i>Низкая</span>
                 {% endif %}
                 </span>
                 <span class="mx-3">&bullet;</span>
             {% endif %}
                 <span class="text-nowrap">{{ place.getId() }}</span>
+            {% if place.getType() %}
+                <span class="hidden-text">
+                    <span class="mx-3">&bullet;</span>
+                    <span class="text-nowrap">{{ place.getType() }}</span>
+                </span>
+            {% endif %}
 			</div>
 			<div class="card-text mt-5">
-    			<div>
             	{% if components %}
-            		Включает в себя:
+                <div>
+            		<h3>Включает в себя</h3>
             		<ul class="list-unstyled component-refs">
             		{% set first_shown = false %}
                 	{% for place in components %}
-					    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a></li>
+					    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>
+					    <span class="place-short-info">
+					    {% if place.getTemporalDescription() != null %}
+                            ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
+                        {% endif %}
+                        {% if place.getType() %}
+                            {% if place.getType() == '//GeniBase/Settlement' %}
+                            <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
+                            {% else %}
+                            <i class="fa fa-sitemap place-type-icon" aria-hidden="true"></i>
+                            {% endif %}
+                        {% else %}
+                            <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
+                        {% endif %}
+                        </span></li>
             	    {% endfor %}
             	    </ul>
+                </div>
             	{% endif %}
-    			</div>
             	{% if neighbors %}
-    			<div class="mt-3">
-            		Поблизости также находятся:
+    			<div class="mt-5">
+            		<h3>Поблизости также находятся</h3>
             		<ul class="list-unstyled component-refs">
             		{% set first_shown = false %}
                 	{% for place in neighbors %}
-					    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a></li>
+                        <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>
+                        <span class="place-short-info">
+                        {% if place.getTemporalDescription() != null %}
+                            ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
+                        {% endif %}
+                        {% if place.getType() %}
+                            {% if place.getType() == '//GeniBase/Settlement' %}
+                            <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
+                            {% else %}
+                            <i class="fa fa-sitemap place-type-icon" aria-hidden="true"></i>
+                            {% endif %}
+                        {% else %}
+                            <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
+                        {% endif %}
+                        </span></li>
             	    {% endfor %}
             	    </ul>
     			</div>

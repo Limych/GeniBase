@@ -7,8 +7,13 @@ use Gedcomx\Common\ExtensibleData;
 use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use GeniBase\Util;
+use GeniBase\Util\DateUtil;
+use GeniBase\Util\IDateTime;
 use GeniBase\Util\UUID;
 use Gedcomx\Common\TextValue;
+use Gedcomx\Common\Attribution;
+use Gedcomx\Common\ResourceReference;
+use Gedcomx\Conclusion\DateInfo;
 
 /**
  *
@@ -19,7 +24,7 @@ class GeniBaseStorager
 
     const GBID_LENGTH = 12;
 
-    const TABLES_WITH_GBID = 'persons sources places events agents';
+    const TABLES_WITH_GBID = 'agents events persons places sources';
 
     /**
      * @var DBaseService
@@ -67,12 +72,13 @@ class GeniBaseStorager
      * @param ExtensibleData $entity
      * @return array
      */
-    public function getDefaultOptions(ExtensibleData $entity = null)
+    public function getDefaultOptions($entity = null)
     {
         return [
             'makeId_name'       => null,
             'makeId_unique'     => true,
             'loadCompanions'    => false,
+            'sortComponents'    => false,
         ];
     }
 
@@ -82,65 +88,9 @@ class GeniBaseStorager
      * @param ExtensibleData $entity
      * @return array
      */
-    public function applyDefaultOptions($o, ExtensibleData $entity = null)
+    public function applyDefaultOptions($o, $entity = null)
     {
         return Util::parseArgs($o, $this->getDefaultOptions($entity));
-    }
-
-    public static function hash($type = 'alnum', $length = 8, $data = null)
-    {
-        switch ($type) {
-            case 'alnum':
-                $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                break;
-            case 'alpha':
-                $pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                break;
-            case 'hexdec':
-                $pool = '0123456789abcdef';
-                break;
-            case 'numeric':
-                $pool = '0123456789';
-                break;
-            case 'nozero':
-                $pool = '123456789';
-                break;
-            case 'distinct':
-                $pool = '234679ACDEFHJKLMNPRTUVWXYZ';
-                break;
-            default:
-                $pool = (string) $type;
-                break;
-        }
-
-        if (empty($pool)) {
-            return '';
-        }
-
-        $token = '';
-        $max = strlen($pool);
-        $log = log($max, 2);
-        $bytes = (int) ($log / 8) + 1; // length in bytes
-        $bits = (int) $log + 1; // length in bits
-        $filter = (int) (1 << $bits) - 1; // set all lower bits to 1
-        for ($i = 0; $i < $length; $i ++) {
-            if (! empty($data)) {
-                // Predefined hash
-                $rnd = hexdec(substr(md5($data.$i), 0, $bytes*2));
-                $rnd = $rnd & $filter; // discard irrelevant bits
-                while ($rnd >= $max) {
-                    $rnd -= $max;
-                }
-            } else {
-                // Random data
-                do {
-                    $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes)));
-                    $rnd = $rnd & $filter; // discard irrelevant bits
-                } while ($rnd >= $max);
-            }
-            $token .= $pool[$rnd];
-        }
-        return $token;
     }
 
     /**
@@ -163,7 +113,7 @@ class GeniBaseStorager
      */
     public static function makeGbid($name = null)
     {
-        return join('-', array_reverse(str_split(self::hash('distinct', self::GBID_LENGTH, $name), 4)));
+        return join('-', array_reverse(str_split(Util::hash('distinct', self::GBID_LENGTH, $name), 4)));
     }
 
     /**
@@ -174,6 +124,7 @@ class GeniBaseStorager
     public function makeGbidUnique($name = null)
     {
         static $tables;
+        static $cache;
 
         if (! isset($tables)) {
             // Initialization
@@ -183,24 +134,30 @@ class GeniBaseStorager
                 },
                 preg_split('/[\s,]+/', self::TABLES_WITH_GBID, null, PREG_SPLIT_NO_EMPTY)
             );
+            $cache = [];
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         $suffix = '';
         do {
-            $gbid = self::makeGbid(empty($name) ? null : $name . $suffix);
-            $suffix += 1;
+            do {
+                $gbid = self::makeGbid(empty($name) ? null : $name . $suffix);
+                $suffix += 1;
+            } while (in_array($gbid, $cache));
+            $cache[] = $gbid;
 
-            $q = "";
-            $qid = $this->dbs->getDb()->quote($gbid);
-            $cnt = 0;
-            foreach ($tables as $t) {
-                if (1 != ++$cnt) {
-                    $q  .= " UNION ";
+            foreach ($tables as $tbl) {
+                if (false !== $this->dbs->getDb()->fetchColumn("SELECT 1 FROM $tbl WHERE id = ?", [$gbid])) {
+                    continue 2;
                 }
-                $q  .= "SELECT 1 FROM $t WHERE id = " . $qid;
             }
-        } while (! empty($q) && (false !== $r = $this->dbs->getDb()->fetchColumn($q)));
+        } while (false);
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return $gbid;
     }
 
@@ -274,7 +231,7 @@ class GeniBaseStorager
      *
      * @throws \BadMethodCallException
      */
-    public function loadListGedcomx($entity, $context = null, $o = null)
+    public function loadComponentsGedcomx($entity, $context = null, $o = null)
     {
         $class = get_class($this);
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
@@ -306,7 +263,19 @@ class GeniBaseStorager
         }
 
         $result = $this->loadRaw($entity, $context, $o);
-        return $this->processRaw($this->getObject(), $result);
+        return $this->unpackLoadedData($this->getObject(), $result);
+    }
+
+    /**
+     * Compare two objects for sorting list of components.
+     *
+     * @param object $a
+     * @param object $b
+     * @return number
+     */
+    protected function compareComponents($a, $b)
+    {
+        return 0;
     }
 
     /**
@@ -315,15 +284,18 @@ class GeniBaseStorager
      * @param array|null $o
      * @return object[]|false
      */
-    public function loadList($context = null, $o = null)
+    public function loadComponents($context = null, $o = null)
     {
         if (! $context instanceof ExtensibleData) {
             $context = $this->getObject($context);
         }
 
-        if (is_array($result = $this->loadListRaw($context, $o))) {
-            foreach ($result as $k => $r) {
-                $result[$k] = $this->processRaw($this->getObject(), $r);
+        if (is_array($result = $this->loadComponentsRaw($context, $o))) {
+            foreach ($result as $k => $res) {
+                $result[$k] = $this->unpackLoadedData($this->getObject(), $res);
+            }
+            if (! empty($o['sortComponents'])) {
+                usort($result, [$this, 'compareComponents']);
             }
         }
         return $result;
@@ -339,10 +311,11 @@ class GeniBaseStorager
     {
         $qparts = $this->getSqlQueryParts();
 
-        foreach ($qparts['tables'] as $k => $v) {
-            $qparts['joins'][$k] = $v . (empty($b = $qparts['bundles'][$k]) ? '' : " ON $b");
+        $qparts['joins'] = [];
+        for ($i = 0; $i < count($qparts['tables']); $i++) {
+            $qparts['joins'][] = $qparts['tables'][$i] . (empty($b = $qparts['bundles'][$i]) ? '' : " ON $b");
         }
-        $qparts['fields'][] = array_shift($qparts['fields']);
+        $qparts['fields'] = array_reverse($qparts['fields']);
         if (! empty($fields)) {
             if (! is_array($fields)) {
                 $fields = preg_split('/,\s*/', $fields, null, PREG_SPLIT_NO_EMPTY);
@@ -350,7 +323,7 @@ class GeniBaseStorager
             $qparts['fields'] = array_merge($qparts['fields'], $fields);
         }
 
-        return $head . ' ' . join(', ', $qparts['fields']) . ' FROM ' . join(' LEFT JOIN ', $qparts['joins']) . ' ';
+        return $head . ' ' . join(', ', $qparts['fields']) . ' FROM ' . join(' LEFT JOIN ', $qparts['joins']) . ' ' . $tail;
     }
 
     /**
@@ -359,9 +332,15 @@ class GeniBaseStorager
      */
     protected function getSqlQueryParts()
     {
+        $table = $this->getTableName();
+
         $qparts = [
             'fields'    => [],  'tables'    => [],  'bundles'   => [],
         ];
+
+        $qparts['fields'][]     = "t.*";
+        $qparts['tables'][]     = "$table AS t";
+        $qparts['bundles'][]    = "";
 
         return $qparts;
     }
@@ -393,7 +372,7 @@ class GeniBaseStorager
      *
      * @throws \BadMethodCallException
      */
-    protected function loadListRaw($context, $o)
+    protected function loadComponentsRaw($context, $o)
     {
         $class = get_class($this);
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
@@ -409,7 +388,42 @@ class GeniBaseStorager
      * @param array          $result
      * @return object|false
      */
-    protected function processRaw($entity, $result)
+    protected function processRawAttribution($entity, $result)
+    {
+        if (! is_array($result)) {
+            return $result;
+        }
+
+        $t_agents = $this->dbs->getTableName('agents');
+
+        $result['attribution'] = [];
+        if (isset($result['att_contributor_id'])
+            && ! empty($res = $this->dbs->getPublicId($t_agents, $result['att_contributor_id']))
+        ) {
+            $result['attribution']['contributor'] = [
+                'resourceId' => $res,
+            ];
+        }
+        if (! empty($result['att_modified'])) {
+            $result['attribution']['modified'] = date(DATE_W3C, strtotime($result['att_modified']));
+        }
+        if (! empty($result['att_changeMessage'])) {
+            $result['attribution']['changeMessage'] = $result['att_changeMessage'];
+        }
+        if (empty($result['attribution'])) {
+            unset($result['attribution']);
+        }
+
+        return $result;
+    }
+
+    /**
+     *
+     * @param ExtensibleData $entity
+     * @param array          $result
+     * @return object|false
+     */
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
@@ -425,22 +439,236 @@ class GeniBaseStorager
     }
 
     /**
+     * Return table name for store entity data.
+     *
+     * @return string Table full name.
+     *
+     * @throws \BadMethodCallException
+     */
+    protected function getTableName()
+    {
+        $class = get_class($this);
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
+            throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
+
+        return '';
+    }
+
+    /**
+     * Return data of entity for store to database.
+     *
+     * @param object|array $entity
+     * @param ExtensibleData $context
+     * @param array|string $o
+     * @return mixed[]
+     *
+     * @throws \BadMethodCallException
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        $class = get_class($this);
+        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
+            throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        }
+
+        $data = [];
+
+        if ($entity instanceof ExtensibleData) {
+            if (! empty($res = GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
+                $data['_id'] = (int) $res;
+            }
+            if (! empty($res = $entity->getId())) {
+                $data['id'] = $res;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param Attribution $attribution
+     * @return mixed[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function packAttribution($attribution)
+    {
+        $data = [];
+
+        if (empty($attribution)) {
+            $attribution = new Attribution();
+        } elseif (! $attribution instanceof Attribution) {
+            throw new \InvalidArgumentException('Argument 1 must be an instance of ' . Attribution::class);
+        }
+
+        $t_agents = $this->dbs->getTableName('agents');
+
+        if (empty($res = $attribution->getContributor()) && ! empty($res2 = $this->dbs->getAgent())) {
+            $attribution->setContributor(new ResourceReference([ 'resourceId' => $res2->getId() ]));
+        }
+        if (! empty($res = $attribution->getContributor()) && ! empty($res = $res->getResourceId())
+            && ! empty($res = $this->dbs->getInternalId($t_agents, $res))
+        ) {
+            $data['att_contributor_id'] = $res;
+        }
+        if (! empty($res = $attribution->getModified())) {
+            $data['att_modified'] = date(IDateTime::SQL, strtotime($res));
+        }
+        if (! empty($res = $attribution->getChangeMessage())) {
+            $data['att_changeMessage'] = $res;
+        }
+
+        return $data;
+    }
+
+    protected function unpackAttribution($data)
+    {
+        $result = [];
+
+        $t_agents = $this->dbs->getTableName('agents');
+
+        if (! empty($data['att_contributor_id'])
+            && ! empty($res = $this->dbs->getPublicId($t_agents, $data['att_contributor_id']))
+        ) {
+            $result['contributor'] = [  'resourceId' => $res    ];
+        }
+        if (! empty($data['att_modified'])) {
+            $result['modified'] = date(DATE_W3C, strtotime($data['att_modified']));
+        }
+        if (! empty($data['att_changeMessage'])) {
+            $result['changeMessage'] = $data['att_changeMessage'];
+        }
+
+        return (empty($result) ? null : new Attribution($result));
+    }
+
+    /**
+     *
+     * @param DateInfo $dateInfo
+     * @param string $fieldsPrefix
+     * @return mixed[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected static function packDateInfo($dateInfo, $fieldsPrefix = 'date_')
+    {
+        $data = [];
+
+        if (empty($dateInfo)) {
+            return [];
+        } elseif (! $dateInfo instanceof DateInfo) {
+            throw new \InvalidArgumentException('Argument 1 must be an instance of ' . DateInfo::class);
+        }
+
+        if (! empty($res = $dateInfo->getOriginal())) {
+            $data[$fieldsPrefix.'original'] = $res;
+        }
+        if (! empty($res = $dateInfo->getFormal())) {
+            $data[$fieldsPrefix.'formal'] = $res;
+            $period = DateUtil::calcPeriodInDays($res);
+            $data[$fieldsPrefix.'_from_day']   = $period[0];
+            $data[$fieldsPrefix.'_to_day']     = $period[1];
+        }
+
+        return $data;
+    }
+
+    protected function unpackDateInfo($data, $fieldsPrefix = 'date_')
+    {
+        $result = [];
+
+        if (! empty($res = $data[$fieldsPrefix.'original'])) {
+            $result['original'] = $res;
+        }
+        if (! empty($res = $data[$fieldsPrefix.'formal'])) {
+            $result['formal'] = $res;
+        }
+
+        return (empty($result) ? null : new DateInfo($result));
+    }
+
+    protected function getResourceIdFromUri($table, ResourceReference $reference)
+    {
+        if (! empty($res = $reference->getResourceId())
+            || (! empty($res = $reference->getResource()) && empty($reference->getResourceId())
+                && ! empty($res = GeniBaseStorager::getIdFromReference($res))
+            )
+        ) {
+            if (! empty($res = $this->dbs->getInternalId($table, $res))) {
+                return $res;
+            }
+        }
+        return null;
+    }
+
+    /**
      *
      * @param mixed          $entity
      * @param ExtensibleData $context
      * @param array|null     $o
      * @return ExtensibleData|false
-     *
-     * @throws \BadMethodCallException
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         $this->garbageCleaning();
 
-        $class = get_class($this);
-        if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
-            throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#getObject');
         }
+        /** @var ExtensibleData $ent */
+        $ent = $this->getObject($entity);
+        if (! is_a($entity, get_class($ent))) {
+            $ent->initFromArray($entity);
+            $entity = $ent;
+        }
+        unset($ent);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#getObject');
+        }
+
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
+        }
+        $o = $this->applyDefaultOptions($o, $entity);
+        $data = $this->packData4Save($entity, $context, $o);
+        $table = $this->getTableName();
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
+        }
+
+        if (empty($data['_id']) && ! empty($data['id'])) {
+            $data['_id'] = $this->dbs->getInternalId($table, $data['id']);
+        }
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#SQL');
+        }
+        if (! empty($data['_id'])) {
+            $this->dbs->getDb()->update($table, $data, [   '_id' => $data['_id']   ]);
+        } else {
+            unset($data['_id']);
+            try {
+                $this->dbs->getDb()->insert($table, $data);
+                $data['_id'] = $this->dbs->getDb()->lastInsertId();
+            } catch (UniqueConstraintViolationException $e) {
+                // Do nothing
+            }
+        }
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#SQL');
+        }
+
+        if ($entity instanceof ExtensibleData && ! empty($data['_id'])) {
+            GeniBaseInternalProperties::setPropertyOf($entity, '_id', $data['_id']);
+        }
+
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
+        return $entity;
     }
 
     /**
@@ -468,117 +696,20 @@ class GeniBaseStorager
     /**
      *
      * @param string $uri
-     * @return number
+     * @return NULL|string|boolean
+     * @deprecated
      */
-    public function getTypeId($uri)
+    public static function getIdFromReference($uri)
     {
-        static $cache = [];
-
-        if (isset($cache[$uri])) {
-            return $cache[$uri];
+        if (empty($uri)) {
+            return null;
         }
 
-        $t_types = $this->dbs->getTableName('types');
-
-        $result = $this->dbs->getDb()->fetchColumn(
-            "SELECT _id FROM $t_types WHERE uri = ?",
-            [$uri]
-        );
-        if (false !== $result) {
-            $cache[$uri] = (int) $result;
-            return $cache[$uri];
+        if (preg_match('/\#([\w\-]+)/', $uri, $matches)) {
+            return $matches[1];
         }
 
-        $this->dbs->getDb()->insert(
-            $t_types,
-            [
-            'uri' => $uri
-            ]
-        );
-        $cache[$uri] = (int) $this->dbs->getDb()->lastInsertId();
-        return $cache[$uri];
-    }
-
-    /**
-     *
-     * @param number $id
-     * @return string|false
-     */
-    public function getType($id)
-    {
-        static $cache = [];
-
-        if (isset($cache[$id])) {
-            return $cache[$id];
-        }
-
-        $t_types = $this->dbs->getTableName('types');
-
-        $result = $this->dbs->getDb()->fetchColumn(
-            "SELECT uri FROM $t_types WHERE _id = ?",
-            [(int) $id]
-        );
-
-        $cache[$id] = $result;
-        return $result;
-    }
-
-    /**
-     *
-     * @param string $lang
-     * @return number|false
-     */
-    public function getLangId($lang)
-    {
-        static $cache = [];
-
-        if (isset($cache[$lang])) {
-            return $cache[$lang];
-        }
-
-        $t_langs = $this->dbs->getTableName('languages');
-
-        $result = $this->dbs->getDb()->fetchColumn(
-            "SELECT _id FROM $t_langs WHERE lang = ?",
-            [$lang]
-        );
-        if (false !== $result) {
-            $cache[$lang] = (int) $result;
-            return $cache[$lang];
-        }
-
-        $this->dbs->getDb()->insert(
-            $t_langs,
-            [
-            'lang' => $lang
-            ]
-        );
-        $cache[$lang] = (int) $this->dbs->getDb()->lastInsertId();
-        return $cache[$lang];
-    }
-
-    /**
-     *
-     * @param number $id
-     * @return string|false
-     */
-    public function getLang($id)
-    {
-        static $cache = [];
-
-        if (isset($cache[$id])) {
-            return $cache[$id];
-        }
-
-        $t_langs = $this->dbs->getTableName('languages');
-
-        $result = $this->dbs->getDb()->fetchColumn(
-            "SELECT lang FROM $t_langs WHERE _id = ?",
-            [(int) $id]
-        );
-
-        $cache[$id] = $result;
-        return $result;
+        return false;
     }
 
     /**
@@ -598,8 +729,8 @@ class GeniBaseStorager
             $text_value = $text_value->toArray();
         }
 
-        if (! empty($group)) {
-            $text_value['_group'] = $this->getTypeId($group);
+        if (! empty($group) && (false !== $type_id = $this->dbs->getTypeId($ent['type']))) {
+            $text_value['_group'] = $type_id;
         }
 
         $t_tvs = $this->dbs->getTableName('text_values');
@@ -607,30 +738,20 @@ class GeniBaseStorager
         $ent = $text_value;
         $data = Util::arraySliceKeys($ent, 'value', '_group');
 
-        if (! empty($ent['lang']) && (false !== $result = $this->getLangId($ent['lang']))) {
-            $data['lang_id'] = $result;
+        if (! empty($ent['lang']) && (false !== $lang_id = $this->dbs->getLangId($ent['lang']))) {
+            $data['lang_id'] = $lang_id;
         }
-        if (empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+        if (empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
-        $data['_ref'] = $r;
+        $data['_ref_id'] = $res;
 
         if (isset($ent['_id'])) {
-            $this->dbs->getDb()->update(
-                $t_tvs,
-                $data,
-                [
-                '_id' => (int) $ent['_id']
-                ]
-            );
+            $this->dbs->getDb()->update($t_tvs, $data, [    '_id' => (int) $ent['_id']  ]);
             $result = (int) $ent['_id'];
         } else {
-            try {
-                $this->dbs->getDb()->insert($t_tvs, $data);
-                $result = (int) $this->dbs->getDb()->lastInsertId();
-            } catch (UniqueConstraintViolationException $e) {
-                // Do nothing
-            }
+            $this->dbs->getDb()->insert($t_tvs, $data);
+            $result = (int) $this->dbs->getDb()->lastInsertId();
         }
 
         return $result;
@@ -638,9 +759,9 @@ class GeniBaseStorager
 
     /**
      *
-     * @param string         $group
-     * @param array[]        $text_values
-     * @param ExtensibleData $context
+     * @param string                $group
+     * @param array[]|TextValue[]   $text_values
+     * @param ExtensibleData        $context
      *
      * @throws \UnexpectedValueException
      */
@@ -652,13 +773,14 @@ class GeniBaseStorager
 
         $t_tvs = $this->dbs->getTableName('text_values');
 
-        $_group = $this->getTypeId($group);
+        // TODO: Add type_id check
+        $_group = $this->dbs->getTypeId($group);
         if (empty($_ref = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
 
         $tvs = $this->dbs->getDb()->fetchAll(
-            "SELECT _id FROM $t_tvs WHERE _group = ? AND _ref = ? ORDER BY _id",
+            "SELECT _id FROM $t_tvs WHERE _group = ? AND _ref_id = ? ORDER BY _id",
             [$_group, $_ref]
         );
         if (! empty($tvs)) {
@@ -670,7 +792,7 @@ class GeniBaseStorager
             );
         }
         foreach ($text_values as $tv) {
-            if ($tv instanceof TextValue) {
+            if (is_object($tv)) {
                 $tv = $tv->toArray();
             }
             $tv['_group'] = $_group;
@@ -696,9 +818,10 @@ class GeniBaseStorager
      */
     public function loadTextValue($group, ExtensibleData $context)
     {
-        $_group = $this->getTypeId($group);
+        // TODO: Add type_id check
+        $_group = $this->dbs->getTypeId($group);
         if (empty($_ref = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
 
         $t_tvs = $this->dbs->getTableName('text_values');
@@ -706,7 +829,7 @@ class GeniBaseStorager
 
         $q = "SELECT tv.*, l.lang FROM $t_tvs AS tv " .
             "LEFT JOIN $t_langs AS l ON (tv.lang_id = l._id) ".
-            "WHERE tv._group = ? AND tv._ref = ? ORDER BY tv._id LIMIT 1";
+            "WHERE tv._group = ? AND tv._ref_id = ? ORDER BY tv._id LIMIT 1";
 
         if (false !== $result = $this->dbs->getDb()->fetchAssoc($q, [$_group, $_ref])) {
             $result = new TextValue($result);
@@ -724,16 +847,17 @@ class GeniBaseStorager
     public function loadAllTextValues($group, ExtensibleData $context)
     {
         if (empty($_ref = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
-        $_group = $this->getTypeId($group);
+        // TODO: Add type_id check
+        $_group = $this->dbs->getTypeId($group);
 
         $t_tvs = $this->dbs->getTableName('text_values');
         $t_langs = $this->dbs->getTableName('languages');
 
         $q = "SELECT tv.*, l.lang FROM $t_tvs AS tv " .
             "LEFT JOIN $t_langs AS l ON (tv.lang_id = l._id) ".
-            "WHERE tv._group = ? AND tv._ref = ? ORDER BY tv._id";
+            "WHERE tv._group = ? AND tv._ref_id = ? ORDER BY tv._id";
 
         if (false !== $result = $this->dbs->getDb()->fetchAll($q, [$_group, $_ref])) {
             foreach ($result as $k => $v) {
@@ -752,13 +876,16 @@ class GeniBaseStorager
      */
     public function searchRefByTextValues($group, $textValues)
     {
-        $_group = $this->getTypeId($group);
-        if (! is_array($textValues))    $textValues = [$textValues];
+        // TODO: Add type_id check
+        $_group = $this->dbs->getTypeId($group);
+        if (! is_array($textValues)) {
+            $textValues = [$textValues];
+        }
 
         $t_tvs = $this->dbs->getTableName('text_values');
         $t_langs = $this->dbs->getTableName('languages');
 
-        $q = "SELECT tv._ref FROM $t_tvs AS tv ";
+        $q = "SELECT tv._ref_id FROM $t_tvs AS tv ";
         $qw = "WHERE tv._group = ?";
         $data = [$_group];
 
@@ -778,11 +905,13 @@ class GeniBaseStorager
             }
             $qwtv[] = $tmp;
         }
-        if (! empty($qwtv)) $qw .= ' AND (' . implode(' OR ', $qwtv). ')';
+        if (! empty($qwtv)) {
+            $qw .= ' AND (' . implode(' OR ', $qwtv). ')';
+        }
 
         if (false !== $result = $this->dbs->getDb()->fetchAll($q . $qw, $data)) {
             foreach ($result as $k => $v) {
-                $result[$k] = (int) $v['_ref'];
+                $result[$k] = (int) $v['_ref_id'];
             }
         }
 

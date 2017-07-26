@@ -2,11 +2,8 @@
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
-use GeniBase\Util;
-use GeniBase\DBase\DBaseService;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\Fact;
-use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\PlaceDescription;
 
 /**
@@ -24,106 +21,68 @@ class FactStorager extends ConclusionStorager
     }
 
     /**
-     *
-     * @param mixed          $entity
-     * @param ExtensibleData $context
-     * @param array|null     $o
-     * @return ExtensibleData|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
      */
-    public function save($entity, ExtensibleData $context = null, $o = null)
+    protected function getTableName()
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
-        }
+        return $this->dbs->getTableName('facts');
+    }
 
-        $o = $this->applyDefaultOptions($o, $entity);
-        $this->makeUuidIfEmpty($entity, $o);
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        $data = parent::packData4Save($entity, $context, $o);
 
-        $t_facts = $this->dbs->getTableName('facts');
+        $t_facts = $this->getTableName();
         $t_places = $this->dbs->getTableName('places');
 
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'id', 'value');
-        if (empty($context) || empty($r = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context local ID required!');
+        /** @var Fact $entity */
+        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+            throw new \UnexpectedValueException('Context internal ID required!');
         }
-        $data['_person_id'] = $r;
-        if (isset($ent['primary'])) {
-            $data['primary'] = (int) $ent['primary'];
+        $data['_person_id'] = $res;
+        if (! empty($res = $entity->getPrimary())) {
+            $data['primary'] = (int) $res;
         }
-        if (isset($ent['type'])) {
-            $data['type_id'] = $this->getTypeId($ent['type']);
+        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+            $data['type_id'] = $res;
         }
-        if (isset($ent['date'])) {
-            $r = $this->dbs->getDb()->fetchColumn(
-                "SELECT date_id FROM $t_facts WHERE id = ?",
-                [$data['id']]
-            );
-            $dt = new DateInfo($ent['date']);
-            if (false !== $r) {
-                GeniBaseInternalProperties::setPropertyOf($dt, '_id', $r);
-            }
-            if (false !== $dt = $this->newStorager($dt)->save($dt)) {
-                $data['date_id'] = (int) GeniBaseInternalProperties::getPropertyOf($dt, '_id');
-            }
+        if (! empty($res = $entity->getValue())) {
+            $data['value'] = $res;
         }
-        if (isset($ent['place'])) {
-            if (isset($ent['place']['description'])) {
-                $data['place_description'] = $ent['place']['description'];
-
-                if (! empty($id = DBaseService::getIdFromReference($ent['place']['description']))
-                    && (false !== $r = $this->dbs->getLidForId($t_places, $id))
+        if (! empty($res = $entity->getDate())) {
+            $data = array_merge($data, self::packDateInfo($res));
+        }
+        if (! empty($res = $entity->getPlace())) {
+            if (! empty($res2 = $res->getDescriptionRef())) {
+                $data['place_description_uri'] = $res2;
+                if (! empty($res2 = GeniBaseStorager::getIdFromReference($res2))
+                    && ! empty($res2 = $this->dbs->getInternalId($t_places, $res2))
                 ) {
-                    $data['place_description_id'] = (int) $r;
+                    $data['place_description_id'] = (int) $res2;
                 }
             }
-            if (isset($ent['place']['original'])) {
-                $data['place_original'] = $ent['place']['original'];
+            if (! empty($res2 = $res->getOriginal())) {
+                $data['place_original'] = $res2;
             }
         }
 
-        // Save data
-        $_id = (int) $this->dbs->getLidForId($t_facts, $data['id']);
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update(
-                $t_facts,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_facts, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
-        }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-
-        return $entity;
+        return $data;
     }
 
     protected function getSqlQueryParts()
     {
-        $t_facts = $this->dbs->getTableName('facts');
         $t_types = $this->dbs->getTableName('types');
 
-        $qparts = [
-            'fields'    => [],  'tables'    => [],  'bundles'   => [],
-        ];
-
-        $qparts['fields'][]     = "ft.*";
-        $qparts['tables'][]     = "$t_facts AS ft";
-        $qparts['bundles'][]    = "";
+        $qparts = parent::getSqlQueryParts();
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp2._id = ft.type_id";
-
-        $qp = parent::getSqlQueryParts();
-        $qp['bundles'][0]   = "cn.id = ft.id";
-        $qparts = array_merge_recursive($qparts, $qp);
+        $qparts['bundles'][]    = "tp2._id = t.type_id";
 
         return $qparts;
     }
@@ -133,26 +92,26 @@ class FactStorager extends ConclusionStorager
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE er._id = ?", [$_id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
         } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE er.id = ?", [$id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
         }
 
         return $result;
     }
 
-    protected function loadListRaw($context, $o)
+    protected function loadComponentsRaw($context, $o)
     {
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE ft._person_id = ?", [$_id]);
+            $result = $this->dbs->getDb()->fetchAll("$q WHERE t._person_id = ?", [$_id]);
         }
 
         return $result;
     }
 
-    protected function processRaw($entity, $result)
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
@@ -173,23 +132,23 @@ class FactStorager extends ConclusionStorager
             unset($result['place']);
         }
 
-        /**
- * @var Person $entity
-*/
-        $entity = parent::processRaw($entity, $result);
+        /** @var Person $entity */
+        $entity = parent::unpackLoadedData($entity, $result);
+
+        if (! empty($res = self::unpackDateInfo($result))) {
+            $entity->setDate($res);
+        }
 
         return $entity;
     }
 
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
-        /**
- * @var Fact $entity
-*/
+        /** @var Fact $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
         if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = DBaseService::getIdFromReference($r))
+            && ! empty($rid = GeniBaseStorager::getIdFromReference($r))
         ) {
             $gedcomx->embed(
                 $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
@@ -203,7 +162,7 @@ class FactStorager extends ConclusionStorager
     {
         parent::garbageCleaning();
 
-        if (mt_rand(1, 10000) > self::GC_PROBABILITY) {
+        if (! defined('DEBUG_SECONDARY') && mt_rand(1, 10000) > self::GC_PROBABILITY) {
             return; // Skip cleaning now
         }
 

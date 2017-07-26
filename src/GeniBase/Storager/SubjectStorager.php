@@ -29,7 +29,9 @@ class SubjectStorager extends ConclusionStorager
      */
     protected function detectId(ExtensibleData &$entity)
     {
-        if (parent::detectId($entity))  return true;
+        if (parent::detectId($entity)) {
+            return true;
+        }
 
         /** @var Subject $entity */
         if (! empty($r = $entity->getIdentifiers())
@@ -50,19 +52,12 @@ class SubjectStorager extends ConclusionStorager
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
-        }
-
-        $o = $this->applyDefaultOptions($o, $entity);
-        $this->makeUuidIfEmpty($entity, $o);
-
-        // Save data
-        parent::save($entity, $context, $o);
+        /** @var PlaceDescription $entity */
+        $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($r = $entity->getIdentifiers())) {
-            foreach ($r as $id) {
+        if (! empty($res = $entity->getIdentifiers())) {
+            foreach ($res as $id) {
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }
         }
@@ -70,16 +65,16 @@ class SubjectStorager extends ConclusionStorager
         return $entity;
     }
 
-    protected function processRaw($entity, $result)
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
         }
 
         /** @var Subject $entity */
-        $entity = parent::processRaw($entity, $result);
+        $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($res = $this->newStorager(Identifier::class)->loadList($entity))) {
+        if (! empty($res = $this->newStorager(Identifier::class)->loadComponents($entity))) {
             $entity->setIdentifiers($res);
         }
 

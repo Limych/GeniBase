@@ -1,0 +1,30 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+	<div class="card my-3">
+		<div class="card-block">
+            <h2 class="card-title"><i class="fa fa-globe mr-2" aria-hidden="true"></i>Весь мир</h2>
+			<div class="card-text mt-5">
+        		<ul class="list-unstyled component-refs">
+            	{% for place in gedcomx.getPlaces() %}
+                    <li><a href="{{ path('place', {'id': place.getId()}) }}"><i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp;{{ place.getNames()[0].getValue() }}</a>
+                    <span class="place-short-info">
+                    {% if place.getTemporalDescription() != null %}
+                        ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
+                    {% endif %}
+                    {% if place.getType() %}
+                        {% if place.getType() == '//GeniBase/Settlement' %}
+                        <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
+                        {% else %}
+                        <i class="fa fa-sitemap place-type-icon" aria-hidden="true"></i>
+                        {% endif %}
+                    {% else %}
+                        <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
+                    {% endif %}
+                    </span></li>
+        	    {% endfor %}
+        	    </ul>
+			</div>
+		</div>
+	</div>
+{% endblock %}

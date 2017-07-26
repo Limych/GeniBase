@@ -3,7 +3,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
-use GeniBase\Util;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\Name;
 use Gedcomx\Conclusion\Person;
@@ -23,6 +22,39 @@ class PersonStorager extends SubjectStorager
     }
 
     /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::getTableName()
+     */
+    protected function getTableName()
+    {
+        return $this->dbs->getTableName('persons');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
+     */
+    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    {
+        $this->makeGbidIfEmpty($entity, $o);
+
+        $data = parent::packData4Save($entity, $context, $o);
+
+        $t_places = $this->getTableName();
+        $t_sources = $this->dbs->getTableName('sources');
+
+        /** @var Person $entity */
+        if (! empty($res = $entity->isPrivate())) {
+            $data['private'] = (int) $res;
+        }
+        if (! empty($res = $entity->isLiving())) {
+            $data['living'] = (int) $res;
+        }
+
+        return $data;
+    }
+
+    /**
      *
      * @param mixed          $entity
      * @param ExtensibleData $context
@@ -31,58 +63,22 @@ class PersonStorager extends SubjectStorager
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
-        if (! $entity instanceof ExtensibleData) {
-            $entity = $this->getObject($entity);
-        }
+        /** @var Person $entity */
+        $entity = parent::save($entity, $context, $o);
 
-        $o = $this->applyDefaultOptions($o, $entity);
-        $this->makeGbidIfEmpty($entity, $o);
-
-        $t_persons = $this->dbs->getTableName('persons');
-        $t_pgs = $this->dbs->getTableName('genders');
-
-        // Prepare data to save
-        $ent = $entity->toArray();
-        $data = Util::arraySliceKeys($ent, 'id');
-
-        if (isset($ent['private'])) {
-            $data['private'] = (int) $ent['private'];
-        }
-        if (isset($ent['living'])) {
-            $data['living'] = (int) $ent['living'];
-        }
-
-        // Save data
-        $_id = (int) $this->dbs->getLidForId($t_persons, $data['id']);
-        parent::save($entity, $context, $o);
-
-        if (! empty($_id)) {
-            $result = $this->dbs->getDb()->update(
-                $t_persons,
-                $data,
-                [
-                '_id' => $_id
-                ]
-            );
-        } else {
-            $this->dbs->getDb()->insert($t_persons, $data);
-            $_id = (int) $this->dbs->getDb()->lastInsertId();
-        }
-        GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
-        
         // Save childs
-        if (isset($ent['gender'])) {
+        if (! empty($res = $entity->getGender())) {
             $tmp = $o;
             if (! empty($tmp['makeId_name'])) {
                 $tmp['makeId_name'] = 'Gender: ' . $tmp['makeId_name'];
             }
-            $this->newStorager(Gender::class)->save($ent['gender'], $entity, $tmp);
+            $this->newStorager(Gender::class)->save($res, $entity, $tmp);
             unset($tmp);
         }
-        if (! empty($ent['names'])) {
+        if (! empty($res = $entity->getNames())) {
             $tmp = $o;
             $tmp_cnt = 0;
-            foreach ($ent['names'] as $name) {
+            foreach ($res as $name) {
                 if (! empty($o['makeId_name'])) {
                     $tmp['makeId_name'] = 'Name-' . (++$tmp_cnt) . ': ' . $o['makeId_name'];
                 }
@@ -91,12 +87,12 @@ class PersonStorager extends SubjectStorager
             unset($tmp);
             unset($tmp_cnt);
         }
-        if (! empty($ent['facts'])) {
+        if (! empty($res = $entity->getFacts())) {
             $tmp = $o;
             $tmp_cnt = 0;
-            foreach ($ent['facts'] as $name) {
+            foreach ($res as $fact) {
                 $tmp['makeId_name'] = 'Fact-' . (++$tmp_cnt) . ': ' . $entity->getId();
-                $this->newStorager(Fact::class)->save($name, $entity, $o);
+                $this->newStorager(Fact::class)->save($fact, $entity, $o);
             }
             unset($tmp);
             unset($tmp_cnt);
@@ -105,39 +101,20 @@ class PersonStorager extends SubjectStorager
         return $entity;
     }
 
-    protected function getSqlQueryParts()
-    {
-        $t_persons = $this->dbs->getTableName('persons');
-
-        $qparts = [
-            'fields'    => [],  'tables'    => [],  'bundles'   => [],
-        ];
-
-        $qparts['fields'][]     = "pn.*";
-        $qparts['tables'][]     = "$t_persons AS pn";
-        $qparts['bundles'][]    = "";
-
-        $qp = parent::getSqlQueryParts();
-        $qp['bundles'][0]   = "cn.id = pn.id";
-        $qparts = array_merge_recursive($qparts, $qp);
-
-        return $qparts;
-    }
-
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
         $q = $this->getSqlQuery();
         $result = false;
         if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE pn._id = ?", [$_id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
         } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE pn.id = ?", [$id]);
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
         }
 
         return $result;
     }
 
-    protected function processRaw($entity, $result)
+    protected function unpackLoadedData($entity, $result)
     {
         if (! is_array($result)) {
             return $result;
@@ -153,15 +130,15 @@ class PersonStorager extends SubjectStorager
         /**
  * @var Person $entity
 */
-        $entity = parent::processRaw($entity, $result);
+        $entity = parent::unpackLoadedData($entity, $result);
 
         if (! empty($r = $this->newStorager(Gender::class)->load(null, $entity))) {
             $entity->setGender($r);
         }
-        if (! empty($r = $this->newStorager(Name::class)->loadList($entity))) {
+        if (! empty($r = $this->newStorager(Name::class)->loadComponents($entity))) {
             $entity->setNames($r);
         }
-        if (! empty($r = $this->newStorager(Fact::class)->loadList($entity))) {
+        if (! empty($r = $this->newStorager(Fact::class)->loadComponents($entity))) {
             $entity->setFacts($r);
         }
 

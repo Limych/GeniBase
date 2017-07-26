@@ -5,7 +5,6 @@
 // === Logging ================================================================
 
 $app['monolog.name']    = 'GeniBase';
-$app['monolog.level']   = Monolog\Logger::ERROR;
 $app['monolog.logfile'] = BASE_DIR.'/var/logs/' . \Carbon\Carbon::now()->format('Y-m-d') . '.log';
 
 // === Caching ================================================================
@@ -44,3 +43,9 @@ $app['translator.resource'] = BASE_DIR . '/app/lang/';
 // === Importer configs =======================================================
 
 $app['svrt.1914.store'] = BASE_DIR.'/var/store';
+
+// === API keys ===============================================================
+
+$app['svrt.1914.token'] = '';
+$app['google_api.key'] = ''; // Optional
+$app['google_api.secret'] = ''; // Optional

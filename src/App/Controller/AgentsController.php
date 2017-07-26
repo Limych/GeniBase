@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Rs\ApiLinksUpdater;
-use Gedcomx\Conclusion\Event;
+use Gedcomx\Agent\Agent;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
 use GeniBase\Storager\StoragerFactory;
@@ -12,7 +12,7 @@ use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EventsController extends BaseController
+class AgentsController extends BaseController
 {
 
     /**
@@ -22,10 +22,9 @@ class EventsController extends BaseController
      */
     public function statistic(Application $app)
     {
-        $t_events = $app['gb.db']->getTableName('events');
+        $t_agents = $app['gb.db']->getTableName('agents');
 
-        $query = "SELECT COUNT(*) AS events, MAX(att_modified) AS events_modified FROM $t_events";
-        $result = $app['db']->fetchAssoc($query);
+        $result = $app['db']->fetchAssoc("SELECT COUNT(*) AS agents FROM $t_agents");
         if (false !== $result) {
             $result = new Statistic($result);
         }
@@ -35,8 +34,8 @@ class EventsController extends BaseController
 
     public static function bindApiRoutes($app, $base)
     {
-        $app->get($base, "events.controller:statistic");
-        $app->get($base.'/{id}', "events.controller:getOne");
+        $app->get($base, "agents.controller:statistic");
+        $app->get($base.'/{id}', "agents.controller:getOne");
         //         $app->post($base, "persons.controller:save");
         //         $app->put($base.'/{id}', "persons.controller:update");
         //         $app->delete($base.'/{id}', "persons.controller:delete");
@@ -51,12 +50,8 @@ class EventsController extends BaseController
      */
     public function getOne(Application $app, Request $request, $id)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], Event::class)
-        ->loadGedcomx(
-            [
-            'id' => $id,
-            ]
-        );
+        $gedcomx = StoragerFactory::newStorager($app['gb.db'], Agent::class)
+            ->loadGedcomx([     'id' => $id,    ]);
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);

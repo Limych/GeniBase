@@ -43,7 +43,9 @@ $dev_mode = $allow_dev_mode && ! isset($_REQUEST['nodev'])
             && in_array(@$_SERVER['REMOTE_ADDR'], array('127.0.0.1', 'fe80::1', '::1'))
             && file_exists(BASE_DIR.'/app/configs/.allow_dev_mode');
 
-if (! $dev_mode) {
+if ($dev_mode) {
+    define('DEBUG', true);
+} else {
     ini_set('display_errors', 0);
 }
 
@@ -57,6 +59,13 @@ require BASE_DIR.'/app/providers.php';
 require BASE_DIR.'/app/configs/prod.php';
 if ($dev_mode) {
     include BASE_DIR.'/app/configs/dev.php';
+}
+
+if (defined('DEBUG') && ! empty($app['debug.secondary'])) {
+    define('DEBUG_SECONDARY', true);
+}
+if (defined('DEBUG') && ! empty($app['debug.profile'])) {
+    define('DEBUG_PROFILE', true);
 }
 
 // Register database provider

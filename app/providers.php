@@ -49,7 +49,8 @@ $app['twig'] = $app->extend(
     'twig',
     function ($twig, $app) {
         // add custom globals, filters, tags, ...
-        $twig->addGlobal('min', $app['debug'] ? '' : '.min');
+        $twig->addGlobal('min', !empty($app['debug']) ? '' : '.min');
+        $twig->addGlobal('google_api_key', !empty($app['google_api_key']) ? $app['google_api_key'] : '');
 
         return $twig;
     }
@@ -69,3 +70,4 @@ $app->register(new \Silex\Provider\HttpFragmentServiceProvider());
 $app->register(new \Silex\Provider\RoutingServiceProvider());
 
 $app->register(new Provider\ResponsibleServiceProvider());
+$app->register(new Provider\PlaceMapProvider());

@@ -3,7 +3,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Agent\Agent;
 use Gedcomx\Conclusion\Conclusion;
-use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\Event;
 use Gedcomx\Conclusion\EventRole;
 use Gedcomx\Conclusion\Fact;
@@ -47,9 +46,6 @@ class StoragerFactory
 
             case SourceReference::class:
                 return new SourceReferenceStorager($dbs);
-
-            case DateInfo::class:
-                return new DateInfoStorager($dbs);
 
             case Name::class:
                 return new NameStorager($dbs);

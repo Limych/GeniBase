@@ -34,3 +34,7 @@ Auto-generated technical documentation is available at the https://limych.github
 * `dev.php.dist` → `dev.php` (отладочные настройки; применяются поверх основных).
 
 Всё. Система развёрнута. Можно заходить на созданный сайт.
+
+## Screenshots
+
+![Географическое место](https://github.com/Limych/GeniBase/tree/3.0.x-dev/assets/screenshots/place.png)

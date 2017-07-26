@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Controller\AgentsController;
 use App\Controller\EventsController;
 use App\Controller\PersonsController;
 use App\Controller\PlacesController;
@@ -24,10 +25,6 @@ $app['places.importer'] = function () use ($app) {
     return new PlacesImporter($app);
 };
 //
-$app['statistic.controller'] = function () use ($app) {
-    return new StatisticController();
-};
-//
 $app['places.controller'] = function () use ($app) {
     return new PlacesController();
 };
@@ -39,6 +36,9 @@ $app['persons.controller'] = function () use ($app) {
 };
 $app['events.controller'] = function () use ($app) {
     return new EventsController();
+};
+$app['agents.controller'] = function () use ($app) {
+    return new AgentsController();
 };
 
 // Register routes
@@ -92,12 +92,14 @@ $app->get(
 ->bind('homepage');
 
 $app->get('/import/places', "places.importer:import");
+$app->get('/import/places/geo_update', "places.importer:updatePlaceGeoCoordinates");
 $app->get('/import/svrt', "svrt.importer:import");
 //
 PlacesController::bindRoutes($app, '/places');
 SourcesController::bindRoutes($app, '/sources');
 PersonsController::bindRoutes($app, '/persons');
 EventsController::bindRoutes($app, '/events');
+AgentsController::bindRoutes($app, '/agents');
 
 // Register API routes
 $api = $app["controllers_factory"];
@@ -105,7 +107,7 @@ $api = $app["controllers_factory"];
 $api->get(
     '/',
     function () use ($app) {
-        $controllers = explode(' ', 'statistic persons sources places events');
+        $controllers = explode(' ', 'persons sources places events agents');
 
         foreach ($controllers as $c) {
             if (! isset($stat)) {
@@ -124,5 +126,6 @@ PlacesController::bindApiRoutes($api, '/places');
 SourcesController::bindApiRoutes($api, '/sources');
 PersonsController::bindApiRoutes($api, '/persons');
 EventsController::bindApiRoutes($api, '/events');
+AgentsController::bindApiRoutes($api, '/agents');
 //
 $app->mount($app["api.endpoint"].'/'.$app["api.version"], $api);

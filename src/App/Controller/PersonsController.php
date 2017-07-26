@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\ApiLinksUpdater;
+use App\Rs\ApiLinksUpdater;
 use Gedcomx\Conclusion\Person;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
@@ -22,19 +22,26 @@ class PersonsController extends BaseController
      */
     public function statistic(Application $app)
     {
-        $t_cons = $app['gb.db']->getTableName('conclusions');
         $t_persons = $app['gb.db']->getTableName('persons');
+        $t_facts = $app['gb.db']->getTableName('facts');
 
-        $query = "SELECT COUNT(*) AS persons, MAX(att_modified) AS persons_modified FROM $t_persons AS ps " .
-            "LEFT JOIN $t_cons AS cs ON ( ps.id = cs.id )";
+        $stat = new Statistic();
 
+        $query = "SELECT COUNT(*) AS persons, MAX(att_modified) AS persons_modified FROM $t_persons";
         $result = $app['db']->fetchAssoc($query);
 
         if (false !== $result) {
-            $result = new Statistic($result);
+            $stat->embed(new Statistic($result));
         }
 
-        return $result;
+        $query = "SELECT COUNT(*) AS facts, MAX(att_modified) AS facts_modified FROM $t_facts";
+        $result = $app['db']->fetchAssoc($query);
+
+        if (false !== $result) {
+            $stat->embed(new Statistic($result));
+        }
+
+        return $stat;
     }
 
     public static function bindApiRoutes($app, $base)
@@ -62,7 +69,7 @@ class PersonsController extends BaseController
             ]
         );
 
-        if (false === $gedcomx) {
+        if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
         }
 

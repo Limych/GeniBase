@@ -1,13 +1,12 @@
 <?php
-namespace App;
+namespace App\Rs;
 
 use Gedcomx\Gedcomx;
-use Gedcomx\Rs\Client\Rel;
 use GeniBase\Rs\Server\GedcomxRsUpdater;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
-use GeniBase\DBase\DBaseService;
 use Gedcomx\Conclusion\Fact;
+use GeniBase\Storager\GeniBaseStorager;
 
 /**
  *
@@ -51,6 +50,9 @@ class ApiLinksUpdater extends GedcomxRsUpdater
     {
         $place->addLinkRelation(Rel::SELF, $this->api_root.'/places/'.$place->getId());
         $place->addLinkRelation(Rel::CHILDREN, $this->api_root.'/places/'.$place->getId().'/components');
+        if (! empty($res = $place->getJurisdiction())) {
+            $place->addLinkRelation(Rel::PARENT_RELATIONSHIPS, $this->api_root.'/places/'.$res->getResourceId());
+        }
 
         parent::visitPlaceDescription($place);
     }
@@ -62,8 +64,9 @@ class ApiLinksUpdater extends GedcomxRsUpdater
     public function visitFact(Fact $fact)
     {
         if (! empty($rel = $fact->getPlace())) {
-            $fact->addLinkRelation(Rel::PLACE_DESCRIPTION,
-                $this->api_root.'/places/' . DBaseService::getIdFromReference($rel->getDescriptionRef())
+            $fact->addLinkRelation(
+                Rel::PLACE_DESCRIPTION,
+                $this->api_root.'/places/' . GeniBaseStorager::getIdFromReference($rel->getDescriptionRef())
             );
         }
 
@@ -110,10 +113,26 @@ class ApiLinksUpdater extends GedcomxRsUpdater
      */
     public function visitSourceReference(\Gedcomx\Source\SourceReference $sourceReference)
     {
-        $sourceReference->addLinkRelation(Rel::DESCRIPTION,
-            $this->api_root.'/sources/' . DBaseService::getIdFromReference($sourceReference->getDescriptionRef())
+        $sourceReference->addLinkRelation(
+            Rel::DESCRIPTION,
+            $this->api_root.'/sources/' . GeniBaseStorager::getIdFromReference($sourceReference->getDescriptionRef())
         );
 
         parent::visitSourceReference($sourceReference);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \Gedcomx\Rt\GedcomxModelVisitorBase::visitAttribution()
+     */
+    protected function visitAttribution(\Gedcomx\Common\Attribution $attribution)
+    {
+        if (! empty($res = $attribution->getContributor())) {
+            /** @var \Gedcomx\Links\HypermediaEnabledData $entity */
+            $entity = end($this->contextStack);
+            $entity->addLinkRelation(Rel::CONTRIBUTOR, $this->api_root.'/agents/'.$res->getResourceId());
+        }
+
+        parent::visitAttribution($attribution);
     }
 }
