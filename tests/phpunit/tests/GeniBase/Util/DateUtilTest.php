@@ -15,13 +15,13 @@ class DateUtilTest extends TestCase
     /**
      * Tests DateUtil::expand()
      */
-    public function testExpand()
-    {
-        // TODO Auto-generated DateUtilTest::testExpand()
+//     public function testExpand()
+//     {
+//         // TODO Auto-generated DateUtilTest::testExpand()
 //         $this->markTestIncomplete("expand test not implemented");
 
 //         DateUtil::expand(/* parameters */);
-    }
+//     }
 
     /**
      * Tests DateUtil::calcPeriodInDays()
@@ -89,4 +89,3 @@ class DateUtilTest extends TestCase
         }
     }
 }
-
