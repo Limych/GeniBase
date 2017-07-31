@@ -475,12 +475,12 @@ class PlaceDescriptionStorager extends SubjectStorager
             "SELECT MIN(latitude), MIN(longitude), MAX(latitude), MAX(longitude) " .
             "FROM $t_places WHERE jurisdiction_id = ?",
             [$place_id]
-            );
+        );
         if (empty($geo) && (count($geo) === array_sum(array_map('empty', $geo)))) {
             $this->dbs->getDb()->executeQuery(
                 "UPDATE $t_places SET _calculatedGeo = 0, latitude = 0, longitude = 0 WHERE _id = ?",
                 [$place_id]
-                );
+            );
         } else {
             $zoom = 11;
             if ($geo[0] !== $geo[2] && $geo[1] !== $geo[3]) {
@@ -490,7 +490,7 @@ class PlaceDescriptionStorager extends SubjectStorager
                 "UPDATE $t_places SET _calculatedGeo = 1, latitude = ?, longitude = ?, _zoom = ? " .
                 "WHERE _id = ?",
                 [($geo[0] + $geo[2]) / 2, ($geo[1] + $geo[3]) / 2, $zoom, $place_id]
-                );
+            );
         }
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);

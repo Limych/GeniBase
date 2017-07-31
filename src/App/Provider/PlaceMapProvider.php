@@ -18,7 +18,9 @@ class PlaceMapProvider implements ServiceProviderInterface
             $twig->addFunction(new \Twig_SimpleFunction(
                 'place_map',
                 function ($lat, $lon, $zoom = 11) use ($app) {
-                    $url = "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lon&zoom=$zoom&scale=2&size=640x320&maptype=terrain&format=png&markers=size:small%7Ccolor:red%7Clabel:%7C$lat,$lon";
+                    $url = "https://maps.googleapis.com/maps/api/staticmap" .
+                        "?center=$lat,$lon&zoom=$zoom&scale=2&size=640x320&maptype=terrain&format=png" .
+                        "&markers=size:small%7Ccolor:red%7Clabel:%7C$lat,$lon";
                     if (! empty($app['google_api.key'])) {
                         $url .= '&key=' . $app['google_api.key'];
                         if (! empty($app['google_api.secret'])) {

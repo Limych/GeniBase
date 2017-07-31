@@ -56,9 +56,9 @@ class EventStorager extends SubjectStorager
                 $data['place_description_uri'] = $res2;
                 if (! empty($res2 = GeniBaseStorager::getIdFromReference($res2))
                     && ! empty($res2 = $this->dbs->getInternalId($t_places, $res2))
-                    ) {
-                        $data['place_description_id'] = (int) $res2;
-                    }
+                ) {
+                    $data['place_description_id'] = (int) $res2;
+                }
             }
             if (! empty($res2 = $res->getOriginal())) {
                 $data['place_original'] = $res2;
@@ -103,7 +103,9 @@ class EventStorager extends SubjectStorager
                 $this->newStorager($er)->save($er, $entity);
             }
             if (! empty($ers)) {
-                $this->dbs->getDb()->executeQuery("DELETE FROM $t_eroles WHERE _id IN (?)", [$ers],
+                $this->dbs->getDb()->executeQuery(
+                    "DELETE FROM $t_eroles WHERE _id IN (?)",
+                    [$ers],
                     [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
                 );
             }

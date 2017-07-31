@@ -56,11 +56,9 @@
 			"echo 'Started web server on http://localhost:8888'",
 			"php -S localhost:8888 -t web"
 		],
-		"sca" : [
+		"scan" : [
 			"php vendor/bin/phpcs app src tests/phpunit/tests --standard=build/config/phpcs.xml --ignore=*.html.php,*.config.php,*.twig.php",
-			"php vendor/bin/phpmd app text build/config/phpmd.xml",
-			"php vendor/bin/phpmd src text build/config/phpmd.xml",
-			"php vendor/bin/phpmd tests/phpunit/tests text build/config/phpmd.xml"
+			"null"
 		]
 	},
 	"homepage" : "https://github.com/Limych/GeniBase",

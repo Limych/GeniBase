@@ -92,7 +92,9 @@ class NameStorager extends ConclusionStorager
             $this->newStorager($nf)->save($nf, $entity);
         }
         if (! empty($nfs)) {
-            $this->dbs->getDb()->executeQuery("DELETE FROM $t_nfs WHERE _id IN (?)", [$nfs],
+            $this->dbs->getDb()->executeQuery(
+                "DELETE FROM $t_nfs WHERE _id IN (?)",
+                [$nfs],
                 [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
             );
         }

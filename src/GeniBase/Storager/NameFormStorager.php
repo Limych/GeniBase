@@ -83,7 +83,9 @@ class NameFormStorager extends GeniBaseStorager
             $this->newStorager($np)->save($np, $entity);
         }
         if (! empty($nps)) {
-            $this->dbs->getDb()->executeQuery("DELETE FROM $t_nps WHERE _id IN (?)", [$nps],
+            $this->dbs->getDb()->executeQuery(
+                "DELETE FROM $t_nps WHERE _id IN (?)",
+                [$nps],
                 [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
             );
         }

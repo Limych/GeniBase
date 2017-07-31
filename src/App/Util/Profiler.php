@@ -100,8 +100,10 @@ class Profiler
             }
             echo sprintf(
                 "%70s %s %6.4fs / %3d = %7.4fs\n",
-                $sname, $prefix . (!$isLast ? '&#9507;' : '&#9495;'),
-                $timers[$name]->period, $timers[$name]->counter,
+                $sname,
+                $prefix . (!$isLast ? '&#9507;' : '&#9495;'),
+                $timers[$name]->period,
+                $timers[$name]->counter,
                 ($timers[$name]->period / $timers[$name]->counter)
             );
             if (! empty($timers[$name]->subtimers)) {

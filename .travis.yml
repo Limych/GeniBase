@@ -33,7 +33,7 @@ install:
 
 script:
   - php vendor/bin/phpunit -v
-  - if [[ "$DOCS" = "yes" ]]; then composer sca; fi;
+  - if [[ "$DOCS" = "yes" ]]; then composer scan; fi;
 
 after_success:
   - |

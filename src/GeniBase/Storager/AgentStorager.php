@@ -145,7 +145,7 @@ class AgentStorager extends GeniBaseStorager
      */
     protected static function packResourceReferences($rrefs)
     {
-        return join("\n", array_filter( array_map(
+        return join("\n", array_filter(array_map(
             function (ResourceReference $v) {
                 return $res = $v->getResource();
             },
