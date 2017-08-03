@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
@@ -66,11 +87,17 @@ class PlaceDescriptionStorager extends SubjectStorager
 
     /**
      * {@inheritDoc}
-     * @see \GeniBase\Storager\SubjectStorager::detectId()
+     * @see \GeniBase\Storager\SubjectStorager::detectPreviousState()
      */
-    protected function detectId(ExtensibleData &$entity)
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
-        if (parent::detectId($entity)) {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
+        if (parent::detectPreviousState($entity, $context, $o)) {
+            if (defined('DEBUG_PROFILE')) {
+                \App\Util\Profiler::stopTimer(__METHOD__);
+            }
             return true;
         }
 
@@ -79,34 +106,42 @@ class PlaceDescriptionStorager extends SubjectStorager
         $t_places = $this->dbs->getTableName('places');
 
         if (! empty($refs = $this->searchRefByTextValues(self::GROUP_NAMES, $entity->getNames()))) {
-            $q = $this->getSqlQuery('SELECT', '', 'WHERE t._id IN (?)');
+            $query = $this->getSqlQuery('SELECT', '', 'WHERE t._id IN (?)');
             if (! empty($jur = $entity->getJurisdiction())) {
-                if (! empty($ref = $jur->getResourceId())) {
-                    $q .= ' AND jurisdiction_id = ' . $this->dbs->getInternalId($t_places, $ref);
-                } elseif (! empty($ref = $jur->getResource())) {
-                    $q .= ' AND jurisdiction_uri = ' . $this->dbs->getDb()->quote($ref);
+                if (! empty($res = $jur->getResourceId())
+                    && ! empty($res = $this->dbs->getInternalId($t_places, $res))
+                ) {
+                    $query .= ' AND jurisdiction_id = ' . $res;
+                } elseif (! empty($res = $jur->getResource())) {
+                    $query .= ' AND jurisdiction_uri = ' . $this->dbs->getDb()->quote($res);
                 }
             } else {
-                $q .= ' AND jurisdiction_id IS NULL AND jurisdiction_uri IS NULL';
+                $query .= ' AND jurisdiction_id IS NULL AND jurisdiction_uri IS NULL';
             }
-            $result = $this->dbs->getDb()->fetchAll($q, [$refs], [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            $result = $this->dbs->getDb()->fetchAll($query, [$refs], [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
             if (is_array($result)) {
-                $candidate = null;
-                foreach ($result as $k => $r) {
-                    $place = $this->unpackLoadedData($this->getObject(), $r);
-                    if (empty($entity->getId()) || (self::confidenceCmp($entity, $place) < 0)) {
-                        $candidate = clone $entity;
-                        $candidate->embed($place);
-                        $candidate->setId($place->getId());
+                $candidate = $entity;
+                foreach ($result as $res) {
+                    $place = $this->unpackLoadedData($this->getObject(), $res);
+                    if (empty($candidate->getId()) || (self::confidenceCmp($candidate, $place) > 0)) {
+                        $this->previousState = clone $place;
+                        $candidate = $place;
+                        $candidate->embed($entity);
                     }
                 }
-                if (! empty($candidate)) {
+                if ($candidate !== $entity) {
                     $entity = $candidate;
                 }
+            }
+            if (defined('DEBUG_PROFILE')) {
+                \App\Util\Profiler::stopTimer(__METHOD__);
             }
             return ! empty($entity->getId());
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return false;
     }
 
@@ -136,16 +171,20 @@ class PlaceDescriptionStorager extends SubjectStorager
         $t_sources = $this->dbs->getTableName('sources');
 
         /** @var PlaceDescription $entity */
-        if (! empty($res = $entity->getLatitude())) {
+        if (! empty($res = $entity->getLatitude()) && ($res != $this->previousState->getLatitude())) {
             $data['latitude'] = $res;
         }
-        if (! empty($res = $entity->getLongitude())) {
+        if (! empty($res = $entity->getLongitude()) && ($res != $this->previousState->getLongitude())) {
             $data['longitude'] = $res;
         }
-        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
+        if (! empty($res = $entity->getType()) && ($res != $this->previousState->getType())
+            && ! empty($res = $this->dbs->getTypeId($res))
+        ) {
             $data['type_id'] = $res;
         }
-        if (! empty($res = $entity->getSpatialDescription())) {
+        if (! empty($res = $entity->getSpatialDescription())
+            && ($res != $this->previousState->getSpatialDescription())
+        ) {
             if (! empty($res2 = $res->getResource())) {
                 $data['spatialDescription_uri'] = $res2;
             }
@@ -155,7 +194,7 @@ class PlaceDescriptionStorager extends SubjectStorager
                 $data['spatialDescription_id'] = $res;
             }
         }
-        if (! empty($res = $entity->getJurisdiction())) {
+        if (! empty($res = $entity->getJurisdiction()) && ($res != $this->previousState->getJurisdiction())) {
             if (! empty($res2 = $res->getResource())) {
                 $data['jurisdiction_uri'] = $res2;
             }
@@ -165,7 +204,9 @@ class PlaceDescriptionStorager extends SubjectStorager
                 $data['jurisdiction_id'] = $res2;
             }
         }
-        if (! empty($res = $entity->getTemporalDescription())) {
+        if (! empty($res = $entity->getTemporalDescription())
+            && ($res != $this->previousState->getTemporalDescription())
+        ) {
             $data = array_merge($data, self::packDateInfo($res, 'temporalDescription_'));
         }
 
@@ -188,7 +229,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getNames())) {
+        if (! empty($res = $entity->getNames()) && ($res != $this->previousState->getNames())) {
             $names = [];
             foreach ($res as $name) {
                 $names[] = $name->toArray();
@@ -272,8 +313,14 @@ class PlaceDescriptionStorager extends SubjectStorager
         /** @var PlaceDescription $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
+        if (! empty($res = $this->loadAllTextValues(self::GROUP_NAMES, $entity))) {
+            $entity->setNames($res);
+        }
         if (! empty($res = self::unpackDateInfo($result, 'temporalDescription_'))) {
             $entity->setTemporalDescription($res);
+        }
+        if (! empty($result['_zoom'])) {
+            GeniBaseInternalProperties::setPropertyOf($entity, '_zoom', $result['_zoom']);
         }
 
         // Load childs
@@ -283,13 +330,6 @@ class PlaceDescriptionStorager extends SubjectStorager
             if (false !== $dt = $this->newStorager($dt)->load($dt)) {
                 $entity->setTemporalDescription($dt);
             }
-        }
-        $res = $this->loadAllTextValues(self::GROUP_NAMES, $entity);
-        if (! empty($res)) {
-            $entity->setNames($res);
-        }
-        if (! empty($result['_zoom'])) {
-            GeniBaseInternalProperties::setPropertyOf($entity, '_zoom', $result['_zoom']);
         }
 
         return $entity;

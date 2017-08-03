@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
@@ -62,19 +83,29 @@ class ConclusionStorager extends GeniBaseStorager
      */
     protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
     {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         $this->makeUuidIfEmpty($entity, $o);
 
         $data = parent::packData4Save($entity, $context, $o);
 
         /** @var Conclusion $entity */
-        if (! empty($res = $entity->getConfidence()) && ! empty($res = $this->dbs->getTypeId($res))) {
+        if (! empty($res = $entity->getConfidence()) && ($res != $this->previousState->getConfidence())
+            && ! empty($res = $this->dbs->getTypeId($res))
+        ) {
             $data['confidence_id'] = $res;
         }
-        if (! empty($res = $entity->getLang()) && ! empty($res = $this->dbs->getLangId($res))) {
+        if (! empty($res = $entity->getLang()) && ($res != $this->previousState->getLang())
+            && ! empty($res = $this->dbs->getLangId($res))
+        ) {
             $data['lang_id'] = $res;
         }
         $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return $data;
     }
 
@@ -97,9 +128,16 @@ class ConclusionStorager extends GeniBaseStorager
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__ . '#Childs');
         }
-        if (! empty($res = $entity->getSources())) {
-            foreach ($res as $src) {
-                $this->newStorager(SourceReference::class)->save($src, $entity);
+        if (! empty($res = $entity->getSources()) && ($res != ($res2 = $this->previousState->getSources()))) {
+            $max = count($res);
+            for ($i = 0; $i < $max; $i++) {
+                if (empty($res2[$i]) || ($res[$i] != $res2[$i])) {
+                    $this->newStorager(SourceReference::class)->save($res[$i], $entity);
+                }
+            }
+            $max = count($res2);
+            for (; $i < $max; $i++) {
+                // TODO: Delete old $res2[$i]
             }
         }
 
@@ -128,6 +166,10 @@ class ConclusionStorager extends GeniBaseStorager
         return $qparts;
     }
 
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::loadRaw()
+     */
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
         $q = $this->getSqlQuery();
@@ -162,10 +204,10 @@ class ConclusionStorager extends GeniBaseStorager
         $result = $this->processRawAttribution($entity, $result);
 
         $entity = parent::unpackLoadedData($entity, $result);
+// if ($entity instanceof \Gedcomx\Conclusion\PlaceDescription && $entity->getId() != 'L7HW-ANNP-V43N') { var_dump($result, $entity);die; } // FIXME Delete me
 
         // Load childs
-        $res = $this->newStorager(SourceReference::class)->loadComponents($entity);
-        if (! empty($res)) {
+        if (! empty($res = $this->newStorager(SourceReference::class)->loadComponents($entity))) {
             $entity->setSources($res);
         }
 

@@ -37,4 +37,4 @@ Auto-generated technical documentation is available at the https://limych.github
 
 ## Screenshots
 
-![Географическое место](https://github.com/Limych/GeniBase/tree/3.0.x-dev/assets/screenshots/place.png)
+![Географическое место](https://github.com/Limych/GeniBase/raw/3.0.x-dev/assets/screenshots/place.png)

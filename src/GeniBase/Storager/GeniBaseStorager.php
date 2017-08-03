@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -24,7 +45,7 @@ class GeniBaseStorager
 
     const GBID_LENGTH = 12;
 
-    const TABLES_WITH_GBID = 'agents events persons places sources';
+    const TABLES_WITH_GBID = 'sources persons events places agents';
 
     /**
      * @var DBaseService
@@ -93,12 +114,16 @@ class GeniBaseStorager
         return Util::parseArgs($o, $this->getDefaultOptions($entity));
     }
 
+    protected $previousState;
+
     /**
      *
      * @param ExtensibleData $entity
+     * @param ExtensibleData $context
+     * @param mixed[] $o
      * @return boolean
      */
-    protected function detectId(ExtensibleData &$entity)
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         return false;
     }
@@ -123,17 +148,19 @@ class GeniBaseStorager
      */
     public function makeGbidUnique($name = null)
     {
-        static $tables;
+        static $query;
         static $cache;
 
-        if (! isset($tables)) {
+        if (! isset($query)) {
             // Initialization
-            $tables = array_map(
-                function ($v) {
-                    return $this->dbs->getTableName($v);
+            $query = implode(' UNION ALL ', array_map(
+                function($tbl) {
+                    $tbl = $this->dbs->getTableName($tbl);
+                    return "SELECT 1 FROM $tbl WHERE id = {id}";
                 },
                 preg_split('/[\s,]+/', self::TABLES_WITH_GBID, null, PREG_SPLIT_NO_EMPTY)
-            );
+            ));
+
             $cache = [];
         }
 
@@ -147,13 +174,11 @@ class GeniBaseStorager
                 $suffix += 1;
             } while (in_array($gbid, $cache));
             $cache[] = $gbid;
-
-            foreach ($tables as $tbl) {
-                if (false !== $this->dbs->getDb()->fetchColumn("SELECT 1 FROM $tbl WHERE id = ?", [$gbid])) {
-                    continue 2;
-                }
-            }
-        } while (false);
+        } while (false !== $this->dbs->getDb()->fetchColumn(str_replace(
+            '{id}',
+            $this->dbs->getDb()->quote($gbid),
+            $query
+        )));
 
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
@@ -168,7 +193,7 @@ class GeniBaseStorager
      */
     public function makeGbidIfEmpty(ExtensibleData &$entity, $o = null)
     {
-        if (empty($entity->getId()) && ! $this->detectId($entity)) {
+        if (empty($entity->getId())) {
             $name = ! empty($o['makeId_name']) ? $o['makeId_name'] : null;
             if (! isset($o['makeId_unique']) || ! empty($o['makeId_unique'])) {
                 $id = $this->makeGbidUnique($name);
@@ -199,7 +224,7 @@ class GeniBaseStorager
      */
     public function makeUuidIfEmpty(ExtensibleData &$entity, $o = null)
     {
-        if (empty($entity->getId()) && ! $this->detectId($entity)) {
+        if (empty($entity->getId())) {
             $name = ! empty($o['makeId_name']) ? $o['makeId_name'] : null;
             $entity->setId(self::makeUuid($name));
         }
@@ -467,6 +492,9 @@ class GeniBaseStorager
      */
     protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
     {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         $class = get_class($this);
         if ((new \ReflectionClass($class))->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
             throw new \BadMethodCallException('Error: Method ' . __METHOD__ . ' should be redefined for class ' . $class);
@@ -478,11 +506,14 @@ class GeniBaseStorager
             if (! empty($res = GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
                 $data['_id'] = (int) $res;
             }
-            if (! empty($res = $entity->getId())) {
+            if (! empty($res = $entity->getId()) && ($res != $this->previousState->getId())) {
                 $data['id'] = $res;
             }
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return $data;
     }
 
@@ -496,10 +527,16 @@ class GeniBaseStorager
     {
         $data = [];
 
+        /** @var Attribution $prev */
         if (empty($attribution)) {
             $attribution = new Attribution();
         } elseif (! $attribution instanceof Attribution) {
             throw new \InvalidArgumentException('Argument 1 must be an instance of ' . Attribution::class);
+        } elseif ($attribution == ($prev = $this->previousState->getAttribution())) {
+            return [];
+        }
+        if (empty($prev)) {
+            $prev = new Attribution();
         }
 
         $t_agents = $this->dbs->getTableName('agents');
@@ -507,7 +544,9 @@ class GeniBaseStorager
         if (empty($res = $attribution->getContributor()) && ! empty($res2 = $this->dbs->getAgent())) {
             $attribution->setContributor(new ResourceReference([ 'resourceId' => $res2->getId() ]));
         }
-        if (! empty($res = $attribution->getContributor()) && ! empty($res = $res->getResourceId())
+
+        if (! empty($res = $attribution->getContributor()) && ($res != $prev->getContributor())
+            && ! empty($res = $res->getResourceId())
             && ! empty($res = $this->dbs->getInternalId($t_agents, $res))
         ) {
             $data['att_contributor_id'] = $res;
@@ -556,7 +595,7 @@ class GeniBaseStorager
         $data = [];
 
         if (empty($dateInfo)) {
-            return [];
+            return null;
         } elseif (! $dateInfo instanceof DateInfo) {
             throw new \InvalidArgumentException('Argument 1 must be an instance of ' . DateInfo::class);
         }
@@ -569,6 +608,40 @@ class GeniBaseStorager
             $period = DateUtil::calcPeriodInDays($res);
             $data[$fieldsPrefix.'_from_day']   = $period[0];
             $data[$fieldsPrefix.'_to_day']     = $period[1];
+        }
+
+        return $data;
+    }
+
+    /**
+     *
+     * @param ResourceReference $resourceReference
+     * @param string $fieldsPrefix
+     * @param string|null $table
+     * @return mixed[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected static function packResourceReference($resourceReference, $fieldsPrefix, $table)
+    {
+        $data = [];
+
+        if (empty($resourceReference)) {
+            return [];
+        } elseif (! $resourceReference instanceof ResourceReference) {
+            throw new \InvalidArgumentException('Argument 1 must be an instance of ' . ResourceReference::class);
+        }
+
+        if (! empty($res = $resourceReference->getResource())) {
+            $data[$fieldsPrefix . 'uri'] = $res;
+            if (! empty($res = GeniBaseStorager::getIdFromReference($res))) {
+                $resourceReference->setResourceId($res);
+            }
+        }
+        if (! empty($res = $resourceReference->getResourceId())
+            && ! empty($table) && ! empty($res = $this->dbs->getInternalId($table, $res))
+        ) {
+            $data[$fieldsPrefix . 'id'] = $res;
         }
 
         return $data;
@@ -608,6 +681,8 @@ class GeniBaseStorager
      * @param ExtensibleData $context
      * @param array|null     $o
      * @return ExtensibleData|false
+     *
+     * @throws UniqueConstraintViolationException
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
@@ -620,49 +695,59 @@ class GeniBaseStorager
             \App\Util\Profiler::startTimer(__METHOD__ . '#getObject');
         }
         /** @var ExtensibleData $ent */
-        $ent = $this->getObject($entity);
-        if (! is_a($entity, get_class($ent))) {
-            $ent->initFromArray($entity);
-            $entity = $ent;
+        $this->previousState = $this->getObject();
+        if (! is_a($entity, get_class($this->previousState))) {
+            $entity = $this->getObject($entity);
         }
         unset($ent);
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__ . '#getObject');
         }
 
+        $o = $this->applyDefaultOptions($o, $entity);
+        $table = $this->getTableName();
+
         if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#detectPreviousState');
+        }
+        $this->detectPreviousState($entity, $context, $o);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#detectPreviousState');
             \App\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
         }
-        $o = $this->applyDefaultOptions($o, $entity);
         $data = $this->packData4Save($entity, $context, $o);
-        $table = $this->getTableName();
+// if ($entity instanceof \Gedcomx\Conclusion\PlaceDescription && $entity->getId() != 'L7HW-ANNP-V43N') { var_dump($data, $entity); die; }  // FIXME Delete me
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
         }
 
-        if (empty($data['_id']) && ! empty($data['id'])) {
-            $data['_id'] = $this->dbs->getInternalId($table, $data['id']);
+        $_id = $data['_id'];
+        unset($data['_id']);
+        if (empty($_id) && ! empty($data['id'])) {
+            $_id = $this->dbs->getInternalId($table, $data['id']);
         }
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__ . '#SQL');
         }
-        if (! empty($data['_id'])) {
-            $this->dbs->getDb()->update($table, $data, [   '_id' => $data['_id']   ]);
-        } else {
-            unset($data['_id']);
-            try {
-                $this->dbs->getDb()->insert($table, $data);
-                $data['_id'] = $this->dbs->getDb()->lastInsertId();
-            } catch (UniqueConstraintViolationException $e) {
-                // Do nothing
+        if (! empty($data)) {
+            if (! empty($_id)) {
+// { var_dump($data, $entity, $this->previousState); die; }  // FIXME Delete me
+                $this->dbs->getDb()->update($table, $data, [   '_id' => $_id   ]);
+            } else {
+                try {
+                    $this->dbs->getDb()->insert($table, $data);
+                    $_id = $this->dbs->getDb()->lastInsertId();
+                } catch (UniqueConstraintViolationException $ex) {
+                    // Do nothing
+                }
             }
         }
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__ . '#SQL');
         }
 
-        if ($entity instanceof ExtensibleData && ! empty($data['_id'])) {
-            GeniBaseInternalProperties::setPropertyOf($entity, '_id', $data['_id']);
+        if ($entity instanceof ExtensibleData && ! empty($_id)) {
+            GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
         }
 
         if (defined('DEBUG_PROFILE')) {
@@ -876,6 +961,9 @@ class GeniBaseStorager
      */
     public function searchRefByTextValues($group, $textValues)
     {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
         // TODO: Add type_id check
         $_group = $this->dbs->getTypeId($group);
         if (! is_array($textValues)) {
@@ -915,6 +1003,9 @@ class GeniBaseStorager
             }
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return $result;
     }
 }

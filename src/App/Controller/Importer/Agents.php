@@ -15,6 +15,9 @@ class Agents
     public static function getGeniBaseAgent(GeniBaseStorager $gbs)
     {
         return $gbs->newStorager(Agent::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => '//GeniBase/',
+            ],
             'emails'    => [
                 [   'resource'  => 'mailto:andrey@khrolenok.ru',       ],
             ],

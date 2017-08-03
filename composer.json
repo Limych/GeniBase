@@ -1,10 +1,9 @@
 {
 	"name" : "limych/genibase",
 	"description" : "GeniBase is web software you can use to create a genealogical databases.",
-	"license" : "GPL-3.0",
+	"license" : "AGPL-3.0+",
 	"type" : "project",
 	"require" : {
-		"php" : ">=5.5.9",
 		"gedcomx/gedcomx-php" : "dev-3.1.x-fix",
 		"silex/silex" : "~2.1",
 		"symfony/monolog-bridge" : "~2.8|^3.0",
@@ -32,7 +31,8 @@
 		"squizlabs/php_codesniffer" : "*",
 		"phpmd/phpmd" : "*",
 		"sebastian/phpcpd" : "*",
-		"sebastian/phpdcd" : "*"
+		"sebastian/phpdcd" : "*",
+		"limych/proxy-checker" : "dev-master"
 	},
 	"authors" : [{
 			"name" : "Andrey Khrolenok",

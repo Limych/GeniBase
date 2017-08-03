@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
@@ -48,15 +69,18 @@ class AgentStorager extends GeniBaseStorager
 
     /**
      * {@inheritDoc}
-     * @see \GeniBase\Storager\GeniBaseStorager::detectId()
+     * @see \GeniBase\Storager\GeniBaseStorager::detectPreviousState()
      */
-    protected function detectId(ExtensibleData &$entity)
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         /** @var Agent $entity */
-        if (! empty($r = $entity->getIdentifiers())
-            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))
+        if (! empty($res = $entity->getIdentifiers())
+            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($res))
         ) {
-            $entity->setId($id);
+            $candidate = $this->load([ 'id' => $id ]);
+            $this->previousState = clone $candidate;
+            $candidate->embed($entity);
+            $entity = $candidate;
             return true;
         }
 
@@ -83,20 +107,26 @@ class AgentStorager extends GeniBaseStorager
         $data = parent::packData4Save($entity, $context, $o);
 
         /** @var Agent $entity */
-        if (! empty($res = $entity->getAddresses()) && ('[{}]' !== $res = json_encode($res))) {
+        if (! empty($res = $entity->getAddresses()) && ($res != $this->previousState->getAddresses())
+            && ('[{}]' !== $res = json_encode($res))
+        ) {
             $data['addresses_json'] = $res;
         }
         // TODO: accounts
-        if (! empty($res = $entity->getHomepage()) && ! empty($res = $res->getResource())) {
+        if (! empty($res = $entity->getHomepage()) && ($res != $this->previousState->getHomepage())
+            && ! empty($res = $res->getResource())
+        ) {
             $data['homepage_uri'] = $res;
         }
-        if (! empty($res = $entity->getOpenid()) && ! empty($res = $res->getResource())) {
+        if (! empty($res = $entity->getOpenid()) && ($res != $this->previousState->getOpenid())
+            && ! empty($res = $res->getResource())
+        ) {
             $data['openid_uri'] = $res;
         }
-        if (! empty($res = $entity->getEmails())) {
+        if (! empty($res = $entity->getEmails()) && ($res != $this->previousState->getEmails())) {
             $data['emails_uris'] = self::packResourceReferences($res);
         }
-        if (! empty($res = $entity->getPhones())) {
+        if (! empty($res = $entity->getPhones()) && ($res != $this->previousState->getPhones())) {
             $data['phones_uris'] = self::packResourceReferences($res);
         }
         // TODO: persons
@@ -122,14 +152,14 @@ class AgentStorager extends GeniBaseStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getNames())) {
+        if (! empty($res = $entity->getNames()) && ($res != $this->previousState->getNames())) {
             $names = [];
             foreach ($res as $name) {
                 $names[] = $name->toArray();
             }
             $this->saveAllTextValues(self::GROUP_NAMES, $names, $entity);
         }
-        if (! empty($res = $entity->getIdentifiers())) {
+        if (! empty($res = $entity->getIdentifiers()) && ($res != $this->previousState->getIdentifiers())) {
             foreach ($res as $id) {
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }

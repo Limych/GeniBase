@@ -1,7 +1,29 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
+use GeniBase\Util;
 use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceReference;
 
@@ -28,6 +50,42 @@ class SourceReferenceStorager extends GeniBaseStorager
 
     /**
      * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::detectPreviousState()
+     */
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
+    {
+        if (parent::detectPreviousState($entity, $context, $o)) {
+            return true;
+        }
+
+        /** @var SourceReference $entity */
+
+        $o = Util::parseArgs($o, [  'is_componentOf' => false   ]);
+
+        $t_srefs = $this->getTableName();
+        $t_sources = $this->dbs->getTableName('sources');
+
+        if ($context instanceof ExtensibleData) {
+            $context_id = GeniBaseInternalProperties::getPropertyOf($context, '_id');
+        } else {
+            $context_id = $this->dbs->getInternalId($t_sources, $context['id']);
+        }
+        if (!empty($context_id) && ! empty($res = $entity->getDescriptionRef())) {
+            $query = "SELECT * FROM $t_srefs WHERE _source_id = ? AND is_componentOf = ? AND description_uri = ?";
+            $result = $this->dbs->getDb()->fetchAssoc($query, [$context_id, $o['is_componentOf'], $res]);
+
+            if (! empty($result)) {
+                $candidate = $this->unpackLoadedData($this->getObject(), $result);
+                $this->previousState = clone $candidate;
+                $candidate->embed($entity);
+                $entity = $candidate;
+            }
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      *
      * @throws \UnexpectedValueException
@@ -41,7 +99,7 @@ class SourceReferenceStorager extends GeniBaseStorager
         /** @var SourceReference $entity */
         if (empty($res = $entity->getDescriptionRef())) {
             throw new \UnexpectedValueException('Description reference URI required!');
-        } else {
+        } elseif ($res != $this->previousState->getDescriptionRef()) {
             $data['description_uri'] = $res;
             if (! empty($res = GeniBaseStorager::getIdFromReference($res))
                 && ! empty($res = $this->dbs->getInternalId($t_sources, $res))
@@ -49,15 +107,18 @@ class SourceReferenceStorager extends GeniBaseStorager
                 $data['description_id'] = (int) $res;
             }
         }
-        if (empty($res = GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
-        } else {
-            $data['_source_id'] = $res;
-        }
-        if (! empty($o['is_componentOf'])) {
-            $data['is_componentOf'] = (int) $o['is_componentOf'];
-        }
         $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
+
+        if (! empty($data['description_uri'])) {
+            if (empty($res = GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+                throw new \UnexpectedValueException('Context internal ID required!');
+            } else {
+                $data['_source_id'] = $res;
+            }
+            if (! empty($o['is_componentOf'])) {
+                $data['is_componentOf'] = (int) $o['is_componentOf'];
+            }
+        }
 
         return $data;
     }
@@ -72,16 +133,16 @@ class SourceReferenceStorager extends GeniBaseStorager
      */
     public function loadComponents($context = null, $o = null)
     {
-        $o = array_merge([  'is_componentOf' => false   ], (is_array($o) ? $o : []));
+        $o = Util::parseArgs($o, [  'is_componentOf' => false   ]);
+
+        $t_srefs = $this->getTableName();
+        $t_sources = $this->dbs->getTableName('sources');
 
         if ($context instanceof ExtensibleData) {
             $context_id = GeniBaseInternalProperties::getPropertyOf($context, '_id');
         } else {
-            $context_id = $this->dbs->getInternalIdForId($context['id']);
+            $context_id = $this->dbs->getInternalId($t_sources, $context['id']);
         }
-
-        $t_srefs = $this->dbs->getTableName('source_references');
-        $t_srcs = $this->dbs->getTableName('sources');
 
         if (empty($context_id)) {
             throw new \UnexpectedValueException('Context internal ID required!');

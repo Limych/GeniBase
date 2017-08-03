@@ -84,18 +84,19 @@ class PlacesImporter extends GeniBaseImporter
         $count = count($places);
 
         $overtime = false;
+		$pcnt = 0;
         for ($cnt = $start; $cnt < $count; $cnt++) {
-            if (Util::executionTime() > 10000) {
-                $overtime = true;
-                break;
-            }
-
             /** @var PlaceDescription $plc */
             unset($plc);
             $segments = preg_split("/\s+>\s+/", $places[$cnt], null, PREG_SPLIT_NO_EMPTY);
             $max = count($segments) - 1;
+            $place_path = '';
             for ($i = 0; $i <= $max; $i++) {
+                $place_path .= ' > ' . $segments[$i];
                 $place = $this->parsePlace($segments[$i], $plc);
+                $place['identifiers'] = [
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => '//GeniBase/#' . md5($place_path),
+                ];
                 if ($i == $max) {
                     $place['type'] = PlaceTypes::SETTLEMENT;
                 } else {
@@ -103,9 +104,16 @@ class PlacesImporter extends GeniBaseImporter
                 }
                 $plc = $this->gbs->newStorager(PlaceDescription::class)->save($place);
             }
-        }
+			$pcnt++;
 
-        $response = new Response("<div><progress value='$cnt' max='$count'></progress> $cnt of $count places</div>");
+            if (Util::executionTime() > 10000) {
+                $overtime = true;
+                break;
+            }
+		}
+
+        $response = new Response("<div><progress value='$cnt' max='$count'></progress> " .
+            sprintf('%d of %d places (%.2f places/sec)', $cnt, $count, ($pcnt * 1000 / Util::executionTime())) . "</div>");
         if ($overtime) {
             $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, $cnt));
             $response->headers->set('Refresh', '0; url=' . $request->getUri());

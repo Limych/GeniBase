@@ -1,9 +1,28 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace App\Util;
 
 /**
- *
- * @author Limych
  *
  */
 class Profiler
@@ -17,7 +36,7 @@ class Profiler
         if (empty($name)) {
             return;
         }
-        $mt = microtime(true);
+        $mt = microtime(true) * 1000;
         if (empty(self::$timers)) {
             self::$timers = &self::$timersRoot;
             self::$timers[''] = null;
@@ -55,7 +74,7 @@ class Profiler
         if (empty($name)) {
             return;
         }
-        $mt = microtime(true);
+        $mt = microtime(true) * 1000;
         $timers = $prev = &self::$timersRoot;
         while ($timers[''] !== $name) {
             $prev = &$timers;
@@ -73,19 +92,19 @@ class Profiler
         }
     }
 
-    public static function omitSubtimers()
+    public static function omitSubtimers($omit = true)
     {
         if (! empty(self::$timers)) {
             $currentTimer = self::$timers[''];
             if (! empty(self::$timers[$currentTimer]->active)) {
-                self::$timers[$currentTimer]->omitSubtimers = true;
+                self::$timers[$currentTimer]->omitSubtimers = $omit;
             }
         }
     }
 
     protected static function dumpLevel($timers, $prefix = '')
     {
-        $mt = microtime(true);
+        $mt = microtime(true) * 1000;
         $keys = array_values(array_filter(array_keys($timers)));
         $max = count($keys) - 1;
         for ($i = 0; $i <= $max; $i++) {
@@ -98,14 +117,13 @@ class Profiler
                 $timers[$name]->period += $mt - $timers[$name]->startTime;
                 $timers[$name]->startTime = $mt;
             }
-            echo sprintf(
-                "%70s %s %6.4fs / %3d = %7.4fs\n",
-                $sname,
-                $prefix . (!$isLast ? '&#9507;' : '&#9495;'),
-                $timers[$name]->period,
-                $timers[$name]->counter,
-                ($timers[$name]->period / $timers[$name]->counter)
-            );
+            echo sprintf("%70s %s ", $sname, $prefix . (!$isLast ? '&#9507;' : '&#9495;')) .
+                sprintf(
+                    "%6.0f ms/%3d = %7.1f ms\n",
+                    $timers[$name]->period,
+                    $timers[$name]->counter,
+                    $timers[$name]->period / $timers[$name]->counter
+                );
             if (! empty($timers[$name]->subtimers)) {
                 self::dumpLevel($timers[$name]->subtimers, $prefix . (!$isLast ? '&#9475; ' : '&#8229;&#8229;'));
             }

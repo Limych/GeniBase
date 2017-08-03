@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Rs\Server;
 
 use Gedcomx\Gedcomx;
@@ -24,26 +45,26 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
 
     const MODE_COLLECT_IDS  = '\GeniBase\Rs\Server\GedcomxRsFilter:ModeCollectIds';
     const MODE_FILTER_NODES = '\GeniBase\Rs\Server\GedcomxRsFilter:ModeFilterNodes';
-    
+
     protected $mode;
-    
+
     protected $supplier_ids;
-    
+
     protected $filtered;
-    
+
     public function __construct()
     {
         $this->supplier_ids = [];
         $this->filtered = new Gedcomx();
     }
-    
+
     /**
      * @param Gedcomx $supplier
      */
     protected function startCollecting(Gedcomx $supplier)
     {
         $this->mode = self::MODE_COLLECT_IDS;
-        
+
         $supplier->accept($this);
     }
 
@@ -53,10 +74,10 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
     protected function startFiltering(Gedcomx $document)
     {
         $this->mode = self::MODE_FILTER_NODES;
-        
+
         $document->accept($this);
     }
-    
+
     /**
      * @return Gedcomx $filtered
      */
@@ -74,18 +95,18 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
     public static function filter(Gedcomx $document, Gedcomx $supplier)
     {
         $visitor = new self();
-        
+
         $args = func_get_args();
         array_shift($args);
-        
+
         foreach ($args as $supp) {
             $visitor->startCollecting($supp);
         }
         $visitor->startFiltering($document);
-        
+
         return $visitor->getFiltered();
     }
-    
+
     protected function passFilter(ExtensibleData $entity)
     {
         if ($this->mode === self::MODE_COLLECT_IDS) {
@@ -99,7 +120,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         return false;
     }
-    
+
     public function visitDocument(Document $document)
     {
         if ($this->passFilter($document)) {
@@ -107,7 +128,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitDocument($document);
     }
-    
+
     public function visitPlaceDescription(PlaceDescription $place)
     {
         if ($this->passFilter($place)) {
@@ -115,7 +136,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitPlaceDescription($place);
     }
-    
+
     public function visitEvent(Event $event)
     {
         if ($this->passFilter($event)) {
@@ -123,7 +144,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitEvent($event);
     }
-    
+
     public function visitAgent(Agent $agent)
     {
         if ($this->passFilter($agent)) {
@@ -131,7 +152,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitAgent($agent);
     }
-    
+
     public function visitSourceDescription(SourceDescription $sourceDescription)
     {
         if ($this->passFilter($sourceDescription)) {
@@ -139,7 +160,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitSourceDescription($sourceDescription);
     }
-    
+
     public function visitCollection(Collection $collection)
     {
         if ($this->passFilter($collection)) {
@@ -147,7 +168,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitCollection($collection);
     }
-    
+
     public function visitRecordDescriptor(RecordDescriptor $recordDescriptor)
     {
         if ($this->passFilter($recordDescriptor)) {
@@ -155,7 +176,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitRecordDescriptor($recordDescriptor);
     }
-    
+
     public function visitField(Field $field)
     {
         if ($this->passFilter($field)) {
@@ -163,7 +184,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitField($field);
     }
-    
+
     public function visitRelationship(Relationship $relationship)
     {
         if ($this->passFilter($relationship)) {
@@ -171,7 +192,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
         }
         parent::visitRelationship($relationship);
     }
-    
+
     public function visitPerson(Person $person)
     {
         if ($this->passFilter(Person)) {

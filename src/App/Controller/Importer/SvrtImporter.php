@@ -18,7 +18,7 @@ use GeniBase\Types\PlaceTypes;
 class SvrtImporter extends GeniBaseImporter
 {
 
-    const REFRESH_PERIOD = 180;  // seconds
+    const REFRESH_PERIOD = 120;  // seconds
 
     protected $cached_fpath;
     protected $imported_fpath;
@@ -42,6 +42,7 @@ class SvrtImporter extends GeniBaseImporter
         }
 
         $overtime = false;
+		$pcnt = 0;
         foreach ($json as $r) {
             if ($r->id <= $id) {
                 continue;
@@ -59,6 +60,7 @@ class SvrtImporter extends GeniBaseImporter
                     $this->importKilled($r);
                     break;
             }
+			$pcnt++;
 
             if (Util::executionTime() >= 10000) {
                 $overtime = true;
@@ -79,7 +81,7 @@ class SvrtImporter extends GeniBaseImporter
         }
 
         $response = new Response("<div><progress value='" . $r->id . "' max='" . $this->getCount() . "'></progress> " .
-            $r->id . " of " . $this->getCount() . " records</div>");
+            sprintf('%d of %d records (%.2f records/sec)', $r->id, $this->getCount(), ($pcnt * 1000 / Util::executionTime())) . "</div>");
         if (! defined('DEBUG_PROFILE')) {
             $response->headers->set('Refresh', $period . '; url=' . $request->getUri());
         }
@@ -205,10 +207,12 @@ class SvrtImporter extends GeniBaseImporter
     {
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
-            \App\Util\Profiler::omitSubtimers();
         }
         $title = 'Именные списки убитым, раненым и без вести пропавшим нижним чинам (солдатам)';
         $src = $this->gbs->newStorager(SourceDescription::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($title),
+            ],
             'resourceType'  => ResourceType::COLLECTION,
             'citations' => [[
                 'lang'  => 'ru',
@@ -222,6 +226,9 @@ class SvrtImporter extends GeniBaseImporter
 
         $title = $rec->source;
         $src = $this->gbs->newStorager(SourceDescription::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($title),
+            ],
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
             'citations' => [[
                 'lang'  => 'ru',
@@ -243,11 +250,15 @@ class SvrtImporter extends GeniBaseImporter
         } elseif (preg_match('|rsl\.ru/|', $rec->source_url)) {
             $mediator_id = Agents::getRslAgent($this->gbs)->getId();
         }
+        $citation = 'Страница ' . Util::numberFormat($this->app, $rec->source_pg, 0) . '. ' . $rec->source;
         $src = $this->gbs->newStorager(SourceDescription::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($citation),
+            ],
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
             'citations' => [[
                 'lang'  => 'ru',
-                'value' => 'Страница ' . Util::numberFormat($this->app, $rec->source_pg, 0) . '. ' . $rec->source,
+                'value' => $citation,
             ]],
             'componentOf' => [
                 'description'   => '#' . $src->getId(),
@@ -263,6 +274,9 @@ class SvrtImporter extends GeniBaseImporter
         ]);
 
         $src = $this->gbs->newStorager(SourceDescription::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($source_citation),
+            ],
             'resourceType'  => ResourceType::RECORD,
             'citations' => [[
                 'lang'  => 'ru',
@@ -291,7 +305,7 @@ class SvrtImporter extends GeniBaseImporter
                 '\bв(ол)?\.'    => 'волость',
                 '\bокр\.'       => 'округа',
                 '\bг(ор)?\.'    => '',
-                '\bмещ(\.|анин)?\b' => '',
+                '\bмещ(\.|анин\b)?' => '',
             ];
             $patterns = array_map(
                 function ($v) {
@@ -327,6 +341,9 @@ class SvrtImporter extends GeniBaseImporter
 
         $name = 'Российская империя';
         $plc = $this->gbs->newStorager(PlaceDescription::class)->save([
+            'identifiers'   => [
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#place_' . md5($name),
+            ],
             'names' => [[
                 'lang'  => 'ru',
                 'value' => $name,
@@ -346,8 +363,13 @@ class SvrtImporter extends GeniBaseImporter
             return trim(preg_replace($patterns, $replaces, $v), "\x00..\x1F ,;");
         }, $segments)));
         $max = count($segments) - 1;
+        $place_path = $name;
         for ($i = 0; $i <= $max; $i++) {
+            $place_path .= ' > ' . $segments[$i];
             $data = [
+                'identifiers'   => [
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#place_' . md5($place_path),
+                ],
                 'extracted' => true,
                 'names' => [[
                     'lang'  => 'ru',
@@ -382,7 +404,7 @@ class SvrtImporter extends GeniBaseImporter
             [
                 'extracted' => true,
                 'identifiers'   => [
-                    \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#person=' . $rec->id,
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#person_' . md5($source_citation),
                 ],
                 'living'    => false,
                 'gender'    => [
@@ -451,7 +473,7 @@ class SvrtImporter extends GeniBaseImporter
             [
                 'extracted' => true,
                 'identifiers'   => [
-                    \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#event=' . $rec->id,
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#event_' . md5($source_citation),
                 ],
                 'type'  => $event_type,
                 'date'  => [

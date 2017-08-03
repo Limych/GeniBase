@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
@@ -25,21 +46,37 @@ class SubjectStorager extends ConclusionStorager
     /**
      * {@inheritDoc}
      *
-     * @see \GeniBase\Storager\GeniBaseStorager::detectId()
+     * @see \GeniBase\Storager\GeniBaseStorager::detectPreviousState()
      */
-    protected function detectId(ExtensibleData &$entity)
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
-        if (parent::detectId($entity)) {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
+        if (parent::detectPreviousState($entity, $context, $o)) {
+            if (defined('DEBUG_PROFILE')) {
+                \App\Util\Profiler::stopTimer(__METHOD__);
+            }
             return true;
         }
 
         /** @var Subject $entity */
-        if (! empty($r = $entity->getIdentifiers())
-        && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($r))) {
-            $entity->setId($id);
+        if (! empty($res = $entity->getIdentifiers())
+            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($res))
+        ) {
+            $candidate = $this->load([ 'id' => $id ]);
+            $this->previousState = clone $candidate;
+            $candidate->embed($entity);
+            $entity = $candidate;
+            if (defined('DEBUG_PROFILE')) {
+                \App\Util\Profiler::stopTimer(__METHOD__);
+            }
             return true;
         }
 
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
         return false;
     }
 
@@ -56,7 +93,7 @@ class SubjectStorager extends ConclusionStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getIdentifiers())) {
+        if (! empty($res = $entity->getIdentifiers()) && ($res != $this->previousState->getIdentifiers())) {
             foreach ($res as $id) {
                 $this->newStorager(Identifier::class)->save($id, $entity);
             }
