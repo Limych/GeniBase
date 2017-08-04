@@ -4,8 +4,6 @@ vendor/
 
 # Configuration files with possibly sensitive information
 /.coveralls.yml
-/var/store/*
-!/var/store/import_0.json
 /app/configs/*.php
 
 # Files and folders related to build/test tools
@@ -47,6 +45,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+
 
 # External tool builders
 .externalToolBuilders/

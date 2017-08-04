@@ -119,4 +119,45 @@ class Util
         $remainingMiliseconds = $max_execution_time * 1000 - $spendMiliseconds;
         return ($remainingMiliseconds >= $miliseconds);
     }
+
+    /**
+     * Get last line of text file.
+     *
+     * @param string $fpath Path to file
+     * @return NULL|string Last line of file or NULL on error.
+     */
+    public static function fileGetLastLine($fpath)
+    {
+        $line = '';
+        $cursor = -1;
+
+        $handle = fopen($fpath, 'r');
+        if (false === $handle) {
+            return null;
+        }
+
+        /**
+         * Trim trailing newline chars of the file
+         */
+        while (true) {
+            fseek($handle, $cursor--, SEEK_END);
+            $char = fgetc($handle);
+            if ($char !== "\n" && $char !== "\r") {
+                break;
+            }
+            $line = $char . $line;
+        }
+
+        /**
+         * Read until the start of file or first newline char
+         */
+        while ($char !== false && $char !== "\n" && $char !== "\r") {
+            $line = $char . $line;
+            fseek($handle, $cursor--, SEEK_END);
+            $char = fgetc($handle);
+        }
+
+        fclose($handle);
+        return $line;
+    }
 }

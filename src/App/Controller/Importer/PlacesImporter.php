@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace App\Controller\Importer;
 
 use App\Util;
@@ -95,7 +116,7 @@ class PlacesImporter extends GeniBaseImporter
                 $place_path .= ' > ' . $segments[$i];
                 $place = $this->parsePlace($segments[$i], $plc);
                 $place['identifiers'] = [
-                    \Gedcomx\Types\IdentifierType::PERSISTENT => '//GeniBase/#' . md5($place_path),
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => '//GeniBase/#place_' . md5($place_path),
                 ];
                 if ($i == $max) {
                     $place['type'] = PlaceTypes::SETTLEMENT;
@@ -125,7 +146,7 @@ class PlacesImporter extends GeniBaseImporter
 
     protected function getPlaces($year = 1913)
     {
-        $fpath = BASE_DIR . "/var/places_{$year}.txt";
+        $fpath = BASE_DIR . "/var/store/places_{$year}.txt";
 
         $places = file_get_contents($fpath);
 

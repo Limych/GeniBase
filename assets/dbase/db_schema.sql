@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS `gb_identifiers` (
   `type_id` bigint(20) unsigned NOT NULL COMMENT 'The type of the identifier',
   `value` varchar(255) NOT NULL COMMENT 'The value (URI) of identifier',
   PRIMARY KEY (`_ref_id`,`type_id`,`value`),
-  KEY `type_id` (`type_id`),
-  KEY `value` (`value`)
+  KEY `value` (`value`),
+  KEY `type_id` (`type_id`,`value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 CREATE TABLE IF NOT EXISTS `gb_languages` (

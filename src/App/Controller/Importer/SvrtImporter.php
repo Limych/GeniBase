@@ -1,4 +1,25 @@
 <?php
+/**
+ * GeniBase — the content management system for genealogical websites.
+ *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
+ * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
+ * @link https://github.com/Limych/GeniBase
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
+ */
 namespace App\Controller\Importer;
 
 use App\Util;
@@ -14,133 +35,131 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use GeniBase\Types\PlaceTypes;
+use App\Util\MsCsv;
 
 class SvrtImporter extends GeniBaseImporter
 {
 
     const REFRESH_PERIOD = 120;  // seconds
 
-    protected $cached_fpath;
     protected $imported_fpath;
     protected $count_fpath;
+    protected $lastId;
 
     public function __construct(Application $app)
     {
         parent::__construct($app);
 
         $this->imported_fpath = BASE_DIR . '/tmp/imported_id.txt';
-        $this->cached_fpath = BASE_DIR . '/tmp/import.json';
         $this->count_fpath = BASE_DIR . '/tmp/count.txt';
     }
 
     public function import(Request $request)
     {
-        $id = $this->loadImportedId();
-
-        if (false === $json = $this->getData($id)) {
-            return new Response(null, 204);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
         }
+        list($startId, $seek) = (file_exists($this->imported_fpath)
+            ? json_decode(file_get_contents($this->imported_fpath), true)
+            : array(0, 0));
 
+        $refresh = self::REFRESH_PERIOD;
+
+        $store_fpath = $this->app['svrt.1914.store'] . "/1914_svrt_ru.csv";
+        if (empty($this->app['svrt.1914.token'])) {
+            $store_fpath = $this->app['svrt.1914.store'] . "/1914_svrt_ru.sample.csv";
+        }
+        $fh = fopen($store_fpath, 'c+');
+        $keys = MsCsv::fGetCsv($fh);
+        if (0 !== $seek) {
+            fseek($fh, $seek);
+        }
+        $refresh = 0;
+        $cnt = 0;
         $overtime = false;
-		$pcnt = 0;
-        foreach ($json as $r) {
-            if ($r->id <= $id) {
-                continue;
-            }
-            if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::startTimer('SvrtImport');
-            }
-            switch ($r->source_type_id) {
-                default:
-                    var_dump($r);
-                    $this->saveImportedId($r->id);
-                    throw new \LogicException("Undefined logic for source type " . $r->source_type_id);
-
-                case 1:
-                    $this->importKilled($r);
+        while (true) {
+            if (feof($fh)) {
+                if (! flock($fh, LOCK_EX) || ! $this->fetchNewData($fh)) {
                     break;
+                }
+                fflush($fh);
+                flock($fh, LOCK_UN);
+                fseek($fh, $seek);
+                $refresh = self::REFRESH_PERIOD;
             }
-			$pcnt++;
 
-            if (Util::executionTime() >= 10000) {
-                $overtime = true;
-                break;
+            while (true) {
+                flock($fh, LOCK_SH);
+                $record = MsCsv::fGetCsv($fh);
+                flock($fh, LOCK_UN);
+                if (! is_array($record)) {
+                    break;
+                }
+
+                if ((int) $record[0] < $startId) {
+                    continue;
+                }
+                $record = self::makeRecord($keys, $record);
+                $cnt++;
+                $this->lastId = $record->id;
+                switch ($record->source_type_id) {
+                    default:
+                        echo "Undefined logic for source type " . $record->source_type_id;
+                        var_dump($record);
+                        $refresh = -1;
+                        $this->lastId = -1;
+                        break 3;
+                    case 1:
+                        $this->importKilled($record);
+                        break;
+                }
+                $seek = ftell($fh);
+                if (Util::executionTime() >= 10000) {
+                    $overtime = true;
+                    break 2;
+                }
             }
         }
+        fclose($fh);
+
+        file_put_contents($this->imported_fpath, json_encode([$this->lastId + 1, $seek]));
+
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::dumpTimers();
         }
-        $this->saveImportedId($r->id);
 
-        $period = 0;
-        if (!$overtime) {
-            $this->flushCache();
-
-            $store_fpath = $this->getStoreFPath($r->id);
-            $period = (! file_exists($store_fpath) ? self::REFRESH_PERIOD : 0);
-        }
-
-        $response = new Response("<div><progress value='" . $r->id . "' max='" . $this->getCount() . "'></progress> " .
-            sprintf('%d of %d records (%.2f records/sec)', $r->id, $this->getCount(), ($pcnt * 1000 / Util::executionTime())) . "</div>");
-        if (! defined('DEBUG_PROFILE')) {
-            $response->headers->set('Refresh', $period . '; url=' . $request->getUri());
+        $response = new Response("<div><progress value='" . $this->lastId . "' max='" . $this->getCount() . "'></progress> " .
+            sprintf('%d of %d records (%.2f records/sec)', $this->lastId, $this->getCount(), ($cnt * 1000 / Util::executionTime())) . "</div>");
+        if (! defined('DEBUG_PROFILE') && ($refresh >= 0)) {
+            $response->headers->set('Refresh', $refresh . '; url=' . $request->getUri());
         }
 
         return $response;
     }
 
-    protected function loadImportedId()
+    protected static function makeRecord($keys, $values)
     {
-        $id = file_exists($this->imported_fpath)
-            ? intval(file_get_contents($this->imported_fpath))
-            : 0;
-        return $id;
+        return (object) array_combine($keys, $values);
     }
 
-    protected function saveImportedId($id)
+    protected function fetchNewData($fh)
     {
-        if (! isset($this->imported_fpath)) {
-            $this->loadImportedId();
-        }
-
-        file_put_contents($this->imported_fpath, intval($id));
-    }
-
-    /**
-     *
-     * @param number $id
-     * @return string
-     */
-    protected function getStoreFPath($id)
-    {
-        return $this->app['svrt.1914.store'] . "/import_{$id}.json";
-    }
-
-    /**
-     *
-     * @param number $id
-     * @return boolean|\stdClass
-     */
-    protected function getData($id)
-    {
-        $store_fpath = $this->getStoreFPath($id);
-
-        if (file_exists($this->cached_fpath)) {
-            $json = file_get_contents($this->cached_fpath);
-        } else {
-            if (file_exists($store_fpath)) {
-                $json = file_get_contents($store_fpath);
-            } elseif (! empty($key = $this->app['svrt.1914.token'])) {
-                $json = file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=$id");
-                if (false === $json) {
-                    return false;
-                }
-
-                file_put_contents($store_fpath, $json);
+        if (! empty($key = $this->app['svrt.1914.token'])
+            && ! empty($json = @file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=" . $this->lastId))
+        ) {
+            $fstat = fstat($fh);
+            if ($fstat['size'] === 0) {
+                MsCsv::fPutBom($fh);
             }
-            file_put_contents($this->cached_fpath, $json);
+
+            $json = json_decode($json, true);
+            foreach ($json as $record) {
+                unset($record['region_idx']);
+                MsCsv::fPutCsv($fh, array_values($record));
+            }
+            return true;
         }
-        return json_decode($json);
+        return false;
     }
 
     protected function getCount()
@@ -167,11 +186,6 @@ class SvrtImporter extends GeniBaseImporter
         file_put_contents($this->count_fpath, $count);
 
         return $count;
-    }
-
-    protected function flushCache()
-    {
-        @unlink($this->cached_fpath);
     }
 
     protected function importKilled($rec)
