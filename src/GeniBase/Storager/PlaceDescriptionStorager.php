@@ -54,10 +54,12 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $this->updateGeoCoordinates();
 
-        $def['neighboring_distance'] = 100;
         $def['makeId_unique'] = false;
         $def['loadJurisdictions'] = true;
         $def['sortComponents'] = true;
+        //
+        $def['neighboringDistance'] = 100;
+        $def['neighboringLimit'] = 30;
 
         if (! empty($entity)) {
             /**
@@ -360,12 +362,13 @@ class PlaceDescriptionStorager extends SubjectStorager
             "AND latitude BETWEEN X(@bot_rgt) AND X(@top_lft) " .
             "AND longitude BETWEEN Y(@top_lft) AND Y(@bot_rgt) " .
             "HAVING _dist < ? " .
-            "ORDER BY _dist",
+            "ORDER BY _dist " .
+            "LIMIT " . ((int) $o['neighboringLimit']),
             [
                 $context->getLatitude(),
                 $context->getLongitude(),
                 $this->dbs->getInternalId($this->getTableName(), $context->getId()),
-                $o['neighboring_distance'],
+                (int) $o['neighboringDistance'],
             ]
         );
 

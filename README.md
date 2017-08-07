@@ -5,6 +5,16 @@ GeniBase
 [![Dependency Status](https://www.versioneye.com/user/projects/596db2a5368b0800554f1c2f/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596db2a5368b0800554f1c2f)
 [![Coverage Status](https://coveralls.io/repos/github/Limych/GeniBase/badge.svg?branch=3.0.x-dev)](https://coveralls.io/github/Limych/GeniBase?branch=3.0.x-dev)
 
+## Основная цель проекта
+
+Цель проекта — сделать систему, позволяющую создать личный сервер для хранения любой генеалогической информации. Система должна позволять соединять отдельные сервера в [децентрализованную одноранговую сеть](https://ru.wikipedia.org/wiki/%D0%9E%D0%B4%D0%BD%D0%BE%D1%80%D0%B0%D0%BD%D0%B3%D0%BE%D0%B2%D0%B0%D1%8F_%D1%81%D0%B5%D1%82%D1%8C).
+
+Администратор каждого сервера сам будет решать, что хранить и сам же будет решать, кто из пользователей и что сможет видеть из этих данных. При этом должна иметься возможность скопировать к себе нужные данные из любых доступных источников. А также возможность поставить ссылки на любые данные на соседних серверах сети.
+
+Система должна иметь также возможность создавать на свое основе тематические справочные базы.
+
+Также должны быть функции [социальной сети](https://ru.wikipedia.org/wiki/%D0%A1%D0%BE%D1%86%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D1%81%D0%B5%D1%82%D1%8C) для пользователей системы.
+
 ## Documentation
 
 Auto-generated technical documentation is available at the https://limych.github.io/GeniBase/

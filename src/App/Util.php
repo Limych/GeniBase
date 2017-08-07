@@ -160,4 +160,20 @@ class Util
         fclose($handle);
         return $line;
     }
+
+    public static function printStatus($done, $max, $msg = '', $newLine = false)
+    {
+        static $lastMsgLen = 0;
+
+        $prc = $done * 100 / $max;
+        if ($newLine) {
+            $spc = "\n";
+            $lastMsgLen = 0;
+        } else {
+            $spc = str_repeat(' ', max(0, ($lastMsgLen - strlen($msg))));
+            $lastMsgLen = strlen($msg);
+        }
+        $sprc = rtrim(substr("$prc", 0, 5), '.');
+        echo sprintf("\r[%'.-25s] %s%% %s", str_repeat('#', round(25 * $prc / 100)), $sprc, $msg . $spc);
+    }
 }

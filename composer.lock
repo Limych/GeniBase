@@ -4,8 +4,48 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "715064d98263b6c46c0cec7f4f6cf0c7",
+    "content-hash": "84b2bcad22c9a1a5e21ee45a9d9cbc4b",
     "packages": [
+        {
+            "name": "bordercloud/sparql",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Limych/SPARQL.git",
+                "reference": "6ebae275887164122b6188af86810da6702c540a"
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "evert/phpdoc-md": "0.0.*",
+                "phpdocumentor/phpdocumentor": "2.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BorderCloud\\SPARQL\\": ""
+                }
+            },
+            "license": [
+                "CC-BY-SA-4.0"
+            ],
+            "authors": [
+                {
+                    "name": "Karima Rafes",
+                    "email": "karima.rafes@bordercloud.com",
+                    "homepage": "http://www.bordercloud.com/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Lib PHP very easy for SPARQL 1.1",
+            "homepage": "https://github.com/BorderCloud/SPARQL",
+            "keywords": [
+                "RDF",
+                "SPARQL"
+            ],
+            "time": "2017-08-06 22:41:04"
+        },
         {
             "name": "doctrine/annotations",
             "version": "v1.2.7",
@@ -2190,16 +2230,16 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.1.9",
+            "version": "2.1.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f"
+                "reference": "ffbbd2c06c64b08fb47974eed5dbce4ca2bb0eec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f",
-                "reference": "b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/ffbbd2c06c64b08fb47974eed5dbce4ca2bb0eec",
+                "reference": "ffbbd2c06c64b08fb47974eed5dbce4ca2bb0eec",
                 "shasum": ""
             },
             "require": {
@@ -2247,7 +2287,7 @@
                 "whoops",
                 "zf2"
             ],
-            "time": "2017-06-03T18:33:07+00:00"
+            "time": "2017-08-03T18:23:40+00:00"
         },
         {
             "name": "guzzle/guzzle",
@@ -2343,17 +2383,17 @@
             "time": "2014-01-28T22:29:15+00:00"
         },
         {
-            "name": "limych/proxy-checker",
+            "name": "limych/foxy-tools",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Limych/ProxyChecker.git",
-                "reference": "535765d3d28d00d269958b40823b48af845d613c"
+                "url": "https://github.com/Limych/foxy-tools.git",
+                "reference": "a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Limych/ProxyChecker/zipball/535765d3d28d00d269958b40823b48af845d613c",
-                "reference": "535765d3d28d00d269958b40823b48af845d613c",
+                "url": "https://api.github.com/repos/Limych/foxy-tools/zipball/a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e",
+                "reference": "a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e",
                 "shasum": ""
             },
             "require": {
@@ -2362,7 +2402,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "ProxyChecker\\": "src"
+                    "FoxyTools\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2371,21 +2411,22 @@
             ],
             "authors": [
                 {
-                    "name": "Alexey",
-                    "homepage": "https://github.com/AlexeyFreelancer"
-                },
-                {
                     "name": "Andrey Khrolenok",
                     "email": "andrey@khrolenok.ru",
                     "homepage": "https://github.com/Limych"
                 }
             ],
-            "description": "Simple and quick check if a proxy is working and for its type (transparent, anonymous, elite).",
-            "homepage": "https://github.com/Limych/ProxyChecker",
+            "description": "“I solemnly swear that I am planning a prank, and only prank…”",
+            "homepage": "https://github.com/Limych/foxy-tools",
             "keywords": [
-                "proxychecker"
+                "bot",
+                "proxy-checker",
+                "proxychecker",
+                "toolkit",
+                "user-agent",
+                "useragent"
             ],
-            "time": "2017-08-03T14:39:11+00:00"
+            "time": "2017-08-05 13:14:12"
         },
         {
             "name": "paragonie/random_compat",
@@ -2582,22 +2623,22 @@
         },
         {
             "name": "phpdocumentor/reflection-docblock",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/ReflectionDocBlock.git",
-                "reference": "46f7e8bb075036c92695b15a1ddb6971c751e585"
+                "reference": "183824db76118b9dddffc7e522b91fa175f75119"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/46f7e8bb075036c92695b15a1ddb6971c751e585",
-                "reference": "46f7e8bb075036c92695b15a1ddb6971c751e585",
+                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/183824db76118b9dddffc7e522b91fa175f75119",
+                "reference": "183824db76118b9dddffc7e522b91fa175f75119",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.5",
                 "phpdocumentor/reflection-common": "^1.0@dev",
-                "phpdocumentor/type-resolver": "^0.4.0",
+                "phpdocumentor/type-resolver": "^0.3.0",
                 "webmozart/assert": "^1.0"
             },
             "require-dev": {
@@ -2623,20 +2664,20 @@
                 }
             ],
             "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2017-07-15T11:38:20+00:00"
+            "time": "2017-08-04T20:55:59+00:00"
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "0.4.0",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "9c977708995954784726e25d0cd1dddf4e65b0f7"
+                "reference": "fb3933512008d8162b3cdf9e18dba9309b7c3773"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/9c977708995954784726e25d0cd1dddf4e65b0f7",
-                "reference": "9c977708995954784726e25d0cd1dddf4e65b0f7",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/fb3933512008d8162b3cdf9e18dba9309b7c3773",
+                "reference": "fb3933512008d8162b3cdf9e18dba9309b7c3773",
                 "shasum": ""
             },
             "require": {
@@ -2670,7 +2711,7 @@
                     "email": "me@mikevanriel.com"
                 }
             ],
-            "time": "2017-07-14T14:27:02+00:00"
+            "time": "2017-06-03T08:32:36+00:00"
         },
         {
             "name": "phploc/phploc",
@@ -4722,7 +4763,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "gedcomx/gedcomx-php": 20,
-        "limych/proxy-checker": 20
+        "bordercloud/sparql": 20,
+        "limych/foxy-tools": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
