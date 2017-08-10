@@ -68,7 +68,7 @@ if (empty($src_fpath) || ('--' == $src_fpath)) {
     die2(2, "ERROR: Can't read source file.\n");
 }
 
-$data = PlacesIterator::process($data, 'updatePlace');
+$data = PlacesIterator::run($data, 'updatePlace');
 
 if (empty($dst_fpath)) {
     echo $data;
@@ -101,24 +101,28 @@ function updatePlace($place, $parent, $cnt, $max)
         $country = $place;
     }
     if (! empty($place['alias'])) {
-        $query = " BIND( <${place['alias']}> AS ?item ) ";
+        $alias = PlacesIterator::processURI($place['alias'], false);
+        $query = "BIND( $alias AS ?item )\n  " .
+            "FILTER ( LANG(?itemLabel) = \"ru\" )";
     } else {
         $tmp = [];
         foreach (PlacesIterator::expandNames($place['name']) as $name) {
-            $tmp[] = " { ?item rdfs:label \"$name\"@ru. } UNION { ?item skos:altLabel \"$name\"@ru. } ";
+            $tmp[] = "\"$name\"@ru";
         }
-        $query = implode('UNION', $tmp);
+        $query = "VALUES ?itemLabel { " . implode(' ', $tmp) . " }";
 
         $filter = [];
         if (! empty($country['alias'])) {
-            $filter[] = "?item wd:P17 <${country['alias']}>.";
+            $alias = PlacesIterator::processURI($country['alias'], false);
+            $filter[] = "?item wd:P17 $alias .";
         }
         if (! empty($parent['alias'])) {
-            $filter[] = "?item wd:P131 <${parent['alias']}>.";
+            $alias = PlacesIterator::processURI($parent['alias'], false);
+            $filter[] = "?item wd:P131 $alias .";
         }
         if (! empty($filter)) {
             $filter = ' { ' . implode(' UNION ', $filter) . ' } ';
-            $candidate = digBigData($place, $parent, $query . $filter);
+            $candidate = digBigData($place, $parent, "$query\n  $filter");
             if ($place !== $candidate) {
                 return $candidate;
             }
@@ -128,45 +132,87 @@ function updatePlace($place, $parent, $cnt, $max)
     return digBigData($place, $parent, $query);
 }
 
+function addTypes(array &$types, $key, array $newTypes)
+{
+    if (empty($types[$key])) {
+        $types[$key] = $newTypes;
+    } else {
+        $types[$key] = array_unique(array_merge($types[$key], $newTypes));
+    }
+}
+
 function digBigData($place, $parent, $query)
 {
+    static $types, $metaTypes;
+
+    if (empty($types)) {
+        // Define main metaTypes (in order of importance)
+        $metaTypes = [
+            'wd:Q6256',     // country (страна)
+            'wd:Q515',      // city (город)
+            'wd:Q2989457',  // town (посад, п.г.т.)
+            'wd:Q532',      // village (село)
+            'wd:Q5084',     // hamlet (деревня)
+            'wd:Q748331',   // stanitsa (станица)
+            'wd:Q2023000',  // khutor (хутор)
+        ];
+
+        // Add basic metatypes to types
+        $types = [];
+        foreach ($metaTypes as $key) {
+            if (empty($types[$key])) {
+                $types[$key] = [];
+            }
+            $types[$key][] = $key;
+        }
+
+        // Define dependences from types to metatypes (in order of importance)
+        addTypes($types, 'wd:Q10864048', [  // АТЕ-1
+            'wd:Q10864048', // АТЕ-1
+            'wd:Q86622',    // губерния
+            'wd:Q171308',   // область
+            'wd:Q7075127',  // область Российской империи
+            'wd:Q217691',   // Губернии Финляндии
+        ]);
+        addTypes($types, 'wd:Q13220204', [  // АТЕ-2
+            'wd:Q13220204', // АТЕ-2
+            'wd:Q18867465', // уезд
+        ]);
+        addTypes($types, 'wd:Q13221722', [  // АТЕ-3
+            'wd:Q13221722', // АТЕ-3
+            'wd:Q3504085',  // гмина
+            'wd:Q687121',   // волость
+            'wd:Q20732405', // волость Российской Империи
+        ]);
+        addTypes($types, 'wd:Q2989457', [   // посад (посёлок городского типа)
+            'wd:Q2989457',  // посад (посёлок городского типа)
+            'wd:Q3957',     // малый город
+        ]);
+        addTypes($types, 'wd:Q2514025', [   // посёлок
+            'wd:Q2514025',  // посёлок
+            'wd:Q486972',   // населённый пункт
+            'wd:Q1989945',  // агрогородок
+        ]);
+
+        // Add commom metaTypes for regions and settlements
+        $metaTypes[] = 'wd:Q15642541';  // human-geographic territorial entity (геополитическая область)
+        $metaTypes[] = 'wd:Q486972';    // settlement (населённый пункт)
+
+        // Join metaTypes to one string
+        $metaTypes = implode(' ', array_unique($metaTypes));
+    }
+
     $sp = new Endpoint('https://query.wikidata.org/sparql');
 
-    $query = "SELECT DISTINCT ?item ?itemType ?itemLabel ?location ?founding ?dissolution WHERE {
+    $query = "SELECT DISTINCT ?item ?itemType ?itemMetaType ?itemLabel ?location ?founding ?dissolution WHERE {
+  ?item (rdfs:label|skos:altLabel) ?itemLabel;
+        wdt:P31 ?itemType;
+        wdt:P31/wdt:P279* ?itemMetaType.
   $query
-  {
-    # страна
-    ?item wdt:P31/wdt:P279* wd:Q6256.
-    BIND( wd:Q6256 AS ?itemType )
-  } UNION {
-    # (обобщаем) геополитическая область
-    ?item wdt:P31/wdt:P279* wd:Q15642541;
-          wdt:P31 ?itemType.
-  } UNION {
-    # город
-    ?item wdt:P31/wdt:P279* wd:Q515.
-    BIND( wd:Q515 AS ?itemType )
-  } UNION {
-    # посад (посёлок городского типа)
-    ?item wdt:P31/wdt:P279* wd:Q2989457.
-    BIND( wd:Q2989457 AS ?itemType )
-  } UNION {
-    # село
-    ?item wdt:P31/wdt:P279* wd:Q532.
-    BIND( wd:Q532 AS ?itemType )
-  } UNION {
-    # деревня
-    ?item wdt:P31/wdt:P279* wd:Q5084.
-    BIND( wd:Q5084 AS ?itemType )
-  } UNION {
-    # (обобщаем) населённый пункт
-    ?item wdt:P31/wdt:P279* wd:Q486972;
-          wdt:P31 ?itemType.
-  }
+  VALUES ?itemMetaType { $metaTypes }
   OPTIONAL{ ?item wdt:P625 ?location. }
   OPTIONAL{ ?item wdt:P571 ?founding. }
   OPTIONAL{ ?item wdt:P576 ?dissolution. }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ru\". }
 }";
 
     $rows = $sp->query($query);
@@ -176,109 +222,110 @@ function digBigData($place, $parent, $query)
 //         throw new \Exception(print_r($err, true));
         return $place;
     }
-    $data = [];
+
+    // Prepare candidates
+    $candidates = [];
     foreach ($rows['result']['rows'] as $row) {
-        $item = $row['item'];
-        $data[$item]['item'] = $item;
-        if (empty($data[$item])) {
-            $data[$item] = [];
+        $item = PlacesIterator::processURI($row['item'], false);
+        if (empty($candidates[$item])) {
+            $candidates[$item] = [];
         }
-        if (empty($data[$item]['type'])) {
-            $data[$item]['type'] = [];
+        $candidates[$item]['item'] = $item;
+
+        // Type
+        if (empty($candidates[$item]['type'])) {
+            $candidates[$item]['type'] = [];
         }
-        $data[$item]['type'][] = $row['itemType'];
-        $data[$item]['label'] = $row['itemLabel'];
+        $candidates[$item]['type'][PlacesIterator::processURI($row['itemType'], false)] = true;
+        $candidates[$item]['type'][PlacesIterator::processURI($row['itemMetaType'], false)] = true;
+
+        // Labels
+        if (empty($candidates[$item]['label'])) {
+            $candidates[$item]['label'] = [];
+        }
+        $candidates[$item]['label'][] = $row['itemLabel'];
+
+        // Location
         if (! empty($row['location']) && preg_match('/Point\(([\d\.]+)\s+([\d\.]+)\)/', $row['location'], $matches)) {
-            $data[$item]['location'] = $matches[2] . ',' . $matches[1];
+            $candidates[$item]['location'] = $matches[2] . ',' . $matches[1];
         }
+
+        // Existence dates
+        if (empty($candidates[$item]['temporal'])) {
+            $candidates[$item]['temporal'] = [];
+        }
+        $temporal = '';
         if (! empty($row['founding'])) {
             $dt = strtok($row['founding'], 'T');
             $dt = preg_replace('/(-01)?-01$/', '', $dt);
-            $data[$item]['temporal'] = '+' . $dt . '/';
+            $temporal = '+' . $dt . '/';
         }
         if (! empty($row['dissolution'])) {
-            if (empty($data[$item]['temporal'])) {
-                $data[$item]['temporal'] = '/';
+            if (empty($temporal)) {
+                $temporal = '/';
             }
             $dt = strtok($row['dissolution'], 'T');
             $dt = preg_replace('/(-01)?-01$/', '', $dt);
-            $data[$item]['temporal'] .= '+' . $dt;
+            $temporal .= '+' . $dt;
+        }
+        if (! empty($temporal)) {
+            $candidates[$item]['temporal'][] = $temporal;
         }
     }
-
-    static $types;
-
-    if (empty($types)) {
-        $types = [];
-        $types[PlacesIterator::processURI('wd:Q6256')] = [  // страна
-            PlacesIterator::processURI('wd:Q6256'),         // страна
-        ];
-        $types[PlacesIterator::processURI('wd:Q10864048')] = [  // АТЕ-1
-            PlacesIterator::processURI('wd:Q10864048'), // АТЕ-1
-            PlacesIterator::processURI('wd:Q86622'),    // губерния
-            PlacesIterator::processURI('wd:Q171308'),   // область
-            PlacesIterator::processURI('wd:Q7075127'),  // область Российской империи
-            PlacesIterator::processURI('wd:Q217691'),   // Губернии Финляндии
-        ];
-        $types[PlacesIterator::processURI('wd:Q13220204')] = [  // АТЕ-2
-            PlacesIterator::processURI('wd:Q13220204'), // АТЕ-2
-            PlacesIterator::processURI('wd:Q18867465'), // уезд
-        ];
-        $types[PlacesIterator::processURI('wd:Q13221722')] = [  // АТЕ-3
-            PlacesIterator::processURI('wd:Q13221722'), // АТЕ-3
-            PlacesIterator::processURI('wd:Q3504085'),  // гмина
-            PlacesIterator::processURI('wd:Q687121'),   // волость
-            PlacesIterator::processURI('wd:Q20732405'), // волость Российской Империи
-        ];
-        $types[PlacesIterator::processURI('wd:Q515')] = [   // город
-            PlacesIterator::processURI('wd:Q515'),      // город
-        ];
-        $types[PlacesIterator::processURI('wd:Q2989457')] = [   // посад (посёлок городского типа)
-            PlacesIterator::processURI('wd:Q2989457'),  // посад (посёлок городского типа)
-            PlacesIterator::processURI('wd:Q3957'),     // малый город
-        ];
-        $types[PlacesIterator::processURI('wd:Q2514025')] = [   // посёлок
-            PlacesIterator::processURI('wd:Q2514025'),  // посёлок
-            PlacesIterator::processURI('wd:Q486972'),   // населённый пункт
-            PlacesIterator::processURI('wd:Q1989945'),  // агрогородок
-        ];
-        $types[PlacesIterator::processURI('wd:Q532')] = [   // село
-            PlacesIterator::processURI('wd:Q532'),      // село
-        ];
-        $types[PlacesIterator::processURI('wd:Q5084')] = [   // деревня
-            PlacesIterator::processURI('wd:Q5084'),     // деревня
-        ];
-        $types[PlacesIterator::processURI('wd:Q748331')] = [   // станица
-            PlacesIterator::processURI('wd:Q748331'),     // станица
-        ];
-        $types[PlacesIterator::processURI('wd:Q2023000')] = [   // хутор
-            PlacesIterator::processURI('wd:Q2023000'),     // хутор
-        ];
+    if (empty($candidates)) {
+        return $place;
     }
 
-    $tested = [];
-    foreach ($data as $item => $wikidata) {
+    // Filter candidates
+    $filtered = [];
+    foreach ($candidates as $item => $wikidata) {
+        $passed = false;
+
+        // Types
         foreach ($types as $key => $tests) {
             foreach ($tests as $test) {
-                if (in_array($test, $wikidata['type'])) {
+                if (! empty($wikidata['type'][$test])) {
                     $wikidata['type'] = $key;
-                    $tested[$item] = $wikidata;
-                    break 3;
+                    $passed = true;
+                    break 2;
                 }
             }
         }
+
+        // Labels
+        $wikidata['label'] = array_unique($wikidata['label']);
+
+        // Existence dates
+        $wikidata['temporal'] = implode(',', array_unique($wikidata['temporal']));
+
+        if ($passed) {
+            $filtered[$item] = $wikidata;
+        }
     }
-    if (1 === count($tested)) {
-        $wikidata = array_shift($tested);
+
+    // Apply candidates
+    if (1 === count($filtered)) {
+        $wikidata = array_shift($filtered);
         $hasAlias = ! empty($place['alias']);
-        if (! $hasAlias || ($place['alias'] != $wikidata['item'])) {
-            $place['disputedAlias'] = $wikidata['item'];
+        unset ($place['disputedAlias']);
+        $tmp = PlacesIterator::processURI($wikidata['item']);
+        if (! $hasAlias || ($place['alias'] != $tmp)) {
+            $place['disputedAlias'] = $tmp;
         }
-        if (! empty($wikidata['type'])
-            && (empty($place['type']) || ($place['type'] != $wikidata['type']))
+		if (empty($place['alias']) && empty($place['disputedAlias'])) {
+			$place['disputedAlias'] = 'wd:';
+		}
+        unset ($place['disputedType']);
+        $tmp = PlacesIterator::processURI($wikidata['type']);
+        if (! empty($tmp)
+            && (empty($place['type']) || ($place['type'] != $tmp))
         ) {
-            $place['disputedType'] = $wikidata['type'];
+            $place['disputedType'] = $tmp;
         }
+		if (empty($place['type']) && empty($place['disputedType'])) {
+			$place['disputedType'] = 'wd:';
+		}
+        unset ($place['disputedLocation']);
         if (! empty($wikidata['location'])
             && (empty($place['location']) || ($place['location'] != $wikidata['location']))
         ) {
@@ -289,6 +336,10 @@ function digBigData($place, $parent, $query)
                 $place['disputedLocation'] = $wikidata['location'];
             }
         }
+		if (empty($place['location']) && empty($place['disputedLocation'])) {
+			$place['disputedLocation'] = ',';
+		}
+        unset ($place['disputedTemporal']);
         if (! empty($wikidata['temporal'])
             && (empty($place['temporal']) || ($place['temporal'] != $wikidata['temporal']))
         ) {
@@ -299,19 +350,22 @@ function digBigData($place, $parent, $query)
                 $place['disputedTemporal'] = $wikidata['temporal'];
             }
         }
-    } elseif (! empty($tested)) {
+		if (empty($place['temporal']) && empty($place['disputedTemporal'])) {
+			$place['disputedTemporal'] = '/';
+		}
+    } elseif (! empty($filtered)) {
         if (! empty($place['alias'])) {
-            unset($tested[$place['alias']]);
+            unset($filtered[$place['alias']]);
         }
-        if (! empty($tested)) {
-            $place['disputedAlias'] = implode(',', array_keys($tested));
+        if (! empty($filtered)) {
+            $place['disputedAlias'] = implode(',', array_keys($filtered));
         }
-    } elseif (! empty($data)) {
+    } elseif (! empty($candidates)) {
         if (! empty($place['alias'])) {
-            unset($data[$place['alias']]);
+            unset($candidates[$place['alias']]);
         }
-        if (! empty($data)) {
-            $place['disputedAlias'] = implode(',', array_keys($data));
+        if (! empty($candidates)) {
+            $place['disputedAlias'] = implode(',', array_keys($candidates));
         }
     }
     return $place;

@@ -63,8 +63,8 @@ class SubjectStorager extends ConclusionStorager
         /** @var Subject $entity */
         if (! empty($res = $entity->getIdentifiers())
             && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($res))
+            && (false !== $candidate = $this->load([ 'id' => $id ]))
         ) {
-            $candidate = $this->load([ 'id' => $id ]);
             $this->previousState = clone $candidate;
             $candidate->embed($entity);
             $entity = $candidate;
@@ -78,6 +78,33 @@ class SubjectStorager extends ConclusionStorager
             \App\Util\Profiler::stopTimer(__METHOD__);
         }
         return false;
+    }
+
+    public function getDefaultOptions($entity = null)
+    {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
+        $def = parent::getDefaultOptions();
+
+        if (empty($def['makeId_name']) && ! empty($entity)) {
+            /**
+             * @var Subject $entity
+             */
+            if (! empty($res = $entity->getIdentifiers())) {
+                foreach ($res as $id) {
+                    if (\Gedcomx\Types\IdentifierType::PERSISTENT === $id->getType()) {
+                        $def['makeId_name'] = $res[0]->getValue();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
+        return $def;
     }
 
     /**

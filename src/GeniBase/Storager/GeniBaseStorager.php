@@ -699,7 +699,6 @@ class GeniBaseStorager
         if (! is_a($entity, get_class($this->previousState))) {
             $entity = $this->getObject($entity);
         }
-        unset($ent);
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__ . '#getObject');
         }

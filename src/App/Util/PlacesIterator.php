@@ -31,10 +31,10 @@ class PlacesIterator {
         $this->callback = $callback;
     }
 
-    public static function process($input, callable $callback)
+    public static function run($input, callable $callback)
     {
         $upd = new self($callback);
-        return $upd->processData($input);
+        return $upd->process($input);
     }
 
     protected $parent;
@@ -42,7 +42,7 @@ class PlacesIterator {
     protected $cnt;
     protected $max;
 
-    public function processData($input)
+    public function process($input)
     {
         $input = preg_split('/\s*([\{\}\n])\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         $this->parent = null;
@@ -132,36 +132,40 @@ class PlacesIterator {
 
     protected function processToken($input, $prefix)
     {
-        $data = preg_split('/\s+(?:(\??[#%@])(\S+)|(\??\[)([^\s\]]+)\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $data = preg_split('/\s+(\??[#%@]\S+|\??\[[^\s\]]+\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         $input = [
             'name'  => [],
         ];
         while (! empty($data)) {
             $token = array_shift($data);
-            switch ($token) {
+            $type = substr($token, 0, 1);
+            if ($type === '?') {
+                $type .= substr($token, 1, 1);
+            }
+            switch ($type) {
                 case '%':
-                    $input['type'] = self::processURI(array_shift($data));
+                    $input['type'] = self::processURI(substr($token, 1));
                     break;
-                case '%':
-                    $input['disputedType'] = self::processURI(array_shift($data));
+                case '?%':
+                    $input['disputedType'] = substr($token, 1);
                     break;
                 case '#':
-                    $input['alias'] = self::processURI(array_shift($data));
+                    $input['alias'] = self::processURI(substr($token, 1));
                     break;
                 case '?#':
-                    $input['disputedAlias'] = self::processURI(array_shift($data));
-                    break;
-                case '?@':
-                    $input['disputedLocation'] = array_shift($data);
+                    $input['disputedAlias'] = substr($token, 2);
                     break;
                 case '@':
-                    $input['location'] = array_shift($data);
+                    $input['location'] = substr($token, 1);
                     break;
-                case '?[':
-                    $input['disputedTemporal'] = array_shift($data);
+                case '?@':
+                    $input['disputedLocation'] = substr($token, 2);
                     break;
                 case '[':
-                    $input['temporal'] = array_shift($data);
+                    $input['temporal'] = rtrim(substr($token, 1), ']');
+                    break;
+                case '?[':
+                    $input['disputedTemporal'] = rtrim(substr($token, 2), ']');
                     break;
                 default:
                     $input['name'][] = $token;
@@ -174,23 +178,35 @@ class PlacesIterator {
 
         $output = $prefix . $input['name'];
         if (! empty($input['alias'])) {
-            $output .= ' #' . self::processURI($input['alias'], false);
-        } elseif (! empty($input['disputedAlias'])) {
-            $output .= ' ?#' . self::processURI($input['disputedAlias'], false);
+            $output .= ' #' . PlacesIterator::processURI($input['alias'], false);
         }
-        if (! empty($input['type'])) {
-            $output .= ' %' . self::processURI($input['type'], false) . '%';
-        } elseif (! empty($input['disputedType'])) {
-            $output .= ' ?%' . self::processURI($input['disputedType'], false) . '%';
+        if (! empty($input['disputedAlias'])
+            && (empty($input['alias']) || ($input['alias'] !== $input['disputedAlias']))
+        ) {
+            $output .= ' ?#' . PlacesIterator::processURI($input['disputedAlias'], false);
         }
+//         if (! empty($input['type'])) {
+//             $output .= ' %' . self::processURI($input['type'], false);
+//         }
+//         if (! empty($input['disputedType'])
+//             && (empty($input['type']) || ($input['type'] !== $input['disputedType']))
+//         ) {
+//             $output .= ' ?%' . self::processURI($input['disputedType'], false);
+//         }
         if (! empty($input['temporal'])) {
             $output .= ' [' . $input['temporal'] . ']';
-        } elseif (! empty($input['disputedTemporal'])) {
+        }
+        if (! empty($input['disputedTemporal'])
+            && (empty($input['temporal']) || ($input['temporal'] !== $input['disputedTemporal']))
+        ) {
             $output .= ' ?[' . $input['disputedTemporal'] . ']';
         }
         if (! empty($input['location'])) {
             $output .= ' @' . $input['location'];
-        } elseif (! empty($input['disputedLocation'])) {
+        }
+        if (! empty($input['disputedLocation'])
+            && (empty($input['location']) || ($input['location'] !== $input['disputedLocation']))
+        ) {
             $output .= ' ?@' . $input['disputedLocation'];
         }
         return $output;

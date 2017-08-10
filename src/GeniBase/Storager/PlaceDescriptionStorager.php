@@ -61,24 +61,26 @@ class PlaceDescriptionStorager extends SubjectStorager
         $def['neighboringDistance'] = 100;
         $def['neighboringLimit'] = 30;
 
-        if (! empty($entity)) {
+        if (empty($def['makeId_name']) && ! empty($entity)) {
             /**
              * @var PlaceDescription $entity
              */
+            $tmp = [];
             if (! empty($entity->getLatitude()) && ! empty($entity->getLongitude())) {
-                $def['makeId_name'] = $entity->getLatitude() . ',' . $entity->getLongitude();
+                $tmp[] = $entity->getLatitude() . ',' . $entity->getLongitude();
             } elseif (! empty($res = $entity->getNames())) {
-                $def['makeId_name'] = $res[0]->getValue();
+                $tmp[] = $res[0]->getValue();
                 if (! empty($res = $entity->getType())) {
-                    $def['makeId_name'] .= "\t" . $res;
+                    $tmp[] = $res;
                 }
                 if (! empty($res = $entity->getJurisdiction())) {
-                    $def['makeId_name'] .= "\t" . $res->getResourceId();
+                    $tmp[] = $res->getResourceId();
                 }
                 if (! empty($res = $entity->getTemporalDescription())) {
-                    $def['makeId_name'] .= "\t" . ($res->getFormal() ? $res->getFormal() : $res->getOriginal());
+                    $tmp[] = ($res->getFormal() ? $res->getFormal() : $res->getOriginal());
                 }
             }
+            $def['makeId_name'] = implode("\t", array_filter($tmp));
         }
 
         if (defined('DEBUG_PROFILE')) {

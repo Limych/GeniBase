@@ -23,6 +23,7 @@
 namespace App\Controller\Importer;
 
 use App\Util;
+use FoxyTools\MsCsv;
 use Gedcomx\Conclusion\Event;
 use Gedcomx\Conclusion\Person;
 use Gedcomx\Conclusion\PlaceDescription;
@@ -35,7 +36,6 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use GeniBase\Types\PlaceTypes;
-use App\Util\MsCsv;
 
 class SvrtImporter extends GeniBaseImporter
 {
