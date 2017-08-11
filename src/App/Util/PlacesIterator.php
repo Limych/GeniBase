@@ -172,11 +172,11 @@ class PlacesIterator {
                     break;
             }
         }
-        $input['name'] = implode(' ', $input['name']);
+        $input['name'] = trim(implode(' ', $input['name']));
         $input = call_user_func($this->callback, $input, $this->parent, $this->cnt, $this->max);
         $this->parent = $input;
 
-        $output = $prefix . $input['name'];
+        $output = $prefix . trim($input['name']);
         if (! empty($input['alias'])) {
             $output .= ' #' . PlacesIterator::processURI($input['alias'], false);
         }
@@ -214,16 +214,41 @@ class PlacesIterator {
 
     public static function expandNames($name)
     {
-        $names = [];
-        if (! preg_match("/(.*?)\s*\(([^\)]+)\)(.*)/", $name, $matches)) {
-            $names[] = $name;
-        } else {
-            $tmp = preg_split("/[;,]\s*/", $matches[2], null, PREG_SPLIT_NO_EMPTY);
-            array_unshift($tmp, $matches[1]);
-            foreach ($tmp as $y) {
-                $names[] = $y . $matches[3];
-            }
-        }
-        return $names;
+        return self::expandNamesProcessor($name);
     }
+	
+	private static function expandNamesProcessor(&$input) {
+		$input = trim($input);
+		$queue = [];
+		$bracket = false;
+		do {
+			$tokens = preg_split('!\s*([(),;/])\s*!', $input, 2, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+			if ($bracket) {
+				$queue = array_map(function ($v) use ($tokens) {
+					return "$v ${tokens[0]}";
+				}, $queue);
+				$bracket = false;
+			} else {
+				$queue[] = $tokens[0];
+			}
+
+			if (1 === count($tokens)) {
+				return $queue;
+			}
+			switch ($tokens[1]) {
+				case ',':
+				case ';':
+				case '/':
+					break;
+				case '(':
+					$queue = array_merge($queue, self::expandNames($tokens[2]));
+					$bracket = true;
+					break;
+			}
+			$input = @trim($tokens[2]);
+		} while (! empty($input) && (')' !== $tokens[1]));
+		
+		return $queue;
+	}
 }

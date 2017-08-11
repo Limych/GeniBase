@@ -202,6 +202,27 @@ function digBigData($place, $parent, $query)
         $metaTypes = implode(' ', array_unique($metaTypes));
     }
 
+	if (empty($place['alias'])) {
+		$place['disputedAlias'] = 'wd:';
+	} else {
+		unset($place['disputedAlias']);
+	}
+	if (empty($place['type'])) {
+		$place['disputedType'] = 'wd:';
+	} else {
+		unset($place['disputedType']);
+	}
+	if (empty($place['location'])) {
+		$place['disputedLocation'] = ',';
+	} else {
+		unset($place['disputedLocation']);
+	}
+	if (empty($place['temporal'])) {
+		$place['disputedTemporal'] = '/';
+	} else {
+		unset($place['disputedTemporal']);
+	}
+	
     $sp = new Endpoint('https://query.wikidata.org/sparql');
 
     $query = "SELECT DISTINCT ?item ?itemType ?itemMetaType ?itemLabel ?location ?founding ?dissolution WHERE {
@@ -307,52 +328,36 @@ function digBigData($place, $parent, $query)
     if (1 === count($filtered)) {
         $wikidata = array_shift($filtered);
         $hasAlias = ! empty($place['alias']);
-        unset ($place['disputedAlias']);
         $tmp = PlacesIterator::processURI($wikidata['item']);
-        if (! $hasAlias || ($place['alias'] != $tmp)) {
+        if (! $hasAlias || ($place['alias'] !== $tmp)) {
             $place['disputedAlias'] = $tmp;
         }
-		if (empty($place['alias']) && empty($place['disputedAlias'])) {
-			$place['disputedAlias'] = 'wd:';
-		}
-        unset ($place['disputedType']);
         $tmp = PlacesIterator::processURI($wikidata['type']);
         if (! empty($tmp)
-            && (empty($place['type']) || ($place['type'] != $tmp))
+            && (empty($place['type']) || ($place['type'] !== $tmp))
         ) {
             $place['disputedType'] = $tmp;
         }
-		if (empty($place['type']) && empty($place['disputedType'])) {
-			$place['disputedType'] = 'wd:';
-		}
-        unset ($place['disputedLocation']);
         if (! empty($wikidata['location'])
-            && (empty($place['location']) || ($place['location'] != $wikidata['location']))
+            && (empty($place['location']) || ($place['location'] !== $wikidata['location']))
         ) {
             if ($hasAlias && empty($place['location'])) {
                 $place['location'] = $wikidata['location'];
-                unset($place['disputedLocation']);
+				unset($place['disputedLocation']);
             } else {
                 $place['disputedLocation'] = $wikidata['location'];
             }
         }
-		if (empty($place['location']) && empty($place['disputedLocation'])) {
-			$place['disputedLocation'] = ',';
-		}
-        unset ($place['disputedTemporal']);
         if (! empty($wikidata['temporal'])
-            && (empty($place['temporal']) || ($place['temporal'] != $wikidata['temporal']))
+            && (empty($place['temporal']) || ($place['temporal'] !== $wikidata['temporal']))
         ) {
             if ($hasAlias && empty($place['temporal'])) {
                 $place['temporal'] = $wikidata['temporal'];
-                unset($place['temporal']);
+				unset($place['disputedTemporal']);
             } else {
                 $place['disputedTemporal'] = $wikidata['temporal'];
             }
         }
-		if (empty($place['temporal']) && empty($place['disputedTemporal'])) {
-			$place['disputedTemporal'] = '/';
-		}
     } elseif (! empty($filtered)) {
         if (! empty($place['alias'])) {
             unset($filtered[$place['alias']]);
@@ -368,5 +373,6 @@ function digBigData($place, $parent, $query)
             $place['disputedAlias'] = implode(',', array_keys($candidates));
         }
     }
+	
     return $place;
 }

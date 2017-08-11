@@ -207,7 +207,7 @@ class PlacesProcessor {
                 }
             }
         }
-        $input['label'] = implode(' ', $input['rdfs:label']);
+        $input['label'] = trim(implode(' ', $input['rdfs:label']));
         $input['rdfs:label'] = self::expandNames($input['label']);
         $input['count'] = ++$this->cnt_entity;
         $this->lastPlace = $input;
@@ -217,29 +217,43 @@ class PlacesProcessor {
         return true;
     }
 
-    public static function expandNames($input)
+    public static function expandNames($name)
     {
-        $tokens = preg_split('!\s*([(),;/])\s*!', $input, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $names = [];
-        while (! empty($tokens)) {
-            $tok = array_shift($tokens);
-            switch ($tok) {
-                case '(':
-                case ',':
-                case ';':
-                case '/':
-                    break;
-                case ')':
-                    $tok = array_shift($tokens);
-                    $names = array_map(function ($v) use ($tok) {
-                        return trim("$v $tok");
-                    }, $names);
-                        break;
-                default:
-                    $names[] = $tok;
-                    break;
-            }
-        }
-        return $names;
+        return self::expandNamesProcessor($name);
     }
+	
+	private static function expandNamesProcessor(&$input) {
+		$input = trim($input);
+		$queue = [];
+		$bracket = false;
+		do {
+			$tokens = preg_split('!\s*([(),;/])\s*!', $input, 2, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+			if ($bracket) {
+				$queue = array_map(function ($v) use ($tokens) {
+					return "$v ${tokens[0]}";
+				}, $queue);
+				$bracket = false;
+			} else {
+				$queue[] = $tokens[0];
+			}
+
+			if (1 === count($tokens)) {
+				return $queue;
+			}
+			switch ($tokens[1]) {
+				case ',':
+				case ';':
+				case '/':
+					break;
+				case '(':
+					$queue = array_merge($queue, self::expandNames($tokens[2]));
+					$bracket = true;
+					break;
+			}
+			$input = @trim($tokens[2]);
+		} while (! empty($input) && (')' !== $tokens[1]));
+		
+		return $queue;
+	}
 }
