@@ -27,48 +27,50 @@ use App\Util\PlacesProcessor;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
-use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Util\FormalDate;
-use GeniBase\Types\PlaceTypes;
 use Silex\Application;
-use GeniBase\Storager\GeniBaseStorager;
 
 class PlacesImporter extends GeniBaseImporter
 {
 
     const OVERTIME_COOKIE   = 'PlacesImporter';
 
-    private $skipPlaces;
-    private $processedCnt;
+    private $tokensCnt;
+    private $tokensSkip;
+    private $tokensTotal;
+
     private $placesCnt;
-    private $cnt;
-    private $total;
+    private $placesProcessed;
     private $placesStack;
     private $lastPlace;
 
     public function import(Request $request)
     {
-        $place_types = [
-            PlaceTypes::COUNTRY,
-            PlaceTypes::FIRST_LEVEL,
-            PlaceTypes::SECOND_LEVEL,
-            PlaceTypes::THIRD_LEVEL,
-        ];
-
-        $this->skipPlaces = $request->cookies->getInt(self::OVERTIME_COOKIE);
-        $this->processedCnt = 0;
-        $this->placesStack = [];
+        $this->tokensSkip = 0;
+        $this->placesStack = array();
+        $this->placesCnt = 0;
+        $this->placesProcessed = 0;
         $this->lastPlace = null;
 
-        $places = $this->getPlaces();
-        $done = PlacesProcessor::run($places, [$this, 'processPlace']);
+        $res = $request->cookies->get(self::OVERTIME_COOKIE);
+        if (! empty($res)) {
+            $res = json_decode($res, true);
+            $this->tokensSkip = (int) $res['skip'];
+            $this->placesStack = $res['stack'];
+        }
 
-        $response = new Response("<div><progress value='{$this->cnt}' max='{$this->total}'></progress> " .
-            sprintf('Imported %d places (%.2f places/sec)', $this->placesCnt, ($this->processedCnt * 1000 / Util::executionTime())) . "</div>");
+        $places = $this->getPlaces();
+        $done = PlacesProcessor::run($places, array($this, 'processPlace'));
+
+        $response = new Response("<div><progress value='{$this->tokensCnt}' max='{$this->tokensTotal}'></progress> " .
+            sprintf('Imported %d places (%.2f places/sec)', $this->placesCnt, ($this->placesProcessed * 1000 / Util::executionTime())) . "</div>");
         if ($done) {
             $response->headers->clearCookie(self::OVERTIME_COOKIE);
         } else {
-            $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, $this->placesCnt));
+            $response->headers->setCookie(new Cookie(self::OVERTIME_COOKIE, json_encode(array(
+                'stack' => $this->placesStack,
+                'skip'  => $this->tokensCnt,
+            ))));
             $response->headers->set('Refresh', '0; url=' . $request->getUri());
         }
         return $response;
@@ -77,25 +79,32 @@ class PlacesImporter extends GeniBaseImporter
     public function processPlace($state, $input)
     {
         if ($state === PlacesProcessor::LIST_START) {
-            array_unshift($this->placesStack, $this->lastPlace);
+            if ($this->tokensCnt >= $this->tokensSkip) {
+                array_unshift($this->placesStack, $this->lastPlace);
+            }
             return true;
         } elseif ($state === PlacesProcessor::LIST_END) {
-            array_shift($this->placesStack);
+            if ($this->tokensCnt >= $this->tokensSkip) {
+                array_shift($this->placesStack);
+            }
             return true;
         }
 
-        if (++$this->placesCnt < $this->skipPlaces) {
+        list($state, $input, $parentPlace, $this->tokensCnt, $this->tokensTotal) = func_get_args();
+
+        $this->placesCnt++;
+
+        if ($this->tokensCnt < $this->tokensSkip) {
             return true;
         }
-        list($state, $input, $parentPlace, $this->cnt, $this->total) = func_get_args();
 
-        $place = [
+        $place = array(
             'confidence'    => \Gedcomx\Types\ConfidenceLevel::HIGH,
-        ];
+        );
 
         $tmp = new FormalDate();
         $tmp->parse($input['gx:temporalDescription']);
-        $place['temporalDescription'] = [];
+        $place['temporalDescription'] = array();
         if ($tmp->isValid()) {
             $place['temporalDescription']['formal'] = $input['gx:temporalDescription'];
         } else {
@@ -103,9 +112,9 @@ class PlacesImporter extends GeniBaseImporter
         }
 
         if (! empty($input['owl:sameAs'])) {
-            $place['identifiers'] = [
+            $place['identifiers'] = array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => $input['owl:sameAs'],
-            ];
+            );
         }
 
         if (! empty($input['location'])) {
@@ -115,25 +124,22 @@ class PlacesImporter extends GeniBaseImporter
         }
 
         foreach ($input['rdfs:label'] as $name) {
-            $place['names'][] = [
+            $place['names'][] = array(
                 'lang'  => 'ru',
                 'value' => $name,
-            ];
+            );
         }
 
         if (! empty($this->placesStack[0])) {
-            $place['jurisdiction'] = [
+            $place['jurisdiction'] = array(
                 'resourceId'    => $this->placesStack[0],
-            ];
+            );
         }
 
-        $plc = $this->gbs->newStorager(PlaceDescription::class)->save($place);
+        $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription')->save($place);
 
-        $this->processedCnt++;
-        $this->skipPlaces = $this->placesCnt;
+        $this->placesProcessed++;
         $this->lastPlace = $plc->getId();
-var_dump($place, $this->placesStack);
-if (3 === $this->placesCnt) die;
 
 		return (Util::executionTime() <= 10000);
     }
@@ -147,18 +153,14 @@ if (3 === $this->placesCnt) die;
 
     public function updatePlaceGeoCoordinates(Application $app, Request $request)
     {
-        $plc = $this->gbs->newStorager(PlaceDescription::class);
+        $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription');
 
         $t_places = $app['gb.db']->getTableName('places');
 
-        $query = "SELECT _id FROM $t_places AS p1 " .
-            "WHERE p1._calculatedGeo = 1 OR (p1.latitude IS NULL AND p1.longitude IS NULL " .
-            "AND EXISTS ( SELECT 1 FROM $t_places AS p2 WHERE " .
-            "p2.jurisdiction_id = p1._id AND p2.latitude AND p2.longitude " .
-            ")) ORDER BY RAND()";
+        $query = "SELECT id FROM $t_places ORDER BY RAND()";
         $result = $app['db']->fetchAll($query);
         foreach ($result as $res) {
-            $plc->updatePlaceGeoCoordinates($res['_id']);
+            $plc->updatePlaceGeoCoordinates($res['id']);
         }
 
         $response = new Response('Done.');

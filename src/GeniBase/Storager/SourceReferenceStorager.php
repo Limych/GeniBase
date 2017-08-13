@@ -24,7 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use GeniBase\Util;
-use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Source\SourceReference;
 
 /**
@@ -60,24 +59,20 @@ class SourceReferenceStorager extends GeniBaseStorager
 
         /** @var SourceReference $entity */
 
-        $o = Util::parseArgs($o, [  'is_componentOf' => false   ]);
+        $o = Util::parseArgs($o, array( 'is_componentOf' => false ));
 
         $t_srefs = $this->getTableName();
         $t_sources = $this->dbs->getTableName('sources');
 
-        if ($context instanceof ExtensibleData) {
-            $context_id = GeniBaseInternalProperties::getPropertyOf($context, '_id');
-        } else {
-            $context_id = $this->dbs->getInternalId($t_sources, $context['id']);
-        }
-        if (!empty($context_id) && ! empty($res = $entity->getDescriptionRef())) {
-            $query = "SELECT * FROM $t_srefs WHERE _source_id = ? AND is_componentOf = ? AND description_uri = ?";
-            $result = $this->dbs->getDb()->fetchAssoc($query, [$context_id, $o['is_componentOf'], $res]);
-
+        $context_id = ($context instanceof ExtensibleData ? $context->getId() : $context['id']);
+        $res = $entity->getDescriptionRef();
+        if (!empty($context_id) && ! empty($res)) {
+            $query = "SELECT * FROM $t_srefs WHERE parent_id = ? AND is_componentOf = ? AND description_uri = ?";
+            $result = $this->dbs->getDb()->fetchAssoc($query, array($context_id, $o['is_componentOf'], $res));
             if (! empty($result)) {
                 $candidate = $this->unpackLoadedData($this->getObject(), $result);
                 $this->previousState = clone $candidate;
-                $candidate->embed($entity);
+                $candidate->initFromArray($entity->toArray());
                 $entity = $candidate;
             }
         }
@@ -90,37 +85,57 @@ class SourceReferenceStorager extends GeniBaseStorager
      *
      * @throws \UnexpectedValueException
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         $data = parent::packData4Save($entity, $context, $o);
 
         $t_sources = $this->dbs->getTableName('sources');
 
         /** @var SourceReference $entity */
-        if (empty($res = $entity->getDescriptionRef())) {
+        $res = $entity->getDescriptionRef();
+        if (empty($res)) {
             throw new \UnexpectedValueException('Description reference URI required!');
         } elseif ($res != $this->previousState->getDescriptionRef()) {
             $data['description_uri'] = $res;
-            if (! empty($res = GeniBaseStorager::getIdFromReference($res))
-                && ! empty($res = $this->dbs->getInternalId($t_sources, $res))
-            ) {
-                $data['description_id'] = (int) $res;
+            $res = self::getIdFromReference($res);
+            if (! empty($res)) {
+                $data['description_id'] = $res;
             }
         }
-        $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
 
         if (! empty($data['description_uri'])) {
-            if (empty($res = GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-                throw new \UnexpectedValueException('Context internal ID required!');
-            } else {
-                $data['_source_id'] = $res;
-            }
+            $data['parent_id'] = $context->getId();
             if (! empty($o['is_componentOf'])) {
                 $data['is_componentOf'] = (int) $o['is_componentOf'];
             }
         }
 
         return $data;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::save()
+     */
+    public function save($entity, ExtensibleData $context = null, $o = null)
+    {
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__);
+        }
+        /** @var Conclusion $entity */
+        $entity = parent::save($entity, $context, $o);
+
+        // Save childs
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#Childs');
+        }
+        AttributionStorager::saveAttribution($this->dbs, $entity->getAttribution(), $entity);
+
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#Childs');
+            \App\Util\Profiler::stopTimer(__METHOD__);
+        }
+        return $entity;
     }
 
     /**
@@ -133,27 +148,21 @@ class SourceReferenceStorager extends GeniBaseStorager
      */
     public function loadComponents($context = null, $o = null)
     {
-        $o = Util::parseArgs($o, [  'is_componentOf' => false   ]);
+        $o = Util::parseArgs($o, array( 'is_componentOf' => false ));
 
         $t_srefs = $this->getTableName();
         $t_sources = $this->dbs->getTableName('sources');
 
-        if ($context instanceof ExtensibleData) {
-            $context_id = GeniBaseInternalProperties::getPropertyOf($context, '_id');
-        } else {
-            $context_id = $this->dbs->getInternalId($t_sources, $context['id']);
-        }
-
+        $context_id = ($context instanceof ExtensibleData ? $context->getId() : $context['id']);
         if (empty($context_id)) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+            throw new \UnexpectedValueException('Context ID required!');
         }
 
-        $q = "SELECT * FROM $t_srefs WHERE _source_id = ? AND is_componentOf = ?";
-        $result = $this->dbs->getDb()->fetchAll($q, [$context_id, $o['is_componentOf']]);
-
+        $query = "SELECT * FROM $t_srefs WHERE parent_id = ? AND is_componentOf = ?";
+        $result = $this->dbs->getDb()->fetchAll($query, array($context_id, $o['is_componentOf']));
         if (is_array($result)) {
-            foreach ($result as $k => $v) {
-                $result[$k] = $this->unpackLoadedData($this->getObject(), $v);
+            foreach ($result as $key => $val) {
+                $result[$key] = $this->unpackLoadedData($this->getObject(), $val);
             }
         }
 

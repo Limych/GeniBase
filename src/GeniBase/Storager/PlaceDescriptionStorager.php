@@ -24,10 +24,8 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
-use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\PlaceDescription;
 use GeniBase\DBase\GeniBaseInternalProperties;
-use App\Provider\PlaceMapProvider;
 
 /**
  *
@@ -36,7 +34,7 @@ use App\Provider\PlaceMapProvider;
 class PlaceDescriptionStorager extends SubjectStorager
 {
 
-    const GROUP_NAMES   = 'http://genibase/PlaceName';
+    const GROUP_NAMES   = '//GeniBase/PlaceName';
 
     const UPDATE_GEO_PROBABILITY    = 1;    // of 10 000
 
@@ -50,11 +48,10 @@ class PlaceDescriptionStorager extends SubjectStorager
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
         }
-        $def = parent::getDefaultOptions();
+        $def = parent::getDefaultOptions($entity);
 
         $this->updateGeoCoordinates();
 
-        $def['makeId_unique'] = false;
         $def['loadJurisdictions'] = true;
         $def['sortComponents'] = true;
         //
@@ -65,19 +62,25 @@ class PlaceDescriptionStorager extends SubjectStorager
             /**
              * @var PlaceDescription $entity
              */
-            $tmp = [];
+            $tmp = array();
+            $res = $entity->getJurisdiction();
+            if (! empty($res)) {
+                $tmp[] = $res->getResourceId();
+            }
             if (! empty($entity->getLatitude()) && ! empty($entity->getLongitude())) {
                 $tmp[] = $entity->getLatitude() . ',' . $entity->getLongitude();
-            } elseif (! empty($res = $entity->getNames())) {
-                $tmp[] = $res[0]->getValue();
-                if (! empty($res = $entity->getType())) {
-                    $tmp[] = $res;
-                }
-                if (! empty($res = $entity->getJurisdiction())) {
-                    $tmp[] = $res->getResourceId();
-                }
-                if (! empty($res = $entity->getTemporalDescription())) {
-                    $tmp[] = ($res->getFormal() ? $res->getFormal() : $res->getOriginal());
+            } else {
+                $res = $entity->getNames();
+                if (! empty($res)) {
+                    $tmp[] = $res[0]->getValue();
+                    $res = $entity->getType();
+                    if (! empty($res)) {
+                        $tmp[] = $res;
+                    }
+                    $res = $entity->getTemporalDescription();
+                    if (! empty($res)) {
+                        $tmp[] = ($res->getFormal() ? $res->getFormal() : $res->getOriginal());
+                    }
                 }
             }
             $def['makeId_name'] = implode("\t", array_filter($tmp));
@@ -109,20 +112,27 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $t_places = $this->dbs->getTableName('places');
 
-        if (! empty($refs = $this->searchRefByTextValues(self::GROUP_NAMES, $entity->getNames()))) {
-            $query = $this->getSqlQuery('SELECT', '', 'WHERE t._id IN (?)');
-            if (! empty($jur = $entity->getJurisdiction())) {
-                if (! empty($res = $jur->getResourceId())
-                    && ! empty($res = $this->dbs->getInternalId($t_places, $res))
-                ) {
-                    $query .= ' AND jurisdiction_id = ' . $res;
-                } elseif (! empty($res = $jur->getResource())) {
-                    $query .= ' AND jurisdiction_uri = ' . $this->dbs->getDb()->quote($res);
+        $refs = $this->searchRefByTextValues(self::GROUP_NAMES, $entity->getNames());
+        if (! empty($refs)) {
+            $query = $this->getSqlQuery('SELECT', '', 'WHERE t.id IN (?)');
+            $jur = $entity->getJurisdiction();
+            $data = array($refs);
+            if (! empty($jur)) {
+                $res = $jur->getResourceId();
+                if (! empty($res)) {
+                    $query .= ' AND jurisdiction_id = ?';
+                    $data[] = $res;
+                } else {
+                    $res = $jur->getResource();
+                    if (! empty($res)) {
+                        $query .= ' AND jurisdiction_uri = ?';
+                        $data[] = $res;
+                    }
                 }
             } else {
                 $query .= ' AND jurisdiction_id IS NULL AND jurisdiction_uri IS NULL';
             }
-            $result = $this->dbs->getDb()->fetchAll($query, [$refs], [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]);
+            $result = $this->dbs->getDb()->fetchAll($query, $data, array(\Doctrine\DBAL\Connection::PARAM_INT_ARRAY));
             if (is_array($result)) {
                 $candidate = $entity;
                 foreach ($result as $res) {
@@ -130,7 +140,7 @@ class PlaceDescriptionStorager extends SubjectStorager
                     if (empty($candidate->getId()) || (self::confidenceCmp($candidate, $place) > 0)) {
                         $this->previousState = clone $place;
                         $candidate = $place;
-                        $candidate->embed($entity);
+                        $candidate->initFromArray($entity->toArray());
                     }
                 }
                 if ($candidate !== $entity) {
@@ -162,7 +172,7 @@ class PlaceDescriptionStorager extends SubjectStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
@@ -175,43 +185,39 @@ class PlaceDescriptionStorager extends SubjectStorager
         $t_sources = $this->dbs->getTableName('sources');
 
         /** @var PlaceDescription $entity */
-        if (! empty($res = $entity->getLatitude()) && ($res != $this->previousState->getLatitude())) {
+        $res = $entity->getLatitude();
+        if (! empty($res) && ($res != $this->previousState->getLatitude())) {
             $data['latitude'] = $res;
+            $data['geo_calculated'] = false;
         }
-        if (! empty($res = $entity->getLongitude()) && ($res != $this->previousState->getLongitude())) {
+
+        $res = $entity->getLongitude();
+        if (! empty($res) && ($res != $this->previousState->getLongitude())) {
             $data['longitude'] = $res;
+            $data['geo_calculated'] = false;
         }
-        if (! empty($res = $entity->getType()) && ($res != $this->previousState->getType())
-            && ! empty($res = $this->dbs->getTypeId($res))
-        ) {
-            $data['type_id'] = $res;
-        }
-        if (! empty($res = $entity->getSpatialDescription())
-            && ($res != $this->previousState->getSpatialDescription())
-        ) {
-            if (! empty($res2 = $res->getResource())) {
-                $data['spatialDescription_uri'] = $res2;
-            }
-            if (! empty($res2 = $res->getResourceId())
-                && ! empty($res2 = $this->dbs->getInternalId($t_sources, $res2))
-            ) {
-                $data['spatialDescription_id'] = $res;
+
+        $res = $entity->getType();
+        if (! empty($res) && ($res != $this->previousState->getType())) {
+            $res = $this->dbs->getTypeId($res);
+            if (! empty($res)) {
+                $data['type_id'] = $res;
             }
         }
-        if (! empty($res = $entity->getJurisdiction()) && ($res != $this->previousState->getJurisdiction())) {
-            if (! empty($res2 = $res->getResource())) {
-                $data['jurisdiction_uri'] = $res2;
-            }
-            if (! empty($res2 = $res->getResourceId())
-                && ! empty($res2 = $this->dbs->getInternalId($t_places, $res2))
-            ) {
-                $data['jurisdiction_id'] = $res2;
-            }
+
+        $res = $entity->getSpatialDescription();
+        if (! empty($res) && ($res != $this->previousState->getSpatialDescription())) {
+            $data = array_merge($data, self::packResourceReference($res, 'spatialDescription'));
         }
-        if (! empty($res = $entity->getTemporalDescription())
-            && ($res != $this->previousState->getTemporalDescription())
-        ) {
-            $data = array_merge($data, self::packDateInfo($res, 'temporalDescription_'));
+
+        $res = $entity->getJurisdiction();
+        if (! empty($res) && ($res != $this->previousState->getJurisdiction())) {
+            $data = array_merge($data, self::packResourceReference($res, 'jurisdiction'));
+        }
+
+        $res = $entity->getTemporalDescription();
+        if (! empty($res) && ($res != $this->previousState->getTemporalDescription())) {
+            $data = array_merge($data, self::packDateInfo($res, 'temporalDescription'));
         }
 
         if (defined('DEBUG_PROFILE')) {
@@ -233,12 +239,9 @@ class PlaceDescriptionStorager extends SubjectStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getNames()) && ($res != $this->previousState->getNames())) {
-            $names = [];
-            foreach ($res as $name) {
-                $names[] = $name->toArray();
-            }
-            $this->saveAllTextValues(self::GROUP_NAMES, $names, $entity);
+        $res = $entity->getNames();
+        if (! empty($res) && ($res != $this->previousState->getNames())) {
+            $this->saveTextValues(self::GROUP_NAMES, $res, $entity);
         }
 
         return $entity;
@@ -248,16 +251,14 @@ class PlaceDescriptionStorager extends SubjectStorager
     {
         $q = $this->getSqlQuery();
         $result = false;
-        if (empty($id = $context->getId())) {
+        $id = $context->getId();
+        if (empty($id)) {
             $result = $this->dbs->getDb()->fetchAll(
                 "$q WHERE jurisdiction_uri IS NULL AND jurisdiction_id IS NULL " .
-                "ORDER BY t._id"
+                "ORDER BY t.id"
             );
-        } elseif (! empty($_ref = $this->dbs->getInternalId($this->getTableName(), $id))) {
-            $result = $this->dbs->getDb()->fetchAll(
-                "$q WHERE jurisdiction_id = ?",
-                [(int) $_ref]
-            );
+        } else {
+            $result = $this->dbs->getDb()->fetchAll("$q WHERE jurisdiction_id = ?", array($id));
         }
 
         return $result;
@@ -271,8 +272,10 @@ class PlaceDescriptionStorager extends SubjectStorager
     {
         /** @var PlaceDescription $a */
         /** @var PlaceDescription $b */
-        $aName = mb_strtolower($a->getNames()[0]->getValue(), 'UTF-8');
-        $bName = mb_strtolower($b->getNames()[0]->getValue(), 'UTF-8');
+        $an = $a->getNames();
+        $aName = mb_strtolower($an[0]->getValue(), 'UTF-8');
+        $bn = $b->getNames();
+        $bName = mb_strtolower($bn[0]->getValue(), 'UTF-8');
         return strcmp($aName, $bName);
     }
 
@@ -282,58 +285,47 @@ class PlaceDescriptionStorager extends SubjectStorager
             return $result;
         }
 
-        if (isset($result['type_id'])
-            && (false !== $type_id = $this->dbs->getType($result['type_id']))
-        ) {
-            $result['type'] = $type_id;
-        }
-
-        $result['spatialDescription'] = [];
-        if (isset($result['spatialDescription_uri'])) {
-            $result['spatialDescription']['resource'] = $result['spatialDescription_uri'];
-        }
-        if (isset($result['spatialDescription_id'])
-            && (false !== $res = $this->dbs->getIdForInternalId($result['spatialDescription_id']))
-        ) {
-            $result['spatialDescription']['resourceId'] = $res;
-        }
-        if (empty($result['spatialDescription'])) {
-            unset($result['spatialDescription']);
-        }
-
-        $result['jurisdiction'] = [];
-        if (isset($result['jurisdiction_uri'])) {
-            $result['jurisdiction']['resource'] = $result['jurisdiction_uri'];
-        }
-        if (isset($result['jurisdiction_id'])
-            && (false !== $res = $this->dbs->getPublicId($this->getTableName(), $result['jurisdiction_id']))
-        ) {
-            $result['jurisdiction']['resourceId'] = $res;
-        }
-        if (empty($result['jurisdiction'])) {
-            unset($result['jurisdiction']);
-        }
-
         /** @var PlaceDescription $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($res = $this->loadAllTextValues(self::GROUP_NAMES, $entity))) {
-            $entity->setNames($res);
-        }
-        if (! empty($res = self::unpackDateInfo($result, 'temporalDescription_'))) {
-            $entity->setTemporalDescription($res);
-        }
-        if (! empty($result['_zoom'])) {
-            GeniBaseInternalProperties::setPropertyOf($entity, '_zoom', $result['_zoom']);
+        if (isset($result['type_id'])) {
+            $type = $this->dbs->getType($result['type_id']);
+            if (! empty($type)) {
+                $entity->setType($type);
+            }
         }
 
-        // Load childs
-        if (isset($result['temporalDescription_id'])) {
-            $dt = new DateInfo();
-            GeniBaseInternalProperties::setPropertyOf($dt, '_id', $result['temporalDescription_id']);
-            if (false !== $dt = $this->newStorager($dt)->load($dt)) {
-                $entity->setTemporalDescription($dt);
-            }
+        $res = $this->loadTextValues(self::GROUP_NAMES, $entity);
+        if (! empty($res)) {
+            $entity->setNames($res);
+        }
+
+        $res = self::unpackDateInfo($result, 'temporalDescription');
+        if (! empty($res)) {
+            $entity->setTemporalDescription($res);
+        }
+
+        $res = self::unpackResourceReference($result, 'spatialDescription');
+        if (! empty($res)) {
+            $entity->setSpatialDescription($res);
+        }
+
+        $res = self::unpackResourceReference($result, 'jurisdiction');
+        if (! empty($res)) {
+            $entity->setJurisdiction($res);
+        }
+
+        if (! empty($result['geo_lat_min'])) {
+            GeniBaseInternalProperties::setPropertyOf($entity, 'geo_lat_min', $result['geo_lat_min']);
+            GeniBaseInternalProperties::setPropertyOf($entity, 'geo_lon_min', $result['geo_lon_min']);
+            GeniBaseInternalProperties::setPropertyOf($entity, 'geo_lat_max', $result['geo_lat_max']);
+            GeniBaseInternalProperties::setPropertyOf($entity, 'geo_lon_max', $result['geo_lon_max']);
+            GeniBaseInternalProperties::setPropertyOf($entity, 'geo_bbox', array(
+                $result['geo_lat_min'],
+                $result['geo_lon_min'],
+                $result['geo_lat_max'],
+                $result['geo_lon_max'],
+            ));
         }
 
         return $entity;
@@ -355,29 +347,29 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $this->dbs->getDb()->executeQuery(
             "CALL geobox_pt(POINT(?, ?), ?, @top_lft, @bot_rgt)",
-            [$context->getLatitude(), $context->getLongitude(), $o['neighboring_distance']]
+            array($context->getLatitude(), $context->getLongitude(), $o['neighboringDistance'])
         );
 
-        $q = $this->getSqlQuery('SELECT', ['geodist(?, ?, latitude, longitude) AS _dist']);
+        $query = $this->getSqlQuery('SELECT', array('geodist(?, ?, latitude, longitude) AS geo_dist'));
         $result = $this->dbs->getDb()->fetchAll(
-            "$q WHERE t._id != ? AND latitude AND longitude " .
+            "$query WHERE t.id != ? AND latitude AND longitude " .
             "AND latitude BETWEEN X(@bot_rgt) AND X(@top_lft) " .
             "AND longitude BETWEEN Y(@top_lft) AND Y(@bot_rgt) " .
-            "HAVING _dist < ? " .
-            "ORDER BY _dist " .
+            "HAVING geo_dist < ? " .
+            "ORDER BY geo_dist " .
             "LIMIT " . ((int) $o['neighboringLimit']),
-            [
+            array(
                 $context->getLatitude(),
                 $context->getLongitude(),
-                $this->dbs->getInternalId($this->getTableName(), $context->getId()),
+                $context->getId(),
                 (int) $o['neighboringDistance'],
-            ]
+            )
         );
 
         if (is_array($result)) {
-            foreach ($result as $k => $r) {
-                $result[$k] = $this->unpackLoadedData($this->getObject(), $r);
-                GeniBaseInternalProperties::setPropertyOf($result[$k], '_dist', $r['_dist']);
+            foreach ($result as $key => $res) {
+                $result[$key] = $this->unpackLoadedData($this->getObject(), $res);
+                GeniBaseInternalProperties::setPropertyOf($result[$key], 'geo_dist', $res['geo_dist']);
             }
         }
         return $result;
@@ -424,7 +416,7 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function loadComponentsGedcomx($entity, $context = null, $o = null)
     {
         $gedcomx = new Gedcomx();
-        $companions = [];
+        $companions = array();
 
         $o = $this->applyDefaultOptions($o);
 
@@ -458,7 +450,7 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function loadNeighboringPlacesGedcomx($entity, $context = null, $o = null)
     {
         $gedcomx = new Gedcomx();
-        $companions = [];
+        $companions = array();
 
         $o = $this->applyDefaultOptions($o);
 
@@ -485,10 +477,14 @@ class PlaceDescriptionStorager extends SubjectStorager
         /** @var PlaceDescription $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getJurisdiction()) && ! empty($rid = $r->getResourceId())) {
-            $gedcomx->embed(
-                $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
-            );
+        $res = $entity->getJurisdiction();
+        if (! empty($res)) {
+            $rid = $res->getResourceId();
+            if (! empty($rid)) {
+                $gedcomx->embed(
+                    $this->newStorager('Gedcomx\Conclusion\PlaceDescription')->loadGedcomx(array( 'id' => $rid ))
+                );
+            }
         }
 
         return $gedcomx;
@@ -500,10 +496,14 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $gedcomx = new Gedcomx();
 
-        if (! empty($r = $entity->getJurisdiction()) && ! empty($rid = $r->getResourceId())) {
-            $gedcomx->embed(
-                $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
-            );
+        $res = $entity->getJurisdiction();
+        if (! empty($res)) {
+            $rid = $res->getResourceId();
+            if (! empty($rid)) {
+                $gedcomx->embed(
+                    $this->newStorager('Gedcomx\Conclusion\PlaceDescription')->loadGedcomx(array( 'id' => $rid ))
+                );
+            }
         }
 
         return $gedcomx;
@@ -516,27 +516,51 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
         $t_places = $this->getTableName();
 
-        $geo = $this->dbs->getDb()->fetchArray(
-            "SELECT MIN(latitude), MIN(longitude), MAX(latitude), MAX(longitude) " .
-            "FROM $t_places WHERE jurisdiction_id = ?",
-            [$place_id]
+        $place = $this->dbs->getDb()->fetchAssoc(
+            "SELECT geo_calculated, latitude, longitude FROM $t_places WHERE id = ?",
+            array($place_id)
         );
-        if (empty($geo) && (count($geo) === array_sum(array_map('empty', $geo)))) {
-            $this->dbs->getDb()->executeQuery(
-                "UPDATE $t_places SET _calculatedGeo = 0, latitude = 0, longitude = 0 WHERE _id = ?",
-                [$place_id]
-            );
-        } else {
+        if (! empty($place)) {
+            $place['geo_calculated'] = $place['geo_calculated'] || is_null($place['latitude']);
+        }
+
+        $geo = $this->dbs->getDb()->fetchArray(
+            "SELECT MIN(latitude), MIN(longitude), MAX(latitude), MAX(longitude), " .
+            "MIN(geo_lat_min), MIN(geo_lon_min), MAX(geo_lat_max), MAX(geo_lon_max) " .
+            "FROM $t_places WHERE jurisdiction_id = ?",
+            array($place_id)
+        );
+        if (count($geo) !== array_sum(array_map(function($val) { return empty($val); }, $geo))) {
             $zoom = 11;
-            if ($geo[0] !== $geo[2] && $geo[1] !== $geo[3]) {
-                $zoom = PlaceMapProvider::getBoundsZoomLevel($geo[0], $geo[1], $geo[2], $geo[3]);
+            $geo[0] = empty($geo[4]) ? $geo[0] : min($geo[0], $geo[4]);
+            $geo[1] = empty($geo[5]) ? $geo[1] : min($geo[1], $geo[5]);
+            $geo[2] = empty($geo[6]) ? $geo[2] : max($geo[2], $geo[6]);
+            $geo[3] = empty($geo[7]) ? $geo[3] : max($geo[3], $geo[7]);
+            if (! $place['geo_calculated']) {
+                $geo[0] = min($geo[0], $place['latitude']);
+                $geo[1] = min($geo[1], $place['longitude']);
+                $geo[2] = max($geo[2], $place['latitude']);
+                $geo[3] = max($geo[3], $place['longitude']);
             }
+            $data = array(
+                'geo_lat_min'   => $geo[0],
+                'geo_lon_min'   => $geo[1],
+                'geo_lat_max'   => $geo[2],
+                'geo_lon_max'   => $geo[3],
+            );
+            if ($place['geo_calculated']) {
+                $data['geo_calculated'] = 1;
+                $data['latitude']   = ($geo[0] + $geo[2]) / 2;
+                $data['longitude']  = ($geo[1] + $geo[3]) / 2;
+            }
+            $this->dbs->getDb()->update($t_places, $data, array( 'id' => $place_id ));
+        } elseif ($place['geo_calculated']) {
             $this->dbs->getDb()->executeQuery(
-                "UPDATE $t_places SET _calculatedGeo = 1, latitude = ?, longitude = ?, _zoom = ? " .
-                "WHERE _id = ?",
-                [($geo[0] + $geo[2]) / 2, ($geo[1] + $geo[3]) / 2, $zoom, $place_id]
+                "UPDATE $t_places SET geo_calculated = 0, latitude = NULL, longitude = NULL WHERE id = ?",
+                array($place_id)
             );
         }
+
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
         }
@@ -544,23 +568,19 @@ class PlaceDescriptionStorager extends SubjectStorager
 
     public function updateGeoCoordinates()
     {
-        if (! defined('DEBUG_SECONDARY') && (mt_rand(1, 10000) > self::UPDATE_GEO_PROBABILITY)) {
+        if (! defined('DEBUG_PLACES') && (mt_rand(1, 10000) > self::UPDATE_GEO_PROBABILITY)) {
             return; // Skip updating now
         }
-
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
         }
-        $t_places = $this->getTableName();
 
+        $t_places = $this->getTableName();
         $place_id = $this->dbs->getDb()->fetchColumn(
-            "SELECT _id FROM $t_places AS p1 " .
-            "WHERE p1._calculatedGeo = 1 OR (p1.latitude IS NULL AND p1.longitude IS NULL " .
-            "AND EXISTS ( SELECT 1 FROM $t_places AS p2 WHERE " .
-            "p2.jurisdiction_id = p1._id AND p2.latitude AND p2.longitude " .
-            ")) ORDER BY RAND() LIMIT 1"
+            "SELECT id FROM $t_places ORDER BY RAND() LIMIT 1"
         );
         $this->updatePlaceGeoCoordinates($place_id);
+
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
         }

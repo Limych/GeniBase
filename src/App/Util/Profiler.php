@@ -28,7 +28,7 @@ namespace App\Util;
 class Profiler
 {
 
-    protected static $timersRoot = [];
+    protected static $timersRoot = array();
     protected static $timers;
 
     public static function startTimer($name, $stopPrevious = false)
@@ -50,7 +50,7 @@ class Profiler
                 self::$timers[$currentTimer]->period += $mt - self::$timers[$currentTimer]->startTime;
             } else {
                 if (empty(self::$timers[$currentTimer]->subtimers)) {
-                    self::$timers[$currentTimer]->subtimers = [];
+                    self::$timers[$currentTimer]->subtimers = array();
                 }
                 self::$timers = &self::$timers[$currentTimer]->subtimers;
             }

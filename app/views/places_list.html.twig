@@ -12,7 +12,7 @@
                     {% if place.getTemporalDescription() != null %}
                         ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
                     {% endif %}
-                    {% if place.getType() %}
+{#                    {% if place.getType() %}
                         {% if place.getType() == '//GeniBase/Settlement' %}
                         <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
                         {% else %}
@@ -21,7 +21,7 @@
                     {% else %}
                         <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
                     {% endif %}
-                    </span></li>
+#}                    </span></li>
         	    {% endfor %}
         	    </ul>
 			</div>

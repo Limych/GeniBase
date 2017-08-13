@@ -30,12 +30,15 @@ class PlacesProcessor {
 
     protected $callback;
 
-    public function __construct(callable $callback)
+    public function __construct($callback)
     {
+        if (! is_callable($callback)) {
+            throw new \InvalidArgumentException('Argument MUST be callable');
+        }
         $this->callback = $callback;
     }
 
-    public static function run($input, callable $callback)
+    public static function run($input, $callback)
     {
         $upd = new self($callback);
         return $upd->process($input);
@@ -62,7 +65,7 @@ class PlacesProcessor {
         }
         $prevToken = null;
         $lastPlace = $parentPlace;
-        $queue = [];
+        $queue = array();
         while (! empty($input)) {
             $token = array_shift($input);
             $this->cnt++;
@@ -123,22 +126,22 @@ class PlacesProcessor {
 
     public static function processURI($uri, $expand = true)
     {
-        static $namespaces = [
+        static $namespaces = array(
             'wd:'    => 'http://www.wikidata.org/entity/',
 //             'gb:'    => '//GeniBase/',
-        ];
+        );
 
         if ($expand) {
             // Expand URI
             $uri = preg_replace(
-                array_map(self::class.'::pregPrepare', array_keys($namespaces)),
+                array_map(__CLASS__.'::pregPrepare', array_keys($namespaces)),
                 array_values($namespaces),
                 $uri
             );
         } else {
             // Contract URI
             $uri = preg_replace(
-                array_map(self::class . '::pregPrepare', array_values($namespaces)),
+                array_map(__CLASS__.'::pregPrepare', array_values($namespaces)),
                 array_keys($namespaces),
                 $uri
             );
@@ -149,9 +152,9 @@ class PlacesProcessor {
     protected function processToken($input, $parentPlace)
     {
         $data = preg_split('/\s+(\??[#%@]\S+|\??\[[^\s\]]+\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-        $input = [
-            'rdfs:label'  => [],
-        ];
+        $input = array(
+            'rdfs:label'  => array(),
+        );
         while (! empty($data)) {
             $token = array_shift($data);
             $type = substr($token, 0, 1);
@@ -201,7 +204,7 @@ class PlacesProcessor {
                     $input[$key] = $token;
                 } else {
                     if (! is_array($input[$key])) {
-                        $input[$key] = [$input[$key]];
+                        $input[$key] = array($input[$key]);
                     }
                     $input[$key][] = $token;
                 }
@@ -221,39 +224,39 @@ class PlacesProcessor {
     {
         return self::expandNamesProcessor($name);
     }
-	
-	private static function expandNamesProcessor(&$input) {
-		$input = trim($input);
-		$queue = [];
-		$bracket = false;
-		do {
-			$tokens = preg_split('!\s*([(),;/])\s*!', $input, 2, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
-			if ($bracket) {
-				$queue = array_map(function ($v) use ($tokens) {
-					return "$v ${tokens[0]}";
-				}, $queue);
-				$bracket = false;
-			} else {
-				$queue[] = $tokens[0];
-			}
+    private static function expandNamesProcessor(&$input) {
+        $input = trim($input);
+        $queue = array();
+        $bracket = false;
+        do {
+            $tokens = preg_split('!\s*([(),;/])\s*!', $input, 2, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
-			if (1 === count($tokens)) {
-				return $queue;
-			}
-			switch ($tokens[1]) {
-				case ',':
-				case ';':
-				case '/':
-					break;
-				case '(':
-					$queue = array_merge($queue, self::expandNames($tokens[2]));
-					$bracket = true;
-					break;
-			}
-			$input = @trim($tokens[2]);
-		} while (! empty($input) && (')' !== $tokens[1]));
-		
-		return $queue;
-	}
+            if ($bracket) {
+                $queue = array_map(function ($v) use ($tokens) {
+                    return "$v ${tokens[0]}";
+                }, $queue);
+                    $bracket = false;
+            } else {
+                $queue[] = $tokens[0];
+            }
+
+            if (1 === count($tokens)) {
+                return $queue;
+            }
+            switch ($tokens[1]) {
+                case ',':
+                case ';':
+                case '/':
+                    break;
+                case '(':
+                    $queue = array_merge($queue, self::expandNamesProcessor($tokens[2]));
+                    $bracket = true;
+                    break;
+            }
+            $input = @trim($tokens[2]);
+        } while (! empty($input) && (')' !== $tokens[1]));
+
+        return $queue;
+    }
 }

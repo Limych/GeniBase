@@ -24,10 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Conclusion;
-use GeniBase\DBase\GeniBaseInternalProperties;
-use Gedcomx\Source\SourceReference;
-use Gedcomx\Source\SourceDescription;
-use Gedcomx\Agent\Agent;
 use Gedcomx\Types\ConfidenceLevel;
 
 /**
@@ -46,7 +42,9 @@ class ConclusionStorager extends GeniBaseStorager
     {
         $result = 0;
 
-        if (! empty($confA = $a->getConfidence()) && ! empty($confB = $b->getConfidence())) {
+        $confA = $a->getConfidence();
+        $confB = $b->getConfidence();
+        if (! empty($confA) && ! empty($confB)) {
             switch ($confA) {
                 default:
                 case ConfidenceLevel::LOW:
@@ -81,7 +79,7 @@ class ConclusionStorager extends GeniBaseStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
@@ -91,17 +89,18 @@ class ConclusionStorager extends GeniBaseStorager
         $data = parent::packData4Save($entity, $context, $o);
 
         /** @var Conclusion $entity */
-        if (! empty($res = $entity->getConfidence()) && ($res != $this->previousState->getConfidence())
-            && ! empty($res = $this->dbs->getTypeId($res))
-        ) {
-            $data['confidence_id'] = $res;
+        $res = $entity->getConfidence();
+        if (! empty($res) && ($res != $this->previousState->getConfidence())) {
+            $res = $this->dbs->getTypeId($res);
+            if (! empty($res)) {
+                $data['confidence_type_id'] = $res;
+            }
         }
-        if (! empty($res = $entity->getLang()) && ($res != $this->previousState->getLang())
-            && ! empty($res = $this->dbs->getLangId($res))
-        ) {
-            $data['lang_id'] = $res;
+
+        $res = $entity->getLang();
+        if (! empty($res) && ($res != $this->previousState->getLang())) {
+            $data['lang'] = $res;
         }
-        $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
 
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
@@ -110,11 +109,8 @@ class ConclusionStorager extends GeniBaseStorager
     }
 
     /**
-     *
-     * @param mixed          $entity
-     * @param ExtensibleData $context
-     * @param array|null     $o
-     * @return ExtensibleData|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::save()
      */
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
@@ -128,11 +124,15 @@ class ConclusionStorager extends GeniBaseStorager
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__ . '#Childs');
         }
-        if (! empty($res = $entity->getSources()) && ($res != ($res2 = $this->previousState->getSources()))) {
+        AttributionStorager::saveAttribution($this->dbs, $entity->getAttribution(), $entity);
+
+        $res = $entity->getSources();
+        if (! empty($res) && ($res != ($res2 = $this->previousState->getSources()))) {
             $max = count($res);
+            $st = new SourceReferenceStorager($this->dbs);
             for ($i = 0; $i < $max; $i++) {
                 if (empty($res2[$i]) || ($res[$i] != $res2[$i])) {
-                    $this->newStorager(SourceReference::class)->save($res[$i], $entity);
+                    $st->save($res[$i], $entity);
                 }
             }
             $max = count($res2);
@@ -151,17 +151,14 @@ class ConclusionStorager extends GeniBaseStorager
     protected function getSqlQueryParts()
     {
         $t_types = $this->dbs->getTableName('types');
-        $t_langs = $this->dbs->getTableName('languages');
 
         $qparts = parent::getSqlQueryParts();
 
-        $qparts['fields'][]     = "l.lang";
-        $qparts['tables'][]     = "$t_langs AS l";
-        $qparts['bundles'][]    = "l._id = t.lang_id";
-
         $qparts['fields'][]     = "tp.uri AS confidence";
         $qparts['tables'][]     = "$t_types AS tp";
-        $qparts['bundles'][]    = "tp._id = t.confidence_id";
+        $qparts['bundles'][]    = "tp.id = t.confidence_type_id";
+
+        $qparts = AttributionStorager::addAttributionSqlQueryParts($this->dbs, $qparts);
 
         return $qparts;
     }
@@ -174,10 +171,9 @@ class ConclusionStorager extends GeniBaseStorager
     {
         $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
-        } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
+        $id = $entity->getId();
+        if (! empty($id)) {
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", array($id));
         }
 
         return $result;
@@ -201,13 +197,15 @@ class ConclusionStorager extends GeniBaseStorager
         ) {
             $result['lang'] = $lang_id;
         }
-        $result = $this->processRawAttribution($entity, $result);
+        $result['attribution'] = AttributionStorager::unpackAttribution($result);
 
         $entity = parent::unpackLoadedData($entity, $result);
 // if ($entity instanceof \Gedcomx\Conclusion\PlaceDescription && $entity->getId() != 'L7HW-ANNP-V43N') { var_dump($result, $entity);die; } // FIXME Delete me
 
         // Load childs
-        if (! empty($res = $this->newStorager(SourceReference::class)->loadComponents($entity))) {
+        $st = new SourceReferenceStorager($this->dbs);
+        $res = $st->loadComponents($entity);
+        if (! empty($res)) {
             $entity->setSources($res);
         }
 
@@ -219,19 +217,30 @@ class ConclusionStorager extends GeniBaseStorager
         /** @var Conclusion $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getAttribution()) && ! empty($r = $r->getContributor())
-        && ! empty($rid = $r->getResourceId())) {
-            $gedcomx->embed($this->newStorager(Agent::class)->loadGedcomx([ 'id' => $rid ]));
+        $res = $entity->getAttribution();
+        if (! empty($res)) {
+            $res = $res->getContributor();
+            if (! empty($res)) {
+                $res = $res->getResourceId();
+                if (! empty($res)) {
+                    $st = new AgentStorager($this->dbs);
+                    $gedcomx->embed($st->loadGedcomx(array( 'id' => $res )));
+                }
+            }
         }
 
-        if (! empty($list = $entity->getSources())) {
+        $list = $entity->getSources();
+        if (! empty($list)) {
             foreach ($list as $ent) {
-                if (! empty($r = $ent->getDescriptionRef())
-                    && ! empty($rid = GeniBaseStorager::getIdFromReference($r))
-                ) {
-                    $gedcomx->embed(
-                        $this->newStorager(SourceDescription::class)->loadGedcomx([ 'id' => $rid ])
-                    );
+                $res = $ent->getDescriptionRef();
+                if (! empty($res)) {
+                    $res = self::getIdFromReference($res);
+                    if (! empty($res)) {
+                        $st = new SourceDescriptionStorager($this->dbs);
+                        $gedcomx->embed(
+                            $st->loadGedcomx(array( 'id' => $rid ))
+                        );
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@
 	"license" : "AGPL-3.0+",
 	"type" : "project",
 	"require" : {
+		"php" : ">=5.3",
 		"gedcomx/gedcomx-php" : "dev-3.1.x-fix",
 		"silex/silex" : "~2.1",
 		"symfony/monolog-bridge" : "~2.8|^3.0",
@@ -67,7 +68,7 @@
 			"type" : "git",
 			"url" : "https://github.com/Limych/gedcomx-php",
 			"name" : "gedcomx/gedcomx-php"
-		},{
+		}, {
 			"type" : "git",
 			"url" : "https://github.com/Limych/SPARQL.git",
 			"name" : "bordercloud/sparql"

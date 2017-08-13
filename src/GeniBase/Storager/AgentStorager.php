@@ -23,20 +23,14 @@
 namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
-use Gedcomx\Agent\Agent;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Common\ResourceReference;
-use GeniBase\DBase\GeniBaseInternalProperties;
-use Gedcomx\Conclusion\Identifier;
+use Gedcomx\Agent\Agent;
 
-/**
- *
- * @author Limych
- */
 class AgentStorager extends GeniBaseStorager
 {
 
-    const GROUP_NAMES       = 'http://genibase/AgentName';
+    const GROUP_NAMES       = '//GeniBase/AgentName';
 
     protected function getObject($o = null)
     {
@@ -51,16 +45,29 @@ class AgentStorager extends GeniBaseStorager
 
         if (! empty($entity)) {
             /** @var Agent $entity */
-            if (! empty($r = $entity->getOpenid())) {
-                $def['makeId_name'] = $r;
-            } elseif (! empty($r = $entity->getNames())) {
-                $def['makeId_name'] = $r[0]->getValue();
-            } elseif (! empty($r = $entity->getEmails())) {
-                $def['makeId_name'] = $r[0];
-            } elseif (! empty($r = $entity->getPhones())) {
-                $def['makeId_name'] = $r[0];
-            } elseif (! empty($r = $entity->getHomepage())) {
-                $def['makeId_name'] = $r;
+            $res = $entity->getOpenid();
+            if (! empty($res)) {
+                $def['makeId_name'] = $res;
+            } else {
+                $res = $entity->getNames();
+                if (! empty($res)) {
+                    $def['makeId_name'] = $res[0]->getValue();
+                } else {
+                    $res = $entity->getEmails();
+                    if (! empty($res)) {
+                        $def['makeId_name'] = $res[0];
+                    } else {
+                        $res = $entity->getPhones();
+                        if (! empty($res)) {
+                            $def['makeId_name'] = $res[0];
+                        } else {
+                            $res = $entity->getHomepage();
+                            if (! empty($res)) {
+                                $def['makeId_name'] = $res;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -74,14 +81,18 @@ class AgentStorager extends GeniBaseStorager
     protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         /** @var Agent $entity */
-        if (! empty($res = $entity->getIdentifiers())
-            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($res))
-        ) {
-            $candidate = $this->load([ 'id' => $id ]);
-            $this->previousState = clone $candidate;
-            $candidate->embed($entity);
-            $entity = $candidate;
-            return true;
+        $res = $entity->getIdentifiers();
+        if (! empty($res)) {
+            $id = $this->searchIdByIdentifiers($res);
+            if (! empty($id)) {
+                $candidate = $this->load(array( 'id' => $id ));
+                if (! empty($candidate)) {
+                    $this->previousState = clone $candidate;
+                    $candidate->initFromArray($entity->toArray());
+                    $entity = $candidate;
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -100,35 +111,48 @@ class AgentStorager extends GeniBaseStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         $this->makeGbidIfEmpty($entity, $o);
 
         $data = parent::packData4Save($entity, $context, $o);
 
         /** @var Agent $entity */
-        if (! empty($res = $entity->getAddresses()) && ($res != $this->previousState->getAddresses())
+        $res = $entity->getAddresses();
+        if (! empty($res) && ($res != $this->previousState->getAddresses())
             && ('[{}]' !== $res = json_encode($res))
         ) {
             $data['addresses_json'] = $res;
         }
+
         // TODO: accounts
-        if (! empty($res = $entity->getHomepage()) && ($res != $this->previousState->getHomepage())
-            && ! empty($res = $res->getResource())
-        ) {
-            $data['homepage_uri'] = $res;
+
+        $res = $entity->getHomepage();
+        if (! empty($res) && ($res != $this->previousState->getHomepage())) {
+            $res = $res->getResource();
+            if (! empty($res)) {
+                $data['homepage_uri'] = $res;
+            }
         }
-        if (! empty($res = $entity->getOpenid()) && ($res != $this->previousState->getOpenid())
-            && ! empty($res = $res->getResource())
-        ) {
-            $data['openid_uri'] = $res;
+
+        $res = $entity->getOpenid();
+        if (! empty($res) && ($res != $this->previousState->getOpenid())) {
+            $res = $res->getResource();
+            if (! empty($res)) {
+                $data['openid_uri'] = $res;
+            }
         }
-        if (! empty($res = $entity->getEmails()) && ($res != $this->previousState->getEmails())) {
+
+        $res = $entity->getEmails();
+        if (! empty($res) && ($res != $this->previousState->getEmails())) {
             $data['emails_uris'] = self::packResourceReferences($res);
         }
-        if (! empty($res = $entity->getPhones()) && ($res != $this->previousState->getPhones())) {
+
+        $res = $entity->getPhones();
+        if (! empty($res) && ($res != $this->previousState->getPhones())) {
             $data['phones_uris'] = self::packResourceReferences($res);
         }
+
         // TODO: persons
 //         if (! empty($res = $entity->) && isset($ent['person']['resourceId'])
 //             && (false !== $res = $this->dbs->getInternalIdForId($ent['person']['resourceId']))
@@ -152,17 +176,14 @@ class AgentStorager extends GeniBaseStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getNames()) && ($res != $this->previousState->getNames())) {
-            $names = [];
-            foreach ($res as $name) {
-                $names[] = $name->toArray();
-            }
-            $this->saveAllTextValues(self::GROUP_NAMES, $names, $entity);
+        $res = $entity->getNames();
+        if (! empty($res) && ($res != $this->previousState->getNames())) {
+            $this->saveTextValues(self::GROUP_NAMES, $res, $entity);
         }
-        if (! empty($res = $entity->getIdentifiers()) && ($res != $this->previousState->getIdentifiers())) {
-            foreach ($res as $id) {
-                $this->newStorager(Identifier::class)->save($id, $entity);
-            }
+
+        $res = $entity->getIdentifiers();
+        if (! empty($res) && ($res != $this->previousState->getIdentifiers())) {
+            $this->saveIdentifiers($res, $entity);
         }
 
         return $entity;
@@ -192,7 +213,7 @@ class AgentStorager extends GeniBaseStorager
     {
         return array_map(
             function ($v) {
-                return new ResourceReference([ 'resource' => $v ]);
+                return new ResourceReference(array( 'resource' => $v ));
             },
             explode("\n", $rrefs)
         );
@@ -202,10 +223,9 @@ class AgentStorager extends GeniBaseStorager
     {
         $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [(int) $_id]);
-        } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
+        $id = $entity->getId();
+        if (! empty($id)) {
+            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", array($id));
         }
 
         return $result;
@@ -228,14 +248,18 @@ class AgentStorager extends GeniBaseStorager
         $entity = parent::unpackLoadedData($entity, $result);
 
         // TODO accounts
-        if (! empty($res = $this->loadAllTextValues(self::GROUP_NAMES, $entity))) {
+        $res = $this->loadTextValues(self::GROUP_NAMES, $entity);
+        if (! empty($res)) {
             $entity->setNames($res);
         }
-        if (! empty($res = $this->newStorager(Identifier::class)->loadComponents($entity))) {
+
+        $res = $this->loadIdentifiers($entity);
+        if (! empty($res)) {
             $entity->setIdentifiers($res);
         }
+
         if (! empty($result['homepage_uri'])) {
-            $entity->setHomepage(new ResourceReference([ 'resource' => $result['homepage_uri'] ]));
+            $entity->setHomepage(new ResourceReference(array( 'resource' => $result['homepage_uri'] )));
             unset($result['homepage_uri']);
         }
         if (! empty($result['emails_uris'])) {
@@ -247,7 +271,7 @@ class AgentStorager extends GeniBaseStorager
             unset($result['phones_uris']);
         }
         if (! empty($result['openid_uri'])) {
-            $entity->setOpenid(new ResourceReference([ 'resource' => $result['openid_uri'] ]));
+            $entity->setOpenid(new ResourceReference(array( 'resource' => $result['openid_uri'] )));
             unset($result['openid_uri']);
         }
 

@@ -37,6 +37,7 @@ use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Source\SourceDescription;
 use Gedcomx\Source\SourceReference;
 use GeniBase\DBase\DBaseService;
+use Gedcomx\Common\Attribution;
 
 /**
  *
@@ -59,47 +60,47 @@ class StoragerFactory
         }
 
         switch ($class) {
-            case Conclusion::class:
+            case 'Gedcomx\Conclusion\Conclusion':
                 return new ConclusionStorager($dbs);
 
-            case SourceDescription::class:
+            case 'Gedcomx\Source\SourceDescription':
                 return new SourceDescriptionStorager($dbs);
 
-            case SourceReference::class:
+            case 'Gedcomx\Source\SourceReference':
                 return new SourceReferenceStorager($dbs);
 
-            case Name::class:
+            case 'Gedcomx\Conclusion\Name':
                 return new NameStorager($dbs);
 
-            case NameForm::class:
+            case 'Gedcomx\Conclusion\NameForm':
                 return new NameFormStorager($dbs);
 
-            case NamePart::class:
+            case 'Gedcomx\Conclusion\NamePart':
                 return new NamePartStorager($dbs);
 
-            case Person::class:
+            case 'Gedcomx\Conclusion\Person':
                 return new PersonStorager($dbs);
 
-            case Gender::class:
+            case 'Gedcomx\Conclusion\Gender':
                 return new GenderStorager($dbs);
 
-            case PlaceDescription::class:
+            case 'Gedcomx\Conclusion\PlaceDescription':
                 return new PlaceDescriptionStorager($dbs);
 
-            case Fact::class:
+            case 'Gedcomx\Conclusion\Fact':
                 return new FactStorager($dbs);
 
-            case Event::class:
+            case 'Gedcomx\Conclusion\Event':
                 return new EventStorager($dbs);
 
-            case EventRole::class:
+            case 'Gedcomx\Conclusion\EventRole':
                 return new EventRoleStorager($dbs);
 
-            case Agent::class:
+            case 'Gedcomx\Agent\Agent':
                 return new AgentStorager($dbs);
 
-            case Identifier::class:
-                return new IdentifierStorager($dbs);
+            case 'Gedcomx\Common\Attribution':
+                return new AttributionStorager($dbs);
         }
 
         throw new \UnexpectedValueException('Not supported class: ' . $class);

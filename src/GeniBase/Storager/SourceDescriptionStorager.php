@@ -39,11 +39,11 @@ use GeniBase\Util\IDateTime;
 class SourceDescriptionStorager extends GeniBaseStorager
 {
 
-    const GROUP_TITLES      = 'http://genibase/SourceTitle';
-    const GROUP_CITATIONS   = 'http://genibase/SourceCitation';
-    const GROUP_TITLE_LABEL = 'http://genibase/SourceTitleLabel';
-    const GROUP_DESCRIPTION = 'http://genibase/SourceDescription';
-    const GROUP_IDENTIFIERS = 'http://genibase/SourceIdentifier';
+    const GROUP_TITLES      = '//GeniBase/SourceTitle';
+    const GROUP_CITATIONS   = '//GeniBase/SourceCitation';
+    const GROUP_TITLE_LABEL = '//GeniBase/SourceTitleLabel';
+    const GROUP_DESCRIPTION = '//GeniBase/SourceDescription';
+    const GROUP_IDENTIFIERS = '//GeniBase/SourceIdentifier';
 
     protected function getObject($o = null)
     {
@@ -111,7 +111,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         ) {
             $candidate = $this->load([ 'id' => $id ]);
             $this->previousState = clone $candidate;
-            $candidate->embed($entity);
+            $candidate->initFromArray($entity->toArray());
             $entity = $candidate;
 
             if (defined('DEBUG_PROFILE')) {
@@ -125,7 +125,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
             if (! empty($result)) {
                 $candidate = $this->unpackLoadedData($this->getObject(), $result);
                 $this->previousState = clone $candidate;
-                $candidate->embed($entity);
+                $candidate->initFromArray($entity->toArray());
                 $entity = $candidate;
 
                 if (defined('DEBUG_PROFILE')) {

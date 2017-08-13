@@ -95,10 +95,8 @@ class GeniBaseInternalProperties
      */
     public static function getPropertiesOf(ExtensibleData $object)
     {
-        /**
- * @var self $ex
-*/
-        $ex = $object->findExtensionOfType(self::class);
+        /** @var self $ex */
+        $ex = $object->findExtensionOfType(__CLASS__);
 
         return (null === $ex) ? array() : $ex->getProperties();
     }
@@ -110,10 +108,8 @@ class GeniBaseInternalProperties
      */
     public static function setPropertiesOf(ExtensibleData $object, $properties)
     {
-        /**
- * @var self $ex
-*/
-        $ex = $object->findExtensionOfType(self::class);
+        /** @var self $ex */
+        $ex = $object->findExtensionOfType(__CLASS__);
         if (null === $ex) {
             $object->addExtensionElement(new self($properties));
         } else {
@@ -129,10 +125,8 @@ class GeniBaseInternalProperties
      */
     public static function getPropertyOf(ExtensibleData $object, $key)
     {
-        /**
- * @var self $ex
-*/
-        $ex = $object->findExtensionOfType(self::class);
+        /** @var self $ex */
+        $ex = $object->findExtensionOfType(__CLASS__);
 
         return (null === $ex) ? null : $ex->getProperty($key);
     }
@@ -146,12 +140,10 @@ class GeniBaseInternalProperties
     public static function setPropertyOf(ExtensibleData $object, $key, $value)
     {
         /** @var self $ex */
-        $ex = $object->findExtensionOfType(self::class);
+        $ex = $object->findExtensionOfType(__CLASS__);
         if (null === $ex) {
             $object->addExtensionElement(
-                new self(array(
-                $key => $value
-                ))
+                new self(array( $key => $value ))
             );
         } else {
             $ex->setProperty($key, $value);

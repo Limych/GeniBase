@@ -216,7 +216,7 @@ class PlacesIterator {
     {
         return self::expandNamesProcessor($name);
     }
-	
+
 	private static function expandNamesProcessor(&$input) {
 		$input = trim($input);
 		$queue = [];
@@ -242,13 +242,13 @@ class PlacesIterator {
 				case '/':
 					break;
 				case '(':
-					$queue = array_merge($queue, self::expandNames($tokens[2]));
+				    $queue = array_merge($queue, self::expandNamesProcessor($tokens[2]));
 					$bracket = true;
 					break;
 			}
 			$input = @trim($tokens[2]);
 		} while (! empty($input) && (')' !== $tokens[1]));
-		
+
 		return $queue;
 	}
 }

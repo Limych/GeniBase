@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "84b2bcad22c9a1a5e21ee45a9d9cbc4b",
+    "content-hash": "5526bfeabbe7b8ca48790b3d50ea582a",
     "packages": [
         {
             "name": "bordercloud/sparql",
@@ -12,7 +12,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Limych/SPARQL.git",
-                "reference": "6ebae275887164122b6188af86810da6702c540a"
+                "reference": "e5fa17f315880d7043110f011203d0138f59c33c"
             },
             "require": {
                 "php": ">=5.3.0"
@@ -44,7 +44,7 @@
                 "RDF",
                 "SPARQL"
             ],
-            "time": "2017-08-06 22:41:04"
+            "time": "2017-08-06 23:04:31"
         },
         {
             "name": "doctrine/annotations",
@@ -615,7 +615,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Limych/gedcomx-php",
-                "reference": "b0c3e6d30bbb9062214ac8badb2c424952035d5c"
+                "reference": "e5be913a943fd8ff5f67bccda6b8804c3ac92cb7"
             },
             "require-dev": {
                 "fzaninotto/faker": "1.4.*",
@@ -654,7 +654,7 @@
             "support": {
                 "issues": "https://github.com/FamilySearch/gedcomx-php/issues"
             },
-            "time": "2017-07-31 21:07:30"
+            "time": "2017-08-12 17:26:04"
         },
         {
             "name": "monolog/monolog",
@@ -2388,12 +2388,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Limych/foxy-tools.git",
-                "reference": "a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e"
+                "reference": "8c89ee3486aaae5e4b7c2d55bc61717ea59d3352"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Limych/foxy-tools/zipball/a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e",
-                "reference": "a6c90db74e2b5005b9fb6fb13ebd339f76b48e8e",
+                "url": "https://api.github.com/repos/Limych/foxy-tools/zipball/8c89ee3486aaae5e4b7c2d55bc61717ea59d3352",
+                "reference": "8c89ee3486aaae5e4b7c2d55bc61717ea59d3352",
                 "shasum": ""
             },
             "require": {
@@ -2426,7 +2426,7 @@
                 "user-agent",
                 "useragent"
             ],
-            "time": "2017-08-05 13:14:12"
+            "time": "2017-08-07T14:38:29+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -2623,16 +2623,16 @@
         },
         {
             "name": "phpdocumentor/reflection-docblock",
-            "version": "3.2.1",
+            "version": "3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/ReflectionDocBlock.git",
-                "reference": "183824db76118b9dddffc7e522b91fa175f75119"
+                "reference": "4aada1f93c72c35e22fb1383b47fee43b8f1d157"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/183824db76118b9dddffc7e522b91fa175f75119",
-                "reference": "183824db76118b9dddffc7e522b91fa175f75119",
+                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/4aada1f93c72c35e22fb1383b47fee43b8f1d157",
+                "reference": "4aada1f93c72c35e22fb1383b47fee43b8f1d157",
                 "shasum": ""
             },
             "require": {
@@ -2664,7 +2664,7 @@
                 }
             ],
             "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2017-08-04T20:55:59+00:00"
+            "time": "2017-08-08T06:39:58+00:00"
         },
         {
             "name": "phpdocumentor/type-resolver",
@@ -4768,6 +4768,8 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.3"
+    },
     "platform-dev": []
 }

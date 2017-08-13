@@ -22,10 +22,8 @@
  */
 namespace App\Controller;
 
-use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
-use GeniBase\DBase\GeniBaseInternalProperties;
 use GeniBase\Rs\Server\GedcomxRsFilter;
 use GeniBase\Rs\Server\GedcomxRsUpdater;
 use GeniBase\Storager\StoragerFactory;
@@ -85,12 +83,8 @@ class PlacesController extends BaseController
      */
     public function getOne(Application $app, Request $request, $id)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
-        ->loadGedcomx(
-            [
-            'id' => $id,
-            ]
-        );
+        $gedcomx = StoragerFactory::newStorager($app['gb.db'], 'Gedcomx\Conclusion\PlaceDescription')
+            ->loadGedcomx(array( 'id' => $id, ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
@@ -98,8 +92,9 @@ class PlacesController extends BaseController
 
         ApiLinksUpdater::update2($app, $request, $gedcomx);
 
-        if (class_exists(WebLinkExtension::class)) {
-            (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
+        if (class_exists('Symfony\Bridge\Twig\Extension\WebLinkExtension')) {
+            $wl = new WebLinkExtension($app['request_stack']);
+            $wl->link($request->getUri(), Rel::DESCRIPTION);
         }
         return $gedcomx;
     }
@@ -111,8 +106,8 @@ class PlacesController extends BaseController
      */
     public function getComponents(Application $app, Request $request, $id = null)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)
-        ->loadComponentsGedcomx([     'id' => $id     ]);
+        $gedcomx = StoragerFactory::newStorager($app['gb.db'], 'Gedcomx\Conclusion\PlaceDescription')
+            ->loadComponentsGedcomx(array( 'id' => $id ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
@@ -171,13 +166,11 @@ class PlacesController extends BaseController
      */
     public function showPlace(Application $app, Request $request, $id = null)
     {
-        $storager = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class);
+        $storager = StoragerFactory::newStorager($app['gb.db'], 'Gedcomx\Conclusion\PlaceDescription');
         if (empty($id)) {
-            $gedcomx = $storager->loadComponentsGedcomx([]);
+            $gedcomx = $storager->loadComponentsGedcomx(array());
         } else {
-            $gedcomx = $storager->loadGedcomx([
-                'id' => $id,
-            ]);
+            $gedcomx = $storager->loadGedcomx(array( 'id' => $id, ));
         }
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
@@ -187,18 +180,14 @@ class PlacesController extends BaseController
         GedcomxRsUpdater::update($gedcomx);
 
         if (empty($id)) {
-            return $app['twig']->render(
-                'places_list.html.twig',
-                [
-                    'gedcomx' => $gedcomx,
-                ]
-            );
+            return $app['twig']->render('places_list.html.twig', array( 'gedcomx' => $gedcomx, ));
         } else {
-            $gedcomx2 = $storager->loadComponentsGedcomx([  'id' => $gedcomx->getPlaces()[0]->getId()   ]);
+            $pl = $gedcomx->getPlaces();
+            $gedcomx2 = $storager->loadComponentsGedcomx(array( 'id' => $pl[0]->getId() ));
             GedcomxRsUpdater::update($gedcomx2);
 
             $gedcomx3 = GedcomxRsFilter::filter(
-                $storager->loadNeighboringPlacesGedcomx($gedcomx->getPlaces()[0]),
+                $storager->loadNeighboringPlacesGedcomx($pl[0]),
                 $gedcomx,
                 $gedcomx2
             );
@@ -206,12 +195,13 @@ class PlacesController extends BaseController
 
             return $app['twig']->render(
                 'place.html.twig',
-                [
+                array(
                     'gedcomx' => $gedcomx,
                     'components' => $gedcomx2->getPlaces(),
                     'neighbors' => $gedcomx3->getPlaces(),
-                    'map_zoom'  => GeniBaseInternalProperties::getPropertyOf($gedcomx->getPlaces()[0], '_zoom'),
-                ]
+//                     'map_zoom'  => GeniBaseInternalProperties::getPropertyOf($gedcomx->getPlaces()[0], '_zoom'),
+                    'map_zoom'  => 11,
+                )
             );
         }
     }

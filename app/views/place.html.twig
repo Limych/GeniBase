@@ -16,7 +16,7 @@
 		</ol>
         {% set place = gedcomx.getPlaces()[0] %}
         {% if place.getLatitude() %}
-		<div class="card-img-top place-map" style="background-image:url('{{ place_map(place.getLatitude(), place.getLongitude(), map_zoom) }}')"></div>
+		<div class="card-img-top place-map" style="background-image:url('{{ place_map(place) }}')"></div>
 		{% endif %}
 		<div class="card-block">
             <h2 class="card-title"><i class="fa fa-map-marker mr-2" aria-hidden="true"></i>{%
@@ -74,7 +74,7 @@
 					    {% if place.getTemporalDescription() != null %}
                             ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
                         {% endif %}
-                        {% if place.getType() %}
+{#                        {% if place.getType() %}
                             {% if place.getType() == '//GeniBase/Settlement' %}
                             <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
                             {% else %}
@@ -83,7 +83,7 @@
                         {% else %}
                             <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
                         {% endif %}
-                        </span></li>
+#}                        </span></li>
             	    {% endfor %}
             	    </ul>
                 </div>
@@ -99,7 +99,7 @@
                         {% if place.getTemporalDescription() != null %}
                             ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
                         {% endif %}
-                        {% if place.getType() %}
+{#                        {% if place.getType() %}
                             {% if place.getType() == '//GeniBase/Settlement' %}
                             <i class="fa fa-home place-type-icon" aria-hidden="true"></i>
                             {% else %}
@@ -108,7 +108,7 @@
                         {% else %}
                             <i class="fa fa-question place-type-icon" aria-hidden="true"></i>
                         {% endif %}
-                        </span></li>
+#}                        </span></li>
             	    {% endfor %}
             	    </ul>
     			</div>

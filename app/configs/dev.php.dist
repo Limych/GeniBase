@@ -24,6 +24,7 @@
 // enable the debug mode
 $app['debug'] = true;
 // $app['debug.secondary'] = true;
+// $app['debug.places'] = true;
 // $app['debug.profile'] = true;
 
 // === Profiler ===============================================================

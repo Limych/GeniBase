@@ -24,6 +24,7 @@ namespace App\Provider;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
  *
@@ -38,10 +39,36 @@ class PlaceMapProvider implements ServiceProviderInterface
         $app['twig'] = $app->extend('twig', function ($twig, $app) {
             $twig->addFunction(new \Twig_SimpleFunction(
                 'place_map',
-                function ($lat, $lon, $zoom = 11) use ($app) {
+                function ($place) use ($app) {
+                    /** @var \Gedcomx\Conclusion\PlaceDescription $place */
+                    $clat = $mlat = $place->getLatitude();
+                    $clon = $mlon = $place->getLongitude();
+                    $zoom = 11;
+
+                    $bbox = GeniBaseInternalProperties::getPropertyOf($place, 'geo_bbox');
+                    if (! empty($bbox[0])) {
+                        $clat = ($bbox[0] + $bbox[2]) /2;
+                        $clon = ($bbox[1] + $bbox[3]) /2;
+                        $zoom = self::getBoundsZoomLevel($bbox[0], $bbox[1], $bbox[2], $bbox[3]);
+                    }
+//                     $mlat = $clat; // TODO Fix map showing and Remove this line
+//                     $mlon = $clon; // TODO Fix map showing and Remove this line
+
                     $url = "https://maps.googleapis.com/maps/api/staticmap" .
-                        "?center=$lat,$lon&zoom=$zoom&scale=2&size=640x320&maptype=terrain&format=png" .
-                        "&markers=size:small%7Ccolor:red%7Clabel:%7C$lat,$lon";
+                        "?center=$clat,$clon&zoom=$zoom&scale=2&size=640x320&maptype=terrain&format=png" .
+                        "&style=feature:all|gamma:2" .
+// Old fashioned style 1
+//                         "&style=feature:road|feature:administrative|feature:poi|feature:labels|feature:transit|visibility:off" .
+//                         "&style=feature:all|saturation:-30" .
+//                         "&style=feature:water|saturation:-50" .
+//                         "&style=feature:poi|visibility:off" .
+//                         "&style=feature:road|visibility:off" .
+//                         "&style=feature:road.arterial|visibility:on|color:0xF9F9F9" .
+//                         "&style=feature:all|element:labels|visibility:off" .
+//                         "&style=feature:administrative.locality|element:labels|visibility:simplified|color:0xAAAAAA" .
+// Old fashioned style 2
+//                         "&style=element:geometry%7Ccolor:0xebe3cd&style=element:labels.icon%7Cvisibility:off&style=element:labels.text.fill%7Ccolor:0x523735&style=element:labels.text.stroke%7Ccolor:0xf5f1e6&style=feature:administrative%7Celement:geometry.stroke%7Ccolor:0xc9b2a6&style=feature:administrative%7Celement:labels%7Ccolor:0xa38d69%7Cvisibility:simplified&style=feature:administrative.land_parcel%7Cvisibility:off&style=feature:administrative.land_parcel%7Celement:geometry.stroke%7Ccolor:0xdcd2be&style=feature:administrative.land_parcel%7Celement:labels.text.fill%7Ccolor:0xae9e90&style=feature:administrative.neighborhood%7Cvisibility:off&style=feature:landscape%7Celement:labels%7Ccolor:0xa38d69%7Cvisibility:simplified&style=feature:landscape.man_made%7Cvisibility:off&style=feature:landscape.natural%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:poi%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:poi%7Celement:labels.text%7Cvisibility:off&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0x93817c&style=feature:poi.park%7Celement:geometry.fill%7Ccolor:0xa5b076&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x447530&style=feature:road%7Celement:geometry%7Ccolor:0xf5f1e6&style=feature:road%7Celement:labels%7Cvisibility:off&style=feature:road.arterial%7Celement:geometry%7Ccolor:0xfdfcf8&style=feature:road.arterial%7Celement:labels%7Cvisibility:off&style=feature:road.highway%7Celement:geometry.fill%7Ccolor:0xf1f1f1&style=feature:road.highway%7Celement:geometry.stroke%7Cvisibility:off&style=feature:road.local%7Celement:labels.text.fill%7Ccolor:0x806b63&style=feature:transit%7Cvisibility:off&style=feature:transit.line%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:transit.line%7Celement:labels.text.fill%7Ccolor:0x8f7d77&style=feature:transit.line%7Celement:labels.text.stroke%7Ccolor:0xebe3cd&style=feature:transit.station%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:water%7Celement:geometry.fill%7Ccolor:0xb9d3c2&style=feature:water%7Celement:labels.text%7Cvisibility:off&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x92998d" .
+                        "&markers=size:small%7Ccolor:red%7Clabel:%7C$mlat,$mlon";
                     if (! empty($app['google_api.key'])) {
                         $url .= '&key=' . $app['google_api.key'];
                         if (! empty($app['google_api.secret'])) {
@@ -98,15 +125,18 @@ class PlaceMapProvider implements ServiceProviderInterface
         return floor(log($mapPx / $worldPx / $fraction, 2));
     }
 
-    public static function getBoundsZoomLevel($lat1, $lon1, $lat2, $lon2, $mapWidth = 640, $mapHeight = 320)
+    public static function getBoundsZoomLevel($lat1, $lon1, $lat2, $lon2, $mapWidth = 1100, $mapHeight = 180)
     {
-        static $globeWidth = 256;
+        static $globeSize = 256;
         static $maxZoom = 21;
 
-        $latAngle = max($lat1, $lat2) - min($lat1, $lat2);
-        $lonAngle = max($lon1, $lon2) - min($lon1, $lon2);
-        $angle = max($latAngle, $lonAngle);
+        $latAngle = max($lat1, $lat2) - min($lat1, $lat2) + 0.2;
+        $lonAngle = max($lon1, $lon2) - min($lon1, $lon2) + 0.2;
+        $latZoom = floor(log($mapHeight * 360 / $latAngle / $globeSize, 2));
+        $lonZoom = floor(log($mapWidth * 360 / $lonAngle / $globeSize, 2));
 
-        return min($maxZoom, floor(log(960 * 360 / $angle / $globeWidth, 2)));
+        $zoom = min($maxZoom, $latZoom, $lonZoom);
+// var_dump($latAngle, $lonAngle, $latZoom, $lonZoom, $zoom);die;   // FIXME Delete me
+        return $zoom;
     }
 }

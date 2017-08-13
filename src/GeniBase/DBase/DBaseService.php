@@ -22,7 +22,6 @@
  */
 namespace GeniBase\DBase;
 
-use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Gedcomx\Agent\Agent;
 use Pimple\Container;
 
@@ -85,187 +84,63 @@ class DBaseService extends Container
         return $this->agent;
     }
 
+    private $types_cache = array();
+
     /**
      *
-     * @param string $id
-     * @param boolean $makeIfNew
+     * @param string $type_uri
      * @return number|null
      */
-    public function getInternalId($table, $id)
+    public function getTypeId($type_uri)
     {
-        if (empty($id)) {
+        if (empty($type_uri)) {
             return null;
         }
 
-        static $cache = [];
-
-        if (! empty($cache[$table]) && ! empty($cache[$table][$id])) {
-            return $cache[$table][$id];
-        }
-
-        if (empty($cache[$table])) {
-            $cache[$table] = [];
-        }
-
-        try {
-            $res = $this['app']['db']->fetchColumn("SELECT _id FROM $table WHERE id = ?", [$id]);
-            if (false !== $res) {
-                $cache[$table][$id] = (int) $res;
-                return (int) $res;
-            }
-        } catch (InvalidFieldNameException $e) {
-            // Do nothing
-        }
-        return null;
-    }
-
-    /**
-     *
-     * @param number $_id
-     * @return string|false
-     */
-    public function getPublicId($table, $_id)
-    {
-        if (empty($_id)) {
-            return false;
-        }
-
-        static $cache = [];
-
-        if (! empty($cache[$table]) && ! empty($cache[$table][$_id])) {
-            return $cache[$table][$_id];
-        }
-
-        if (empty($cache[$table])) {
-            $cache[$table] = [];
-        }
-
-        try {
-            $res = $this['app']['db']->fetchColumn("SELECT id FROM $table WHERE _id = ?", [(int) $_id]);
-            if (false !== $res) {
-                $cache[$table][$_id] = $res;
-                return $res;
-            }
-        } catch (InvalidFieldNameException $e) {
-            // Do nothing
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param string $uri
-     * @return number|false
-     */
-    public function getTypeId($uri)
-    {
-        if (empty($uri)) {
-            return false;
-        }
-
-        static $cache = [];
-
-        if (isset($cache[$uri])) {
-            return $cache[$uri];
+        if (isset($this->types_cache[$type_uri])) {
+            return $this->types_cache[$type_uri];
         }
 
         $t_types = $this->getTableName('types');
 
-        $type_id = $this['app']['db']->fetchColumn("SELECT _id FROM $t_types WHERE uri = ?", [$uri]);
+        $type_id = $this['app']['db']->fetchColumn("SELECT id FROM $t_types WHERE uri = ?", array( $type_uri ));
         if (false !== $type_id) {
-            $cache[$uri] = (int) $type_id;
-            return $cache[$uri];
+            $this->types_cache[$type_uri] = (int) $type_id;
+            return $this->types_cache[$type_uri];
         }
 
-        if (0 === $this['app']['db']->insert($t_types, [  'uri' => $uri   ])) {
-            return false;
+        if (0 === $this['app']['db']->insert($t_types, array( 'uri' => $type_uri ))) {
+            return null;
         }
-        $cache[$uri] = (int) $this['app']['db']->lastInsertId();
-        return $cache[$uri];
+        $this->types_cache[$type_uri] = (int) $this['app']['db']->lastInsertId();
+        return $this->types_cache[$type_uri];
     }
 
     /**
      *
      * @param number $type_id
-     * @return string|false
+     * @return string|null
      */
     public function getType($type_id)
     {
         if (empty($type_id)) {
-            return false;
+            return null;
         }
 
-        static $cache = [];
-
-        if (isset($cache[$type_id])) {
-            return $cache[$type_id];
+        $tmp = array_flip($this->types_cache);
+        if (isset($tmp[$type_id])) {
+            return $tmp[$type_id];
         }
 
         $t_types = $this->getTableName('types');
 
-        $type = $this['app']['db']->fetchColumn("SELECT uri FROM $t_types WHERE _id = ?", [(int) $type_id]);
+        $type = $this['app']['db']->fetchColumn(
+            "SELECT uri FROM $t_types WHERE id = ?",
+            array( (int) $type_id )
+        );
         if (false !== $type) {
-            $cache[$type_id] = $type;
+            $this->types_cache[$type] = $type_id;
         }
         return $type;
-    }
-
-    /**
-     *
-     * @param string $lang
-     * @return number|false
-     */
-    public function getLangId($lang)
-    {
-        if (empty($lang)) {
-            return false;
-        }
-
-        static $cache = [];
-
-        if (isset($cache[$lang])) {
-            return $cache[$lang];
-        }
-
-        $t_langs = $this->getTableName('languages');
-
-        $lang_id = $this['app']['db']->fetchColumn("SELECT _id FROM $t_langs WHERE lang = ?", [$lang]);
-        if (false !== $lang_id) {
-            $cache[$lang] = (int) $lang_id;
-            return $cache[$lang];
-        }
-
-        if (0 === $this['app']['db']->insert($t_langs, [  'lang' => $lang     ])) {
-            return false;
-        }
-        $cache[$lang] = (int) $this['app']['db']->lastInsertId();
-        return $cache[$lang];
-    }
-
-    /**
-     *
-     * @param number $lang_id
-     * @return string|false
-     */
-    public function getLang($lang_id)
-    {
-        if (empty($lang_id)) {
-            return false;
-        }
-
-        static $cache = [];
-
-        if (isset($cache[$lang_id])) {
-            return $cache[$lang_id];
-        }
-
-        $t_langs = $this->getTableName('languages');
-
-        $lang = $this['app']['db']->fetchColumn("SELECT lang FROM $t_langs WHERE _id = ?", [(int) $lang_id]);
-        if (false !== $lang) {
-            $cache[$lang_id] = $lang;
-        }
-        return $lang;
     }
 }

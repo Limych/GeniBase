@@ -23,7 +23,6 @@
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
-use Gedcomx\Conclusion\Identifier;
 use Gedcomx\Conclusion\Subject;
 
 /**
@@ -61,17 +60,21 @@ class SubjectStorager extends ConclusionStorager
         }
 
         /** @var Subject $entity */
-        if (! empty($res = $entity->getIdentifiers())
-            && ! empty($id = $this->newStorager(Identifier::class)->getIdByIdentifier($res))
-            && (false !== $candidate = $this->load([ 'id' => $id ]))
-        ) {
-            $this->previousState = clone $candidate;
-            $candidate->embed($entity);
-            $entity = $candidate;
-            if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+        $res = $entity->getIdentifiers();
+        if (! empty($res)) {
+            $id = $this->searchIdByIdentifiers($res);
+            if (! empty($id)) {
+                $candidate = $this->load(array( 'id' => $id ));
+                if (! empty($candidate)) {
+                    $this->previousState = clone $candidate;
+                    $candidate->initFromArray($entity->toArray());
+                    $entity = $candidate;
+                    if (defined('DEBUG_PROFILE')) {
+                        \App\Util\Profiler::stopTimer(__METHOD__);
+                    }
+                    return true;
+                }
             }
-            return true;
         }
 
         if (defined('DEBUG_PROFILE')) {
@@ -88,10 +91,9 @@ class SubjectStorager extends ConclusionStorager
         $def = parent::getDefaultOptions();
 
         if (empty($def['makeId_name']) && ! empty($entity)) {
-            /**
-             * @var Subject $entity
-             */
-            if (! empty($res = $entity->getIdentifiers())) {
+            /** @var Subject $entity */
+            $res = $entity->getIdentifiers();
+            if (! empty($res)) {
                 foreach ($res as $id) {
                     if (\Gedcomx\Types\IdentifierType::PERSISTENT === $id->getType()) {
                         $def['makeId_name'] = $res[0]->getValue();
@@ -120,10 +122,9 @@ class SubjectStorager extends ConclusionStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getIdentifiers()) && ($res != $this->previousState->getIdentifiers())) {
-            foreach ($res as $id) {
-                $this->newStorager(Identifier::class)->save($id, $entity);
-            }
+        $res = $entity->getIdentifiers();
+        if (! empty($res) && ($res != $this->previousState->getIdentifiers())) {
+            $this->saveIdentifiers($res, $entity);
         }
 
         return $entity;
@@ -138,7 +139,8 @@ class SubjectStorager extends ConclusionStorager
         /** @var Subject $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($res = $this->newStorager(Identifier::class)->loadComponents($entity))) {
+        $res = $this->loadIdentifiers($entity);
+        if (! empty($res)) {
             $entity->setIdentifiers($res);
         }
 

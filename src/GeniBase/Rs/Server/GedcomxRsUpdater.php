@@ -112,8 +112,8 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
                     $r1 .= $res->getYear();
                     $r2 .= SimpleDateFormatter::format($res);
                 } elseif ($fd->getIsRange()) {
-                    $r1 .= 'Н/Д';
-                    $r2 .= 'Н/Д';
+                    $r1 .= 'н/в';
+                    $r2 .= 'н/в';
                 }
             }
 

@@ -27,6 +27,9 @@ if ($dev_mode) {
     if (! empty($app['debug.secondary'])) {
         define('DEBUG_SECONDARY', true);
     }
+    if (! empty($app['debug.places'])) {
+        define('DEBUG_PLACES', true);
+    }
     if (! empty($app['debug.profile']) || isset($_GET['PROFILE'])) {
         define('DEBUG_PROFILE', true);
     }
