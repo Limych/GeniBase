@@ -28,7 +28,7 @@ namespace GeniBase\Common;
  */
 class GeniBaseClass
 {
-    const GENIBASE_NS = '//GeniBase/v1/';
+    const GENIBASE_NS = 'http://genibase.net/v1/';
     const XML_NS = 'http://www.w3.org/XML/1998/namespace';
 
     /**
@@ -85,7 +85,7 @@ class GeniBaseClass
      */
     public function toArray()
     {
-        return [];
+        return array();
     }
 
     /**

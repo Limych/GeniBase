@@ -32,6 +32,8 @@ use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Rs\ApiLinksUpdater;
+use Gedcomx\Source\SourceDescription;
+use GeniBase\Storager\GeniBaseStorager;
 
 class PlacesController extends BaseController
 {
@@ -166,7 +168,7 @@ class PlacesController extends BaseController
      */
     public function showPlace(Application $app, Request $request, $id = null)
     {
-        $storager = StoragerFactory::newStorager($app['gb.db'], 'Gedcomx\Conclusion\PlaceDescription');
+        $storager = StoragerFactory::newStorager($app['gb.db'], \Gedcomx\Conclusion\PlaceDescription::class);
         if (empty($id)) {
             $gedcomx = $storager->loadComponentsGedcomx(array());
         } else {
@@ -183,11 +185,20 @@ class PlacesController extends BaseController
             return $app['twig']->render('places_list.html.twig', array( 'gedcomx' => $gedcomx, ));
         } else {
             $pl = $gedcomx->getPlaces();
-            $gedcomx2 = $storager->loadComponentsGedcomx(array( 'id' => $pl[0]->getId() ));
+            $mainPlace = $pl[0];
+
+            if (! empty($res = $mainPlace->getSources())) {
+                $src = StoragerFactory::newStorager($app['gb.db'], SourceDescription::class)->loadGedcomx([
+                    'id' => GeniBaseStorager::getIdFromReference($res[0]->getDescriptionRef()),
+                ]);
+                $gedcomx->embed($src);
+            }
+
+            $gedcomx2 = $storager->loadComponentsGedcomx(array( 'id' => $mainPlace->getId() ));
             GedcomxRsUpdater::update($gedcomx2);
 
             $gedcomx3 = GedcomxRsFilter::filter(
-                $storager->loadNeighboringPlacesGedcomx($pl[0]),
+                $storager->loadNeighboringPlacesGedcomx($mainPlace),
                 $gedcomx,
                 $gedcomx2
             );
@@ -199,8 +210,6 @@ class PlacesController extends BaseController
                     'gedcomx' => $gedcomx,
                     'components' => $gedcomx2->getPlaces(),
                     'neighbors' => $gedcomx3->getPlaces(),
-//                     'map_zoom'  => GeniBaseInternalProperties::getPropertyOf($gedcomx->getPlaces()[0], '_zoom'),
-                    'map_zoom'  => 11,
                 )
             );
         }

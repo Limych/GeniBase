@@ -54,7 +54,7 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
 
     public function __construct()
     {
-        $this->supplier_ids = [];
+        $this->supplier_ids = array();
         $this->filtered = new Gedcomx();
     }
 
@@ -110,11 +110,13 @@ class GedcomxRsFilter extends GedcomxModelVisitorBase
     protected function passFilter(ExtensibleData $entity)
     {
         if ($this->mode === self::MODE_COLLECT_IDS) {
-            if (! empty($id = $entity->getId())) {
+            $id = $entity->getId();
+            if (! empty($id)) {
                 $this->supplier_ids[] = $id;
             }
         } elseif ($this->mode === self::MODE_FILTER_NODES) {
-            if (empty($id = $entity->getId()) || ! in_array($id, $this->supplier_ids)) {
+            $id = $entity->getId();
+            if (empty($id) || ! in_array($id, $this->supplier_ids)) {
                 return true;
             }
         }

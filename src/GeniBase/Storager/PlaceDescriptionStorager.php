@@ -26,6 +26,7 @@ use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\PlaceDescription;
 use GeniBase\DBase\GeniBaseInternalProperties;
+use GeniBase\Util\Geo;
 
 /**
  *
@@ -34,7 +35,7 @@ use GeniBase\DBase\GeniBaseInternalProperties;
 class PlaceDescriptionStorager extends SubjectStorager
 {
 
-    const GROUP_NAMES   = '//GeniBase/PlaceName';
+    const GROUP_NAMES   = 'http://genibase.net/PlaceName';
 
     const UPDATE_GEO_PROBABILITY    = 1;    // of 10 000
 
@@ -199,7 +200,7 @@ class PlaceDescriptionStorager extends SubjectStorager
 
         $res = $entity->getType();
         if (! empty($res) && ($res != $this->previousState->getType())) {
-            $res = $this->dbs->getTypeId($res);
+            $res = $this->getTypeId($res);
             if (! empty($res)) {
                 $data['type_id'] = $res;
             }
@@ -289,7 +290,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         $entity = parent::unpackLoadedData($entity, $result);
 
         if (isset($result['type_id'])) {
-            $type = $this->dbs->getType($result['type_id']);
+            $type = $this->getType($result['type_id']);
             if (! empty($type)) {
                 $entity->setType($type);
             }
@@ -345,28 +346,44 @@ class PlaceDescriptionStorager extends SubjectStorager
             $context = $this->getObject($context);
         }
 
-        $this->dbs->getDb()->executeQuery(
-            "CALL geobox_pt(POINT(?, ?), ?, @top_lft, @bot_rgt)",
-            array($context->getLatitude(), $context->getLongitude(), $o['neighboringDistance'])
-        );
+        $bbox = Geo::box($context->getLatitude(), $context->getLongitude(), $o['neighboringDistance']);
 
-        $query = $this->getSqlQuery('SELECT', array('geodist(?, ?, latitude, longitude) AS geo_dist'));
+        $query = $this->getSqlQuery();
         $result = $this->dbs->getDb()->fetchAll(
             "$query WHERE t.id != ? AND latitude AND longitude " .
-            "AND latitude BETWEEN X(@bot_rgt) AND X(@top_lft) " .
-            "AND longitude BETWEEN Y(@top_lft) AND Y(@bot_rgt) " .
-            "HAVING geo_dist < ? " .
-            "ORDER BY geo_dist " .
-            "LIMIT " . ((int) $o['neighboringLimit']),
+            "AND latitude BETWEEN ? AND ? " .
+            "AND longitude BETWEEN ? AND ? ",
             array(
-                $context->getLatitude(),
-                $context->getLongitude(),
                 $context->getId(),
-                (int) $o['neighboringDistance'],
+                $bbox[2],   // Bottom
+                $bbox[0],   // Top
+                $bbox[1],   // Left
+                $bbox[3],   // Right
             )
         );
 
-        if (is_array($result)) {
+        if (is_array($result) && ! empty($result)) {
+            // Calculate distance
+            foreach ($result as $key => $res) {
+                $result[$key]['geo_dist'] = Geo::dist(
+                    $context->getLatitude(),
+                    $context->getLongitude(),
+                    $res['latitude'],
+                    $res['longitude']
+                );
+            }
+
+            // Sort by distance
+            usort($result, function ($a, $b) {
+                return ($a['geo_dist'] == $b['geo_dist'] ? 0
+                    : $a['geo_dist'] < $b['geo_dist'] ? -1 : 1
+                );
+            });
+
+            // Limit array
+            $result = array_slice($result, 0, (int) $o['neighboringLimit']);
+
+            // Unpack objects
             foreach ($result as $key => $res) {
                 $result[$key] = $this->unpackLoadedData($this->getObject(), $res);
                 GeniBaseInternalProperties::setPropertyOf($result[$key], 'geo_dist', $res['geo_dist']);
@@ -475,17 +492,10 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function loadGedcomxCompanions(ExtensibleData $entity)
     {
         /** @var PlaceDescription $entity */
+
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        $res = $entity->getJurisdiction();
-        if (! empty($res)) {
-            $rid = $res->getResourceId();
-            if (! empty($rid)) {
-                $gedcomx->embed(
-                    $this->newStorager('Gedcomx\Conclusion\PlaceDescription')->loadGedcomx(array( 'id' => $rid ))
-                );
-            }
-        }
+        $gedcomx->embed($this->loadGedcomxJurisdictions($entity));
 
         return $gedcomx;
     }
@@ -500,9 +510,8 @@ class PlaceDescriptionStorager extends SubjectStorager
         if (! empty($res)) {
             $rid = $res->getResourceId();
             if (! empty($rid)) {
-                $gedcomx->embed(
-                    $this->newStorager('Gedcomx\Conclusion\PlaceDescription')->loadGedcomx(array( 'id' => $rid ))
-                );
+                $st = new PlaceDescriptionStorager($this->dbs);
+                $gedcomx->embed($st->loadGedcomx(array( 'id' => $rid )));
             }
         }
 

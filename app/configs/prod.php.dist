@@ -49,12 +49,16 @@ $app['api.version'] = "v1";
 // === DataBase ===============================================================
 
 $app['db.options'] = array(
-    "driver"    => "pdo_mysql",
-    "host"      => "localhost",
-    "user"      => "genibase",
-    "password"  => "genibase",
-    "dbname"    => "genibase",
-    "prefix"    => "gb_",
+    'driver'    => 'pdo_mysql',
+    'host'      => 'localhost',
+    'user'      => 'genibase',
+    'password'  => 'genibase',
+    'dbname'    => 'genibase',
+    'charset'   => 'utf8',
+    'prefix'    => 'gb_',
+    'driverOptions' => array(
+        1002 => 'SET NAMES utf8'
+    ),
 );
 
 // === Translator =============================================================

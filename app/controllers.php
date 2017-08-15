@@ -106,6 +106,10 @@ $app->error(
 $app->get(
     '/',
     function () use ($app) {
+        if (! defined('DEBUG')) {
+            return $app->redirect($app['url_generator']->generate('places-root'));
+
+        }
         return $app['twig']->render('index.html.twig', array());
     }
 )

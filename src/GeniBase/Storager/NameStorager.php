@@ -24,7 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Name;
-use Gedcomx\Conclusion\NameForm;
 use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
@@ -56,26 +55,36 @@ class NameStorager extends ConclusionStorager
      *
      * @throws \UnexpectedValueException
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
+        /** @var Name $entity */
+
         $this->makeUuidIfEmpty($entity, $o);
 
         $data = parent::packData4Save($entity, $context, $o);
 
         $t_names = $this->getTableName();
 
-        /** @var Name $entity */
-        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+        if (empty($context) || empty($context->getId())) {
+            throw new \UnexpectedValueException('Context ID required!');
         }
-        $data['_person_id'] = (int) $res;
-        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
-            $data['type_id'] = $res;
+        $data['person_id'] = $context->getId();
+
+        $res = $entity->getType();
+        if (! empty($res)) {
+            $res = $this->getTypeId($res);
+            if (! empty($res)) {
+                $data['type_id'] = $res;
+            }
         }
-        if (! empty($res = $entity->getPreferred())) {
+
+        $res = $entity->getPreferred();
+        if (! empty($res)) {
             $data['preferred'] = (int) $res;
         }
-        if (! empty($res = $entity->getDate())) {
+
+        $res = $entity->getDate();
+        if (! empty($res)) {
             $data = array_merge($data, self::packDateInfo($res));
         }
 
@@ -94,10 +103,13 @@ class NameStorager extends ConclusionStorager
         /** @var Name $entity */
         $entity = parent::save($entity, $context, $o);
 
-        $t_nfs = $this->dbs->getTableName('name_forms');
-
         // Save childs
-        $nfs = $this->dbs->getDb()->fetchAll("SELECT _id FROM $t_nfs WHERE _name_id = ?", [$_id]);
+
+        $t_nfs = $this->dbs->getTableName('name_forms');
+        $nfs = $this->dbs->getDb()->fetchAll(
+            "SELECT _id FROM $t_nfs WHERE name_id = ?",
+            array( $entity->getId() )
+        );
         if (! empty($nfs)) {
             $nfs = array_map(
                 function ($v) {
@@ -106,23 +118,28 @@ class NameStorager extends ConclusionStorager
                 $nfs
             );
         }
+        $st = new NameFormStorager($this->dbs);
         foreach ($entity->getNameForms() as $nf) {
             if (! empty($nfs)) {
                 GeniBaseInternalProperties::setPropertyOf($nf, '_id', array_shift($nfs));
             }
-            $this->newStorager($nf)->save($nf, $entity);
+            $st->save($nf, $entity);
         }
         if (! empty($nfs)) {
             $this->dbs->getDb()->executeQuery(
                 "DELETE FROM $t_nfs WHERE _id IN (?)",
-                [$nfs],
-                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+                array( $nfs ),
+                array( \Doctrine\DBAL\Connection::PARAM_INT_ARRAY )
             );
         }
 
         return $entity;
     }
 
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\ConclusionStorager::getSqlQueryParts()
+     */
     protected function getSqlQueryParts()
     {
         $t_types = $this->dbs->getTableName('types');
@@ -136,27 +153,20 @@ class NameStorager extends ConclusionStorager
         return $qparts;
     }
 
-    protected function loadRaw(ExtensibleData $entity, $context, $o)
-    {
-        $q = $this->getSqlQuery();
-        $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
-        } elseif (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._person_id = ?", [$_person_id]);
-        }
-
-        return $result;
-    }
-
+    /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::loadComponentsRaw()
+     */
     protected function loadComponentsRaw($context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
+
+        $person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id');
+        if (! empty($person_id)) {
+            $query = $this->getSqlQuery();
             $result = $this->dbs->getDb()->fetchAll(
-                "$q WHERE t._person_id = ? ORDER BY t._id",
-                [$_person_id]
+                "$query WHERE t.person_id = ? ORDER BY t.id",
+                array( $person_id )
             );
         }
 
@@ -176,13 +186,17 @@ class NameStorager extends ConclusionStorager
         /** @var Name $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($res = self::unpackDateInfo($result))) {
+        $res = self::unpackDateInfo($result);
+        if (! empty($res)) {
             $entity->setDate($res);
         }
 
         // Load childs
-        if (! empty($r = $this->newStorager(NameForm::class)->loadComponents($entity))) {
-            $entity->setNameForms($r);
+
+        $st = new NameFormStorager($this->dbs);
+        $res = $st->loadComponents($entity);
+        if (! empty($res)) {
+            $entity->setNameForms($res);
         }
 
         return $entity;
@@ -196,11 +210,11 @@ class NameStorager extends ConclusionStorager
             return; // Skip cleaning now
         }
 
-        $t_names = $this->dbs->getTableName('names');
+        $table = $this->getTableName();
         $t_psns = $this->dbs->getTableName('persons');
 
-        $q  = "DELETE LOW_PRIORITY nm FROM $t_names AS nm WHERE NOT EXISTS ( " .
-            "SELECT 1 FROM $t_psns AS ps WHERE ps._id = nm._person_id )";
+        $q  = "DELETE LOW_PRIORITY t FROM $table AS t WHERE NOT EXISTS ( " .
+            "SELECT 1 FROM $t_psns AS ps WHERE ps.id = t.person_id )";
 
         $this->dbs->getDb()->query($q);
     }

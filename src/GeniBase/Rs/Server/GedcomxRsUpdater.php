@@ -58,7 +58,8 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
     public function visitPlaceDescription(PlaceDescription $place)
     {
         /** @var DateInfo $res */
-        if (! empty($res = $place->getTemporalDescription())) {
+        $res = $place->getTemporalDescription();
+        if (! empty($res)) {
             array_push($this->contextStack, $place);
             $res->accept($this);
             array_pop($this->contextStack);
@@ -76,7 +77,8 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
     {
         $result = '';
 
-        if (! empty($res = $date->getDay())) {
+        $res = $date->getDay();
+        if (! empty($res)) {
             $result .= sprintf('%02d', $res);
         }
 
@@ -89,16 +91,18 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
      */
     public function visitDate(DateInfo $date)
     {
-        $tv1 = new TextValue([   'lang'  => 'ru' ]);
+        $tv1 = new TextValue(array( 'lang'  => 'ru' ));
 
-        if (! empty($d = $date->getFormal())) {
-            $tv2 = new TextValue([   'lang'  => 'ru' ]);
+        $dt = $date->getFormal();
+        if (! empty($dt)) {
+            $tv2 = new TextValue(array( 'lang'  => 'ru' ));
 
             $fd = new FormalDate();
-            $fd->parse($d);
+            $fd->parse($dt);
 
             $r1 = $r2 = '';
-            if (! empty($res = $fd->getStart())) {
+            $res = $fd->getStart();
+            if (! empty($res)) {
                 $r1 .= $res->getYear();
                 $r2 .= SimpleDateFormatter::format($res);
             } else {
@@ -108,7 +112,8 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
             if ($fd->getIsRange()) {
                 $r1 .= '–';
                 $r2 = "c $r2 по ";
-                if (! empty($res = $fd->getEnd())) {
+                $res = $fd->getEnd();
+                if (! empty($res)) {
                     $r1 .= $res->getYear();
                     $r2 .= SimpleDateFormatter::format($res);
                 } elseif ($fd->getIsRange()) {
@@ -124,7 +129,7 @@ class GedcomxRsUpdater extends GedcomxModelVisitorBase
             $tv2 = $tv1;
         }
 
-        $date->setNormalizedExtensions([$tv1, $tv2]);
+        $date->setNormalizedExtensions(array( $tv1, $tv2 ));
 
         parent::visitDate($date);
     }

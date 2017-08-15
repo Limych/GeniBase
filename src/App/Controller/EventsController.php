@@ -23,14 +23,13 @@
 namespace App\Controller;
 
 use App\Rs\ApiLinksUpdater;
-use Gedcomx\Conclusion\Event;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
-use GeniBase\Storager\StoragerFactory;
 use Silex\Application;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use GeniBase\Storager\EventStorager;
 
 class EventsController extends BaseController
 {
@@ -71,12 +70,8 @@ class EventsController extends BaseController
      */
     public function getOne(Application $app, Request $request, $id)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], Event::class)
-        ->loadGedcomx(
-            [
-            'id' => $id,
-            ]
-        );
+        $st = new EventStorager($app['gb.db']);
+        $gedcomx = $st->loadGedcomx(array( 'id' => $id, ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
@@ -84,8 +79,9 @@ class EventsController extends BaseController
 
         ApiLinksUpdater::update2($app, $request, $gedcomx);
 
-        if (class_exists(WebLinkExtension::class)) {
-            (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
+        if (class_exists('Symfony\Bridge\Twig\Extension\WebLinkExtension')) {
+            $wl = new WebLinkExtension($app['request_stack']);
+            $wl->link($request->getUri(), Rel::DESCRIPTION);
         }
         return $gedcomx;
     }

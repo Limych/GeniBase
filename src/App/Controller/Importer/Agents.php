@@ -22,9 +22,7 @@
  */
 namespace App\Controller\Importer;
 
-use Gedcomx\Agent\Agent;
 use GeniBase\Storager\GeniBaseStorager;
-use Gedcomx\Gedcomx;
 
 /**
  *
@@ -38,7 +36,7 @@ class Agents
     {
         return $gbs->newStorager('Gedcomx\Agent\Agent')->save(array(
             'identifiers'   => array(
-                \Gedcomx\Types\IdentifierType::PERSISTENT => '//GeniBase/',
+                \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://genibase.net/',
             ),
             'emails'    => array(
                 array(   'resource'  => 'mailto:andrey@khrolenok.ru',       ),

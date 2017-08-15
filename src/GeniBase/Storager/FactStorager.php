@@ -23,9 +23,7 @@
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
-use GeniBase\DBase\GeniBaseInternalProperties;
 use Gedcomx\Conclusion\Fact;
-use Gedcomx\Conclusion\PlaceDescription;
 
 /**
  *
@@ -54,40 +52,55 @@ class FactStorager extends ConclusionStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
+        /** @var Fact $entity */
         $data = parent::packData4Save($entity, $context, $o);
 
         $t_facts = $this->getTableName();
         $t_places = $this->dbs->getTableName('places');
 
-        /** @var Fact $entity */
-        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+        if (empty($context) || empty($context->getId())) {
+            throw new \UnexpectedValueException('Context ID required!');
         }
-        $data['_person_id'] = $res;
-        if (! empty($res = $entity->getPrimary())) {
+        $data['person_id'] = $context->getId();
+
+        $res = $entity->getPrimary();
+        if (! empty($res)) {
             $data['primary'] = (int) $res;
         }
-        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
-            $data['type_id'] = $res;
+
+        $res = $entity->getType();
+        if (! empty($res)) {
+            $res = $this->getTypeId($res);
+            if (! empty($res)) {
+                $data['type_id'] = $res;
+            }
         }
-        if (! empty($res = $entity->getValue())) {
+
+        $res = $entity->getValue();
+        if (! empty($res)) {
             $data['value'] = $res;
         }
-        if (! empty($res = $entity->getDate())) {
+
+        $res = $entity->getDate();
+        if (! empty($res)) {
             $data = array_merge($data, self::packDateInfo($res));
         }
-        if (! empty($res = $entity->getPlace())) {
-            if (! empty($res2 = $res->getDescriptionRef())) {
+
+        $res = $entity->getPlace();
+        if (! empty($res)) {
+            $res2 = $res->getDescriptionRef();
+            if (! empty($res)) {
                 $data['place_description_uri'] = $res2;
-                if (! empty($res2 = GeniBaseStorager::getIdFromReference($res2))
-                    && ! empty($res2 = $this->dbs->getInternalId($t_places, $res2))
-                ) {
-                    $data['place_description_id'] = (int) $res2;
+                $res2 = self::getIdFromReference($res2);
+                if (! empty($res2)) {
+                    $data['place_description_id'] = $res2;
                 }
             }
-            if (! empty($res2 = $res->getOriginal())) {
+
+            $res2 = $res->getOriginal();
+            if (! empty($res2)) {
                 $data['place_original'] = $res2;
             }
         }
@@ -103,30 +116,19 @@ class FactStorager extends ConclusionStorager
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp2._id = t.type_id";
+        $qparts['bundles'][]    = "tp2.id = t.type_id";
 
         return $qparts;
     }
 
-    protected function loadRaw(ExtensibleData $entity, $context, $o)
-    {
-        $q = $this->getSqlQuery();
-        $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
-        } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
-        }
-
-        return $result;
-    }
-
     protected function loadComponentsRaw($context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE t._person_id = ?", [$_id]);
+
+        $person_id = $context->getId();
+        if (! empty($person_id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAll("$query WHERE t.person_id = ?", array( $person_id ));
         }
 
         return $result;
@@ -142,13 +144,16 @@ class FactStorager extends ConclusionStorager
         if (! empty($result['primary'])) {
             settype($result['primary'], 'boolean');
         }
-        $result['place'] = [];
+        $result['place'] = array();
+
         if (! empty($result['place_description'])) {
             $result['place']['description'] = $result['place_description'];
         }
+
         if (! empty($result['place_original'])) {
             $result['place']['original'] = $result['place_original'];
         }
+
         if (empty($result['place'])) {
             unset($result['place']);
         }
@@ -156,7 +161,8 @@ class FactStorager extends ConclusionStorager
         /** @var Person $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($res = self::unpackDateInfo($result))) {
+        $res = self::unpackDateInfo($result);
+        if (! empty($res)) {
             $entity->setDate($res);
         }
 
@@ -168,12 +174,16 @@ class FactStorager extends ConclusionStorager
         /** @var Fact $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getPlace()) && ! empty($r = $r->getDescriptionRef())
-            && ! empty($rid = GeniBaseStorager::getIdFromReference($r))
-        ) {
-            $gedcomx->embed(
-                $this->newStorager(PlaceDescription::class)->loadGedcomx([ 'id' => $rid ])
-            );
+        $res = $entity->getPlace();
+        if (! empty($res)) {
+            $res = $res->getDescriptionRef();
+            if (! empty($res)) {
+                $res = self::getIdFromReference($res);
+                if (! empty($res)) {
+                    $st = new PlaceDescriptionStorager($this->dbs);
+                    $gedcomx->embed($st->loadGedcomx(array( 'id' => $res )));
+                }
+            }
         }
 
         return $gedcomx;
@@ -187,11 +197,11 @@ class FactStorager extends ConclusionStorager
             return; // Skip cleaning now
         }
 
-        $t_facts = $this->dbs->getTableName('facts');
+        $table = $this->getTableName();
         $t_psns = $this->dbs->getTableName('persons');
 
-        $q  = "DELETE LOW_PRIORITY ft FROM $t_facts AS ft WHERE NOT EXISTS ( " .
-            "SELECT 1 FROM $t_psns AS ps WHERE ps._id = ft._person_id )";
+        $q  = "DELETE LOW_PRIORITY t FROM $table AS t WHERE NOT EXISTS ( " .
+            "SELECT 1 FROM $t_psns AS ps WHERE ps.id = t.person_id )";
 
         $this->dbs->getDb()->query($q);
     }

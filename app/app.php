@@ -34,7 +34,7 @@ $dev_mode = $allow_dev_mode && ! isset($_REQUEST['nodev'])
     && in_array(@$_SERVER['REMOTE_ADDR'], array('127.0.0.1', 'fe80::1', '::1'))
     && file_exists(BASE_DIR.'/app/configs/.allow_dev_mode');
 
-require_once 'defineBaseDir.php';
+include 'defineBaseDir.php';
 
 require_once BASE_DIR.'/vendor/autoload.php';
 
@@ -46,15 +46,15 @@ if (! defined('DEBUG')) {
 $app = new \Silex\Application();
 
 // Register providers
-require BASE_DIR.'/app/providers.php';
+include BASE_DIR.'/app/providers.php';
 
 // Load configs
-require BASE_DIR.'/app/configs/prod.php';
+include BASE_DIR.'/app/configs/prod.php';
 if ($dev_mode) {
     include BASE_DIR.'/app/configs/dev.php';
 }
 
-require_once 'defineConstants.php';
+include 'defineConstants.php';
 
 // Register database provider
 $app->register(new \Silex\Provider\DoctrineServiceProvider());
@@ -98,7 +98,7 @@ $app['gb.db']  = function () use ($app) {
 };
 
 // Register controlers
-require BASE_DIR.'/app/controllers.php';
+include BASE_DIR.'/app/controllers.php';
 
 // Accepting JSON and Gedcomx (JSON and XML)
 $app['rest.mode'] = $app['gedcomx.mode'] = false;
@@ -121,7 +121,7 @@ $app->before(
             ? new \Gedcomx\GedcomxFile\DefaultJsonSerialization()
             : new \Gedcomx\GedcomxFile\DefaultXMLSerialization() );
             $gedcomx = $serializer->deserialize($request->getContent());
-            $request->request->replace(['gedcomx' => $gedcomx]);
+            $request->request->replace(array( 'gedcomx' => $gedcomx ));
         } elseif ($app['rest.mode']) {
             $data = json_decode($request->getContent(), true);
             $request->request->replace(is_array($data) ? $data : array());

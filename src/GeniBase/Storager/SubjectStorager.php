@@ -60,6 +60,7 @@ class SubjectStorager extends ConclusionStorager
         }
 
         /** @var Subject $entity */
+
         $res = $entity->getIdentifiers();
         if (! empty($res)) {
             $id = $this->searchIdByIdentifiers($res);

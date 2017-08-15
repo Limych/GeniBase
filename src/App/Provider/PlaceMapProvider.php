@@ -80,6 +80,20 @@ class PlaceMapProvider implements ServiceProviderInterface
                 array('is_safe' => array('all'))
             ));
 
+            $twig->addFunction(new \Twig_SimpleFunction(
+                'place_dist',
+                function ($place, $type = 'km') use ($app) {
+                    /** @var \Gedcomx\Conclusion\PlaceDescription $place */
+                    $dist = GeniBaseInternalProperties::getPropertyOf($place, 'geo_dist');
+                    if ($type == 'verst') {
+                        $dist *= 1.0668;
+                    }
+                    $dist = round($dist, ($dist >= 20 ? 0 : ($dist >= 10 ? 1 : 2)));
+                    return $dist;
+                },
+                array('is_safe' => array('all'))
+            ));
+
             return $twig;
         });
     }
@@ -131,7 +145,7 @@ class PlaceMapProvider implements ServiceProviderInterface
         static $maxZoom = 21;
 
         $latAngle = max($lat1, $lat2) - min($lat1, $lat2) + 0.2;
-        $lonAngle = max($lon1, $lon2) - min($lon1, $lon2) + 0.2;
+        $lonAngle = max($lon1, $lon2) - min($lon1, $lon2) + 0.01;
         $latZoom = floor(log($mapHeight * 360 / $latAngle / $globeSize, 2));
         $lonZoom = floor(log($mapWidth * 360 / $lonAngle / $globeSize, 2));
 

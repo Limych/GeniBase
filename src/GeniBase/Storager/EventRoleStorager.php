@@ -24,8 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\EventRole;
-use GeniBase\DBase\GeniBaseInternalProperties;
-use Gedcomx\Conclusion\Person;
 
 /**
  *
@@ -56,29 +54,40 @@ class EventRoleStorager extends ConclusionStorager
      *
      * @throws \UnexpectedValueException
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__);
         }
+        /** @var EventRole $entity */
+
         $data = parent::packData4Save($entity, $context, $o);
 
-        $t_persons = $this->dbs->getTableName('persons');
+        if (empty($context) || empty($context->getId())) {
+            throw new \UnexpectedValueException('Context ID required!');
+        }
+        $data['event_id'] = $context->getId();
 
-        /** @var EventRole $entity */
-        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+        $res = $entity->getType();
+        if (! empty($res)) {
+            $res = $this->getTypeId($res);
+            if (! empty($res)) {
+                $data['type_id'] = $res;
+            }
         }
-        $data['_event_id'] = $res;
-        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
-            $data['type_id'] = $res;
-        }
-        if (empty($res = $entity->getPerson()) || empty($res = $res->getResourceId())) {
+
+        $res = $entity->getPerson();
+        if (empty($res)) {
             throw new \UnexpectedValueException('Person reference ID required!');
-        } elseif (! empty($res = $this->dbs->getInternalId($t_persons, $res))) {
-            $data['person_id'] = $res;
         }
-        if (! empty($res = $entity->getDetails())) {
+        $res = $res->getResourceId();
+        if (empty($res)) {
+            throw new \UnexpectedValueException('Person reference ID required!');
+        }
+        $data['person_id'] = $res;
+
+        $res = $entity->getDetails();
+        if (! empty($res)) {
             $data['details'] = $res;
         }
 
@@ -96,30 +105,19 @@ class EventRoleStorager extends ConclusionStorager
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp2._id = t.type_id";
+        $qparts['bundles'][]    = "tp2.id = t.type_id";
 
         return $qparts;
     }
 
-    protected function loadRaw(ExtensibleData $entity, $context, $o)
-    {
-        $q = $this->getSqlQuery();
-        $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
-        } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
-        }
-
-        return $result;
-    }
-
     protected function loadComponentsRaw($context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE t._event_id = ?", [$_id]);
+
+        $event_id = $context->getId();
+        if (! empty($event_id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAll("$query WHERE t.event_id = ?", array( $event_id ));
         }
 
         return $result;
@@ -134,11 +132,9 @@ class EventRoleStorager extends ConclusionStorager
         $t_persons = $this->dbs->getTableName('persons');
 
         // Unpack data
-        $result['person'] = [];
-        if (! empty($result['person_id'])
-            && ! empty($res = $this->dbs->getPublicId($t_persons, $result['person_id']))
-        ) {
-            $result['person']['resourceId'] = $res;
+        $result['person'] = array();
+        if (! empty($result['person_id'])) {
+            $result['person']['resourceId'] = $result['person_id'];
         }
         if (empty($result['person'])) {
             unset($result['person']);
@@ -155,8 +151,13 @@ class EventRoleStorager extends ConclusionStorager
         /** @var EventRole $entity */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($res = $entity->getPerson()) && ! empty($res = $res->getResourceId())) {
-            $gedcomx->embed($this->newStorager(Person::class)->loadGedcomx([ 'id' => $res ]));
+        $res = $entity->getPerson();
+        if (! empty($res)) {
+            $res = $res->getResourceId();
+            if (! empty($res)) {
+                $st = new PersonStorager($this->dbs);
+                $gedcomx->embed($st->loadGedcomx(array( 'id' => $res )));
+            }
         }
 
         return $gedcomx;
@@ -176,13 +177,13 @@ class EventRoleStorager extends ConclusionStorager
             return; // Skip cleaning now
         }
 
-        $t_eroles = $this->dbs->getTableName('event_roles');
+        $table = $this->getTableName();
         $t_events = $this->dbs->getTableName('events');
 
-        $q  = "DELETE LOW_PRIORITY er FROM $t_eroles AS er WHERE NOT EXISTS ( " .
-            "SELECT 1 FROM $t_events AS ev WHERE ev._id = er._event_id )";
+        $query  = "DELETE LOW_PRIORITY t FROM $table AS t WHERE NOT EXISTS ( " .
+            "SELECT 1 FROM $t_events AS ev WHERE ev.id = t.event_id )";
 
-        $this->dbs->getDb()->query($q);
+        $this->dbs->getDb()->query($query);
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
         }

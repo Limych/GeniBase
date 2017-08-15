@@ -109,7 +109,7 @@ class PlacesIterator {
     {
         static $namespaces = [
             'wd:'    => 'http://www.wikidata.org/entity/',
-//             'gb:'    => '//GeniBase/',
+//             'gb:'    => 'http://genibase.net/',
         ];
 
         if ($expand) {
@@ -132,7 +132,7 @@ class PlacesIterator {
 
     protected function processToken($input, $prefix)
     {
-        $data = preg_split('/\s+(\??[#%@]\S+|\??\[[^\s\]]+\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $data = preg_split('/\s+(\??[#@]\S+|\??\%[^%]*\%|\??\[[^\s\]]*\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         $input = [
             'name'  => [],
         ];
@@ -144,10 +144,10 @@ class PlacesIterator {
             }
             switch ($type) {
                 case '%':
-                    $input['type'] = self::processURI(substr($token, 1));
+                    $input['type'] = self::processURI(substr($token, 1, -1));
                     break;
                 case '?%':
-                    $input['disputedType'] = substr($token, 1);
+                    $input['disputedType'] = substr($token, 2, -1);
                     break;
                 case '#':
                     $input['alias'] = self::processURI(substr($token, 1));
@@ -177,26 +177,26 @@ class PlacesIterator {
         $this->parent = $input;
 
         $output = $prefix . trim($input['name']);
+        if (! empty($input['type'])) {
+            $output .= ' %' . self::processURI($input['type'] . '%', false);
+        }
+        if (isset($input['disputedType'])
+            && (empty($input['type']) || ($input['type'] !== $input['disputedType']))
+        ) {
+            $output .= ' ?%' . self::processURI($input['disputedType'] . '%', false);
+        }
         if (! empty($input['alias'])) {
             $output .= ' #' . PlacesIterator::processURI($input['alias'], false);
         }
-        if (! empty($input['disputedAlias'])
-            && (empty($input['alias']) || ($input['alias'] !== $input['disputedAlias']))
-        ) {
-            $output .= ' ?#' . PlacesIterator::processURI($input['disputedAlias'], false);
-        }
-//         if (! empty($input['type'])) {
-//             $output .= ' %' . self::processURI($input['type'], false);
-//         }
-//         if (! empty($input['disputedType'])
-//             && (empty($input['type']) || ($input['type'] !== $input['disputedType']))
-//         ) {
-//             $output .= ' ?%' . self::processURI($input['disputedType'], false);
-//         }
+        if (isset($input['disputedAlias'])
+            && (empty($input['alias']) || ($input['alias'] !== PlacesIterator::processURI($input['disputedAlias'])))
+            ) {
+                $output .= ' ?#' . $input['disputedAlias'];
+            }
         if (! empty($input['temporal'])) {
             $output .= ' [' . $input['temporal'] . ']';
         }
-        if (! empty($input['disputedTemporal'])
+        if (isset($input['disputedTemporal'])
             && (empty($input['temporal']) || ($input['temporal'] !== $input['disputedTemporal']))
         ) {
             $output .= ' ?[' . $input['disputedTemporal'] . ']';
@@ -204,7 +204,7 @@ class PlacesIterator {
         if (! empty($input['location'])) {
             $output .= ' @' . $input['location'];
         }
-        if (! empty($input['disputedLocation'])
+        if (isset($input['disputedLocation'])
             && (empty($input['location']) || ($input['location'] !== $input['disputedLocation']))
         ) {
             $output .= ' ?@' . $input['disputedLocation'];

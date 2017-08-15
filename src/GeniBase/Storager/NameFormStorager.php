@@ -24,7 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\NameForm;
-use Gedcomx\Conclusion\NamePart;
 use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
@@ -54,19 +53,23 @@ class NameFormStorager extends GeniBaseStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
+        /** @var NameForm $entity */
         $data = parent::packData4Save($entity, $context, $o);
 
-        /** @var NameForm $entity */
-        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+        if (empty($context) || empty($context->getId())) {
+            throw new \UnexpectedValueException('Context ID required!');
         }
-        $data['_name_id'] = $res;
-        if (! empty($res = $entity->getLang()) && ! empty($res = $this->dbs->getLangId($res))) {
-            $data['lang_id'] = $res;
+        $data['name_id'] = $context->getId();
+
+        $res = $entity->getLang();
+        if (! empty($res)) {
+            $data['lang'] = $res;
         }
-        if (! empty($res = $entity->getFullText())) {
+
+        $res = $entity->getFullText();
+        if (! empty($res)) {
             $data['full_text'] = $res;
         }
 
@@ -85,10 +88,19 @@ class NameFormStorager extends GeniBaseStorager
         /** @var NameForm $entity */
         $entity = parent::save($entity, $context, $o);
 
-        $t_nps = $this->dbs->getTableName('name_parts');
+        $_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id');
+        if (empty($_id)) {
+            $_id = (int) GeniBaseInternalProperties::getPropertyOf($this->previousState, '_id');
+            if (empty($_id)) {
+                $_id = $this->dbs->getDb()->lastInsertId();
+            }
+            GeniBaseInternalProperties::setPropertyOf($entity, '_id', $_id);
+        }
 
         // Save childs
-        $nps = $this->dbs->getDb()->fetchAll("SELECT _id FROM $t_nps WHERE _name_form_id = ?", [$_id]);
+
+        $t_nps = $this->dbs->getTableName('name_parts');
+        $nps = $this->dbs->getDb()->fetchAll("SELECT _id FROM $t_nps WHERE _name_form_id = ?", array( $_id ));
         if (! empty($nps)) {
             $nps = array_map(
                 function ($v) {
@@ -97,17 +109,18 @@ class NameFormStorager extends GeniBaseStorager
                 $nps
             );
         }
+        $st = new NamePartStorager($this->dbs);
         foreach ($entity->getParts() as $np) {
             if (! empty($nps)) {
                 GeniBaseInternalProperties::setPropertyOf($np, '_id', array_shift($nps));
             }
-            $this->newStorager($np)->save($np, $entity);
+            $st->save($np, $entity);
         }
         if (! empty($nps)) {
             $this->dbs->getDb()->executeQuery(
                 "DELETE FROM $t_nps WHERE _id IN (?)",
-                [$nps],
-                [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+                array( $nps ),
+                array( \Doctrine\DBAL\Connection::PARAM_INT_ARRAY )
             );
         }
 
@@ -129,10 +142,12 @@ class NameFormStorager extends GeniBaseStorager
 
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE nf._id = ?", [$_id]);
+
+        $_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id');
+        if (! empty($_id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAssoc("$query WHERE nf._id = ?", array( $_id ));
         }
 
         return $result;
@@ -140,10 +155,12 @@ class NameFormStorager extends GeniBaseStorager
 
     protected function loadComponentsRaw($context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_name_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_rid'))) {
-            $result = $this->dbs->getDb()->fetchAll("$q WHERE nf._name_id = ?", [$_name_id]);
+
+        $name_id = $context->getId();
+        if (! empty($name_id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAll("$query WHERE nf.name_id = ?", array( $name_id ));
         }
 
         return $result;
@@ -162,8 +179,10 @@ class NameFormStorager extends GeniBaseStorager
         /** @var NameForm $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($r = $this->newStorager(NamePart::class)->loadComponents($entity))) {
-            $entity->setParts($r);
+        $st = new NamePartStorager($this->dbs);
+        $res = $st->loadComponents($entity);
+        if (! empty($res)) {
+            $entity->setParts($res);
         }
 
         return $entity;
@@ -177,12 +196,12 @@ class NameFormStorager extends GeniBaseStorager
             return; // Skip cleaning now
         }
 
-        $t_nfs = $this->dbs->getTableName('name_forms');
+        $table = $this->getTableName();
         $t_names = $this->dbs->getTableName('names');
 
-        $q  = "DELETE LOW_PRIORITY nf FROM $t_nfs AS nf WHERE NOT EXISTS ( " .
-            "SELECT 1 FROM $t_names AS nm WHERE nm._id = nf._name_id )";
+        $query  = "DELETE LOW_PRIORITY t FROM $table AS t WHERE NOT EXISTS ( " .
+            "SELECT 1 FROM $t_names AS nm WHERE nm.id = t.name_id )";
 
-        $this->dbs->getDb()->query($q);
+        $this->dbs->getDb()->query($query);
     }
 }

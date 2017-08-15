@@ -24,7 +24,6 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Conclusion\Gender;
-use GeniBase\DBase\GeniBaseInternalProperties;
 
 /**
  *
@@ -55,7 +54,7 @@ class GenderStorager extends ConclusionStorager
      *
      * @throws \UnexpectedValueException
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
         $this->makeUuidIfEmpty($entity, $o);
 
@@ -65,12 +64,16 @@ class GenderStorager extends ConclusionStorager
         $t_sources = $this->dbs->getTableName('sources');
 
         /** @var Gender $entity */
-        if (empty($context) || empty($res = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            throw new \UnexpectedValueException('Context internal ID required!');
+        if (empty($context) || empty($context->getId())) {
+            throw new \UnexpectedValueException('Context ID required!');
         }
-        $data['_person_id'] = $res;
-        if (! empty($res = $entity->getType()) && ! empty($res = $this->dbs->getTypeId($res))) {
-            $data['type_id'] = $res;
+        $data['person_id'] = $context->getId();
+        $res = $entity->getType();
+        if (! empty($res)) {
+            $res = $this->getTypeId($res);
+            if (! empty($res)) {
+                $data['type_id'] = $res;
+            }
         }
 
         return $data;
@@ -84,22 +87,19 @@ class GenderStorager extends ConclusionStorager
 
         $qparts['fields'][]     = "tp2.uri AS type";
         $qparts['tables'][]     = "$t_types AS tp2";
-        $qparts['bundles'][]    = "tp._id = t.type_id";
+        $qparts['bundles'][]    = "tp.id = t.type_id";
 
         return $qparts;
     }
 
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE gn._id = ?", [$_id]);
-        } elseif (! empty($_person_id = (int) GeniBaseInternalProperties::getPropertyOf($context, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc(
-                "$q WHERE t._person_id = ?",
-                [$_person_id]
-            );
+
+        $person_id = $context->getId();
+        if (! empty($person_id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAssoc("$query WHERE t.person_id = ?", array( $person_id ));
         }
 
         return $result;
@@ -117,7 +117,7 @@ class GenderStorager extends ConclusionStorager
         $t_psns = $this->dbs->getTableName('persons');
 
         $q  = "DELETE LOW_PRIORITY gn FROM $t_genders AS gn WHERE NOT EXISTS ( " .
-            "SELECT 1 FROM $t_psns AS ps WHERE ps._id = gn._person_id )";
+            "SELECT 1 FROM $t_psns AS ps WHERE ps.id = gn.person_id )";
 
         $this->dbs->getDb()->query($q);
     }

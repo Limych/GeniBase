@@ -21,7 +21,7 @@
 }
 
 .confidence .medium   {
-	color: brown;
+	color: #CC0;
 }
 
 .confidence .low   {
@@ -59,6 +59,11 @@
     color: darkgreen;
 }
 
-.hidden-text    {
+.hidden-text,
+.hidden-text *    {
 	color: transparent !important;
+}
+
+.description .table {
+	width: auto;
 }

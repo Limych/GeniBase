@@ -24,11 +24,7 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
-use GeniBase\DBase\GeniBaseInternalProperties;
-use Gedcomx\Conclusion\Name;
 use Gedcomx\Conclusion\Person;
-use Gedcomx\Conclusion\Gender;
-use Gedcomx\Conclusion\Fact;
 
 /**
  *
@@ -55,22 +51,16 @@ class PersonStorager extends SubjectStorager
      * {@inheritDoc}
      * @see \GeniBase\Storager\GeniBaseStorager::packData4Save()
      */
-    protected function packData4Save(&$entity, ExtensibleData $context = null, $o = null)
+    protected function packData4Save(&$entity, $context = null, $o = null)
     {
+        /** @var Person $entity */
+
         $this->makeGbidIfEmpty($entity, $o);
 
         $data = parent::packData4Save($entity, $context, $o);
 
-        $t_places = $this->getTableName();
-        $t_sources = $this->dbs->getTableName('sources');
-
-        /** @var Person $entity */
-        if (! empty($res = $entity->isPrivate())) {
-            $data['private'] = (int) $res;
-        }
-        if (! empty($res = $entity->isLiving())) {
-            $data['living'] = (int) $res;
-        }
+        $data['private'] = (int) $entity->isPrivate();
+        $data['living'] = (int) $entity->isLiving();
 
         return $data;
     }
@@ -88,35 +78,48 @@ class PersonStorager extends SubjectStorager
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
-        if (! empty($res = $entity->getGender()) && ($res != $this->previousState->getGender())) {
+
+        $res = $entity->getGender();
+        if (! empty($res) && ($res != $this->previousState->getGender())) {
             $tmp = $o;
             if (! empty($tmp['makeId_name'])) {
                 $tmp['makeId_name'] = 'Gender: ' . $tmp['makeId_name'];
             }
-            $this->newStorager(Gender::class)->save($res, $entity, $tmp);
+            $st = new GenderStorager($this->dbs);
+            $st->save($res, $entity, $tmp);
             unset($tmp);
         }
-        if (! empty($res = $entity->getNames()) && ($res != $this->previousState->getNames())) {
+
+        $res = $entity->getNames();
+        if (! empty($res) && ($res != $this->previousState->getNames())) {
             $tmp = $o;
             $tmp_cnt = 0;
+            $st = new NameStorager($this->dbs);
             foreach ($res as $name) {
                 if (! empty($o['makeId_name'])) {
                     $tmp['makeId_name'] = 'Name-' . (++$tmp_cnt) . ': ' . $o['makeId_name'];
                 }
-                $this->newStorager(Name::class)->save($name, $entity, $tmp);
+                $st->save($name, $entity, $tmp);
             }
             unset($tmp);
             unset($tmp_cnt);
+
+            // TODO Delete previous names
         }
-        if (! empty($res = $entity->getFacts()) && ($res != $this->previousState->getFacts())) {
+
+        $res = $entity->getFacts();
+        if (! empty($res) && ($res != $this->previousState->getFacts())) {
             $tmp = $o;
             $tmp_cnt = 0;
+            $st = new FactStorager($this->dbs);
             foreach ($res as $fact) {
                 $tmp['makeId_name'] = 'Fact-' . (++$tmp_cnt) . ': ' . $entity->getId();
-                $this->newStorager(Fact::class)->save($fact, $entity, $o);
+                $st->save($fact, $entity, $o);
             }
             unset($tmp);
             unset($tmp_cnt);
+
+            // TODO Delete previous facts
         }
 
         return $entity;
@@ -124,12 +127,11 @@ class PersonStorager extends SubjectStorager
 
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
-        $q = $this->getSqlQuery();
         $result = false;
-        if (! empty($_id = (int) GeniBaseInternalProperties::getPropertyOf($entity, '_id'))) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t._id = ?", [$_id]);
-        } elseif (! empty($id = $entity->getId())) {
-            $result = $this->dbs->getDb()->fetchAssoc("$q WHERE t.id = ?", [$id]);
+        $id = $entity->getId();
+        if (! empty($id)) {
+            $query = $this->getSqlQuery();
+            $result = $this->dbs->getDb()->fetchAssoc("$query WHERE t.id = ?", array( $id ));
         }
 
         return $result;
@@ -153,14 +155,22 @@ class PersonStorager extends SubjectStorager
 */
         $entity = parent::unpackLoadedData($entity, $result);
 
-        if (! empty($r = $this->newStorager(Gender::class)->load(null, $entity))) {
-            $entity->setGender($r);
+        $st = new GenderStorager($this->dbs);
+        $res = $st->load(null, $entity);
+        if (! empty($res)) {
+            $entity->setGender($res);
         }
-        if (! empty($r = $this->newStorager(Name::class)->loadComponents($entity))) {
-            $entity->setNames($r);
+
+        $st = new NameStorager($this->dbs);
+        $res = $st->loadComponents($entity);
+        if (! empty($res)) {
+            $entity->setNames($res);
         }
-        if (! empty($r = $this->newStorager(Fact::class)->loadComponents($entity))) {
-            $entity->setFacts($r);
+
+        $st = new FactStorager($this->dbs);
+        $res = $st->loadComponents($entity);
+        if (! empty($res)) {
+            $entity->setFacts($res);
         }
 
         return $entity;
@@ -200,16 +210,21 @@ class PersonStorager extends SubjectStorager
 */
         $gedcomx = parent::loadGedcomxCompanions($entity);
 
-        if (! empty($r = $entity->getGender())) {
-            $gedcomx->embed($this->newStorager($r)->loadGedcomxCompanions($r));
+        $res = $entity->getGender();
+        if (! empty($res)) {
+            $gedcomx->embed($this->newStorager($res)->loadGedcomxCompanions($res));
         }
-        if (! empty($r = $entity->getNames())) {
-            foreach ($r as $v) {
+
+        $res = $entity->getNames();
+        if (! empty($res)) {
+            foreach ($res as $v) {
                 $gedcomx->embed($this->newStorager($v)->loadGedcomxCompanions($v));
             }
         }
-        if (! empty($r = $entity->getFacts())) {
-            foreach ($r as $v) {
+
+        $res = $entity->getFacts();
+        if (! empty($res)) {
+            foreach ($res as $v) {
                 $gedcomx->embed($this->newStorager($v)->loadGedcomxCompanions($v));
             }
         }

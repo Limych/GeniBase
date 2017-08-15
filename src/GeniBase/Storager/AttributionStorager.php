@@ -24,6 +24,7 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\Attribution;
 use GeniBase\DBase\DBaseService;
+use Gedcomx\Common\ResourceReference;
 
 /**
  *
@@ -53,6 +54,25 @@ class AttributionStorager extends GeniBaseStorager
     }
 
     /**
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::detectPreviousState()
+     */
+    protected function detectPreviousState(&$entity, $context = null, $o = null)
+    {
+        /** @var Attribution $entity */
+        $res = $entity->getContributor();
+        if (empty($res)) {
+            $res = $this->dbs->getAgent();
+            if (! empty($res)) {
+                $entity->setContributor(new ResourceReference(array( 'resourceId' => $res->getId() )));
+            }
+        }
+
+        return parent::detectPreviousState($entity, $context, $o);
+    }
+
+
+    /**
      *
      * @param DBaseService $dbs
      * @param array[] $qparts
@@ -75,10 +95,6 @@ class AttributionStorager extends GeniBaseStorager
      */
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
-        if ($entity === $this->previousState) {
-            return $data;
-        }
-
         $data = parent::packData4Save($entity, $context, $o);
 
         /** @var Attribution $entity */
@@ -93,7 +109,7 @@ class AttributionStorager extends GeniBaseStorager
             if (! empty($res2)) {
                 $data['att_contributor'] = $res2->getId();
             }
-        } elseif (($res != $prev->getContributor())) {
+        } elseif (($res != $this->previousState->getContributor())) {
             $res = $res->getResourceId();
             if (! empty($res)) {
                 $data['att_contributor'] = $res;
@@ -133,9 +149,7 @@ class AttributionStorager extends GeniBaseStorager
      */
     public static function unpackAttribution($result)
     {
-        $data = array(
-            'id' => $result['id'],
-        );
+        $data = array();
 
         if (! empty($result['att_contributor'])) {
             $data['contributor'] = array( 'resourceId' => $result['att_contributor'] );

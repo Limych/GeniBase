@@ -37,7 +37,7 @@ class TransitionsProvider
      */
     public function __construct()
     {
-        $this->transitions = [];
+        $this->transitions = array();
     }
 
     /**

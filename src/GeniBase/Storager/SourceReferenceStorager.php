@@ -87,6 +87,8 @@ class SourceReferenceStorager extends GeniBaseStorager
      */
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
+        $this->makeUuidIfEmpty($entity, $o);
+
         $data = parent::packData4Save($entity, $context, $o);
 
         $t_sources = $this->dbs->getTableName('sources');
@@ -110,6 +112,8 @@ class SourceReferenceStorager extends GeniBaseStorager
             }
         }
 
+        $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
+
         return $data;
     }
 
@@ -129,7 +133,6 @@ class SourceReferenceStorager extends GeniBaseStorager
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::startTimer(__METHOD__ . '#Childs');
         }
-        AttributionStorager::saveAttribution($this->dbs, $entity->getAttribution(), $entity);
 
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__ . '#Childs');
@@ -139,31 +142,25 @@ class SourceReferenceStorager extends GeniBaseStorager
     }
 
     /**
-     *
-     * @param mixed      $context
-     * @param array|null $o
-     * @return ExtensibleData[]|false
+     * {@inheritDoc}
+     * @see \GeniBase\Storager\GeniBaseStorager::loadComponentsRaw()
      *
      * @throws \UnexpectedValueException
      */
-    public function loadComponents($context = null, $o = null)
+    protected function loadComponentsRaw($context, $o)
     {
         $o = Util::parseArgs($o, array( 'is_componentOf' => false ));
 
-        $t_srefs = $this->getTableName();
-        $t_sources = $this->dbs->getTableName('sources');
-
-        $context_id = ($context instanceof ExtensibleData ? $context->getId() : $context['id']);
+        $query = $this->getSqlQuery();
+        $result = false;
+        $context_id = $context->getId();
         if (empty($context_id)) {
             throw new \UnexpectedValueException('Context ID required!');
-        }
-
-        $query = "SELECT * FROM $t_srefs WHERE parent_id = ? AND is_componentOf = ?";
-        $result = $this->dbs->getDb()->fetchAll($query, array($context_id, $o['is_componentOf']));
-        if (is_array($result)) {
-            foreach ($result as $key => $val) {
-                $result[$key] = $this->unpackLoadedData($this->getObject(), $val);
-            }
+        } else {
+            $result = $this->dbs->getDb()->fetchAll(
+                "$query WHERE t.parent_id = ? AND t.is_componentOf = ?",
+                array( $context_id, $o['is_componentOf'] )
+            );
         }
 
         return $result;
@@ -178,9 +175,16 @@ class SourceReferenceStorager extends GeniBaseStorager
         if (isset($result['description_uri'])) {
             $result['description'] = $result['description_uri'];
         }
-        $result = $this->processRawAttribution($entity, $result);
 
+        /** @var SourceReference $entity */
         $entity = parent::unpackLoadedData($entity, $result);
+
+        // Load childs
+
+        $res = self::unpackAttribution($result);
+        if (! empty($res)) {
+            $entity->setAttribution($res);
+        }
 
         return $entity;
     }

@@ -61,8 +61,8 @@ class DBaseService extends Container
      */
     public function getTableName($table)
     {
-        $prefix = isset($this['app']['dbs.options']['default']['prefix'])
-                ? $this['app']['dbs.options']['default']['prefix'] : '';
+        $prefix = isset($this['app']['db.options']['prefix'])
+                ? $this['app']['db.options']['prefix'] : '';
         return $prefix.$table;
     }
 

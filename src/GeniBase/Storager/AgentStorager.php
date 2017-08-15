@@ -26,11 +26,12 @@ use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use Gedcomx\Common\ResourceReference;
 use Gedcomx\Agent\Agent;
+use Gedcomx\Agent\Address;
 
 class AgentStorager extends GeniBaseStorager
 {
 
-    const GROUP_NAMES       = '//GeniBase/AgentName';
+    const GROUP_NAMES       = 'http://genibase.net/AgentName';
 
     protected function getObject($o = null)
     {
@@ -119,10 +120,12 @@ class AgentStorager extends GeniBaseStorager
 
         /** @var Agent $entity */
         $res = $entity->getAddresses();
-        if (! empty($res) && ($res != $this->previousState->getAddresses())
-            && ('[{}]' !== $res = json_encode($res))
-        ) {
-            $data['addresses_json'] = $res;
+        if (! empty($res) && ($res != $this->previousState->getAddresses())) {
+            $res2 = array();
+            foreach ($res as $val) {
+                $res2[] = $val->toArray();
+            }
+            $data['addresses_json'] = json_encode($res2);
         }
 
         // TODO: accounts
@@ -152,6 +155,7 @@ class AgentStorager extends GeniBaseStorager
         if (! empty($res) && ($res != $this->previousState->getPhones())) {
             $data['phones_uris'] = self::packResourceReferences($res);
         }
+
 
         // TODO: persons
 //         if (! empty($res = $entity->) && isset($ent['person']['resourceId'])
@@ -237,17 +241,22 @@ class AgentStorager extends GeniBaseStorager
             return $result;
         }
 
-        $t_agents = $this->dbs->getTableName('agents');
-
-        if (! empty($result['addresses_json'])) {
-            $result['addresses'] = json_decode($result['addresses_json'], true);
-            unset($result['addresses_json']);
-        }
-
         /** @var Agent $entity */
         $entity = parent::unpackLoadedData($entity, $result);
 
+
+        if (! empty($result['addresses_json'])) {
+            $res = json_decode($result['addresses_json'], true);
+            $res2 = array();
+            foreach ($res as $val) {
+                $res2[] = new Address($val);
+            }
+            $entity->setAddresses($res2);
+            unset($result['addresses_json']);
+        }
+
         // TODO accounts
+
         $res = $this->loadTextValues(self::GROUP_NAMES, $entity);
         if (! empty($res)) {
             $entity->setNames($res);

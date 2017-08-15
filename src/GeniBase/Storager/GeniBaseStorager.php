@@ -33,6 +33,9 @@ use Gedcomx\Common\TextValue;
 use Gedcomx\Common\ResourceReference;
 use Gedcomx\Conclusion\DateInfo;
 use Gedcomx\Conclusion\Identifier;
+use Gedcomx\Common\Attributable;
+use GeniBase\DBase\GeniBaseInternalProperties;
+use Gedcomx\Common\Attribution;
 
 /**
  *
@@ -43,7 +46,7 @@ class GeniBaseStorager
 
     const DATE_SQL = 'Y-m-d H:i:s';
 
-    const GBID_LENGTH = 12;
+    const GBID_LENGTH = 8;
 
     const TABLES_WITH_GBID = 'sources persons events places agents';
 
@@ -319,8 +322,8 @@ class GeniBaseStorager
         }
 
         if (is_array($result = $this->loadComponentsRaw($context, $o))) {
-            foreach ($result as $k => $res) {
-                $result[$k] = $this->unpackLoadedData($this->getObject(), $res);
+            foreach ($result as $key => $row) {
+                $result[$key] = $this->unpackLoadedData($this->getObject(), $row);
             }
             if (! empty($o['sortComponents'])) {
                 usort($result, array($this, 'compareComponents'));
@@ -385,6 +388,8 @@ class GeniBaseStorager
      */
     protected function loadRaw(ExtensibleData $entity, $context, $o)
     {
+        // TODO Check for ability to replace by standard code. See: ConclusionStorager::loadRaw()
+
         $class = get_class($this);
         $ref = new \ReflectionClass($class);
         if ($ref->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
@@ -404,6 +409,8 @@ class GeniBaseStorager
      */
     protected function loadComponentsRaw($context, $o)
     {
+        // TODO Check for ability to replace by standard code. See: ConclusionStorager::loadComponentsRaw()
+
         $class = get_class($this);
         $ref = new \ReflectionClass($class);
         if ($ref->getMethod(__FUNCTION__)->getDeclaringClass()->name === __CLASS__) {
@@ -475,6 +482,11 @@ class GeniBaseStorager
             $res = $entity->getId();
             if (! empty($res)) {
                 $data['id'] = $res;
+            }else {
+                $res = GeniBaseInternalProperties::getPropertyOf($entity, '_id');
+                if (! empty($res)) {
+                    $data['_id'] = $res;
+                }
             }
         }
 
@@ -599,6 +611,76 @@ class GeniBaseStorager
 
     /**
      *
+     * @param Attribution $attribution
+     * @return mixed[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function packAttribution($attribution)
+    {
+        if (empty($attribution)) {
+            $attribution = new Attribution();
+        } elseif (! $attribution instanceof Attribution) {
+            throw new \InvalidArgumentException('Argument 1 must be an instance of \Gedcomx\Common\Attribution');
+        }
+
+        $data = array();
+
+        $res = $attribution->getContributor();
+        if (empty($res)) {
+            $res2 = $this->dbs->getAgent();
+            if (! empty($res2)) {
+                $data['att_contributor'] = $res2->getId();
+            }
+        } else {
+            $prev = $this->previousState->getAttribution();
+            if (empty($prev) || ($res != $prev->getContributor())) {
+                $res = $res->getResourceId();
+                if (! empty($res)) {
+                    $data['att_contributor'] = $res;
+                }
+            }
+        }
+
+
+        $res = $attribution->getModified();
+        if (empty($res)) {
+            $res = time();
+        }
+        $data['att_modified'] = date(self::DATE_SQL, $res);
+
+        $res = $attribution->getChangeMessage();
+        if (! empty($res)) {
+            $data['att_changeMessage'] = $res;
+        }
+
+        return $data;
+    }
+
+    /**
+     *
+     * @param mixed[] $data
+     * @return NULL|\Gedcomx\Common\Attribution
+     */
+    protected static function unpackAttribution($result)
+    {
+        $data = array();
+
+        if (! empty($result['att_contributor'])) {
+            $data['contributor'] = array( 'resourceId' => $result['att_contributor'] );
+        }
+        if (! empty($result['att_modified'])) {
+            $data['modified'] = strtotime($result['att_modified']);
+        }
+        if (! empty($result['att_changeMessage'])) {
+            $data['changeMessage'] = $result['att_changeMessage'];
+        }
+
+        return (empty($data) ? null : new Attribution($data));
+    }
+
+    /**
+     *
      * @param mixed          $entity
      * @param ExtensibleData $context
      * @param array|null     $o
@@ -636,29 +718,45 @@ class GeniBaseStorager
             \App\Util\Profiler::stopTimer(__METHOD__ . '#detectPreviousState');
         }
 
-        if ($entity != $this->previousState) {
-            if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
-            }
-            $data = $this->packData4Save($entity, $context, $o);
-            if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
-            }
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
+        }
+        $data = $this->packData4Save($entity, $context, $o);
+        if (defined('DEBUG_PROFILE')) {
+            \App\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
+        }
 
+        if (1 < count($data)) {
             if (defined('DEBUG_PROFILE')) {
                 \App\Util\Profiler::startTimer(__METHOD__ . '#SQL');
             }
-            if (1 < count($data)) {
-                try {
-                    $this->dbs->getDb()->insert($table, $data);
-                } catch (UniqueConstraintViolationException $ex) {
-                    $id = $data['id'];
+            try {
+                $this->dbs->getDb()->insert($table, $data);
+            } catch (UniqueConstraintViolationException $ex) {
+                $id = $data['id'];
+                if (! empty($id)) {
                     unset($data['id']);
                     $this->dbs->getDb()->update($table, $data, array( 'id' => $id ));
+                } else {
+                    $_id = $data['_id'];
+                    unset($data['_id']);
+                    $this->dbs->getDb()->update($table, $data, array( '_id' => $_id ));
                 }
             }
             if (defined('DEBUG_PROFILE')) {
                 \App\Util\Profiler::stopTimer(__METHOD__ . '#SQL');
+            }
+
+            if ($entity instanceof Attributable) {
+                $res = $entity->getAttribution();
+                if (empty($res)) {
+                    $res = new Attribution();
+                    $entity->setAttribution($res);
+                }
+                $res->setModified(time());
+                $rref = new ResourceReference();
+                $rref->setResourceId($this->dbs->getAgent()->getId());
+                $res->setContributor($rref);
             }
         }
         if (defined('DEBUG_PROFILE')) {
@@ -808,7 +906,7 @@ class GeniBaseStorager
             \App\Util\Profiler::startTimer(__METHOD__);
         }
         // TODO: Add type_id check
-        $_group = $this->dbs->getTypeId($group);
+        $_group = $this->getTypeId($group);
 
         if (! is_array($textValues)) {
             $textValues = array( $textValues );
@@ -878,14 +976,18 @@ class GeniBaseStorager
             }
             $processed[] = $data;
             foreach ($old_ids as $key => $val) {
-                if ($val == $data) {
+                if (($val['type_id'] == $data['type_id']) && ($val['value'] == $data['value'])) {
                     unset($old_ids[$key]);
                     continue 2;
                 }
             }
 
             $data['id'] = $_ref;
-            $this->dbs->getDb()->insert($t_ids, $data);
+            try {
+                $this->dbs->getDb()->insert($t_ids, $data);
+            } catch (\Exception $ex) {
+var_dump($processed, $ex);die;
+            }
         }
 
         foreach ($old_ids as $data) {

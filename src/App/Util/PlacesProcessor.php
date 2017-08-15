@@ -28,6 +28,9 @@ class PlacesProcessor {
     const LIST_END      = 'ListEnd';
     const PLACE         = 'Place';
 
+    const CONTRACT_URI   = false;
+    const EXPAND_URI    = true;
+
     protected $callback;
 
     public function __construct($callback)
@@ -124,34 +127,37 @@ class PlacesProcessor {
         return '!^' . preg_quote($reg, '!') . '!';
     }
 
-    public static function processURI($uri, $expand = true)
+    public static function processURI($uri, $mode = self::EXPAND_URI)
     {
         static $namespaces = array(
             'wd:'    => 'http://www.wikidata.org/entity/',
-//             'gb:'    => '//GeniBase/',
+//             'gb:'    => 'http://genibase.net/',
         );
 
-        if ($expand) {
-            // Expand URI
-            $uri = preg_replace(
-                array_map(__CLASS__.'::pregPrepare', array_keys($namespaces)),
-                array_values($namespaces),
-                $uri
-            );
-        } else {
-            // Contract URI
-            $uri = preg_replace(
-                array_map(__CLASS__.'::pregPrepare', array_values($namespaces)),
-                array_keys($namespaces),
-                $uri
-            );
+        switch ($mode) {
+            case self::EXPAND_URI:
+                $uri = preg_replace(
+                    array_map(__CLASS__.'::pregPrepare', array_keys($namespaces)),
+                    array_values($namespaces),
+                    $uri
+                );
+                break;
+            case self::CONTRACT_URI:
+                $uri = preg_replace(
+                    array_map(__CLASS__.'::pregPrepare', array_values($namespaces)),
+                    array_keys($namespaces),
+                    $uri
+                );
+                break;
+            default:
+                throw new \InvalidArgumentException('Unsupported mode');
         }
         return $uri;
     }
 
     protected function processToken($input, $parentPlace)
     {
-        $data = preg_split('/\s+(\??[#%@]\S+|\??\[[^\s\]]+\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $data = preg_split('/\s+(\??[#@]\S+|\??\%[^%]*\%|\??\[[^\s\]]*\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         $input = array(
             'rdfs:label'  => array(),
         );
@@ -165,11 +171,11 @@ class PlacesProcessor {
             switch ($type) {
                 case '%':
                     $key = 'rdf:type';
-                    $token = self::processURI(substr($token, 1));
+                    $token = self::processURI(substr($token, 1, -1));
                     break;
                 case '?%':
                     $key = 'disputedType';
-                    $token = self::processURI(substr($token, 2));
+                    $token = self::processURI(substr($token, 2, -1));
                     break;
                 case '#':
                     $key = 'owl:sameAs';

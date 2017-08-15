@@ -24,13 +24,12 @@ namespace App\Controller;
 
 use App\Rs\ApiLinksUpdater;
 use Gedcomx\Rs\Client\Rel;
-use Gedcomx\Source\SourceDescription;
 use GeniBase\Common\Statistic;
-use GeniBase\Storager\StoragerFactory;
 use Silex\Application;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use GeniBase\Storager\SourceDescriptionStorager;
 
 class SourcesController extends BaseController
 {
@@ -72,12 +71,8 @@ class SourcesController extends BaseController
      */
     public function getOne(Application $app, Request $request, $id)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], SourceDescription::class)
-        ->loadGedcomx(
-            [
-            'id' => $id,
-            ]
-        );
+        $st = new SourceDescriptionStorager($app['gb.db']);
+        $gedcomx = $st->loadGedcomx(array( 'id' => $id ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
@@ -85,8 +80,9 @@ class SourcesController extends BaseController
 
         ApiLinksUpdater::update2($app, $request, $gedcomx);
 
-        if (class_exists(WebLinkExtension::class)) {
-            (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
+        if (class_exists('Symfony\Bridge\Twig\Extension\WebLinkExtension')) {
+            $wl = new WebLinkExtension($app['request_stack']);
+            $wl->link($request->getUri(), Rel::DESCRIPTION);
         }
         return $gedcomx;
     }
@@ -98,8 +94,8 @@ class SourcesController extends BaseController
      */
     public function getComponents(Application $app, Request $request, $id = null)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], SourceDescription::class)
-            ->loadComponentsGedcomx([     'id' => $id     ]);
+        $st = new SourceDescriptionStorager($app['gb.db']);
+        $gedcomx = $st->loadComponentsGedcomx(array( 'id' => $id ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);

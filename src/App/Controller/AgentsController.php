@@ -23,10 +23,9 @@
 namespace App\Controller;
 
 use App\Rs\ApiLinksUpdater;
-use Gedcomx\Agent\Agent;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
-use GeniBase\Storager\StoragerFactory;
+use GeniBase\Storager\AgentStorager;
 use Silex\Application;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,8 +69,8 @@ class AgentsController extends BaseController
      */
     public function getOne(Application $app, Request $request, $id)
     {
-        $gedcomx = StoragerFactory::newStorager($app['gb.db'], Agent::class)
-            ->loadGedcomx([     'id' => $id,    ]);
+        $st = new AgentStorager($app['gb.db']);
+        $gedcomx = $st->loadGedcomx(array( 'id' => $id ));
 
         if (false === $gedcomx || empty($gedcomx->toArray())) {
             return new Response(null, 204);
@@ -79,8 +78,9 @@ class AgentsController extends BaseController
 
         ApiLinksUpdater::update2($app, $request, $gedcomx);
 
-        if (class_exists(WebLinkExtension::class)) {
-            (new WebLinkExtension($app['request_stack']))->link($request->getUri(), Rel::DESCRIPTION);
+        if (class_exists('Symfony\Bridge\Twig\Extension\WebLinkExtension')) {
+            $wl = new WebLinkExtension($app['request_stack']);
+            $wl->link($request->getUri(), Rel::DESCRIPTION);
         }
         return $gedcomx;
     }

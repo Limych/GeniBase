@@ -28,7 +28,7 @@ namespace GeniBase\Common;
  */
 class Statistic extends GeniBaseClass
 {
-    protected $statistic = [];
+    protected $statistic = array();
 
     /**
      * Merges given data with current object

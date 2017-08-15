@@ -26,6 +26,8 @@ use App\Util\PlacesIterator;
 use BorderCloud\SPARQL\Endpoint;
 use App\Util;
 
+
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('VERSION', '0.1');
@@ -132,69 +134,37 @@ function updatePlace($place, $parent, $cnt, $max)
     return digBigData($place, $parent, $query);
 }
 
-function addTypes(array &$types, $key, array $newTypes)
-{
-    if (empty($types[$key])) {
-        $types[$key] = $newTypes;
-    } else {
-        $types[$key] = array_unique(array_merge($types[$key], $newTypes));
-    }
-}
-
 function digBigData($place, $parent, $query)
 {
-    static $types, $metaTypes;
+    static $metaTypes;
 
-    if (empty($types)) {
-        // Define main metaTypes (in order of importance)
-        $metaTypes = [
-            'wd:Q6256',     // country (страна)
-            'wd:Q515',      // city (город)
-            'wd:Q2989457',  // town (посад, п.г.т.)
-            'wd:Q532',      // village (село)
-            'wd:Q5084',     // hamlet (деревня)
-            'wd:Q748331',   // stanitsa (станица)
-            'wd:Q2023000',  // khutor (хутор)
-        ];
+    if (empty($metaTypes)) {
+        // ATE-0
+        PlaceTypes::registerType('страна', 'wd:Q6256');
 
-        // Add basic metatypes to types
-        $types = [];
-        foreach ($metaTypes as $key) {
-            if (empty($types[$key])) {
-                $types[$key] = [];
-            }
-            $types[$key][] = $key;
-        }
+        // ATE-1
+//         PlaceTypes::registerType('ATE-1', 'wd:Q10864048');
+        PlaceTypes::registerType('губерния', 'wd:Q86622', 'wd:Q217691');
+        PlaceTypes::registerType('область', 'wd:Q171308', 'wd:Q7075127');
 
-        // Define dependences from types to metatypes (in order of importance)
-        addTypes($types, 'wd:Q10864048', [  // АТЕ-1
-            'wd:Q10864048', // АТЕ-1
-            'wd:Q86622',    // губерния
-            'wd:Q171308',   // область
-            'wd:Q7075127',  // область Российской империи
-            'wd:Q217691',   // Губернии Финляндии
-        ]);
-        addTypes($types, 'wd:Q13220204', [  // АТЕ-2
-            'wd:Q13220204', // АТЕ-2
-            'wd:Q18867465', // уезд
-        ]);
-        addTypes($types, 'wd:Q13221722', [  // АТЕ-3
-            'wd:Q13221722', // АТЕ-3
-            'wd:Q3504085',  // гмина
-            'wd:Q687121',   // волость
-            'wd:Q20732405', // волость Российской Империи
-        ]);
-        addTypes($types, 'wd:Q2989457', [   // посад (посёлок городского типа)
-            'wd:Q2989457',  // посад (посёлок городского типа)
-            'wd:Q3957',     // малый город
-        ]);
-        addTypes($types, 'wd:Q2514025', [   // посёлок
-            'wd:Q2514025',  // посёлок
-            'wd:Q486972',   // населённый пункт
-            'wd:Q1989945',  // агрогородок
-        ]);
+        // ATE-2
+//         PlaceTypes::registerType('ATE-2', 'wd:Q13220204');
+        PlaceTypes::registerType('уезд', 'wd:Q18867465');
 
-        // Add commom metaTypes for regions and settlements
+        // ATE-3
+//         PlaceTypes::registerType('ATE-3', 'wd:Q13221722');
+        PlaceTypes::registerType('волость', 'wd:Q687121', 'wd:Q20732405');
+        PlaceTypes::registerType('гмина', 'wd:Q3504085');
+
+//         PlaceTypes::registerType('город', 'wd:Q515');
+//         PlaceTypes::registerType('посад', 'wd:Q2989457', 'wd:Q3957');
+//         PlaceTypes::registerType('село', 'wd:Q532');
+//         PlaceTypes::registerType('посёлок', 'wd:Q2514025', 'wd:Q486972 wd:Q1989945');
+//         PlaceTypes::registerType('деревня', 'wd:Q5084');
+//         PlaceTypes::registerType('станица', 'wd:Q748331');
+//         PlaceTypes::registerType('хутор', 'wd:Q2023000');
+
+        $metaTypes = PlaceTypes::getMainTypes();
         $metaTypes[] = 'wd:Q15642541';  // human-geographic territorial entity (геополитическая область)
         $metaTypes[] = 'wd:Q486972';    // settlement (населённый пункт)
 
@@ -208,7 +178,7 @@ function digBigData($place, $parent, $query)
 		unset($place['disputedAlias']);
 	}
 	if (empty($place['type'])) {
-		$place['disputedType'] = 'wd:';
+		$place['disputedType'] = '';
 	} else {
 		unset($place['disputedType']);
 	}
@@ -222,15 +192,18 @@ function digBigData($place, $parent, $query)
 	} else {
 		unset($place['disputedTemporal']);
 	}
-	
+
     $sp = new Endpoint('https://query.wikidata.org/sparql');
+
+    if (false === strpos($query, 'BIND(')) {
+        $query .= "\n  VALUES ?itemMetaType { $metaTypes }\n";
+    }
 
     $query = "SELECT DISTINCT ?item ?itemType ?itemMetaType ?itemLabel ?location ?founding ?dissolution WHERE {
   ?item (rdfs:label|skos:altLabel) ?itemLabel;
         wdt:P31 ?itemType;
         wdt:P31/wdt:P279* ?itemMetaType.
   $query
-  VALUES ?itemMetaType { $metaTypes }
   OPTIONAL{ ?item wdt:P625 ?location. }
   OPTIONAL{ ?item wdt:P571 ?founding. }
   OPTIONAL{ ?item wdt:P576 ?dissolution. }
@@ -303,13 +276,11 @@ function digBigData($place, $parent, $query)
         $passed = false;
 
         // Types
-        foreach ($types as $key => $tests) {
-            foreach ($tests as $test) {
-                if (! empty($wikidata['type'][$test])) {
-                    $wikidata['type'] = $key;
-                    $passed = true;
-                    break 2;
-                }
+        foreach (array_keys($wikidata['type']) as $type) {
+            if (! empty($name = PlaceTypes::getTypeName($type))) {
+                $wikidata['type'] = $name;
+                $passed = true;
+                break;
             }
         }
 
@@ -328,9 +299,8 @@ function digBigData($place, $parent, $query)
     if (1 === count($filtered)) {
         $wikidata = array_shift($filtered);
         $hasAlias = ! empty($place['alias']);
-        $tmp = PlacesIterator::processURI($wikidata['item']);
-        if (! $hasAlias || ($place['alias'] !== $tmp)) {
-            $place['disputedAlias'] = $tmp;
+        if (! $hasAlias || ($place['alias'] !== $wikidata['item'])) {
+            $place['disputedAlias'] = $wikidata['item'];
         }
         $tmp = PlacesIterator::processURI($wikidata['type']);
         if (! empty($tmp)
@@ -341,22 +311,12 @@ function digBigData($place, $parent, $query)
         if (! empty($wikidata['location'])
             && (empty($place['location']) || ($place['location'] !== $wikidata['location']))
         ) {
-            if ($hasAlias && empty($place['location'])) {
-                $place['location'] = $wikidata['location'];
-				unset($place['disputedLocation']);
-            } else {
-                $place['disputedLocation'] = $wikidata['location'];
-            }
+            $place['disputedLocation'] = $wikidata['location'];
         }
         if (! empty($wikidata['temporal'])
             && (empty($place['temporal']) || ($place['temporal'] !== $wikidata['temporal']))
         ) {
-            if ($hasAlias && empty($place['temporal'])) {
-                $place['temporal'] = $wikidata['temporal'];
-				unset($place['disputedTemporal']);
-            } else {
-                $place['disputedTemporal'] = $wikidata['temporal'];
-            }
+            $place['disputedTemporal'] = $wikidata['temporal'];
         }
     } elseif (! empty($filtered)) {
         if (! empty($place['alias'])) {
@@ -373,6 +333,43 @@ function digBigData($place, $parent, $query)
             $place['disputedAlias'] = implode(',', array_keys($candidates));
         }
     }
-	
+
     return $place;
+}
+
+
+
+class PlaceTypes {
+
+    private static $types = [];
+
+    public static function registerType($name, $type, $aliases = [])
+    {
+        if (empty(self::$types[$name])) {
+            self::$types[$name] = [];
+        }
+        if (! is_array($aliases)) {
+            $aliases = preg_split('/[\s,;]+/', $aliases, null, PREG_SPLIT_NO_EMPTY);
+        }
+        self::$types[$name] = array_unique(array_merge([$type], self::$types[$name], $aliases));
+    }
+
+    public static function getMainTypes()
+    {
+        $res = [];
+        foreach (self::$types as $list) {
+            $res[] = $list[0];
+        }
+        return $res;
+    }
+
+    public static function getTypeName($type)
+    {
+        foreach (self::$types as $name => $list) {
+            if (in_array($type, $list)) {
+                return $name;
+            }
+        }
+        return null;
+    }
 }

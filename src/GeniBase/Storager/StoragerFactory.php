@@ -22,22 +22,7 @@
  */
 namespace GeniBase\Storager;
 
-use Gedcomx\Agent\Agent;
-use Gedcomx\Conclusion\Conclusion;
-use Gedcomx\Conclusion\Event;
-use Gedcomx\Conclusion\EventRole;
-use Gedcomx\Conclusion\Fact;
-use Gedcomx\Conclusion\Gender;
-use Gedcomx\Conclusion\Identifier;
-use Gedcomx\Conclusion\Name;
-use Gedcomx\Conclusion\NameForm;
-use Gedcomx\Conclusion\NamePart;
-use Gedcomx\Conclusion\Person;
-use Gedcomx\Conclusion\PlaceDescription;
-use Gedcomx\Source\SourceDescription;
-use Gedcomx\Source\SourceReference;
 use GeniBase\DBase\DBaseService;
-use Gedcomx\Common\Attribution;
 
 /**
  *
@@ -60,46 +45,46 @@ class StoragerFactory
         }
 
         switch ($class) {
-            case 'Gedcomx\Conclusion\Conclusion':
+            case \Gedcomx\Conclusion\Conclusion::class:
                 return new ConclusionStorager($dbs);
 
-            case 'Gedcomx\Source\SourceDescription':
+            case \Gedcomx\Source\SourceDescription::class:
                 return new SourceDescriptionStorager($dbs);
 
-            case 'Gedcomx\Source\SourceReference':
+            case \Gedcomx\Source\SourceReference::class:
                 return new SourceReferenceStorager($dbs);
 
-            case 'Gedcomx\Conclusion\Name':
+            case \Gedcomx\Conclusion\Name::class:
                 return new NameStorager($dbs);
 
-            case 'Gedcomx\Conclusion\NameForm':
+            case \Gedcomx\Conclusion\NameForm::class:
                 return new NameFormStorager($dbs);
 
-            case 'Gedcomx\Conclusion\NamePart':
+            case \Gedcomx\Conclusion\NamePart::class:
                 return new NamePartStorager($dbs);
 
-            case 'Gedcomx\Conclusion\Person':
+            case \Gedcomx\Conclusion\Person::class:
                 return new PersonStorager($dbs);
 
-            case 'Gedcomx\Conclusion\Gender':
+            case \Gedcomx\Conclusion\Gender::class:
                 return new GenderStorager($dbs);
 
-            case 'Gedcomx\Conclusion\PlaceDescription':
+            case \Gedcomx\Conclusion\PlaceDescription::class:
                 return new PlaceDescriptionStorager($dbs);
 
-            case 'Gedcomx\Conclusion\Fact':
+            case \Gedcomx\Conclusion\Fact::class:
                 return new FactStorager($dbs);
 
-            case 'Gedcomx\Conclusion\Event':
+            case \Gedcomx\Conclusion\Event::class:
                 return new EventStorager($dbs);
 
-            case 'Gedcomx\Conclusion\EventRole':
+            case \Gedcomx\Conclusion\EventRole::class:
                 return new EventRoleStorager($dbs);
 
-            case 'Gedcomx\Agent\Agent':
+            case \Gedcomx\Agent\Agent::class:
                 return new AgentStorager($dbs);
 
-            case 'Gedcomx\Common\Attribution':
+            case \Gedcomx\Common\Attribution::class:
                 return new AttributionStorager($dbs);
         }
 

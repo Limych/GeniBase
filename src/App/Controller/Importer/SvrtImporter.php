@@ -24,10 +24,6 @@ namespace App\Controller\Importer;
 
 use App\Util;
 use FoxyTools\MsCsv;
-use Gedcomx\Conclusion\Event;
-use Gedcomx\Conclusion\Person;
-use Gedcomx\Conclusion\PlaceDescription;
-use Gedcomx\Source\SourceDescription;
 use Gedcomx\Types\FactType;
 use Gedcomx\Types\GenderType;
 use Gedcomx\Types\NamePartType;
@@ -35,7 +31,6 @@ use Gedcomx\Types\ResourceType;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use GeniBase\Types\PlaceTypes;
 
 class SvrtImporter extends GeniBaseImporter
 {
@@ -122,7 +117,7 @@ class SvrtImporter extends GeniBaseImporter
         }
         fclose($fh);
 
-        file_put_contents($this->imported_fpath, json_encode([$this->lastId + 1, $seek]));
+        file_put_contents($this->imported_fpath, json_encode(array( $this->lastId + 1, $seek )));
 
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::dumpTimers();
@@ -144,20 +139,22 @@ class SvrtImporter extends GeniBaseImporter
 
     protected function fetchNewData($fh)
     {
-        if (! empty($key = $this->app['svrt.1914.token'])
-            && ! empty($json = @file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=" . $this->lastId))
-        ) {
-            $fstat = fstat($fh);
-            if ($fstat['size'] === 0) {
-                MsCsv::fPutBom($fh);
-            }
+        $key = $this->app['svrt.1914.token'];
+        if (! empty($key)) {
+            $json = @file_get_contents("http://1914.svrt.ru/export.php?key=$key&id=" . $this->lastId);
+            if (! empty($json)) {
+                $fstat = fstat($fh);
+                if ($fstat['size'] === 0) {
+                    MsCsv::fPutCsvBom($fh);
+                }
 
-            $json = json_decode($json, true);
-            foreach ($json as $record) {
-                unset($record['region_idx']);
-                MsCsv::fPutCsv($fh, array_values($record));
+                $json = json_decode($json, true);
+                foreach ($json as $record) {
+                    unset($record['region_idx']);
+                    MsCsv::fPutCsv($fh, array_values($record));
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -197,11 +194,11 @@ class SvrtImporter extends GeniBaseImporter
 
         $this->setAgent(Agents::getSvrtAgent($this->gbs));
 
-        $place_description = join("; ", [
+        $place_description = join("; ", array(
             'Какого уезда: ' . $rec->region,
             'Какой волости, села, деревни или станицы: ' . $rec->place,
-        ]);
-        $source_citation = join("; ", [
+        ));
+        $source_citation = join("; ", array(
             'Звание: ' . $rec->rank,
             'Фамилия, имя и отчество: ' . trim($rec->surname . ', ' . $rec->name, ', '),
             'Какого вероисповедания: ' . $rec->religion,
@@ -209,7 +206,7 @@ class SvrtImporter extends GeniBaseImporter
             $place_description,
             'Ранен, убит, в плену или без вести пропал: ' . $rec->reason,
             'Когда, год месяц и число: ' . $rec->date,
-        ]);
+        ));
 
         $src = $this->importKilledSource($rec, $source_citation);
         $plc = $this->importKilledPlace($rec, $src);
@@ -223,40 +220,40 @@ class SvrtImporter extends GeniBaseImporter
             \App\Util\Profiler::startTimer(__METHOD__);
         }
         $title = 'Именные списки убитым, раненым и без вести пропавшим нижним чинам (солдатам)';
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
-            'identifiers'   => [
+        $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
+            'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($title),
-            ],
+            ),
             'resourceType'  => ResourceType::COLLECTION,
-            'citations' => [[
+            'citations' => array(array(
                 'lang'  => 'ru',
                 'value' => $title,
-            ]],
-            'titles' => [[
+            )),
+            'titles' => array(array(
                 'lang'  => 'ru',
                 'value' => $title,
-            ]],
-        ]);
+            )),
+        ));
 
         $title = $rec->source;
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
-            'identifiers'   => [
+        $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
+            'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($title),
-            ],
+            ),
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
-            'citations' => [[
+            'citations' => array(array(
                 'lang'  => 'ru',
                 'value' => $title,
-            ]],
-            'titles' => [[
+            )),
+            'titles' => array(array(
                 'lang'  => 'ru',
                 'value' => $title,
-            ]],
-            'componentOf' => [
+            )),
+            'componentOf' => array(
                 'description'   => '#' . $src->getId(),
-            ],
+            ),
             'sortKey'   => sprintf('%05d', $rec->source_nr),
-        ]);
+        ));
 
         $mediator_id = null;
         if (preg_match('|svrt\.ru/|', $rec->source_url)) {
@@ -265,41 +262,41 @@ class SvrtImporter extends GeniBaseImporter
             $mediator_id = Agents::getRslAgent($this->gbs)->getId();
         }
         $citation = 'Страница ' . Util::numberFormat($this->app, $rec->source_pg, 0) . '. ' . $rec->source;
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
-            'identifiers'   => [
+        $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
+            'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($citation),
-            ],
+            ),
             'resourceType'  => ResourceType::PHYSICALARTIFACT,
-            'citations' => [[
+            'citations' => array(array(
                 'lang'  => 'ru',
                 'value' => $citation,
-            ]],
-            'componentOf' => [
+            )),
+            'componentOf' => array(
                 'description'   => '#' . $src->getId(),
-            ],
+            ),
             'about'    => strtr(
                 $rec->source_url,
-                [   '{pg}'  => ($rec->source_pg + $rec->source_pg_corr),    ]
+                array( '{pg}'  => ($rec->source_pg + $rec->source_pg_corr), )
             ),
-            'mediator'  => [
+            'mediator'  => array(
                 'resourceId'    => $mediator_id,
-            ],
+            ),
             'sortKey'   => sprintf('%07d', $rec->source_pg),
-        ]);
+        ));
 
-        $src = $this->gbs->newStorager(SourceDescription::class)->save([
-            'identifiers'   => [
+        $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
+            'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($source_citation),
-            ],
+            ),
             'resourceType'  => ResourceType::RECORD,
-            'citations' => [[
+            'citations' => array(array(
                 'lang'  => 'ru',
                 'value' => $source_citation,
-            ]],
-            'componentOf' => [
+            )),
+            'componentOf' => array(
                 'description'   => '#' . $src->getId(),
-            ],
-        ]);
+            ),
+        ));
 
         if (defined('DEBUG_PROFILE')) {
             \App\Util\Profiler::stopTimer(__METHOD__);
@@ -312,7 +309,7 @@ class SvrtImporter extends GeniBaseImporter
         static $patterns, $replaces, $patterns4split;
 
         if (! isset($patterns)) {
-            $tmp = [
+            $tmp = array(
                 '\bгуб\.'       => 'губерния',
                 '\bобл\.'       => 'область',
                 '\bу\.'         => 'уезд',
@@ -320,7 +317,7 @@ class SvrtImporter extends GeniBaseImporter
                 '\bокр\.'       => 'округа',
                 '\bг(ор)?\.'    => '',
                 '\bмещ(\.|анин\b)?' => '',
-            ];
+            );
             $patterns = array_map(
                 function ($v) {
                     return "/\b$v/";
@@ -338,14 +335,14 @@ class SvrtImporter extends GeniBaseImporter
             $patterns[] = '/\s{2,}/';
             $replaces[] = ' ';
 
-            $patterns4split = [
+            $patterns4split = array(
                 '\s*[,;]\s*',
-                '\s+(?=и с(?:ела|\.))',
+                '\s+(?=и с(?:ел[ао]|\.))',
                 '\s+(?=и д(?:ер|\.))',
                 '\s+(?=и ст\.)',
                 '\s+(?=и уч\.)',
-                '\s+(?:[сдпгх]|ст|уч)\.',
-            ];
+                '\s+(?:ст|уч|[сдпгх])\.',
+            );
             $patterns4split = implode('|', $patterns4split);
         }
 
@@ -354,20 +351,22 @@ class SvrtImporter extends GeniBaseImporter
         }
 
         $name = 'Российская империя';
-        $plc = $this->gbs->newStorager(PlaceDescription::class)->save([
-            'identifiers'   => [
+        $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription')->save(array(
+            'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#place_' . md5($name),
-            ],
-            'names' => [[
+            ),
+            'names' => array(array(
                 'lang'  => 'ru',
                 'value' => $name,
-            ]],
-            'type'  => PlaceTypes::COUNTRY,
-            'temporalDescription'   => [
+            )),
+//             'type'  => PlaceTypes::COUNTRY,  // TODO Place types
+            'temporalDescription'   => array(
                 'original'  => '1721—1917',
                 'formal'    => '+1721-11-02/+1917-09-14',
-            ],
-        ]);
+            ),
+        ));
+
+return $plc;    // TODO Remove me
 
         $segments = preg_split("/(?:$patterns4split)/iu", $rec->region . ', ' . $rec->place, null, PREG_SPLIT_NO_EMPTY);
         $segments = array_values(array_filter(array_map(function ($v) use ($patterns, $replaces) {
@@ -380,26 +379,26 @@ class SvrtImporter extends GeniBaseImporter
         $place_path = $name;
         for ($i = 0; $i <= $max; $i++) {
             $place_path .= ' > ' . $segments[$i];
-            $data = [
-                'identifiers'   => [
+            $data = array(
+                'identifiers'   => array(
                     \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#place_' . md5($place_path),
-                ],
+                ),
                 'extracted' => true,
-                'names' => [[
+                'names' => array(array(
                     'lang'  => 'ru',
                     'value' => $segments[$i],
-                ]],
-                'jurisdiction'  => [
+                )),
+                'jurisdiction'  => array(
                     'resourceId'    => $plc->getId(),
-                ],
+                ),
 //                 'confidence'    => \Gedcomx\Types\ConfidenceLevel::LOW,
-            ];
+            );
             if ($i === $max) {
-                $data['sources']   = [[
+                $data['sources']   = array(array(
                     'description'   => '#' . $src->getId(),
-                ]];
+                ));
             }
-            $plc = $this->gbs->newStorager(PlaceDescription::class)->save($data);
+            $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription')->save($data);
         }
 
         if (defined('DEBUG_PROFILE')) {
@@ -414,51 +413,51 @@ class SvrtImporter extends GeniBaseImporter
             \App\Util\Profiler::startTimer(__METHOD__);
             \App\Util\Profiler::omitSubtimers();
         }
-        $psn = $this->gbs->newStorager(Person::class)->save(
-            [
+        $psn = $this->gbs->newStorager('Gedcomx\Conclusion\Person')->save(
+            array(
                 'extracted' => true,
-                'identifiers'   => [
+                'identifiers'   => array(
                     \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#person_' . md5($source_citation),
-                ],
+                ),
                 'living'    => false,
-                'gender'    => [
+                'gender'    => array(
                     'type'  => GenderType::MALE,
-                ],
-                'names' => [[
-                    'date'  => [
+                ),
+                'names' => array(array(
+                    'date'  => array(
                         'original'  => $rec->date,
                         'formal'    => $date_formal,
-                    ],
-                    'nameForms' => [[
+                    ),
+                    'nameForms' => array(array(
                         'lang'      => 'ru',
                         'fullText'  => trim($rec->surname . ', ' . $rec->name, ', '),
-                        'parts'     => [[
+                        'parts'     => array(array(
                             'type'  => NamePartType::SURNAME,
                             'value' => $rec->surname,
-                        ]],
-                    ]],
-                    'sources'   => [[
+                        )),
+                    )),
+                    'sources'   => array(array(
                         'description'   => '#' . $src->getId(),
-                    ]],
-                ]],
-                'facts' => [[
+                    )),
+                )),
+                'facts' => array(array(
                     'type'  => FactType::BIRTH,
-                    'place' => [
+                    'place' => array(
                         'original'      => $place_description,
-                        'description'   => '#' . $plc->getId(),
-                    ],
-                    'sources'   => [[
+//                         'description'   => '#' . $plc->getId(),  // TODO Restore
+                    ),
+                    'sources'   => array(array(
                         'description'   => '#' . $src->getId(),
-                    ]],
-                ]],
-                'sources'   => [[
+                    )),
+                )),
+                'sources'   => array(array(
                     'description'   => '#' . $src->getId(),
-                ]],
-            ],
+                )),
+            ),
             null,
-            [
+            array(
                 'makeId_name'   => "Person-1: $source_citation",
-            ]
+            )
         );
 
         if (defined('DEBUG_PROFILE')) {
@@ -483,32 +482,32 @@ class SvrtImporter extends GeniBaseImporter
                 break;
         }
 
-        $evt = $this->gbs->newStorager(Event::class)->save(
-            [
+        $evt = $this->gbs->newStorager('Gedcomx\Conclusion\Event')->save(
+            array(
                 'extracted' => true,
-                'identifiers'   => [
+                'identifiers'   => array(
                     \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#event_' . md5($source_citation),
-                ],
+                ),
                 'type'  => $event_type,
-                'date'  => [
+                'date'  => array(
                     'original'  => $rec->date,
                     'formal'    => $date_formal,
-                ],
-                'roles' => [[
+                ),
+                'roles' => array(array(
                     'type'      => \Gedcomx\Types\EventRoleType::PRINCIPAL,
-                    'person'    => [
+                    'person'    => array(
                         'resourceId'    => $psn->getId(),
-                    ],
+                    ),
                     'details'   => $rec->reason,
-                ]],
-                'sources'   => [[
+                )),
+                'sources'   => array(array(
                     'description'   => '#' . $src->getId(),
-                ]],
-            ],
+                )),
+            ),
             null,
-            [
+            array(
                 'makeId_name'   => "Event-1: $source_citation",
-            ]
+            )
         );
 
         if (defined('DEBUG_PROFILE')) {

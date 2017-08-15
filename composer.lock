@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5526bfeabbe7b8ca48790b3d50ea582a",
+    "content-hash": "fb5bb2c474e08a8f90519aed1c366105",
     "packages": [
         {
             "name": "bordercloud/sparql",
@@ -2388,12 +2388,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Limych/foxy-tools.git",
-                "reference": "8c89ee3486aaae5e4b7c2d55bc61717ea59d3352"
+                "reference": "52a27cf19824d99f6862d629a9444f23778be18e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Limych/foxy-tools/zipball/8c89ee3486aaae5e4b7c2d55bc61717ea59d3352",
-                "reference": "8c89ee3486aaae5e4b7c2d55bc61717ea59d3352",
+                "url": "https://api.github.com/repos/Limych/foxy-tools/zipball/52a27cf19824d99f6862d629a9444f23778be18e",
+                "reference": "52a27cf19824d99f6862d629a9444f23778be18e",
                 "shasum": ""
             },
             "require": {
@@ -2426,7 +2426,7 @@
                 "user-agent",
                 "useragent"
             ],
-            "time": "2017-08-07T14:38:29+00:00"
+            "time": "2017-08-15T16:34:40+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -4769,7 +4769,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3"
+        "php": ">=5.5.9"
     },
     "platform-dev": []
 }

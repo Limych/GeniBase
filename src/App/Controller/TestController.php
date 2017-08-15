@@ -41,14 +41,14 @@ class TestController extends BaseController
             preg_split('/[\s,]+/', GeniBaseStorager::TABLES_WITH_GBID, null, PREG_SPLIT_NO_EMPTY)
         );
 
-        $ids = [
+        $ids = array(
             'A4PC-JAEF-9MV-',   // Unreal true nonexistetnt ID
             'YF93-J6P7-7379',   // Agent ID
             'CPV4-33NJ-R7XE',   // Source ID
             'CT46-36YP-KFE4',   // Person ID
             'N63H-4V97-V376',   // Event ID
             'L7HW-ANNP-V43N',   // Place ID
-        ];
+        );
 
 //         $result = $app['db']->fetchAssoc("SELECT COUNT(*) AS agents FROM $t_agents");
         $attempts = 1000;
@@ -61,7 +61,7 @@ class TestController extends BaseController
             $gbid = $ids[rand(0, $max_id_i)];
 
             foreach ($tables as $tbl) {
-                if (false !== $db->fetchColumn("SELECT 1 FROM $tbl WHERE id = ?", [$gbid])) {
+                if (false !== $db->fetchColumn("SELECT 1 FROM $tbl WHERE id = ?", array( $gbid ))) {
                     continue 2;
                 }
             }

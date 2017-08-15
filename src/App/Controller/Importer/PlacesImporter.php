@@ -27,8 +27,12 @@ use App\Util\PlacesProcessor;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
+use Gedcomx\Types\ResourceType;
 use Gedcomx\Util\FormalDate;
 use Silex\Application;
+use BorderCloud\SPARQL\Endpoint;
+use Gedcomx\Source\SourceDescription;
+use Gedcomx\Conclusion\PlaceDescription;
 
 class PlacesImporter extends GeniBaseImporter
 {
@@ -99,7 +103,8 @@ class PlacesImporter extends GeniBaseImporter
         }
 
         $place = array(
-            'confidence'    => \Gedcomx\Types\ConfidenceLevel::HIGH,
+            'confidence'    => \Gedcomx\Types\ConfidenceLevel::MEDIUM,
+//             'confidence'    => \Gedcomx\Types\ConfidenceLevel::HIGH, // TODO Restore it
         );
 
         $tmp = new FormalDate();
@@ -111,10 +116,21 @@ class PlacesImporter extends GeniBaseImporter
             $place['temporalDescription']['original'] = $input['gx:temporalDescription'];
         }
 
+        if (! empty($input['rdf:type'])) {
+            $place['type'] = $input['rdf:type'];
+        }
+
         if (! empty($input['owl:sameAs'])) {
             $place['identifiers'] = array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => $input['owl:sameAs'],
             );
+
+            $src = $this->getPlacesSources($input['owl:sameAs']);
+            if (! empty($src)) {
+                $place['sources'] = [[
+                    'description' => '#' . $src->getId(),
+                ]];
+            }
         }
 
         if (! empty($input['location'])) {
@@ -136,12 +152,88 @@ class PlacesImporter extends GeniBaseImporter
             );
         }
 
-        $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription')->save($place);
+        $plc = $this->gbs->newStorager(PlaceDescription::class)->save($place);
 
         $this->placesProcessed++;
         $this->lastPlace = $plc->getId();
 
 		return (Util::executionTime() <= 10000);
+    }
+
+    protected function getPlacesSources($id)
+    {
+        static $sp;
+
+        $id = PlacesProcessor::processURI($id, PlacesProcessor::CONTRACT_URI);
+        $query = "SELECT DISTINCT ?itemEnc ?encUri ?encId ?encLabel WHERE {
+  $id p:P1343/pq:P248 ?itemEnc.
+  ?itemEnc wdt:P1433/wdt:P361*/wdt:P629* ?encId.
+  VALUES ?encId { wd:Q19190511 wd:Q4114391 wd:Q19180675 wd:Q4091878 wd:Q602358 wd:Q19217220 wd:Q4532135 }
+  ?encUri schema:about ?itemEnc.
+  ?encId rdfs:label ?encLabel.
+  FILTER ( LANG(?encLabel) = \"ru\" )
+}";
+
+        if (empty($sp)) {
+            $sp = new Endpoint('https://query.wikidata.org/sparql');
+        }
+        $rows = $sp->query($query);
+        $err = $sp->getErrors();
+        if ($err) {
+//             print_r($err);
+//             throw new \Exception(print_r($err, true));
+            return [];
+        }
+        if (empty($rows['result']['rows'])) {
+            return [];
+        }
+
+        $src = $srcContent = null;
+        foreach ($rows['result']['rows'] as $row) {
+            $enc = PlacesProcessor::processURI($row['encId'], PlacesProcessor::CONTRACT_URI);
+
+            $content = file_get_contents($row['encUri']);
+
+            $regex = '!^.*<span id="ws-title">(.*?)</span>.*$!us';
+            $title = preg_replace($regex, '\\1', $content);
+
+            $regex = '!^.*<div class="(?:innertext|article text)">(.*)</div>\s+<\!--\s+NewPP limit report.*$!us';
+            $content = preg_replace($regex, '\\1', $content);
+            $regex = '!<span[^>]* class="(?:mw-editsection|ws-noexport)".*?</span></span>!us';
+            $content = preg_replace($regex, '', $content);
+            $content = preg_replace('!(<table)!us', '\\1 class="table"', $content);
+
+            $content = strip_tags($content, '<p><b><i><strong><em><br><s><u><table><tr><td>');
+
+            if (! empty($srcContent) && (strlen($content) >= strlen($srcContent))) {
+                continue;
+            }
+
+            $srcContent = $content;
+            $src = [
+                'identifiers'   => [
+                    \Gedcomx\Types\IdentifierType::PERSISTENT => [
+                        $row['itemEnc'],
+                        $row['encUri'],
+                    ],
+                ],
+                'resourceType'  => ResourceType::RECORD,
+                'citations' => [[
+                    'lang'  => 'ru',
+                    'value' => $content,
+                ]],
+                'titles' => [[
+                    'lang'  => 'ru',
+                    'value' => $title,
+                ]],
+            ];
+        }
+
+        if (! empty($src)) {
+            $src = $this->gbs->newStorager(SourceDescription::class)->save($src);
+        }
+
+        return $src;
     }
 
     protected function getPlaces($fname = 'russia_1913')
