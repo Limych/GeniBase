@@ -23,8 +23,6 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use GeniBase\Silex\GeniBaseJsonEncoder;
-use GeniBase\Silex\GeniBaseXmlEncoder;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -129,11 +127,12 @@ $app->register(new \GeniBase\Silex\GeniBaseServiceProvider());
 
 $app->register(new \GeniBase\Silex\PlaceMapProvider());
 $app->register(new \GeniBase\Silex\RestApi\RestApiServiceProvider());
+$app->register(new \GeniBase\Silex\ContentCompressor\ContentCompressorServiceProvider());
 
 $app->register(new \GeniBase\Silex\TestServiceProvider()); // FIXME: Remove TestServiceProvider from, production
-$app->register(new \GeniBase\Silex\AgentsServiceProvider());
-$app->register(new \GeniBase\Silex\PlaceDescriptionServiceProvider());
-$app->register(new \GeniBase\Silex\SourceDescriptionServiceProvider());
+$app->register(new \GeniBase\Silex\Gedcomx\AgentsServiceProvider());
+$app->register(new \GeniBase\Silex\Gedcomx\PlaceDescriptionServiceProvider());
+$app->register(new \GeniBase\Silex\Gedcomx\SourceDescriptionServiceProvider());
 
 
 
@@ -142,8 +141,8 @@ $app->register(new \GeniBase\Silex\SourceDescriptionServiceProvider());
 // Configs for REST API provider
 $app['rest_api.options'] = array(
     'serializers' => array(
-        'json' => GeniBaseJsonEncoder::class,
-        'xml' => GeniBaseXmlEncoder::class,
+        'json' => \GeniBase\Silex\Encoder\GeniBaseJsonEncoder::class,
+        'xml' => \GeniBase\Silex\Encoder\GeniBaseXmlEncoder::class,
     ),
     'controllers' => array(
         'v1' => array(
@@ -156,7 +155,6 @@ $app['rest_api.options'] = array(
         ),
     ),
 );
-// dump($app['statistic.controller']);die;
 
 $app['place_description.controller']->mountRoutes($app, '/places');
 

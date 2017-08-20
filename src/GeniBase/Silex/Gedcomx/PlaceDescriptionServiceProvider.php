@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace GeniBase\Silex;
+namespace GeniBase\Silex\Gedcomx;
 
 use Pimple\Container;
 use GeniBase\Rs\Server\ApiLinksUpdater;
@@ -60,7 +60,7 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
 
     /**
      * {@inheritDoc}
-     * @see \GeniBase\Silex\GedcomxServiceProvider::statistic()
+     * @see \GeniBase\Silex\Gedcomx\GedcomxServiceProvider::statistic()
      */
     public function statistic(Application $app)
     {
@@ -76,7 +76,7 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
 
     /**
      * {@inheritDoc}
-     * @see \GeniBase\Silex\GedcomxServiceProvider::mountRoutes()
+     * @see \GeniBase\Silex\Gedcomx\GedcomxServiceProvider::mountRoutes()
      */
     public function mountRoutes($app, $base)
     {
@@ -87,7 +87,7 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
 
     /**
      * {@inheritDoc}
-     * @see \GeniBase\Silex\GedcomxServiceProvider::mountApiRoutes()
+     * @see \GeniBase\Silex\Gedcomx\GedcomxServiceProvider::mountApiRoutes()
      */
     public function mountApiRoutes($app, $base)
     {

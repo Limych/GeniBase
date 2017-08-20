@@ -44,6 +44,13 @@ use Symfony\Component\Serializer\Serializer;
 class RestApiServiceProvider implements ServiceProviderInterface, EventListenerProviderInterface, ControllerProviderInterface, BootableProviderInterface
 {
 
+    protected $options;
+
+    public function __construct($options = null)
+    {
+        $this->options = $options;
+    }
+
     /**
      * {@inheritDoc}
      * @see \Pimple\ServiceProviderInterface::register()
@@ -56,7 +63,7 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             throw new \LogicException('You MUST enable the SerializerServiceProvider to be able to use RestApiServiceProvider.');
         }
 
-        // Default options.
+        // Default options
         $app['rest_api.options.default'] = array(
             'endpoint' => '/api',
             'require_versioning' => true,
@@ -70,10 +77,14 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             'pretty_print' => false,
         );
 
-        // Initialize $app['rest_api.options'].
+        if (! empty($this->options)) {
+            $app['rest_api.options'] = $this->options;
+        }
+
+        // Initialize $app['rest_api.options']
         $app['rest_api.options.init'] = $app->protect(function() use ($app) {
             $options = $app['rest_api.options.default'];
-            if (isset($app['rest_api.options'])) {
+            if (! empty($app['rest_api.options'])) {
                 // Merge default and configured options
                 $options = array_replace_recursive($options, $app['rest_api.options']);
             }

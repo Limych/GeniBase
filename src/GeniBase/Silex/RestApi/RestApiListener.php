@@ -60,7 +60,7 @@ class RestApiListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            KernelEvents::REQUEST => array('onKernelRequest', Application::EARLY_EVENT),
+            KernelEvents::REQUEST => array( 'onKernelRequest', Application::EARLY_EVENT ),
             KernelEvents::VIEW => array( 'onKernelView', -10 ),
         );
     }

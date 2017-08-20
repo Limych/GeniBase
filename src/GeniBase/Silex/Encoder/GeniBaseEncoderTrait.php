@@ -20,7 +20,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace GeniBase\Silex;
+namespace GeniBase\Silex\Encoder;
+
+use Gedcomx\Common\ExtensibleData;
+use GeniBase\Common\GeniBaseClass;
 
 /**
  *
@@ -29,23 +32,17 @@ namespace GeniBase\Silex;
  * @subpackage Silex
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-trait GeniBaseDecoderTrait
+trait GeniBaseEncoderTrait
 {
 
     /**
      * {@inheritdoc}
      */
-    public function supportsDecoding($format, $context = array())
+    public function supportsEncoding($format, $context = array())
     {
-        return (self::FORMAT === $format) && $this->isKnownContentType($context['content-type']);
+        return (self::FORMAT === $format) && (
+            ($context['content'] instanceof ExtensibleData)
+            || ($context['content'] instanceof GeniBaseClass)
+        );
     }
-
-    /**
-     * Whether the specified content type is a known content type and therefore
-     * does not need to be written to the entry attributes.
-     *
-     * @param string $contentType The content type.
-     * @return boolean Whether the content type is "known".
-     */
-    abstract public function isKnownContentType($contentType);
 }
