@@ -20,10 +20,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace App;
 
-use Silex\Provider\WebProfilerServiceProvider;
-use WhoopsSilex\WhoopsServiceProvider;
+use Silex\Application;
+
+/** @var Application $app */
 
 // === Register providers =====================================================
 
@@ -35,34 +35,42 @@ $app->register(new \Silex\Provider\MonologServiceProvider([
 @unlink(dirname($app['monolog.logfile']) . '/' . \Carbon\Carbon::now()->subWeeks(7)->format('Y-m-d') . '.log');
 
 if ($dev_mode) {
-    $app->register(new WhoopsServiceProvider);
+    $app->register(new \WhoopsSilex\WhoopsServiceProvider());
 }
 
 // Register Twig templates
-$app->register(new \Silex\Provider\TwigServiceProvider());
-$app['twig'] = $app->extend(
-    'twig',
-    function ($twig, $app) {
-        // add custom globals, filters, tags, ...
-        $twig->addGlobal('min', !empty($app['debug']) ? '' : '.min');
-        $twig->addGlobal('google_api_key', !empty($app['google_api_key']) ? $app['google_api_key'] : '');
+$keys = array_filter($app->keys(), function ($key) use ($app) {
+    return preg_match('/^twig./', $key) && ! is_callable($app[$key]);
+});
+$cfg = [];
+foreach ($keys as $key) {
+    $cfg[$key] = $app[$key];
+}
+$app->register(new \Silex\Provider\TwigServiceProvider(), $cfg);
+$app->extend('twig', function (Twig_Environment $twig, Application $app) {
+    $twig->addGlobal('min', !empty($app['debug']) ? '' : '.min');
+    $twig->addGlobal('google_api_key', !empty($app['google_api_key']) ? $app['google_api_key'] : '');
 
-        return $twig;
-    }
-);
+    return $twig;
+});
+
+// Register security providers
+include BASE_DIR.'/app/security_providers.php';
 
 if ($dev_mode) {
-    $app->register(new WebProfilerServiceProvider);
+    $app->register(new \Silex\Provider\WebProfilerServiceProvider());
 }
 
-$app->register(new \Euskadi31\Silex\Provider\CorsServiceProvider);
-$app->register(new \Silex\Provider\ServiceControllerServiceProvider);
+$app->register(new \Euskadi31\Silex\Provider\CorsServiceProvider());
+$app->register(new \Silex\Provider\ServiceControllerServiceProvider());
 $app->register(new \Silex\Provider\HttpCacheServiceProvider());
 $app->register(new \Silex\Provider\AssetServiceProvider());
 $app->register(new \Silex\Provider\LocaleServiceProvider());
 $app->register(new \Silex\Provider\TranslationServiceProvider());
 $app->register(new \Silex\Provider\HttpFragmentServiceProvider());
 $app->register(new \Silex\Provider\RoutingServiceProvider());
+$app->register(new \Silex\Provider\FormServiceProvider());
+$app->register(new \Silex\Provider\SessionServiceProvider());
 
-$app->register(new Provider\ResponsibleServiceProvider());
-$app->register(new Provider\PlaceMapProvider());
+$app->register(new \App\Provider\ResponsibleServiceProvider());
+$app->register(new \App\Provider\PlaceMapProvider());

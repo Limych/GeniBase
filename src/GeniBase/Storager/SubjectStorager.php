@@ -50,11 +50,11 @@ class SubjectStorager extends ConclusionStorager
     protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         if (parent::detectPreviousState($entity, $context, $o)) {
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__);
             }
             return true;
         }
@@ -71,7 +71,7 @@ class SubjectStorager extends ConclusionStorager
                     $candidate->initFromArray($entity->toArray());
                     $entity = $candidate;
                     if (defined('DEBUG_PROFILE')) {
-                        \App\Util\Profiler::stopTimer(__METHOD__);
+                        \GeniBase\Util\Profiler::stopTimer(__METHOD__);
                     }
                     return true;
                 }
@@ -79,7 +79,7 @@ class SubjectStorager extends ConclusionStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return false;
     }
@@ -87,7 +87,7 @@ class SubjectStorager extends ConclusionStorager
     public function getDefaultOptions($entity = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $def = parent::getDefaultOptions();
 
@@ -105,7 +105,7 @@ class SubjectStorager extends ConclusionStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $def;
     }

@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+@import "genifont.css";
+
+.btn-social {
+}
+
+.btn-social i {
+    position: relative;
+	padding-right: 27px;
+	font-size: 21px;
+	line-height: 21px;
+	vertical-align: top;
+}
+
+.btn-social i:after {
+	content: "";
+	position: absolute;
+	top: -4px;
+	left: 70%;
+	width: 1px;
+	height: 29px;
+	background: #CCC;
+	background: rgba(255, 255, 255, 0.5);
+}
+
+.btn-social.btn-secondary i:after {
+	background: #333;
+	background: rgba(0, 0, 0, 0.2);
+}

@@ -29,7 +29,6 @@ namespace GeniBase\Common;
 class GeniBaseClass
 {
     const GENIBASE_NS = 'http://genibase.net/v1/';
-    const XML_NS = 'http://www.w3.org/XML/1998/namespace';
 
     /**
      * Constructs a GeniBaseClass from a (parsed) JSON hash
@@ -198,8 +197,23 @@ class GeniBaseClass
     public function toXml(\XMLWriter $writer, $includeNamespaces = true)
     {
         $writer->startElement('xml');
+        if ($includeNamespaces) {
+            $this->writeXmlNamespaces($writer);
+        }
         $this->writeXmlContents($writer);
         $writer->endElement();
+    }
+
+    /**
+     * Writes the namespaces for this GeniBaseClass to an XML writer.
+     * The startElement is expected to be already provided.
+     *
+     * @param \XMLWriter $writer The XML writer.
+     */
+    protected function writeXmlNamespaces(\XMLWriter $writer)
+    {
+        $writer->writeAttributeNs('xmlns', 'gx', null, 'http://gedcomx.org/v1/');
+        $writer->writeAttributeNs('xmlns', 'gb', null, self::GENIBASE_NS);
     }
 
     /**
@@ -208,7 +222,8 @@ class GeniBaseClass
      *
      * @param \XMLWriter $writer The XML writer.
      */
-    public function writeXmlContents(\XMLWriter $writer)
+    protected function writeXmlContents(\XMLWriter $writer)
     {
-    }  // Empty
+        // Do nothing
+    }
 }

@@ -38,21 +38,25 @@ include 'defineBaseDir.php';
 
 require_once BASE_DIR.'/vendor/autoload.php';
 
-if (! defined('DEBUG')) {
+if (defined('DEBUG')) {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+} else {
     ini_set('display_errors', 0);
+    error_reporting(0);
 }
 
 // Initialize Silex framework
 $app = new \Silex\Application();
-
-// Register providers
-include BASE_DIR.'/app/providers.php';
 
 // Load configs
 include BASE_DIR.'/app/configs/prod.php';
 if ($dev_mode) {
     include BASE_DIR.'/app/configs/dev.php';
 }
+
+// Register providers
+include BASE_DIR.'/app/providers.php';
 
 include 'defineConstants.php';
 

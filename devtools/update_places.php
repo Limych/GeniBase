@@ -164,9 +164,12 @@ function digBigData($place, $parent, $query)
 //         PlaceTypes::registerType('станица', 'wd:Q748331');
 //         PlaceTypes::registerType('хутор', 'wd:Q2023000');
 
+        PlaceTypes::registerType('', 'wd:Q486972', 'wd:Q2989457 wd:Q3957 wd:Q532 wd:Q2514025 wd:Q486972 " .
+            "wd:Q1989945 wd:Q5084 wd:Q748331 wd:Q2023000');
+
         $metaTypes = PlaceTypes::getMainTypes();
         $metaTypes[] = 'wd:Q15642541';  // human-geographic territorial entity (геополитическая область)
-        $metaTypes[] = 'wd:Q486972';    // settlement (населённый пункт)
+//         $metaTypes[] = 'wd:Q486972';    // settlement (населённый пункт)
 
         // Join metaTypes to one string
         $metaTypes = implode(' ', array_unique($metaTypes));
@@ -277,7 +280,8 @@ function digBigData($place, $parent, $query)
 
         // Types
         foreach (array_keys($wikidata['type']) as $type) {
-            if (! empty($name = PlaceTypes::getTypeName($type))) {
+            $name = PlaceTypes::getTypeName($type);
+            if (null !== $name) {
                 $wikidata['type'] = $name;
                 $passed = true;
                 break;

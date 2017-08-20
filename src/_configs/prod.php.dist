@@ -1,0 +1,64 @@
+<?php
+
+// Configure your GeniBase for the production environment
+
+// === Logging ================================================================
+
+$app['monolog.name']    = 'GeniBase';
+$app['monolog.logfile'] = "${root_dir}/var/logs/" . \Carbon\Carbon::now()->format('Y-m-d') . '.log';
+$app['monolog.level']   = \Monolog\Logger::ERROR;
+
+// === Caching ================================================================
+
+$app['http_cache.cache_dir'] = "${root_dir}/tmp/cache/http";
+
+// === Twig ===================================================================
+
+$app['twig.path'] = array(
+    "${root_dir}/src/_views"
+);
+$app['twig.options'] = array(
+    'cache' => "${root_dir}/tmp/cache/twig"
+);
+
+// === REST API ===============================================================
+
+$app['api.endpoint'] = "/api";
+$app['api.version'] = "v1";
+
+// === DataBase ===============================================================
+
+$app['db.options'] = array(
+    'driver'    => 'pdo_mysql',
+    'host'      => 'localhost',
+    'user'      => '*** your MySQL username here ***',
+    'password'  => '*** your MySQL password here ***',
+    'dbname'    => '*** your MySQL database name here ***',
+    'charset'   => 'utf8',
+    'prefix'    => 'gb_',
+    'driverOptions' => array(
+        1002 => 'SET NAMES utf8'
+    ),
+);
+
+// === Sessions ===============================================================
+
+$app['session.storage.save_path'] = "${root_dir}/tmp/sessions";
+
+// === Translator =============================================================
+
+$app['translator.resource'] = "${root_dir}/app/lang/";
+
+// === Importer configs =======================================================
+
+$app['svrt.1914.store'] = "${root_dir}/var/store";
+
+// === API keys ===============================================================
+
+$app['api_key.svrt_1914'] = '*** your API key here ***';
+
+$app['api_key.google'] = '*** your API key here ***';
+$app['api_key.google.secret'] = '*** your API key here ***';
+
+$app['api_key.facebook'] = '*** your API key here ***';
+$app['api_key.facebook.secret'] = '*** your API key here ***';

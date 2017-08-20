@@ -47,7 +47,7 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function getDefaultOptions($entity = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $def = parent::getDefaultOptions($entity);
 
@@ -88,7 +88,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $def;
     }
@@ -100,11 +100,11 @@ class PlaceDescriptionStorager extends SubjectStorager
     protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         if (parent::detectPreviousState($entity, $context, $o)) {
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__);
             }
             return true;
         }
@@ -149,13 +149,13 @@ class PlaceDescriptionStorager extends SubjectStorager
                 }
             }
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__);
             }
             return ! empty($entity->getId());
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return false;
     }
@@ -176,7 +176,7 @@ class PlaceDescriptionStorager extends SubjectStorager
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $this->makeGbidIfEmpty($entity, $o);
 
@@ -222,7 +222,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         return $data;
     }
@@ -521,7 +521,7 @@ class PlaceDescriptionStorager extends SubjectStorager
     public function updatePlaceGeoCoordinates($place_id)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $t_places = $this->getTableName();
 
@@ -571,7 +571,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
     }
 
@@ -581,7 +581,7 @@ class PlaceDescriptionStorager extends SubjectStorager
             return; // Skip updating now
         }
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
 
         $t_places = $this->getTableName();
@@ -591,7 +591,7 @@ class PlaceDescriptionStorager extends SubjectStorager
         $this->updatePlaceGeoCoordinates($place_id);
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
     }
 }

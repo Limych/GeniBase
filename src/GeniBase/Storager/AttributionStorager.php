@@ -23,8 +23,8 @@
 namespace GeniBase\Storager;
 
 use Gedcomx\Common\Attribution;
-use GeniBase\DBase\DBaseService;
 use Gedcomx\Common\ResourceReference;
+use GeniBase\Silex\DBaseService;
 
 /**
  *

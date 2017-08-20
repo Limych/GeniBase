@@ -107,7 +107,7 @@ class EventStorager extends SubjectStorager
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         /** @var Event $entity */
         $entity = parent::save($entity, $context, $o);
@@ -132,7 +132,7 @@ class EventStorager extends SubjectStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $entity;
     }

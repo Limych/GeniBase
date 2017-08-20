@@ -82,7 +82,7 @@ class ConclusionStorager extends GeniBaseStorager
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $this->makeUuidIfEmpty($entity, $o);
 
@@ -105,7 +105,7 @@ class ConclusionStorager extends GeniBaseStorager
         $data = array_merge($data, $this->packAttribution($entity->getAttribution()));
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $data;
     }
@@ -117,14 +117,14 @@ class ConclusionStorager extends GeniBaseStorager
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         /** @var Conclusion $entity */
         $entity = parent::save($entity, $context, $o);
 
         // Save childs
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__ . '#Childs');
+            \GeniBase\Util\Profiler::startTimer(__METHOD__ . '#Childs');
         }
 
         $res = $entity->getSources();
@@ -143,8 +143,8 @@ class ConclusionStorager extends GeniBaseStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__ . '#Childs');
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__ . '#Childs');
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $entity;
     }

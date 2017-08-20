@@ -101,11 +101,11 @@ class SourceDescriptionStorager extends GeniBaseStorager
     protected function detectPreviousState(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         if (parent::detectPreviousState($entity, $context, $o)) {
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__);
             }
             return true;
         }
@@ -122,7 +122,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
                     $candidate->initFromArray($entity->toArray());
                     $entity = $candidate;
                     if (defined('DEBUG_PROFILE')) {
-                        \App\Util\Profiler::stopTimer(__METHOD__);
+                        \GeniBase\Util\Profiler::stopTimer(__METHOD__);
                     }
                     return true;
                 }
@@ -140,14 +140,14 @@ class SourceDescriptionStorager extends GeniBaseStorager
                 $entity = $candidate;
 
                 if (defined('DEBUG_PROFILE')) {
-                    \App\Util\Profiler::stopTimer(__METHOD__);
+                    \GeniBase\Util\Profiler::stopTimer(__METHOD__);
                 }
                 return true;
             }
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return false;
     }
@@ -248,7 +248,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         /** @var SourceDescription $entity */
         $entity = parent::save($entity, $context, $o);
@@ -304,7 +304,7 @@ class SourceDescriptionStorager extends GeniBaseStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $entity;
     }

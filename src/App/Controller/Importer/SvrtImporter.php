@@ -52,7 +52,7 @@ class SvrtImporter extends GeniBaseImporter
     public function import(Request $request)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         list($startId, $seek) = (file_exists($this->imported_fpath)
             ? json_decode(file_get_contents($this->imported_fpath), true)
@@ -120,7 +120,7 @@ class SvrtImporter extends GeniBaseImporter
         file_put_contents($this->imported_fpath, json_encode(array( $this->lastId + 1, $seek )));
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::dumpTimers();
+            \GeniBase\Util\Profiler::dumpTimers();
         }
 
         $response = new Response("<div><progress value='" . $this->lastId . "' max='" . $this->getCount() . "'></progress> " .
@@ -217,7 +217,7 @@ class SvrtImporter extends GeniBaseImporter
     protected function importKilledSource($rec, $source_citation)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $title = 'Именные списки убитым, раненым и без вести пропавшим нижним чинам (солдатам)';
         $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
@@ -299,7 +299,7 @@ class SvrtImporter extends GeniBaseImporter
         ));
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $src;
     }
@@ -347,7 +347,7 @@ class SvrtImporter extends GeniBaseImporter
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
 
         $name = 'Российская империя';
@@ -402,7 +402,7 @@ return $plc;    // TODO Remove me
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $plc;
     }
@@ -410,8 +410,8 @@ return $plc;    // TODO Remove me
     protected function importKilledPerson($rec, $src, $plc, $date_formal, $source_citation, $place_description)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
-            \App\Util\Profiler::omitSubtimers();
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::omitSubtimers();
         }
         $psn = $this->gbs->newStorager('Gedcomx\Conclusion\Person')->save(
             array(
@@ -461,7 +461,7 @@ return $plc;    // TODO Remove me
         );
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $psn;
     }
@@ -469,8 +469,8 @@ return $plc;    // TODO Remove me
     protected function importKilledEvent($rec, $src, $psn, $date_formal, $source_citation)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
-            \App\Util\Profiler::omitSubtimers();
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::omitSubtimers();
         }
         switch ($rec->reason) {
             case 'Убит':
@@ -511,7 +511,7 @@ return $plc;    // TODO Remove me
         );
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $evt;
     }

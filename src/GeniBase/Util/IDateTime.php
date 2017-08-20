@@ -61,7 +61,8 @@ class IDateTime extends DateTime
             if (! empty($format[$i])) {
                 $result .= parent::format($format[$i]);
             }
-            if (! empty($key = $format[++$i]) && ! empty($this->formatters[$key])) {
+            $i++;
+            if (! empty($format[$i]) && ! empty($this->formatters[$key = $format[$i]])) {
                 $result .= call_user_func($this->formatters[$key], $this);
             }
         }

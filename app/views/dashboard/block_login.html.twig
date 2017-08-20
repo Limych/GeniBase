@@ -1,0 +1,53 @@
+{% if app.user %}
+    <p>Hello {{ app.user.username }}! Your email is {{ app.user.email|default('"unknown"') }}</p>
+    <a href="{{ logout_path() }}">Logout</a>
+{% else %}
+    <link href="{{ asset('css/social.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/security.css') }}" rel="stylesheet" />
+{#    <form action="{# { path('admin_login_check') }#" method="post">
+        <div class="input-group">
+            <span class="input-group-addon" id="inputEmailLabel" aria-label="E-mail">
+                <i class="fa fa-at" style="width: 1em" aria-hidden="true"></i>
+            </span>
+            <input type="email" class="form-control" placeholder="E-mail"
+                aria-describedby="inputEmailLabel" required autofocus
+                name="_username" value="{{ last_username }}" />
+        </div>
+        <div class="input-group mb-2">
+            <span class="input-group-addon" id="inputPasswordLabel" aria-label="Password">
+                <i class="fa fa-key" style="width: 1em" aria-hidden="true"></i>
+            </span>
+            <input type="password" class="form-control mb-0" placeholder="Password"
+                aria-describedby="inputPasswordLabel" required autofocus
+                name="_password" value="" />
+{#            <span class="input-group-btn">
+                <button class="btn btn-light" type="button" style="height: 100%">
+                    <i class="fa fa-eye" aria-hidden="true"></i>
+                </button>
+            </span>{##
+        </div>
+        <div class="row align-items-center">
+            <div class="col-6 form-check text-right">
+                <label class="form-check-label"><input class="form-check-input" type="checkbox" value="remember-me" /> Запомнить меня</label>
+            </div>
+            <div class="col-4 text-center">
+                <button class="btn btn-lg btn-primary" type="submit">Войти</button>
+            </div>
+        </div>
+    </form>
+    <p class="my-3">… или авторизуйтесь через привычный вам сайт:{##}
+    <p>Просто авторизуйтесь через привычный вам сайт:
+    <ul class="list-inline row">
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-primary btn-social my-1 w-100 text-left" href="{{ login_paths.facebook }}"><i class="gf gf-familysearch gf-fw" aria-hidden="true"></i>FamilySearch</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-primary btn-social my-1 w-100 text-left" href="{{ login_paths.facebook }}"><i class="gf gf-geni gf-fw" aria-hidden="true"></i>Geni</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-primary btn-social my-1 w-100 text-left" href="{{ login_paths.facebook }}"><i class="gf gf-myheritage gf-fw" aria-hidden="true"></i>MyHeritage</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-primary btn-social my-1 w-100 text-left" href="{{ login_paths.facebook }}"><i class="gf gf-ancestry gf-fw" aria-hidden="true"></i>Ancestry</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.facebook }}"><i class="fa fa-facebook gf-fw" aria-hidden="true"></i>Facebook</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.google }}"><i class="fa fa-google gf-fw" aria-hidden="true"></i>Google</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.google }}"><i class="fa fa-vk gf-fw" aria-hidden="true"></i>ВКонтакте</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.google }}"><i class="gf gf-yandex-rus gf-fw" aria-hidden="true"></i>Яндекс</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.google }}"><i class="gf gf-mailru gf-fw" aria-hidden="true"></i>Mail.Ru</a></li>
+        <li class="list-inline-item col-12 col-sm"><a role="button" class="btn btn-secondary btn-social my-1 w-100 text-left" href="{{ login_paths.google }}"><i class="fa fa-github gf-fw" aria-hidden="true"></i>GitHub</a></li>
+    </ul>
+    </p>
+{% endif %}

@@ -25,6 +25,7 @@ namespace App;
 use App\Controller\AgentsController;
 use App\Controller\EventsController;
 use App\Controller\PersonsController;
+use App\Controller\PlaceController;
 use App\Controller\PlacesController;
 use App\Controller\SourcesController;
 use App\Controller\Importer\PlacesImporter;
@@ -46,7 +47,7 @@ $app['places.importer'] = function () use ($app) {
 };
 //
 $app['places.controller'] = function () use ($app) {
-    return new PlacesController();
+    return new PlaceController();
 };
 $app['sources.controller'] = function () {
     return new SourcesController();
@@ -102,6 +103,9 @@ $app->error(
     }
 );
 
+// Register security controllers
+include BASE_DIR.'/app/security_controllers.php';
+
 // Register routes
 $app->get(
     '/',
@@ -119,7 +123,7 @@ $app->get('/import/places', "places.importer:import");
 $app->get('/import/places/geo_update', "places.importer:updatePlaceGeoCoordinates");
 $app->get('/import/svrt', "svrt.importer:import");
 //
-PlacesController::bindRoutes($app, '/places');
+PlaceController::bindRoutes($app, '/places');
 SourcesController::bindRoutes($app, '/sources');
 PersonsController::bindRoutes($app, '/persons');
 EventsController::bindRoutes($app, '/events');
@@ -151,7 +155,7 @@ $api->get(
 )
 ->bind('api_statistic');
 //
-PlacesController::bindApiRoutes($api, '/places');
+PlaceController::bindApiRoutes($api, '/places');
 SourcesController::bindApiRoutes($api, '/sources');
 PersonsController::bindApiRoutes($api, '/persons');
 EventsController::bindApiRoutes($api, '/events');

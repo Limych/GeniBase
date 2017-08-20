@@ -1,0 +1,62 @@
+@charset "UTF-8";
+
+@font-face {
+	font-family: 'GeniFont';
+	src: url('/fonts/genifont.eot?vtg74h');
+	src: url('/fonts/genifont.eot?vtg74h#iefix') format('embedded-opentype'),
+		url('/fonts/genifont.ttf?vtg74h') format('truetype'),
+		url('/fonts/genifont.woff?vtg74h') format('woff'),
+		url('/fonts/genifont.svg?vtg74h#genifont') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.gf {
+	display: inline-block;
+	font: normal normal normal 14px/1 GeniFont;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.gf-fw  {
+	 width: 3rem;
+	 text-align: center;
+}
+
+.gf-genibase-leaf:before {
+	content: "\e907";
+}
+
+.gf-genibase:before {
+	content: "\e908";
+}
+
+.gf-familysearch:before {
+	content: "\e900";
+}
+
+.gf-myheritage:before {
+	content: "\e901";
+}
+
+.gf-geni:before {
+	content: "\e902";
+}
+
+.gf-yandex-rus:before {
+	content: "\e903";
+}
+
+.gf-yandex-eng:before {
+	content: "\e904";
+}
+
+.gf-mailru:before {
+	content: "\e905";
+}
+
+.gf-ancestry:before {
+	content: "\e906";
+}

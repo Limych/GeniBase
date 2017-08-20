@@ -71,6 +71,8 @@ $app['svrt.1914.store'] = BASE_DIR.'/var/store';
 
 // === API keys ===============================================================
 
-$app['svrt.1914.token'] = '';
+$app['svrt.1914.token'] = ''; // Optional
 $app['google_api.key'] = ''; // Optional
 $app['google_api.secret'] = ''; // Optional
+$app['facebook_api.key'] = ''; // Optional
+$app['facebook_api.secret'] = ''; // Optional

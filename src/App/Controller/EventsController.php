@@ -22,7 +22,7 @@
  */
 namespace App\Controller;
 
-use App\Rs\ApiLinksUpdater;
+use GeniBase\Rs\Server\ApiLinksUpdater;
 use Gedcomx\Rs\Client\Rel;
 use GeniBase\Common\Statistic;
 use Silex\Application;

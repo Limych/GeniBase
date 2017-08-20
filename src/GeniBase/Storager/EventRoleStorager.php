@@ -57,7 +57,7 @@ class EventRoleStorager extends ConclusionStorager
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         /** @var EventRole $entity */
 
@@ -92,7 +92,7 @@ class EventRoleStorager extends ConclusionStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $data;
     }
@@ -166,13 +166,13 @@ class EventRoleStorager extends ConclusionStorager
     protected function garbageCleaning()
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         parent::garbageCleaning();
 
         if (! defined('DEBUG_SECONDARY') && mt_rand(1, 10000) > self::GC_PROBABILITY) {
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__);
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__);
             }
             return; // Skip cleaning now
         }
@@ -185,7 +185,7 @@ class EventRoleStorager extends ConclusionStorager
 
         $this->dbs->getDb()->query($query);
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
     }
 }

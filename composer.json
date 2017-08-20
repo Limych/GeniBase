@@ -18,7 +18,11 @@
 		"euskadi31/cors-service-provider" : "~1.0",
 		"symfony/serializer" : "~2.1|~3.0",
 		"symfony/asset" : "~3.3",
-		"bordercloud/sparql" : "dev-master"
+		"bordercloud/sparql" : "dev-master",
+		"orsal/silex-simpleuser" : "dev-master",
+		"gigablah/silex-oauth" : "dev-master",
+		"symfony/form" : "~3.3",
+		"symfony/security" : "~3.3"
 	},
 	"require-dev" : {
 		"phpunit/phpunit" : "*",
@@ -34,7 +38,8 @@
 		"phpmd/phpmd" : "*",
 		"sebastian/phpcpd" : "*",
 		"sebastian/phpdcd" : "*",
-		"limych/foxy-tools" : "dev-master"
+		"limych/foxy-tools" : "dev-master",
+		"symfony/var-dumper" : "~3.3"
 	},
 	"authors" : [{
 			"name" : "Andrey Khrolenok",
@@ -49,8 +54,13 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"" : "src",
-			"GeniBase\\Tests\\" : "tests/phpunit/includes"
+			"GeniBase\\" : "src/GeniBase",
+			"Gedcomx\\" : "src/Gedcomx"
+		}
+	},
+	"autoload-dev" : {
+		"psr-4" : {
+			"GeniBase\\Tests\\" : "tests/GeniBase"
 		}
 	},
 	"scripts" : {
@@ -72,6 +82,14 @@
 			"type" : "git",
 			"url" : "https://github.com/Limych/SPARQL.git",
 			"name" : "bordercloud/sparql"
+		}, {
+			"type" : "git",
+			"url" : "https://github.com/Limych/silex-oauth.git",
+			"name" : "gigablah/silex-oauth"
+		}, {
+			"type" : "git",
+			"url" : "https://github.com/Limych/silex-simpleuser.git",
+			"name" : "jasongrimes/silex-simpleuser"
 		}
 	]
 }

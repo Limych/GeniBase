@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+#dashboard-navbar,
+#dashboard-navbar-login {
+    background-color: #FFF;
+    border-bottom: 1px solid #CCC;
+}
+
+#dashboard-navbar-login {
+    border-bottom-left-radius: 0.5rem;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 9999;
+	opacity: 0.2;
+}
+
+#dashboard-navbar-login:hover,
+#dashboard-navbar-login:active  {
+    opacity: 1;
+}

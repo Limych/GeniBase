@@ -25,8 +25,8 @@ namespace GeniBase\Storager;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
-use GeniBase\DBase\DBaseService;
 use GeniBase\Util;
+use GeniBase\Silex\DBaseService;
 use GeniBase\Util\DateUtil;
 use GeniBase\Util\UUID;
 use Gedcomx\Common\TextValue;
@@ -169,7 +169,7 @@ class GeniBaseStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $suffix = '';
         do {
@@ -185,7 +185,7 @@ class GeniBaseStorager
         )));
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $gbid;
     }
@@ -468,7 +468,7 @@ class GeniBaseStorager
     protected function packData4Save(&$entity, $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $class = get_class($this);
         $ref = new \ReflectionClass($class);
@@ -491,7 +491,7 @@ class GeniBaseStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $data;
     }
@@ -691,12 +691,12 @@ class GeniBaseStorager
     public function save($entity, ExtensibleData $context = null, $o = null)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         $this->garbageCleaning();
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__ . '#getObject');
+            \GeniBase\Util\Profiler::startTimer(__METHOD__ . '#getObject');
         }
         /** @var ExtensibleData $ent */
         $this->previousState = $this->getObject();
@@ -704,31 +704,31 @@ class GeniBaseStorager
             $entity = $this->getObject($entity);
         }
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__ . '#getObject');
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__ . '#getObject');
         }
 
         $o = $this->applyDefaultOptions($o, $entity);
         $table = $this->getTableName();
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__ . '#detectPreviousState');
+            \GeniBase\Util\Profiler::startTimer(__METHOD__ . '#detectPreviousState');
         }
         $this->detectPreviousState($entity, $context, $o);
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__ . '#detectPreviousState');
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__ . '#detectPreviousState');
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
+            \GeniBase\Util\Profiler::startTimer(__METHOD__ . '#packData4Save');
         }
         $data = $this->packData4Save($entity, $context, $o);
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__ . '#packData4Save');
         }
 
         if (1 < count($data)) {
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::startTimer(__METHOD__ . '#SQL');
+                \GeniBase\Util\Profiler::startTimer(__METHOD__ . '#SQL');
             }
             try {
                 $this->dbs->getDb()->insert($table, $data);
@@ -744,7 +744,7 @@ class GeniBaseStorager
                 }
             }
             if (defined('DEBUG_PROFILE')) {
-                \App\Util\Profiler::stopTimer(__METHOD__ . '#SQL');
+                \GeniBase\Util\Profiler::stopTimer(__METHOD__ . '#SQL');
             }
 
             if ($entity instanceof Attributable) {
@@ -760,7 +760,7 @@ class GeniBaseStorager
             }
         }
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $entity;
     }
@@ -903,7 +903,7 @@ class GeniBaseStorager
     public function searchRefByTextValues($group, $textValues)
     {
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::startTimer(__METHOD__);
+            \GeniBase\Util\Profiler::startTimer(__METHOD__);
         }
         // TODO: Add type_id check
         $_group = $this->getTypeId($group);
@@ -934,7 +934,7 @@ class GeniBaseStorager
         }
 
         if (defined('DEBUG_PROFILE')) {
-            \App\Util\Profiler::stopTimer(__METHOD__);
+            \GeniBase\Util\Profiler::stopTimer(__METHOD__);
         }
         return $result;
     }
