@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace App\Controller\Importer;
+namespace GeniBase\Importer;
 
-use App\Util;
-use App\Util\PlacesProcessor;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -33,9 +31,12 @@ use Silex\Application;
 use BorderCloud\SPARQL\Endpoint;
 use Gedcomx\Source\SourceDescription;
 use Gedcomx\Conclusion\PlaceDescription;
+use GeniBase\Util;
+use GeniBase\Util\PlacesProcessor;
 
 class PlacesImporter extends GeniBaseImporter
 {
+    // TODO: Remove Silex classes
 
     const OVERTIME_COOKIE   = 'PlacesImporter';
 

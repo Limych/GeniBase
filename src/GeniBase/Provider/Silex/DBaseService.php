@@ -23,6 +23,7 @@
 namespace GeniBase\Provider\Silex;
 
 use Gedcomx\Agent\Agent;
+use GeniBase\DBase\DBaseInterface;
 use Pimple\Container;
 
 /**
@@ -32,7 +33,7 @@ use Pimple\Container;
  * @subpackage Silex
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-class DBaseService extends Container
+class DBaseService extends Container implements DBaseInterface
 {
 
     /**

@@ -1,6 +1,10 @@
 {% extends "layout.html.twig" %}
 
-{% block title %}{{ gedcomx.getPlaces()[0].getNames()[0].getValue() }}{% endblock %}
+{% set place = gedcomx.getPlaces()[0] %}
+{% block title %}{{ place.getNames()[0].getValue() }}{%
+if place.getTemporalDescription() != null %}
+    ({{ place.getTemporalDescription().getNormalizedExtensions()[0].getValue() }})
+{% endif %}{% endblock %}
 
 {% block content %}
 	<div class="card my-3">

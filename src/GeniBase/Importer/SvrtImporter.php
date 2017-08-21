@@ -20,20 +20,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace App\Controller\Importer;
+namespace GeniBase\Importer;
 
-use App\Util;
 use FoxyTools\MsCsv;
 use Gedcomx\Types\FactType;
 use Gedcomx\Types\GenderType;
 use Gedcomx\Types\NamePartType;
 use Gedcomx\Types\ResourceType;
+use GeniBase\Util;
+use GeniBase\Storager\Agents;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SvrtImporter extends GeniBaseImporter
 {
+    // TODO: Remove Silex classes
 
     const REFRESH_PERIOD = 120;  // seconds
 
@@ -261,7 +263,7 @@ class SvrtImporter extends GeniBaseImporter
         } elseif (preg_match('|rsl\.ru/|', $rec->source_url)) {
             $mediator_id = Agents::getRslAgent($this->gbs)->getId();
         }
-        $citation = 'Страница ' . Util::numberFormat($this->app, $rec->source_pg, 0) . '. ' . $rec->source;
+        $citation = 'Страница ' . Util::numberFormat($rec->source_pg, 0, $this->app['locale']) . '. ' . $rec->source;
         $src = $this->gbs->newStorager('Gedcomx\Source\SourceDescription')->save(array(
             'identifiers'   => array(
                 \Gedcomx\Types\IdentifierType::PERSISTENT => 'http://1914.svrt.ru/#source_' . md5($citation),

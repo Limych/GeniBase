@@ -20,33 +20,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace App\Controller\Importer;
+namespace GeniBase\DBase;
 
-use GeniBase\Storager\GeniBaseStorager;
-use Silex\Application;
+use Gedcomx\Agent\Agent;
 
 /**
  *
- * @author Limych
  *
+ * @package GeniBase
+ * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-class GeniBaseImporter
+interface DBaseInterface
 {
 
-    protected $app;
-    protected $gbs;
-    protected $agent;
+    /**
+     *
+     * @param string $table
+     * @return string
+     */
+    public function getTableName($table);
 
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-        $this->gbs = new GeniBaseStorager($app['gb.db']);
-        $this->setAgent(Agents::getGeniBaseAgent($this->gbs));
-    }
+    /**
+     *
+     * @param Agent $agent
+     */
+    public function setAgent(Agent $agent);
 
-    protected function setAgent($agent)
-    {
-        $this->agent = $agent;
-        $this->app['gb.db']->setAgent($this->agent);
-    }
+    /**
+     *
+     * @return \Gedcomx\Agent\Agent
+     */
+    public function getAgent();
+
+    /**
+     *
+     * @param string $type_uri
+     * @return number|null
+     */
+    public function getTypeId($type_uri);
+
+    /**
+     *
+     * @param number $type_id
+     * @return string|null
+     */
+    public function getType($type_id);
 }

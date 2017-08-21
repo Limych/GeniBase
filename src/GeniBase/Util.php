@@ -155,4 +155,149 @@ class Util
         }
         return $token;
     }
+
+    public static function numberFormat($number, $decimals = 2, $locale = 'en')
+    {
+        $last_locale = setlocale(LC_ALL, 0);
+        if (isset($locale)) {
+            setlocale(LC_ALL, $locale);
+        }
+
+        $locale = localeconv();
+
+        $locale_id = strtok(setlocale(LC_NUMERIC, 0), '_.;');
+        switch ($locale_id) {
+            case 'ru':
+                $locale['thousands_sep'] = ' ';
+                break;
+        }
+
+        $formatted = number_format(
+            $number,
+            $decimals,
+            $locale['decimal_point'],
+            $locale['thousands_sep']
+            );
+
+        switch ($locale_id) {
+            case 'ru':
+                $tmp = explode($locale['decimal_point'], $formatted);
+                if (5 == strlen($tmp[0])) {
+                    $tmp[0] = strtr($tmp[0], [$locale['thousands_sep'] => '']);
+                    $formatted = implode($locale['decimal_point'], $tmp);
+                }
+                break;
+        }
+
+        setlocale(LC_ALL, $last_locale);
+        return $formatted;
+    }
+
+    /**
+     *
+     * @return number $miliseconds
+     */
+    public static function executionTime()
+    {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // On Windows: The real time is measured.
+            $spendMiliseconds = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
+        } else {
+            // On Linux: Any time spent on activity that happens outside the execution
+            //           of the script such as system calls using system(), stream operations
+            //           database queries, etc. is not included.
+            //           @see http://php.net/manual/en/function.set-time-limit.php
+            $resourceUsages = getrusage();
+            $spendMiliseconds = $resourceUsages['ru_utime.tv_sec'] * 1000 + $resourceUsages['ru_utime.tv_usec'] / 1000;
+        }
+        return (int) $spendMiliseconds;
+    }
+
+    /**
+     * Check if more that `$miliseconds` ms remains
+     * to error `PHP Fatal error: Maximum execution time exceeded`
+     *
+     * @param  number $miliseconds
+     * @return bool
+     *
+     * @copyright https://stackoverflow.com/users/5747291/martin
+     */
+    public static function isRemainingExecutionTimeBiggerThan($miliseconds = 5000)
+    {
+        $max_execution_time = ini_get('max_execution_time');
+        if ($max_execution_time === 0) {
+            // No script time limitation
+            return true;
+        }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // On Windows: The real time is measured.
+            $spendMiliseconds = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
+        } else {
+            // On Linux: Any time spent on activity that happens outside the execution
+            //           of the script such as system calls using system(), stream operations
+            //           database queries, etc. is not included.
+            //           @see http://php.net/manual/en/function.set-time-limit.php
+            $resourceUsages = getrusage();
+            $spendMiliseconds = $resourceUsages['ru_utime.tv_sec'] * 1000 + $resourceUsages['ru_utime.tv_usec'] / 1000;
+        }
+        $remainingMiliseconds = $max_execution_time * 1000 - $spendMiliseconds;
+        return ($remainingMiliseconds >= $miliseconds);
+    }
+
+    /**
+     * Get last line of text file.
+     *
+     * @param string $fpath Path to file
+     * @return NULL|string Last line of file or NULL on error.
+     */
+    public static function fileGetLastLine($fpath)
+    {
+        $line = '';
+        $cursor = -1;
+
+        $handle = fopen($fpath, 'r');
+        if (false === $handle) {
+            return null;
+        }
+
+        /**
+         * Trim trailing newline chars of the file
+         */
+        while (true) {
+            fseek($handle, $cursor--, SEEK_END);
+            $char = fgetc($handle);
+            if ($char !== "\n" && $char !== "\r") {
+                break;
+            }
+            $line = $char . $line;
+        }
+
+        /**
+         * Read until the start of file or first newline char
+         */
+        while ($char !== false && $char !== "\n" && $char !== "\r") {
+            $line = $char . $line;
+            fseek($handle, $cursor--, SEEK_END);
+            $char = fgetc($handle);
+        }
+
+        fclose($handle);
+        return $line;
+    }
+
+    public static function printStatus($done, $max, $msg = '', $newLine = false)
+    {
+        static $lastMsgLen = 0;
+
+        $prc = $done * 100 / $max;
+        if ($newLine) {
+            $spc = "\n";
+            $lastMsgLen = 0;
+        } else {
+            $spc = str_repeat(' ', max(0, ($lastMsgLen - strlen($msg))));
+            $lastMsgLen = strlen($msg);
+        }
+        $sprc = rtrim(substr("$prc", 0, 5), '.');
+        echo sprintf("\r[%'.-25s] %s%% %s", str_repeat('#', round(25 * $prc / 100)), $sprc, $msg . $spc);
+    }
 }
