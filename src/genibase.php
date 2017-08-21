@@ -123,16 +123,18 @@ if ($app['debug']) {
     );
 }
 
-$app->register(new \GeniBase\Silex\GeniBaseServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\GeniBaseServiceProvider());
 
-$app->register(new \GeniBase\Silex\PlaceMapProvider());
-$app->register(new \GeniBase\Silex\RestApi\RestApiServiceProvider());
-$app->register(new \GeniBase\Silex\ContentCompressor\ContentCompressorServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\PlaceMapProvider());
+$app->register(new \GeniBase\Provider\Silex\RestApi\RestApiServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\ContentCompressor\ContentCompressorServiceProvider());
 
-$app->register(new \GeniBase\Silex\TestServiceProvider()); // FIXME: Remove TestServiceProvider from, production
-$app->register(new \GeniBase\Silex\Gedcomx\AgentsServiceProvider());
-$app->register(new \GeniBase\Silex\Gedcomx\PlaceDescriptionServiceProvider());
-$app->register(new \GeniBase\Silex\Gedcomx\SourceDescriptionServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\TestServiceProvider()); // FIXME: Remove TestServiceProvider from, production
+$app->register(new \GeniBase\Provider\Silex\Gedcomx\AgentsServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\Gedcomx\PlaceDescriptionServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\Gedcomx\SourceDescriptionServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\Gedcomx\EventServiceProvider());
+$app->register(new \GeniBase\Provider\Silex\Gedcomx\PersonServiceProvider());
 
 
 
@@ -141,8 +143,8 @@ $app->register(new \GeniBase\Silex\Gedcomx\SourceDescriptionServiceProvider());
 // Configs for REST API provider
 $app['rest_api.options'] = array(
     'serializers' => array(
-        'json' => \GeniBase\Silex\Encoder\GeniBaseJsonEncoder::class,
-        'xml' => \GeniBase\Silex\Encoder\GeniBaseXmlEncoder::class,
+        'json' => \GeniBase\Provider\Silex\Encoder\GeniBaseJsonEncoder::class,
+        'xml' => \GeniBase\Provider\Silex\Encoder\GeniBaseXmlEncoder::class,
     ),
     'controllers' => array(
         'v1' => array(
@@ -152,6 +154,8 @@ $app['rest_api.options'] = array(
             '/agents' => array( 'agent.controller:mountApiRoutes' ),
             '/places' => array( 'place_description.controller:mountApiRoutes' ),
             '/sources' => array( 'source_description.controller:mountApiRoutes' ),
+            '/events' => array( 'event.controller:mountApiRoutes' ),
+            '/persons' => array( 'person.controller:mountApiRoutes' ),
         ),
     ),
 );

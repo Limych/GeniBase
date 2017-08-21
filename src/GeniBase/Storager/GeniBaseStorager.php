@@ -26,7 +26,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Gedcomx\Gedcomx;
 use Gedcomx\Common\ExtensibleData;
 use GeniBase\Util;
-use GeniBase\Silex\DBaseService;
+use GeniBase\Provider\Silex\DBaseService;
 use GeniBase\Util\DateUtil;
 use GeniBase\Util\UUID;
 use Gedcomx\Common\TextValue;

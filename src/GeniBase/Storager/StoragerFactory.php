@@ -22,7 +22,7 @@
  */
 namespace GeniBase\Storager;
 
-use GeniBase\Silex\DBaseService;
+use GeniBase\Provider\Silex\DBaseService;
 
 /**
  *

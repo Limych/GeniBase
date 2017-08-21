@@ -24,7 +24,7 @@ namespace GeniBase\Storager;
 
 use Gedcomx\Common\Attribution;
 use Gedcomx\Common\ResourceReference;
-use GeniBase\Silex\DBaseService;
+use GeniBase\Provider\Silex\DBaseService;
 
 /**
  *
