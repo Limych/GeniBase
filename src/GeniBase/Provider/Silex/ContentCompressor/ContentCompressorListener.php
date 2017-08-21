@@ -54,7 +54,7 @@ class ContentCompressorListener implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        if (! function_exists('gzdeflate')) {
+        if (! function_exists('gzencode')) {
             return array();
         }
 
@@ -69,8 +69,8 @@ class ContentCompressorListener implements EventSubscriberInterface
             return;
         }
 
-        $this->app['deflate.options.init']();
-        $options = $this->app['deflate.options'];
+        $this->app['content_compressor.options.init']();
+        $options = $this->app['content_compressor.options'];
 
         $request = $event->getRequest();
         $response = $event->getResponse();

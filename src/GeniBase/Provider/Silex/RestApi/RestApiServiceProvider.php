@@ -32,7 +32,11 @@ use Silex\Api\BootableProviderInterface;
 use Silex\Api\ControllerProviderInterface;
 use Silex\Api\EventListenerProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  *
@@ -63,7 +67,11 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             throw new \LogicException('You MUST enable the SerializerServiceProvider to be able to use RestApiServiceProvider.');
         }
 
-        // Default options
+        $app['rest_api.rest_mode'] = false;
+
+        /**
+         * Default options
+         */
         $app['rest_api.options.default'] = array(
             'endpoint' => '/api',
             'require_versioning' => true,
@@ -75,16 +83,23 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             ),
             'accepted_classes' => null, // If set, serialize only described classes. You can set it to callable or service name to check classes on the fly
             'pretty_print' => false,
+
             // TODO: SSL (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#ssl)
+
             // TODO: Rate limiting (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#rate-limiting)
             // https://github.com/CrazyAwesomeCompany/poc-ratelimit/tree/master/src/CAC/Component/RateLimit
         );
 
+        /**
+         * Copy options from constructor if it was set
+         */
         if (! empty($this->options)) {
             $app['rest_api.options'] = $this->options;
         }
 
-        // Initialize $app['rest_api.options']
+        /**
+         * Initialize $app['rest_api.options']
+         */
         $app['rest_api.options.init'] = $app->protect(function() use ($app) {
             $options = $app['rest_api.options.default'];
             if (! empty($app['rest_api.options'])) {
@@ -94,12 +109,53 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             $app['rest_api.options'] = $options;
         });
 
-        // REST API serialization listener
+        /**
+         * The REST API serialization listener
+         */
         $app['rest_api.listener'] = function ($app) {
             return new RestApiListener($app, $app['serializer']);
         };
 
-        // TODO: Error service (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#errors)
+        /**
+         * Make the standart REST API error response
+         *
+         * @see http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#errors
+         */
+        $app['rest_api.error.response'] = $app->protect(function(Request $request, $http_status, $error_message,
+            $error_code = null, $error_description = null) use ($app)
+        {
+            return $this->makeErrorResponse(
+                $app,
+                $request,
+                $http_status,
+                $error_message,
+                $error_code,
+                $error_description
+            );
+        });
+
+        /**
+         * The default REST API error listener
+         */
+        $app['rest_api.error.listener'] = $app->protect(
+            function (\Exception $ex, Request $request, $code) use ($app) {
+                if (! $app['debug'] && $app['rest_api.rest_mode']) {
+                    return $app['rest_api.error.response'](
+                        $request,
+                        $code,
+                        $ex->getMessage(),
+                        $ex->getCode() ?: $code
+                    );
+                }
+            }
+        );
+
+        /**
+         * Register the default REST API error listener in the framework
+         */
+        $app['rest_api.error.listener.register'] = $app->protect(function() use ($app) {
+            $app->error($app['rest_api.error.listener']);
+        });
     }
 
     /**
@@ -188,5 +244,62 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
         $options = $app['rest_api.options'];
 
         $app->mount($options['endpoint'], $this->connect($app));
+    }
+
+    /**
+     * Make Response with REST error message
+     *
+     * @param Application $app
+     * @param Request $request
+     * @param integer $http_status
+     * @param string $error_message
+     * @param null|integer $error_code
+     * @param null|string|array[] $error_description
+     * @return Response
+     */
+    protected function makeErrorResponse(Application $app, Request $request, $http_status,
+        $error_message, $error_code = null, $error_description = null)
+    {
+        if (null === $error_code) {
+            $error_code = $http_status;
+        }
+        $error = array(
+            'code' => intval($error_code),
+            'message' => strval($error_message),
+        );
+        if (! empty($error_description)) {
+            if (is_array($error_description)) {
+                $error['errors'] = array();
+                foreach ($error_description as $err) {
+                    $row = array(
+                        'code' => intval($err['code']) ?: -1,
+                        'message' => strval($err['message']) ?: '',
+                    );
+                    if ($err['field']) {
+                        $row['field'] = strval($err['field']);
+                    }
+                    if ($err['description']) {
+                        $row['description'] = strval($err['description']);
+                    }
+
+                    $error['errors'][] = $row;
+                }
+            } else {
+                $error['description'] = strval($error_description);
+            }
+        }
+
+        $event = new GetResponseForControllerResultEvent($app, $request, Application::MASTER_REQUEST, $error);
+        $app['dispatcher']->dispatch(KernelEvents::VIEW, $event);
+
+        if ($event->hasResponse()) {
+            $response = $event->getResponse();
+            $response->setStatusCode(intval($http_status), strval($error_message));
+            if ($response instanceof Response) {
+                return $response;
+            }
+        }
+
+        return new Response(json_encode($error), $http_status);
     }
 }

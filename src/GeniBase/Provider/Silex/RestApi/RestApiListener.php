@@ -78,12 +78,14 @@ class RestApiListener implements EventSubscriberInterface
         }
 
         $path = $request->getPathInfo();
-        if ($options['endpoint'] !== substr($path, 0, strlen($options['endpoint']))) {
+        $this->app['rest_api.rest_mode'] =
+            ($options['endpoint'] === substr($path, 0, strlen($options['endpoint'])));
+        if (! $this->app['rest_api.rest_mode']) {
             // Not the REST API request
             return;
         }
 
-        // Detect response format by extension
+        // Try to detect response format by extension
         $requestUri = $request->getRequestUri();
         $query = '';
         if ($pos = strpos($requestUri, '?')) {
@@ -97,8 +99,8 @@ class RestApiListener implements EventSubscriberInterface
             }
             $requestUri = $requestUri['dirname'] . '/' . $requestUri['filename'] . $query;
 
-            // Replace request for proper routing
             if ($request->getRequestUri() !== $requestUri) {
+                // Reset request with new URI for proper routing
                 $request->server->set('REQUEST_URI', $requestUri);
                 $request->initialize(
                     $request->query->all(),

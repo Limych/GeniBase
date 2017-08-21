@@ -93,8 +93,8 @@ if ($app['debug']) {
     $logger = new \Doctrine\DBAL\Logging\DebugStack();
     $app['db.config']->setSQLLogger($logger);
     $app->error(
-        function (\Exception $e, $code) use ($app, $logger) {
-            if ($e instanceof \PDOException and count($logger->queries)) {
+        function (\Exception $ex, $code) use ($app, $logger) {
+            if ($ex instanceof \PDOException and count($logger->queries)) {
                 // We want to log the query as an ERROR for PDO exceptions!
                 $query = array_pop($logger->queries);
                 $app['monolog']->err(
@@ -139,6 +139,38 @@ $app->register(new \GeniBase\Provider\Silex\Gedcomx\PersonServiceProvider());
 
 
 // === Register controllers ===================================================
+
+// Errors controller
+
+$app->error(
+    function (\Exception $ex, Request $request, $code) use ($app) {
+        if ($app['debug']) {
+            return;
+        }
+
+        // Check for REST API error
+        $response = $app['rest_api.error.listener']($ex, $request, $code);
+        if ($response) {
+            return $response;
+        }
+
+        // 404.html, or 40x.html, or 4xx.html, or default.html
+        $templates = array(
+            'errors/'.$code.'.html.twig',
+            'errors/'.substr($code, 0, 2).'x.html.twig',
+            'errors/'.substr($code, 0, 1).'xx.html.twig',
+            'errors/default.html.twig',
+        );
+
+        return new Response(
+            $app['twig']->resolveTemplate($templates)->render(array(
+                'status_code' => $code,
+                'status_text' => $ex->getMessage()
+            )),
+            $code
+        );
+    }
+);
 
 // Configs for REST API provider
 $app['rest_api.options'] = array(

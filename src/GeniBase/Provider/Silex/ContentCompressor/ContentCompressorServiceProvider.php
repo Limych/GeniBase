@@ -53,7 +53,7 @@ class ContentCompressorServiceProvider implements ServiceProviderInterface, Even
     {
 
         // Default options
-        $app['deflate.options.default'] = array(
+        $app['content_compressor.options.default'] = array(
             'formats' => array( 'html', 'txt', 'js', 'css', 'json', 'xml', 'rdf', 'atom', 'rss', 'form', ),
             'threshold' => 2048,
             'encoders' => array( 'gzip', 'deflate' ),
@@ -61,21 +61,21 @@ class ContentCompressorServiceProvider implements ServiceProviderInterface, Even
         );
 
         if (! empty($this->options)) {
-            $app['deflate.options'] = $this->options;
+            $app['content_compressor.options'] = $this->options;
         }
 
-        // Initialize $app['deflate.options']
-        $app['deflate.options.init'] = $app->protect(function() use ($app) {
-            $options = $app['deflate.options.default'];
-            if (! empty($app['deflate.options'])) {
+        // Initialize $app['content_compressor.options']
+        $app['content_compressor.options.init'] = $app->protect(function() use ($app) {
+            $options = $app['content_compressor.options.default'];
+            if (! empty($app['content_compressor.options'])) {
                 // Merge default and configured options
-                $options = array_replace_recursive($options, $app['deflate.options']);
+                $options = array_replace_recursive($options, $app['content_compressor.options']);
             }
-            $app['deflate.options'] = $options;
+            $app['content_compressor.options'] = $options;
         });
 
         // Deflate listener
-        $app['deflate.listener'] = function ($app) {
+        $app['content_compressor.listener'] = function ($app) {
             return new ContentCompressorListener($app);
         };
     }
@@ -88,6 +88,6 @@ class ContentCompressorServiceProvider implements ServiceProviderInterface, Even
      */
     public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
-        $dispatcher->addSubscriber($app['deflate.listener']);
+        $dispatcher->addSubscriber($app['content_compressor.listener']);
     }
 }
