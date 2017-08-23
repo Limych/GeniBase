@@ -83,11 +83,15 @@ if ($app['debug']) {
     $app->register(new \Silex\Provider\VarDumperServiceProvider());
 }
 $app->register(new \Silex\Provider\MonologServiceProvider());
+$app->register(new \Silex\Provider\HttpFragmentServiceProvider());
 $app->register(new \Silex\Provider\ServiceControllerServiceProvider());
 $app->register(new \Silex\Provider\AssetServiceProvider());
-$app->register(new \Silex\Provider\HttpFragmentServiceProvider());
 $app->register(new \Silex\Provider\SerializerServiceProvider());
 $app->register(new \Silex\Provider\DoctrineServiceProvider());
+
+$app->register(new \Silex\Provider\HttpCacheServiceProvider());
+Request::setTrustedProxies(array('127.0.0.1', '::1'));
+
 if ($app['debug']) {
     // SQL-queries logger
     $logger = new \Doctrine\DBAL\Logging\DebugStack();

@@ -289,7 +289,19 @@ class Util
     {
         static $lastMsgLen = 0;
 
-        $prc = $done * 100 / $max;
+        static $progressLen = 25;
+
+        if ($max) {
+            $prc = $done * 100 / $max;
+            $progress = str_repeat('#', round($progressLen * $prc / 100));
+            $sprc = rtrim(substr("$prc", 0, 5), '.');
+        } else {
+            $progress = str_repeat('?', $progressLen);
+            $sprc = '??';
+        }
+
+        $msg = sprintf("\r[%'.-{$progressLen}s] %s%% %s", $progress, $sprc, $msg);
+
         if ($newLine) {
             $spc = "\n";
             $lastMsgLen = 0;
@@ -297,7 +309,7 @@ class Util
             $spc = str_repeat(' ', max(0, ($lastMsgLen - strlen($msg))));
             $lastMsgLen = strlen($msg);
         }
-        $sprc = rtrim(substr("$prc", 0, 5), '.');
-        echo sprintf("\r[%'.-25s] %s%% %s", str_repeat('#', round(25 * $prc / 100)), $sprc, $msg . $spc);
+
+        echo $msg . $spc;
     }
 }

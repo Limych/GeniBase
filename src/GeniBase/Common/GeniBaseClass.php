@@ -66,7 +66,8 @@ class GeniBaseClass
      */
     public function embed(GeniBaseClass $data)
     {
-    }  // Empty
+        // Do nothing
+    }
 
     /**
      * Initializes this GeniBaseClass from an associative array
@@ -75,7 +76,8 @@ class GeniBaseClass
      */
     public function initFromArray(array $o)
     {
-    }  // Empty
+        // Do nothing
+    }
 
     /**
      * Returns the associative array for this GeniBaseClass
@@ -109,8 +111,8 @@ class GeniBaseClass
         if ($xml->hasAttributes) {
             $moreAttributes = $xml->moveToFirstAttribute();
             while ($moreAttributes) {
-                if (!$this->setKnownAttribute($xml)) {
-                    //skip unknown attributes...
+                if (! $this->setKnownAttribute($xml)) {
+                    // Skip unknown attributes…
                 }
                 $moreAttributes = $xml->moveToNextAttribute();
             }
@@ -120,48 +122,11 @@ class GeniBaseClass
             $xml->read();
             while ($xml->nodeType != \XMLReader::END_ELEMENT) {
                 if ($xml->nodeType != \XMLReader::ELEMENT) {
-                    //no-op: skip any insignificant whitespace, comments, etc.
-                } elseif (!$this->setKnownChildElement($xml)) {
-                    $n = $xml->localName;
-                    $ns = $xml->namespaceURI;
-                    $elementIsEmpty = $xml->isEmptyElement;
-                    $dom = new \DOMDocument();
-                    $nodeFactory = $dom;
-                    $dom->formatOutput = true;
-
-                    $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
-                    $dom->appendChild($e);
-                    if ($xml->hasAttributes) {
-                        $moreAttributes = $xml->moveToFirstAttribute();
-                        while ($moreAttributes) {
-                            $e->setAttributeNS($ns, $xml->localName, $xml->value);
-                            $moreAttributes = $xml->moveToNextAttribute();
-                        }
-                    }
-                    $dom = $e;
-                    if (!$elementIsEmpty) {
-                        //create any child elements...
-                        while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n) {
-                            if ($xml->nodeType == \XMLReader::ELEMENT) {
-                                $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
-                                $dom->appendChild($e);
-                                if ($xml->hasAttributes) {
-                                    $moreAttributes = $xml->moveToFirstAttribute();
-                                    while ($moreAttributes) {
-                                        $e->setAttributeNS($xml->namespaceURI, $xml->localName, $xml->value);
-                                        $moreAttributes = $xml->moveToNextAttribute();
-                                    }
-                                }
-                            } elseif ($xml->nodeType == \XMLReader::TEXT) {
-                                $dom->textContent = $xml->value;
-                            } elseif ($xml->nodeType == \XMLReader::END_ELEMENT) {
-                                $dom = $dom->parentNode;
-                            }
-                        }
-                    }
-                    array_push($this->extensionElements, $dom);
+                    // No-op: skip any insignificant whitespace, comments, etc.
+                } elseif (! $this->setKnownChildElement($xml)) {
+                    // Skip unknown elements…
                 }
-                $xml->read(); //advance the reader.
+                $xml->read(); // Advance the reader
             }
         }
     }

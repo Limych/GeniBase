@@ -75,6 +75,8 @@ class SourceDescriptionServiceProvider extends GedcomxServiceProvider
      */
     public function mountApiRoutes($app, $base)
     {
+        parent::mountApiRoutes($app, $base);
+
         $app->get($base, "source_description.controller:getComponents");
         $app->get($base.'/{id}', "source_description.controller:getOne");
         $app->get($base.'/{id}/components', "source_description.controller:getComponents");

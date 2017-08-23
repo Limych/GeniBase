@@ -22,14 +22,15 @@
  */
 namespace GeniBase\Util;
 
-class PlacesProcessor {
+class PlacesProcessor
+{
 
-    const LIST_START    = 'ListStart';
-    const LIST_END      = 'ListEnd';
-    const PLACE         = 'Place';
+    const LIST_START = 'ListStart';
+    const LIST_END = 'ListEnd';
+    const PLACE = 'Place';
 
-    const CONTRACT_URI   = false;
-    const EXPAND_URI    = true;
+    const CONTRACT_URI = false;
+    const EXPAND_URI = true;
 
     protected $callback;
 
@@ -48,29 +49,89 @@ class PlacesProcessor {
     }
 
     protected $cnt;
+
     protected $max;
+
     protected $cnt_entity;
+
     protected $lastPlace;
 
+    protected $resource;
+
+    protected $tokens;
+
+    /**
+     *
+     * @param resource|string $input
+     *
+     * @throws \InvalidArgumentException
+     */
     public function process($input)
     {
-        $input = preg_split('/\s*([\{\}\n])\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        if (is_resource($input)) {
+            $res = get_resource_type($input);
+            if (!in_array($res, array( 'stream' ))) {
+                throw new \InvalidArgumentException("Unsupported resource type ($res)");
+            }
+            $this->resource = $input;
+            $this->tokens = array();
+            $this->max = null;
+        } else {
+            $this->resource = null;
+            $this->tokens = self::parseInput($input);
+            $this->max = count($this->tokens);
+        }
+
         $this->cnt = $this->cnt_entity = 0;
-        $this->max = count($input);
         $this->lastPlace = null;
-        return $this->processBlock($input);
+        $this->processBlock();
     }
 
-    protected function processBlock(&$input, $parentPlace = null)
+    protected static function parseInput($data)
+    {
+        return preg_split('/\s*([\{\}\n])\s*/u', $data, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    }
+
+    protected function getToken()
+    {
+        if (empty($this->tokens) && ! empty($this->resource)) {
+            switch (get_resource_type($this->resource)) {
+                case 'stream':
+                    $input = fgets($this->resource);
+                    if (false === $input) {
+                        throw new \RuntimeException('Source stream read error');
+                    }
+                    break;
+            }
+            $this->tokens = self::parseInput($input);
+        }
+
+        if (! empty($this->tokens)) {
+            return array_shift($this->tokens);
+        }
+
+        return null;
+    }
+
+    protected function processBlock($input = null, $parentPlace = null)
     {
         if (false === call_user_func($this->callback, self::LIST_START, $parentPlace)) {
             return false;
         }
+
         $prevToken = null;
         $lastPlace = $parentPlace;
         $queue = array();
-        while (! empty($input)) {
-            $token = array_shift($input);
+        while (true) {
+            if (isset($input)) {
+                $token = array_shift($input);
+            } else {
+                $token = $this->getToken();
+            }
+            if (! isset($token)) {
+                break;
+            }
+
             $this->cnt++;
             switch ($token) {
                 case "\n":
@@ -99,7 +160,7 @@ class PlacesProcessor {
                     if (! empty($token[1])) {
                         $prevToken = $token[0];
                         $queue[] = $token[1];
-                        $this->cnt--;
+                        $this->cnt --;
                     } elseif (false === $this->processToken($token[0], $parentPlace)) {
                         return false;
                     } else {
@@ -108,12 +169,11 @@ class PlacesProcessor {
                     break;
             }
         }
-        if (! empty($queue)
-            && (
-                false === $this->processToken($prevToken, $parentPlace)
-                || false === $this->processBlock($queue, $this->lastPlace)
-            )
-        ) {
+
+        if (! empty($queue) && (
+            false === $this->processToken($prevToken, $parentPlace)
+            || false === $this->processBlock($queue, $this->lastPlace)
+        )) {
             return false;
         }
         if (false === call_user_func($this->callback, self::LIST_END, $parentPlace)) {
@@ -127,25 +187,30 @@ class PlacesProcessor {
         return '!^' . preg_quote($reg, '!') . '!';
     }
 
+    static $namespaces = array(
+        'wd:' => 'http://www.wikidata.org/entity/',
+        'gb:' => 'http://genibase.net/',
+    );
+
+    public static function registerNamespace($namespace, $uri)
+    {
+        self::$namespaces[$namespace . ':'] = $uri;
+    }
+
     public static function processURI($uri, $mode = self::EXPAND_URI)
     {
-        static $namespaces = array(
-            'wd:'    => 'http://www.wikidata.org/entity/',
-//             'gb:'    => 'http://genibase.net/',
-        );
-
         switch ($mode) {
             case self::EXPAND_URI:
                 $uri = preg_replace(
-                    array_map(__CLASS__.'::pregPrepare', array_keys($namespaces)),
-                    array_values($namespaces),
+                    array_map(__CLASS__ . '::pregPrepare', array_keys(self::$namespaces)),
+                    array_values(self::$namespaces),
                     $uri
                 );
                 break;
             case self::CONTRACT_URI:
                 $uri = preg_replace(
-                    array_map(__CLASS__.'::pregPrepare', array_values($namespaces)),
-                    array_keys($namespaces),
+                    array_map(__CLASS__ . '::pregPrepare', array_values(self::$namespaces)),
+                    array_keys(self::$namespaces),
                     $uri
                 );
                 break;
@@ -159,7 +224,7 @@ class PlacesProcessor {
     {
         $data = preg_split('/\s+(\??[#@]\S+|\??\%[^%]*\%|\??\[[^\s\]]*\]?)\s*/u', $input, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         $input = array(
-            'rdfs:label'  => array(),
+            'rdfs:label' => array()
         );
         while (! empty($data)) {
             $token = array_shift($data);
@@ -171,11 +236,11 @@ class PlacesProcessor {
             switch ($type) {
                 case '%':
                     $key = 'rdf:type';
-                    $token = self::processURI(substr($token, 1, -1));
+                    $token = self::processURI(substr($token, 1, - 1));
                     break;
                 case '?%':
                     $key = 'disputedType';
-                    $token = self::processURI(substr($token, 2, -1));
+                    $token = self::processURI(substr($token, 2, - 1));
                     break;
                 case '#':
                     $key = 'owl:sameAs';
@@ -210,7 +275,9 @@ class PlacesProcessor {
                     $input[$key] = $token;
                 } else {
                     if (! is_array($input[$key])) {
-                        $input[$key] = array($input[$key]);
+                        $input[$key] = array(
+                            $input[$key]
+                        );
                     }
                     $input[$key][] = $token;
                 }
@@ -231,7 +298,8 @@ class PlacesProcessor {
         return self::expandNamesProcessor($name);
     }
 
-    private static function expandNamesProcessor(&$input) {
+    private static function expandNamesProcessor(&$input)
+    {
         $input = trim($input);
         $queue = array();
         $bracket = false;
@@ -242,7 +310,7 @@ class PlacesProcessor {
                 $queue = array_map(function ($v) use ($tokens) {
                     return "$v ${tokens[0]}";
                 }, $queue);
-                    $bracket = false;
+                $bracket = false;
             } else {
                 $queue[] = $tokens[0];
             }

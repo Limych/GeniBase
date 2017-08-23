@@ -87,7 +87,7 @@ class GeniBaseXmlEncoder extends XmlEncoder
 
         $xml = new \XMLWriter();
         $xml->openMemory();
-        if ($context['pretty_print']) {
+        if (! empty($context['pretty_print'])) {
             $xml->setIndent(true);
             $xml->setIndentString('    ');
         }

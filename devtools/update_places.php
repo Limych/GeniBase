@@ -22,9 +22,9 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
 
-use App\Util\PlacesIterator;
 use BorderCloud\SPARQL\Endpoint;
-use App\Util;
+use GeniBase\Util;
+use GeniBase\Util\PlacesProcessor;
 
 
 
@@ -55,28 +55,34 @@ array_shift($argv);
 $src_fpath = array_shift($argv);
 $dst_fpath = array_shift($argv);
 
-if (! empty($dst_fpath)
-    && (is_dir($dst_fpath) || in_array(substr($dst_fpath, -1), array('/', DIRECTORY_SEPARATOR)))
-) {
-    if ('--' == $src_fpath) {
-        die2(3, "ERROR: Please declare target file, not directory.\n");
-    }
-    $dst_fpath .= DIRECTORY_SEPARATOR . basename($src_fpath);
-}
 if (empty($src_fpath) || ('--' == $src_fpath)) {
-    $data = @file_get_contents('php://stdin');
+    $input = STDIN;
 
-} elseif (! file_exists($src_fpath) || ! is_readable($src_fpath) || (false === $data = @file_get_contents($src_fpath))) {
-    die2(2, "ERROR: Can't read source file.\n");
+} elseif (false === $input = file_get_contents($src_fpath)) {
+    die2(2, 'Source stream read error.');
 }
 
-$data = PlacesIterator::run($data, 'updatePlace');
+if (! empty($dst_fpath)) {
+    if (is_dir($dst_fpath) || in_array(substr($dst_fpath, -1), array('/', DIRECTORY_SEPARATOR))) {
+        if ('--' == $src_fpath) {
+            die2(1, 'Please declare target file, not directory.');
+        }
+        $dst_fpath .= DIRECTORY_SEPARATOR . basename($src_fpath);
+    }
 
-if (empty($dst_fpath)) {
-    echo $data;
+    if (false === $dst_stream = fopen($dst_fpath, 'w')) {
+        die2(2, 'Destination stream open error.');
+    }
+}
 
-} elseif (false === @file_put_contents($dst_fpath, $data)) {
-    die2(3, "ERROR: Can't write to target file.\n");
+try {
+    PlacesProcessor::run($input, 'updatePlace');
+} catch (\Exception $ex) {
+    die2(3, $ex->getMessage());
+}
+
+if (! empty($dst_fpath)) {
+    fclose($dst_stream);
 }
 
 die(0);
@@ -89,49 +95,137 @@ function die2($code, $msg)
     die($code);
 }
 
-function updatePlace($place, $parent, $cnt, $max)
+function write($output)
 {
-    global $dst_fpath;
+    global $dst_stream;
 
-    if (! empty($dst_fpath)) {
-        Util::printStatus($cnt, $max, "$cnt/$max tokens processed");
+    if (empty($dst_stream)) {
+        echo $output;
+    } else {
+        fputs($dst_stream, $output);
+    }
+}
+
+function updatePlace($state, $place)
+{
+    global $dst_stream, $output;
+
+    static $level = 0;
+
+    if ($state === PlacesProcessor::LIST_START) {
+        if ($level++) {
+            write(" {");
+        }
+        return true;
+    } elseif ($state === PlacesProcessor::LIST_END) {
+        if (--$level) {
+            write("\n" . str_repeat("\t", $level - 1) . "}");
+        }
+        return true;
+    }
+
+    list($state, $place, $parent, $cnt, $max) = func_get_args();
+
+    if (! empty($dst_stream)) {
+        if ($max) {
+            Util::printStatus($cnt, $max, "$cnt/$max tokens processed");
+        } else {
+            Util::printStatus($cnt, null, "$cnt tokens processed");
+        }
+    }
+    if ($cnt > 1) {
+        write("\n");
     }
 
     static $country;
 
+    $candidate = $place;
     if (empty($country)) {
         $country = $place;
     }
-    if (! empty($place['alias'])) {
-        $alias = PlacesIterator::processURI($place['alias'], false);
+    if (! empty($place['owl:sameAs'])) {
+        $alias = PlacesProcessor::processURI($place['owl:sameAs'], false);
         $query = "BIND( $alias AS ?item )\n  " .
             "FILTER ( LANG(?itemLabel) = \"ru\" )";
     } else {
         $tmp = [];
-        foreach (PlacesIterator::expandNames($place['name']) as $name) {
+        foreach ($place['rdfs:label'] as $name) {
             $tmp[] = "\"$name\"@ru";
         }
         $query = "VALUES ?itemLabel { " . implode(' ', $tmp) . " }";
 
         $filter = [];
-        if (! empty($country['alias'])) {
-            $alias = PlacesIterator::processURI($country['alias'], false);
+        if (! empty($country['owl:sameAs'])) {
+            $alias = PlacesProcessor::processURI($country['owl:sameAs'], PlacesProcessor::CONTRACT_URI);
             $filter[] = "?item wd:P17 $alias .";
         }
-        if (! empty($parent['alias'])) {
-            $alias = PlacesIterator::processURI($parent['alias'], false);
+        if (! empty($parent['owl:sameAs'])) {
+            $alias = PlacesProcessor::processURI($parent['owl:sameAs'], PlacesProcessor::CONTRACT_URI);
             $filter[] = "?item wd:P131 $alias .";
         }
         if (! empty($filter)) {
             $filter = ' { ' . implode(' UNION ', $filter) . ' } ';
             $candidate = digBigData($place, $parent, "$query\n  $filter");
-            if ($place !== $candidate) {
-                return $candidate;
+        }
+    }
+
+    if ($place == $candidate) {
+        $candidate = digBigData($place, $parent, $query);
+    }
+
+    // Save data
+    $res = str_repeat("\t", $level - 1) . trim($candidate['label']);
+    if (isset($candidate['rdf:type'])) {
+        $candidate['rdf:type'] = PlacesProcessor::processURI($candidate['rdf:type'], PlacesProcessor::CONTRACT_URI);
+        $res .= ' %' . $candidate['rdf:type'] . '%';
+    }
+    if (isset($candidate['disputedType'])) {
+        $candidate['disputedType'] = PlacesProcessor::processURI($candidate['disputedType'], PlacesProcessor::CONTRACT_URI);
+        if (empty($candidate['rdf:type']) || $candidate['disputedType'] !== $candidate['rdf:type']) {
+            $res .= ' ?%' . $candidate['disputedType'] . '%';
+        }
+    }
+    if (isset($candidate['owl:sameAs'])) {
+        $candidate['owl:sameAs'] = PlacesProcessor::processURI($candidate['owl:sameAs'], PlacesProcessor::CONTRACT_URI);
+        $res .= ' #' . $candidate['owl:sameAs'];
+    }
+    if (isset($candidate['disputedAlias'])) {
+        $alias = $candidate['disputedAlias'];
+        foreach ((is_array($alias) ? $alias : array( $alias )) as $alias) {
+            $alias = PlacesProcessor::processURI($alias, PlacesProcessor::CONTRACT_URI);
+            if (empty($candidate['owl:sameAs']) || $alias !== $candidate['owl:sameAs']) {
+                $res .= ' ?#' . $alias;
+            }
+        }
+    }
+    if (isset($candidate['gx:temporalDescription'])) {
+        $res .= ' [' . $candidate['gx:temporalDescription'] . ']';
+    }
+    if (isset($candidate['disputedTemporal'])) {
+        $temporal = $candidate['disputedTemporal'];
+        foreach (is_array($temporal) ? $temporal : array( $temporal ) as $temporal) {
+            if (empty($candidate['gx:temporalDescription'])
+                || $temporal !== $candidate['gx:temporalDescription']
+            ) {
+                $res .= ' ?[' . $temporal . ']';
+            }
+        }
+    }
+    if (! empty($candidate['location'])) {
+        $res .= ' @' . $candidate['location'];
+    }
+    if (isset($candidate['disputedLocation'])) {
+        $location = $candidate['disputedLocation'];
+        foreach (is_array($location) ? $location : array( $location ) as $location) {
+            if (empty($candidate['location'])
+                || $location !== $candidate['location']
+            ) {
+                $res .= ' ?@' . $location;
             }
         }
     }
 
-    return digBigData($place, $parent, $query);
+    write($res);
 }
 
 function digBigData($place, $parent, $query)
@@ -140,34 +234,34 @@ function digBigData($place, $parent, $query)
 
     if (empty($metaTypes)) {
         // ATE-0
-        PlaceTypes::registerType('страна', 'wd:Q6256');
+        xPlaceTypes::registerType('страна', 'wd:Q6256');
 
         // ATE-1
-//         PlaceTypes::registerType('ATE-1', 'wd:Q10864048');
-        PlaceTypes::registerType('губерния', 'wd:Q86622', 'wd:Q217691');
-        PlaceTypes::registerType('область', 'wd:Q171308', 'wd:Q7075127');
+//         xPlaceTypes::registerType('ATE-1', 'wd:Q10864048');
+        xPlaceTypes::registerType('губерния', 'wd:Q86622', 'wd:Q217691');
+        xPlaceTypes::registerType('область', 'wd:Q171308', 'wd:Q7075127');
 
         // ATE-2
-//         PlaceTypes::registerType('ATE-2', 'wd:Q13220204');
-        PlaceTypes::registerType('уезд', 'wd:Q18867465');
+//         xPlaceTypes::registerType('ATE-2', 'wd:Q13220204');
+        xPlaceTypes::registerType('уезд', 'wd:Q18867465');
 
         // ATE-3
-//         PlaceTypes::registerType('ATE-3', 'wd:Q13221722');
-        PlaceTypes::registerType('волость', 'wd:Q687121', 'wd:Q20732405');
-        PlaceTypes::registerType('гмина', 'wd:Q3504085');
+//         xPlaceTypes::registerType('ATE-3', 'wd:Q13221722');
+        xPlaceTypes::registerType('волость', 'wd:Q687121', 'wd:Q20732405');
+        xPlaceTypes::registerType('гмина', 'wd:Q3504085');
 
-//         PlaceTypes::registerType('город', 'wd:Q515');
-//         PlaceTypes::registerType('посад', 'wd:Q2989457', 'wd:Q3957');
-//         PlaceTypes::registerType('село', 'wd:Q532');
-//         PlaceTypes::registerType('посёлок', 'wd:Q2514025', 'wd:Q486972 wd:Q1989945');
-//         PlaceTypes::registerType('деревня', 'wd:Q5084');
-//         PlaceTypes::registerType('станица', 'wd:Q748331');
-//         PlaceTypes::registerType('хутор', 'wd:Q2023000');
+//         xPlaceTypes::registerType('город', 'wd:Q515');
+//         xPlaceTypes::registerType('посад', 'wd:Q2989457', 'wd:Q3957');
+//         xPlaceTypes::registerType('село', 'wd:Q532');
+//         xPlaceTypes::registerType('посёлок', 'wd:Q2514025', 'wd:Q486972 wd:Q1989945');
+//         xPlaceTypes::registerType('деревня', 'wd:Q5084');
+//         xPlaceTypes::registerType('станица', 'wd:Q748331');
+//         xPlaceTypes::registerType('хутор', 'wd:Q2023000');
 
-        PlaceTypes::registerType('', 'wd:Q486972', 'wd:Q2989457 wd:Q3957 wd:Q532 wd:Q2514025 wd:Q486972 " .
+        xPlaceTypes::registerType('', 'wd:Q486972', 'wd:Q2989457 wd:Q3957 wd:Q532 wd:Q2514025 wd:Q486972 " .
             "wd:Q1989945 wd:Q5084 wd:Q748331 wd:Q2023000');
 
-        $metaTypes = PlaceTypes::getMainTypes();
+        $metaTypes = xPlaceTypes::getMainTypes();
         $metaTypes[] = 'wd:Q15642541';  // human-geographic territorial entity (геополитическая область)
 //         $metaTypes[] = 'wd:Q486972';    // settlement (населённый пункт)
 
@@ -175,12 +269,12 @@ function digBigData($place, $parent, $query)
         $metaTypes = implode(' ', array_unique($metaTypes));
     }
 
-	if (empty($place['alias'])) {
+	if (empty($place['owl:sameAs'])) {
 		$place['disputedAlias'] = 'wd:';
 	} else {
 		unset($place['disputedAlias']);
 	}
-	if (empty($place['type'])) {
+	if (empty($place['rdf:type'])) {
 		$place['disputedType'] = '';
 	} else {
 		unset($place['disputedType']);
@@ -190,7 +284,7 @@ function digBigData($place, $parent, $query)
 	} else {
 		unset($place['disputedLocation']);
 	}
-	if (empty($place['temporal'])) {
+	if (empty($place['gx:temporalDescription'])) {
 		$place['disputedTemporal'] = '/';
 	} else {
 		unset($place['disputedTemporal']);
@@ -223,7 +317,7 @@ function digBigData($place, $parent, $query)
     // Prepare candidates
     $candidates = [];
     foreach ($rows['result']['rows'] as $row) {
-        $item = PlacesIterator::processURI($row['item'], false);
+        $item = PlacesProcessor::processURI($row['item'], PlacesProcessor::CONTRACT_URI);
         if (empty($candidates[$item])) {
             $candidates[$item] = [];
         }
@@ -233,8 +327,8 @@ function digBigData($place, $parent, $query)
         if (empty($candidates[$item]['type'])) {
             $candidates[$item]['type'] = [];
         }
-        $candidates[$item]['type'][PlacesIterator::processURI($row['itemType'], false)] = true;
-        $candidates[$item]['type'][PlacesIterator::processURI($row['itemMetaType'], false)] = true;
+        $candidates[$item]['type'][PlacesProcessor::processURI($row['itemType'], PlacesProcessor::CONTRACT_URI)] = true;
+        $candidates[$item]['type'][PlacesProcessor::processURI($row['itemMetaType'], PlacesProcessor::CONTRACT_URI)] = true;
 
         // Labels
         if (empty($candidates[$item]['label'])) {
@@ -280,7 +374,7 @@ function digBigData($place, $parent, $query)
 
         // Types
         foreach (array_keys($wikidata['type']) as $type) {
-            $name = PlaceTypes::getTypeName($type);
+            $name = xPlaceTypes::getTypeName($type);
             if (null !== $name) {
                 $wikidata['type'] = $name;
                 $passed = true;
@@ -288,11 +382,8 @@ function digBigData($place, $parent, $query)
             }
         }
 
-        // Labels
         $wikidata['label'] = array_unique($wikidata['label']);
-
-        // Existence dates
-        $wikidata['temporal'] = implode(',', array_unique($wikidata['temporal']));
+        $wikidata['temporal'] = array_unique($wikidata['temporal']);
 
         if ($passed) {
             $filtered[$item] = $wikidata;
@@ -302,15 +393,17 @@ function digBigData($place, $parent, $query)
     // Apply candidates
     if (1 === count($filtered)) {
         $wikidata = array_shift($filtered);
-        $hasAlias = ! empty($place['alias']);
-        if (! $hasAlias || ($place['alias'] !== $wikidata['item'])) {
+        $hasAlias = ! empty($place['owl:sameAs']);
+        if (! $hasAlias
+            || (PlacesProcessor::processURI($place['owl:sameAs'], PlacesProcessor::CONTRACT_URI) !== $wikidata['item'])
+        ) {
             $place['disputedAlias'] = $wikidata['item'];
         }
-        $tmp = PlacesIterator::processURI($wikidata['type']);
-        if (! empty($tmp)
-            && (empty($place['type']) || ($place['type'] !== $tmp))
-        ) {
-            $place['disputedType'] = $tmp;
+        if (! empty($tmp) && (
+            empty($place['rdf:type'])
+            || (PlacesProcessor::processURI($place['rdf:type'], PlacesProcessor::CONTRACT_URI) !== $wikidata['type'])
+        )) {
+            $place['disputedType'] = $wikidata['type'];
         }
         if (! empty($wikidata['location'])
             && (empty($place['location']) || ($place['location'] !== $wikidata['location']))
@@ -318,23 +411,23 @@ function digBigData($place, $parent, $query)
             $place['disputedLocation'] = $wikidata['location'];
         }
         if (! empty($wikidata['temporal'])
-            && (empty($place['temporal']) || ($place['temporal'] !== $wikidata['temporal']))
+            && (empty($place['gx:temporalDescription']) || ($place['gx:temporalDescription'] !== $wikidata['temporal']))
         ) {
             $place['disputedTemporal'] = $wikidata['temporal'];
         }
     } elseif (! empty($filtered)) {
-        if (! empty($place['alias'])) {
-            unset($filtered[$place['alias']]);
+        if (! empty($place['owl:sameAs'])) {
+            unset($filtered[$place['owl:sameAs']]);
         }
         if (! empty($filtered)) {
-            $place['disputedAlias'] = implode(',', array_keys($filtered));
+            $place['disputedAlias'] = array_keys($filtered);
         }
     } elseif (! empty($candidates)) {
-        if (! empty($place['alias'])) {
-            unset($candidates[$place['alias']]);
+        if (! empty($place['owl:sameAs'])) {
+            unset($candidates[$place['owl:sameAs']]);
         }
         if (! empty($candidates)) {
-            $place['disputedAlias'] = implode(',', array_keys($candidates));
+            $place['disputedAlias'] = array_keys($candidates);
         }
     }
 
@@ -343,7 +436,7 @@ function digBigData($place, $parent, $query)
 
 
 
-class PlaceTypes {
+class xPlaceTypes {
 
     private static $types = [];
 

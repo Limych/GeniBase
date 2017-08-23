@@ -169,7 +169,7 @@ class PlacesImporter extends GeniBaseImporter
         $query = "SELECT DISTINCT ?itemEnc ?encUri ?encId ?encLabel WHERE {
   $id p:P1343/pq:P248 ?itemEnc.
   ?itemEnc wdt:P1433/wdt:P361*/wdt:P629* ?encId.
-  VALUES ?encId { wd:Q19190511 wd:Q4114391 wd:Q19180675 wd:Q4091878 wd:Q602358 wd:Q19217220 wd:Q4532135 }
+  VALUES ?encId { wd:Q19190511 wd:Q4114391 wd:Q19180675 wd:Q4091878 wd:Q602358 wd:Q19217220 wd:Q4532135 wd:Q4135594 }
   ?encUri schema:about ?itemEnc.
   ?encId rdfs:label ?encLabel.
   FILTER ( LANG(?encLabel) = \"ru\" )
@@ -219,6 +219,7 @@ class PlacesImporter extends GeniBaseImporter
                     ],
                 ],
                 'resourceType'  => ResourceType::RECORD,
+                'mediaType' => 'text/html',
                 'citations' => [[
                     'lang'  => 'ru',
                     'value' => $content,

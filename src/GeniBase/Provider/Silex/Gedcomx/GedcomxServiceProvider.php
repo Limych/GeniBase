@@ -26,6 +26,8 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use GeniBase\Common\Statistic;
 use Silex\Application;
+use GeniBase\Common\Sitemap;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  *
@@ -43,18 +45,27 @@ class GedcomxServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $app)
     {
-        $app['statistic.controller'] = $app->protect(function() use ($app) {
-            return $app['statistic'];
-        });
-
         if (! isset($app['statistic'])) {
-            $app['statistic'] = function() use ($app) { return $this->statistic($app); };
-        } else {
-            $app->extend('statistic', function($stat, $app) {
-                $stat->embed($this->statistic($app));
-                return $stat;
+            $app['statistic'] = array();
+
+            $app['statistic.controller'] = $app->protect(function() use ($app) {
+                $result = new Statistic();
+                foreach ($app['statistic'] as $stat) {
+                    $callback = $app['callback_resolver']->resolveCallback($stat);
+                    if (is_callable($callback)) {
+                        $result->embed(call_user_func($callback, $app));
+                    }
+                }
+                return $result;
             });
         }
+        $statistic = $app['statistic'];
+        $statistic[] = array($this, 'statistic');
+        $app['statistic'] = $statistic;
+
+        $sitemap = $app['sitemap'];
+        $sitemap[] = array($this, 'sitemap');
+        $app['sitemap'] = $sitemap;
     }
 
     /**
@@ -69,12 +80,25 @@ class GedcomxServiceProvider implements ServiceProviderInterface
 
     /**
      *
+     * @param Application $app
+     * @param Request $request
+     * @return \GeniBase\Common\Sitemap
+     */
+    public function sitemap(Application $app, Request $request)
+    {
+        return new Sitemap();
+    }
+
+    protected $routesBase;
+
+    /**
+     *
      * @param mixed  $app
      * @param string $base
      */
     public function mountRoutes($app, $base)
     {
-        // Abstract. Do nothing
+        $this->routesBase = $base;
     }
 
     /**

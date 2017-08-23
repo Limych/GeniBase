@@ -69,7 +69,7 @@ class GeniBaseJsonEncoder extends JsonEncoder implements NormalizationAwareInter
     protected function resolveContext($context)
     {
         $context = array_merge($this->options, $context);
-        if ($context['pretty_print']) {
+        if (! empty($context['pretty_print'])) {
             $context['json_encode_options'] |= JSON_PRETTY_PRINT;
         }
         return $context;

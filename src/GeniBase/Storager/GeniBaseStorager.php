@@ -789,6 +789,26 @@ class GeniBaseStorager
     }
 
     /**
+     * Return array with all already used IDs of this entity type.
+     *
+     * @return array The list of already user IDs of this entity type.
+     */
+    public function getUsedIds($hasModified = true)
+    {
+        $table = $this->getTableName();
+        $query = 'SELECT id' . ($hasModified ? ', att_modified' : '') . ' FROM ' . $table;
+        $result = $this->dbs->getDb()->fetchAll($query);
+        if (! empty($result)) {
+            $tmp = array();
+            foreach ($result as $row) {
+                $tmp[$row['id']] = $row['att_modified'] ?: true;
+            }
+            $result = $tmp;
+        }
+        return $result;
+    }
+
+    /**
      *
      * @param string $uri
      * @return NULL|string|boolean

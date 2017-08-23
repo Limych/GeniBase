@@ -75,6 +75,8 @@ class AgentsServiceProvider extends GedcomxServiceProvider
      */
     public function mountApiRoutes($app, $base)
     {
+        parent::mountApiRoutes($app, $base);
+
         $app->get($base, "agent.controller:statistic");
         $app->get($base.'/{id}', "agent.controller:getOne");
 //         $app->post($base, "persons.controller:save");

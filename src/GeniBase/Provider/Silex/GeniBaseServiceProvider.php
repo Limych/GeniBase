@@ -28,6 +28,10 @@ use GeniBase\Provider\Silex\Encoder\GeniBaseXmlEncoder;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Silex\Application;
+use Silex\Api\BootableProviderInterface;
+use Symfony\Component\HttpFoundation\Response;
+use GeniBase\Common\Sitemap;
 
 /**
  *
@@ -36,7 +40,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @subpackage Silex
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-class GeniBaseServiceProvider implements ServiceProviderInterface
+class GeniBaseServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
 
     /**
@@ -45,6 +49,8 @@ class GeniBaseServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $app)
     {
+        /** @var Application $app */
+
         $app->before(
             function (Request $request) use ($app) {
                 // Add Gedcomx formats
@@ -58,16 +64,45 @@ class GeniBaseServiceProvider implements ServiceProviderInterface
             }
         );
 
+        // Redefine cache store service
+        $app['http_cache.store'] = function ($app) {
+            return new GeniBaseHttpCacheStore($app['http_cache.cache_dir']);
+        };
+
         // Database service
-        $app['gb.db']  = function () use ($app) { return new DBaseService($app); };
+        $app['gb.db']  = function ($app) { return new DBaseService($app); };
 
         // Register serializers
         $app->extend('serializer.encoders', function ($encoders) {
             $encoders = array_merge(array(
                 new GeniBaseJsonEncoder(),
-                new GeniBaseXmlEncoder()
+                new GeniBaseXmlEncoder(),
             ), $encoders);
             return $encoders;
         });
+
+        $app['sitemap'] = array();
+
+        $app['sitemap.controller'] = $app->protect(function(Request $request) use ($app) {
+            $sitemap = new Sitemap();
+
+            foreach ($app['sitemap'] as $controller) {
+                $callback = $app['callback_resolver']->resolveCallback($controller);
+                if (is_callable($callback)) {
+                    $sitemap->embed(call_user_func($callback, $app, $request));
+                }
+            }
+
+            $encoder = new GeniBaseXmlEncoder();
+            $sitemap = $encoder->encode($sitemap, 'xml');
+            return new Response($sitemap, 200, array(
+                'Content-Type' => 'text/xml',
+            ));
+        });
+    }
+
+    public function boot(Application $app)
+    {
+        $app->get('/sitemap.xml', 'sitemap.controller')->bind('sitemap');
     }
 }

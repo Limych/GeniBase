@@ -27,6 +27,7 @@ use GeniBase\Rs\Server\ApiLinksUpdater;
 use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Rs\Client\Rel;
 use Gedcomx\Source\SourceDescription;
+use GeniBase\Common\SitemapUrl;
 use GeniBase\Common\Statistic;
 use GeniBase\Rs\Server\GedcomxRsFilter;
 use GeniBase\Rs\Server\GedcomxRsUpdater;
@@ -36,6 +37,9 @@ use Silex\Application;
 use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use GeniBase\Common\Sitemap;
+use GeniBase\Rs\Server\GedcomxMTimeCalculator;
+use Carbon\Carbon;
 
 /**
  *
@@ -76,10 +80,38 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
 
     /**
      * {@inheritDoc}
+     * @see \GeniBase\Provider\Silex\Gedcomx\GedcomxServiceProvider::sitemap()
+     */
+    public function sitemap(Application $app, Request $request)
+    {
+        $ids = StoragerFactory::newStorager($app['gb.db'], PlaceDescription::class)->getUsedIds();
+
+        $sitemap = new Sitemap();
+        $req = $request->duplicate();
+        foreach ($ids as $id => $mtime) {
+            $url = $request->getUriForPath($this->routesBase . '/' . $id);
+            $req->server->set('REQUEST_URI', $url);
+            $mtime = $app['http_cache.store']->getMTime($req);
+// var_dump($mtime);die;    // TODO Remove me
+            $sitemap->addUrl(
+                $url,
+                $mtime/*,
+                SitemapUrl::CHANGEFREQ_MONTHLY    // TODO: Uncomment in production /**/
+            );
+        }
+
+        return $sitemap;
+    }
+
+
+    /**
+     * {@inheritDoc}
      * @see \GeniBase\Provider\Silex\Gedcomx\GedcomxServiceProvider::mountRoutes()
      */
     public function mountRoutes($app, $base)
     {
+        parent::mountRoutes($app, $base);
+
         /** @var Application $app */
         $app->get($base, "place_description.controller:showPlace")->bind('places-root');
         $app->get($base.'/{id}', "place_description.controller:showPlace")->bind('place');
@@ -91,6 +123,8 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
      */
     public function mountApiRoutes($app, $base)
     {
+        parent::mountApiRoutes($app, $base);
+
         /** @var ControllerCollection $app */
         $app->get($base, "place_description.controller:getComponents");
         $app->get($base.'/{id}', "place_description.controller:getOne");
@@ -204,9 +238,10 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
         }
 
         GedcomxRsUpdater::update($gedcomx);
+        $mtime = GedcomxMTimeCalculator::getMTime($gedcomx);
 
         if (empty($id)) {
-            return $app['twig']->render('places_list.html.twig', array( 'gedcomx' => $gedcomx, ));
+            $response = $app['twig']->render('places_list.html.twig', array( 'gedcomx' => $gedcomx, ));
         } else {
             $pl = $gedcomx->getPlaces();
             $mainPlace = $pl[0];
@@ -228,7 +263,7 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
             );
             GedcomxRsUpdater::update($gedcomx3);
 
-            return $app['twig']->render(
+            $response = $app['twig']->render(
                 'place.html.twig',
                 array(
                     'gedcomx' => $gedcomx,
@@ -237,5 +272,22 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
                 )
             );
         }
+
+        $response = new Response($response);
+        $response->setEtag(sha1(
+            $gedcomx->toJson()
+            . ($gedcomx2 ? $gedcomx2->toJson() : null)
+            . ($gedcomx3 ? $gedcomx3->toJson() : null)
+        ), true);
+
+        if ($mtime) {
+            $response->setLastModified($mtime);
+        }
+
+        $exp = Carbon::now()->addMonth();
+        $response->setExpires($exp);
+        $response->setSharedMaxAge($exp->diffInSeconds());
+
+        return $response;
     }
 }

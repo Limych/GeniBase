@@ -69,6 +69,8 @@ class EventServiceProvider extends GedcomxServiceProvider
      */
     public function mountApiRoutes($app, $base)
     {
+        parent::mountApiRoutes($app, $base);
+
         $app->get($base, "event.controller:statistic");
         $app->get($base.'/{id}', "event.controller:getOne");
         //         $app->post($base, "persons.controller:save");

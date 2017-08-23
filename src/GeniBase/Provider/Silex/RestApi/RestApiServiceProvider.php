@@ -210,15 +210,13 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
                     // Simple GET controller
                     $service_controllers->get($pattern, $controller);
                 } else {
-                    try {
-                        // Try to resolve callable
-                        $callback = $app['callback_resolver']->convertCallback($controller[0]);
-
+                    $callback = $app['callback_resolver']->resolveCallback($controller[0]);
+                    if (is_callable($callback)) {
                         // Flexible controller setup through callback function
                         $controller[0] = $pattern;   // Second parameter
                         array_unshift($controller, $service_controllers);   // First parameter
                         call_user_func_array($callback, $controller);
-                    } catch (\InvalidArgumentException $ex) {
+                    } else {
                         // First argument is not callable. Use it as controller with defined method(s)
                         $service_controllers->method($controller[0])->match($pattern, $controller);
                     }

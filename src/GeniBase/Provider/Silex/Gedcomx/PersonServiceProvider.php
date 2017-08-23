@@ -76,6 +76,8 @@ class PersonServiceProvider extends GedcomxServiceProvider
 
     public function mountApiRoutes($app, $base)
     {
+        parent::mountApiRoutes($app, $base);
+
         $app->get($base, "person.controller:statistic");
         $app->get($base.'/{id}', "person.controller:getOne");
 //         $app->post($base, "person.controller:save");
