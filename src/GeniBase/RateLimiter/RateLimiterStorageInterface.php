@@ -3,6 +3,7 @@
  * GeniBase — the content management system for genealogical websites.
  *
  * @package GeniBase
+ * @subpackage RateLimiter
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  * @copyright Copyright (C) 2017 Andrey Khrolenok
  * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
@@ -20,29 +21,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace GeniBase\Provider\Silex\Encoder;
-
-use Gedcomx\Common\ExtensibleData;
-use GeniBase\Common\GeniBaseClass;
+namespace GeniBase\RateLimiter;
 
 /**
  *
- *
- * @package GeniBase
- * @subpackage Silex
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-trait GeniBaseEncoderTrait
+interface RateLimiterStorageInterface
 {
 
     /**
-     * {@inheritdoc}
+     * Fetch rate limit
+     *
+     * @param string $id
+     * @param string $default
      */
-    public function supportsEncoding($format, $context = array())
-    {
-        return (self::FORMAT === $format) && (
-            ($context['content'] instanceof ExtensibleData)
-            || ($context['content'] instanceof GeniBaseClass)
-        );
-    }
+    public function get($id, $default = null);
+
+    /**
+     * Set a new rate limit
+     *
+     * @param string $id
+     * @param string $amount
+     */
+    public function set($id, $amount);
 }

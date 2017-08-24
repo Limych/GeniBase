@@ -132,6 +132,7 @@ $app->register(new \GeniBase\Provider\Silex\GeniBaseServiceProvider());
 $app->register(new \GeniBase\Provider\Silex\PlaceMapProvider());
 $app->register(new \GeniBase\Provider\Silex\RestApi\RestApiServiceProvider());
 $app->register(new \GeniBase\Provider\Silex\ContentCompressor\ContentCompressorServiceProvider());
+$app->register(new \GeniBase\RateLimiter\Provider\Silex\RateLimiterServiceProvider());
 
 $app->register(new \GeniBase\Provider\Silex\TestServiceProvider()); // FIXME: Remove TestServiceProvider from, production
 $app->register(new \GeniBase\Provider\Silex\Gedcomx\AgentsServiceProvider());

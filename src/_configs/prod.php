@@ -45,6 +45,7 @@ $app['monolog.level']   = \Monolog\Logger::ERROR;
 // === Caching ================================================================
 
 $app['http_cache.cache_dir'] = "${root_dir}/tmp/cache/http";
+$app['rate_limiter.cache_dir'] = "${root_dir}/tmp/cache/rate";
 
 // === Twig ===================================================================
 

@@ -6,7 +6,7 @@
  * @subpackage ContentCompressor
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  * @author Tobias Sjösten <tobias@tobiassjosten.net>
- * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @copyright Copyright (C) 2017 Andrey Khrolenok
  * @copyright Copyright (C) Tobias Sjösten <tobias@tobiassjosten.net>
  * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
  * @link https://github.com/Limych/GeniBase

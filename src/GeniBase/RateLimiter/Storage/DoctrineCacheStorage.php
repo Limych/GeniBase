@@ -3,6 +3,7 @@
  * GeniBase — the content management system for genealogical websites.
  *
  * @package GeniBase
+ * @subpackage RateLimiter
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  * @copyright Copyright (C) 2017 Andrey Khrolenok
  * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
@@ -20,29 +21,51 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
-namespace GeniBase\Provider\Silex\Encoder;
+namespace GeniBase\RateLimiter\Storage;
 
-use Gedcomx\Common\ExtensibleData;
-use GeniBase\Common\GeniBaseClass;
+use Doctrine\Common\Cache\Cache;
+use GeniBase\RateLimiter\RateLimiterStorageInterface;
 
 /**
  *
  *
- * @package GeniBase
- * @subpackage Silex
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-trait GeniBaseEncoderTrait
+class DoctrineCacheStorage implements RateLimiterStorageInterface
 {
 
     /**
-     * {@inheritdoc}
+     * @var \Doctrine\Common\Cache\Cache
      */
-    public function supportsEncoding($format, $context = array())
+    protected $cache;
+
+    /**
+     * Class constructor
+     *
+     * @param Cache $cache
+     */
+    public function __construct(Cache $cache)
     {
-        return (self::FORMAT === $format) && (
-            ($context['content'] instanceof ExtensibleData)
-            || ($context['content'] instanceof GeniBaseClass)
-        );
+        $this->cache = $cache;
+    }
+
+    /**
+     * (non-PHPdoc)
+     *
+     * @see \GeniBase\RateLimiter\RateLimiterStorageInterface::set()
+     */
+    public function set($id, $amount)
+    {
+        return $this->cache->save($id, $amount);
+    }
+
+    /**
+     * (non-PHPdoc)
+     *
+     * @see \GeniBase\RateLimiter\RateLimiterStorageInterface::get()
+     */
+    public function get($id, $default = null)
+    {
+        return $this->cache->fetch($id) ?: $default;
     }
 }

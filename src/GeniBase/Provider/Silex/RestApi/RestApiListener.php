@@ -6,7 +6,7 @@
  * @subpackage RestApi
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  * @author Tobias Sjösten <tobias@tobiassjosten.net>
- * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @copyright Copyright (C) 2017 Andrey Khrolenok
  * @copyright Copyright (C) Tobias Sjösten <tobias@tobiassjosten.net>
  * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
  * @link https://github.com/Limych/GeniBase
@@ -159,16 +159,13 @@ class RestApiListener implements EventSubscriberInterface
         if (is_object($result) && ! empty($accepted_classes)) {
             $class = get_class($result);
             if (! is_array($accepted_classes)) {
-                try {
-                    // Try to resolve callable and check class through it
-                    if (! call_user_func(
-                        $app['callback_resolver']->convertCallback($accepted_classes),
-                        $class
-                    )) {
+                $callback = $app['callback_resolver']->resolveCallback($accepted_classes);
+                if (is_callable($callback)) {
+                    if (! call_user_func($callback, $class)) {
                         return;
                     }
                     $accepted_classes = array( $class );
-                } catch (\InvalidArgumentException $ex) {
+                } else {
                     // No callable detected. Use $accepted_classes as single class name
                     $accepted_classes = array( $accepted_classes );
                 }

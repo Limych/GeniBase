@@ -5,7 +5,7 @@
  * @package GeniBase
  * @subpackage RestApi
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
- * @copyright Copyright (C) 2014-2017 Andrey Khrolenok
+ * @copyright Copyright (C) 2017 Andrey Khrolenok
  * @license GNU Affero General Public License v3 <http://www.gnu.org/licenses/agpl-3.0.txt>
  * @link https://github.com/Limych/GeniBase
  *
@@ -85,9 +85,6 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             'pretty_print' => false,
 
             // TODO: SSL (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#ssl)
-
-            // TODO: Rate limiting (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#rate-limiting)
-            // https://github.com/CrazyAwesomeCompany/poc-ratelimit/tree/master/src/CAC/Component/RateLimit
         );
 
         /**
