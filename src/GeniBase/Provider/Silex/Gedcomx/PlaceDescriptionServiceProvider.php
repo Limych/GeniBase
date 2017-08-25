@@ -27,7 +27,6 @@ use GeniBase\Rs\Server\ApiLinksUpdater;
 use Gedcomx\Conclusion\PlaceDescription;
 use Gedcomx\Rs\Client\Rel;
 use Gedcomx\Source\SourceDescription;
-use GeniBase\Common\SitemapUrl;
 use GeniBase\Common\Statistic;
 use GeniBase\Rs\Server\GedcomxRsFilter;
 use GeniBase\Rs\Server\GedcomxRsUpdater;
@@ -276,8 +275,8 @@ class PlaceDescriptionServiceProvider extends GedcomxServiceProvider
         $response = new Response($response);
         $response->setEtag(sha1(
             $gedcomx->toJson()
-            . ($gedcomx2 ? $gedcomx2->toJson() : null)
-            . ($gedcomx3 ? $gedcomx3->toJson() : null)
+            . (isset($gedcomx2) ? $gedcomx2->toJson() : null)
+            . (isset($gedcomx3) ? $gedcomx3->toJson() : null)
         ), true);
 
         if ($mtime) {

@@ -21,6 +21,8 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.txt.
  */
 
+use GeniBase\Importer\PlacesImporter;
+use GeniBase\Importer\SvrtImporter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -205,12 +207,29 @@ $app->get(
     '/',
     function () use ($app) {
         if (! $app['debug']) {
-            return $app->redirect($app['url_generator']->generate('places-root'));
+            return $app->redirect($app['url_generator']->generate('places-root'), 301);
         }
         return $app['twig']->render('index.html.twig', array());
     }
 )
 ->bind('homepage');
+
+
+
+// === Register importers =====================================================
+// FIXME: Remove this block from production. It would be replaced by correctly programmed block
+
+$app['svrt.importer'] = function () use ($app) { return new SvrtImporter($app); };
+$app['places.importer'] = function () use ($app) { return new PlacesImporter($app); };
+
+/** @var ControllerCollection $service_controllers */
+$sc = $app['controllers_factory'];
+
+$sc->get('/places', "places.importer:import");
+$sc->get('/places/geo_update', "places.importer:updatePlaceGeoCoordinates");
+$sc->get('/svrt', "svrt.importer:import");
+
+$app->mount('/import', $sc);
 
 
 

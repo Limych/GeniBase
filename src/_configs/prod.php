@@ -29,6 +29,10 @@ $app['api_key.facebook.secret'] = 'd704ec80a9eaaca92ab12e7aeb03d6cc';
 
 
 
+
+
+
+
 // Below this line is configs you may not want to change
 
 // === Logging ================================================================
@@ -42,10 +46,14 @@ $app['monolog.logfile.expired'] = "${root_dir}/var/logs/" .
 
 $app['monolog.level']   = \Monolog\Logger::ERROR;
 
+// === Rate Limiting ==========================================================
+
+$app['rate_limiter.cache_dir'] = "${root_dir}/tmp/cache/rate";
+$app['rate_limiter.whitelist_dir'] = "${root_dir}/var/ip_whitelists";
+
 // === Caching ================================================================
 
 $app['http_cache.cache_dir'] = "${root_dir}/tmp/cache/http";
-$app['rate_limiter.cache_dir'] = "${root_dir}/tmp/cache/rate";
 
 // === Twig ===================================================================
 
@@ -67,3 +75,4 @@ $app['translator.resource'] = "${root_dir}/app/lang/";
 // === Importer configs =======================================================
 
 $app['svrt.1914.store'] = "${root_dir}/var/store";
+$app['places.store'] = "${root_dir}/var/store";

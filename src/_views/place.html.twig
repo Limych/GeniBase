@@ -73,10 +73,12 @@ if place.getTemporalDescription() != null %}
                 </span>
 #}			</div>
 			<div class="card-text mt-3">
+                <p class="alert alert-info text-right"><a href="{{ path('places-root') }}" target="_blank">Что это такое и как им пользоваться</a></p>
+                <p class="alert alert-warning">Работа над этим справочником ещё продолжается. Нам нужны волонтёры для выверки информации: <a href="http://forum.svrt.ru/index.php?showtopic=9013" target="_blank">Тема на форуме</a>.</p>
 			    {% if gedcomx.getSourceDescriptions() %}
                     {% set desc = gedcomx.getSourceDescriptions()[0] %}
                     {% if desc %}
-                <div class="description text-justify mt-3 mx-md-5">{{ desc.getCitations()[0].getValue()|raw }}</div>
+                <div class="description text-justify mt-3 mx-md-5 mb-4">{{ desc.getCitations()[0].getValue()|raw }}</div>
                     {% endif %}
                 {% endif %}
 
@@ -92,7 +94,7 @@ if place.getTemporalDescription() != null %}
                 </script>
 
                 {% if components %}
-                <div class="mt-3">
+                <div class="mt-5">
             		<h3>Включает в себя</h3>
             		<ul class="list-unstyled component-refs">
             		{% set first_shown = false %}

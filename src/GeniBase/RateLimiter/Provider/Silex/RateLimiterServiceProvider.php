@@ -31,6 +31,7 @@ use GeniBase\RateLimiter\RateLimiter;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Silex\Api\BootableProviderInterface;
 
 /**
  *
@@ -39,7 +40,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @author Andrey Khrolenok <andrey@khrolenok.ru>
  */
-class RateLimiterServiceProvider implements ServiceProviderInterface
+class RateLimiterServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
 
     const CHECK_LIMIT_PRIORITY = 256;
@@ -63,6 +64,9 @@ class RateLimiterServiceProvider implements ServiceProviderInterface
         if (! isset($app['rate_limiter.time_limit'])) {
             $app['rate_limiter.time_limit'] = 3600; // Seconds
         }
+        if (! isset($app['rate_limiter.autocheck'])) {
+            $app['rate_limiter.autocheck'] = true;
+        }
 
         /**
          * Storage of rate limits usage
@@ -76,20 +80,57 @@ class RateLimiterServiceProvider implements ServiceProviderInterface
         };
 
         /**
+         * Compose full whitelist of IPs
+         * from $app['rate_limiter.whitelist'] and files in $app['rate_limiter.whitelist_dir']
+         */
+        $app['rate_limiter.whitelist.compose'] = $app->protect(function() use ($app) {
+            $whitelist = isset($app['rate_limiter.whitelist']) ? $app['rate_limiter.whitelist'] : array();
+            if (isset($app['rate_limiter.whitelist_dir'])) {
+                $dir = $app['rate_limiter.whitelist_dir'];
+                if (false !== ($fnames = @scandir($dir))) {
+                    foreach ($fnames as $fname) {
+                        $fpath = "$dir/$fname";
+                        if (! is_dir($fpath) && @is_readable($fpath)) {
+                            $content = file_get_contents($fpath);
+                            $content = explode("\n", $content);
+                            foreach ($content as $range) {
+                                $range = trim($range);
+                                if (preg_match('!\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}!', $range)) {
+                                    $whitelist[] = $range;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return $whitelist;
+        });
+
+        /**
          * Rate limiter
          */
         $app['rate_limiter'] = function(Application $app) {
-            return new RateLimiter(
+            $rl = new RateLimiter(
                 $app['rate_limiter.storage'],
                 $app['rate_limiter.hits_limit'],
                 $app['rate_limiter.time_limit']
             );
+            $whitelist = $app['rate_limiter.whitelist.compose']();
+            if (! empty($whitelist)) {
+                $rl->setWhitelist($whitelist);
+            }
+            return $rl;
         };
 
         /**
-         * Check rate limits
+         * Rate limits checker
          */
-        $app->before(function(Request $request) use ($app) {
+        $app['rate_limiter.checker'] = $app->protect(function(Request $request) use ($app) {
+            if (isset($app['rate_limiter.checked'])) {
+                return;
+            }
+            $app['rate_limiter.checked'] = true;
+
             $userId = RateLimiter::getRealUserIp();
             $hitsLimit = $app['rate_limiter.hits_limit'];
             $timeLimit = $app['rate_limiter.time_limit'];
@@ -114,21 +155,40 @@ class RateLimiterServiceProvider implements ServiceProviderInterface
                 ));
             };
 
+            $timeReset = round($timeLimit * $hitsLeft / $hitsLimit);
             $app['rate_limiter.user_hits_left'] = $hitsLeft;
             $app['rate_limiter.user_hits_limit'] = $hitsLimit;
             $app['rate_limiter.user_time_limit'] = $timeLimit;
-            $app['rate_limiter.user_time_reset'] = round($timeLimit * $hitsLeft / $hitsLimit);
-        }, self::CHECK_LIMIT_PRIORITY);
+            $app['rate_limiter.user_time_reset'] = $timeReset;
+
+            $app->after(function(Request $request, Response $response) use ($app, $hitsLeft, $hitsLimit, $timeReset) {
+                $response->headers->add(array(
+                    'X-Rate-Limit-Limit' => $hitsLimit,
+                    'X-Rate-Limit-Remaining' => $hitsLeft,
+                    'X-Rate-Limit-Reset' => $timeReset,
+                ));
+            });
+        });
 
         /**
-         * Add rate limits information headers to the Response
+         * Register rate limits checker
          */
-        $app->after(function(Request $request, Response $response) use ($app) {
-            $response->headers->add(array(
-                'X-Rate-Limit-Limit' => $app['rate_limiter.user_hits_limit'],
-                'X-Rate-Limit-Remaining' => $app['rate_limiter.user_hits_left'],
-                'X-Rate-Limit-Reset' => $app['rate_limiter.user_time_reset'],
-            ));
+        $app['rate_limiter.checker.register'] = $app->protect(function() use ($app) {
+            if (! isset($app['rate_limiter.checker.registered'])) {
+                $app->before($app['rate_limiter.checker'], self::CHECK_LIMIT_PRIORITY);
+                $app['rate_limiter.checker.registered'] = true;
+            }
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \Silex\Api\BootableProviderInterface::boot()
+     */
+    public function boot(Application $app)
+    {
+        if ($app['rate_limiter.autocheck']) {
+            $app['rate_limiter.checker.register']();
+        }
     }
 }

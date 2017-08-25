@@ -84,6 +84,10 @@ class RestApiServiceProvider implements ServiceProviderInterface, EventListenerP
             'accepted_classes' => null, // If set, serialize only described classes. You can set it to callable or service name to check classes on the fly
             'pretty_print' => false,
 
+            // Rate limits
+            'rate_limiter.hits_limit' => 50,
+            'rate_limiter.time_limit' => 3600,
+
             // TODO: SSL (http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#ssl)
         );
 

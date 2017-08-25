@@ -22,6 +22,8 @@
  */
 namespace GeniBase;
 
+use FoxyTools\Fetcher;
+
 /**
  * Assorted static functions.
  *
@@ -29,6 +31,10 @@ namespace GeniBase;
  */
 class Util
 {
+
+    const USER_AGENT = 'Mozilla/5.0 (compatible; GeniBaseBot/0.1; +http://www.genibase.net/)';
+
+    const CURL_TIMEOUT = 20000;
 
     /**
      *
@@ -311,5 +317,17 @@ class Util
         }
 
         echo $msg . $spc;
+    }
+
+    public static function markdownify($content)
+    {
+        $url = 'http://fuckyeahmarkdown.com/go/';
+        return Fetcher::fetchUrl($url, array(
+            'html' => $content,
+        ), array(
+            'requireProxy' => false,
+            'userAgent' => self::USER_AGENT,
+            'timeout' => self::CURL_TIMEOUT,
+        ));
     }
 }

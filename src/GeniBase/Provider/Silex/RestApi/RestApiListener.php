@@ -85,6 +85,13 @@ class RestApiListener implements EventSubscriberInterface
             return;
         }
 
+        // Check rate limits
+        if (isset($this->app['rate_limiter.checker'])) {
+            $this->app['rate_limiter.hits_limit'] = $options['rate_limiter.hits_limit'];
+            $this->app['rate_limiter.time_limit'] = $options['rate_limiter.time_limit'];
+            $this->app['rate_limiter.checker']($request);
+        }
+
         // Try to detect response format by extension
         $requestUri = $request->getRequestUri();
         $query = '';

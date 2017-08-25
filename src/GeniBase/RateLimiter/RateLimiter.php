@@ -70,6 +70,10 @@ class RateLimiter
         $timeLimit = $timeLimit ?: $this->defaultTimeLimit;
         $now = time();
 
+        if (filter_var($userId, FILTER_VALIDATE_IP) && $this->inWhitelist($userId)) {
+            return $hitsLimit;
+        }
+
         $currentLimit = $this->storage->get($userId, "$hitsLimit|$now");
 
         list($credits, $time) = explode('|', $currentLimit, 2);
@@ -123,5 +127,50 @@ class RateLimiter
         }
 
         return $ip ?: $default;
+    }
+
+    /**
+     * Match IP to CIDR range
+     *
+     * @param string $ip
+     * @param string $range
+     * @return boolean
+     */
+    public function cidrMatch($ip, $range)
+    {
+        list ($subnet, $bits) = explode('/', $range, 2);
+        $ip = ip2long($ip);
+        $subnet = ip2long($subnet);
+        $mask = -1 << (32 - intval($bits));
+        $subnet &= $mask; # nb: in case the supplied subnet wasn't correctly aligned
+        return ($ip & $mask) == $subnet;
+    }
+
+    protected $whitelist = array();
+
+    /**
+     * @return string[] The $whitelist value
+     */
+    public function getWhitelist()
+    {
+        return $this->whitelist;
+    }
+
+    /**
+     * @param string[] $whitelist
+     */
+    public function setWhitelist($whitelist)
+    {
+        $this->whitelist = $whitelist;
+    }
+
+    public function inWhitelist($ip)
+    {
+        foreach ($this->whitelist as $range) {
+            if ($this->cidrMatch($ip, $range)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

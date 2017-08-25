@@ -31,6 +31,8 @@ use GeniBase\Util\PlacesProcessor;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('VERSION', '0.1');
+
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 if (! isset($argv)) {
@@ -82,6 +84,7 @@ try {
 }
 
 if (! empty($dst_fpath)) {
+    fputs($dst_stream, "\n");
     fclose($dst_stream);
 }
 
@@ -138,6 +141,13 @@ function updatePlace($state, $place)
     }
 
     static $country;
+
+    if (! empty($place['owl:sameAs']) && (false !== strpos($place['owl:sameAs'], 'wikipedia.org/wiki/'))) {
+        $res = fetchLinkFromWP($place['owl:sameAs']);
+        if (! empty($res)) {
+            $place['owl:sameAs'] = $res;
+        }
+    }
 
     $candidate = $place;
     if (empty($country)) {
@@ -432,6 +442,18 @@ function digBigData($place, $parent, $query)
     }
 
     return $place;
+}
+
+
+
+function fetchLinkFromWP($url)
+{
+    $content = file_get_contents($url);
+    $ereg = '!<li id="t-wikibase"><a href="https://www\.wikidata\.org/wiki/Special:EntityPage/([^"]+)!';
+    if (preg_match($ereg, $content, $matches)) {
+        return 'wd:' . $matches[1];
+    }
+    return null;
 }
 
 

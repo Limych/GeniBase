@@ -33,6 +33,7 @@ use Gedcomx\Source\SourceDescription;
 use Gedcomx\Conclusion\PlaceDescription;
 use GeniBase\Util;
 use GeniBase\Util\PlacesProcessor;
+use FoxyTools\Fetcher;
 
 class PlacesImporter extends GeniBaseImporter
 {
@@ -103,18 +104,26 @@ class PlacesImporter extends GeniBaseImporter
             return true;
         }
 
-        $place = array(
-            'confidence'    => \Gedcomx\Types\ConfidenceLevel::MEDIUM,
-//             'confidence'    => \Gedcomx\Types\ConfidenceLevel::HIGH, // TODO Restore it
-        );
+        $place = array();
 
-        $tmp = new FormalDate();
-        $tmp->parse($input['gx:temporalDescription']);
-        $place['temporalDescription'] = array();
-        if ($tmp->isValid()) {
-            $place['temporalDescription']['formal'] = $input['gx:temporalDescription'];
+        $res = isset($input['owl:sameAs']) + isset($input['rdf:type']) + isset($input['location']);
+        if ($res == 3) {
+            $place['confidence'] = \Gedcomx\Types\ConfidenceLevel::HIGH;
+        } elseif ($res > 0) {
+            $place['confidence'] = \Gedcomx\Types\ConfidenceLevel::MEDIUM;
         } else {
-            $place['temporalDescription']['original'] = $input['gx:temporalDescription'];
+            $place['confidence'] = \Gedcomx\Types\ConfidenceLevel::LOW;
+        }
+
+        if (isset($input['gx:temporalDescription'])) {
+            $tmp = new FormalDate();
+            $tmp->parse($input['gx:temporalDescription']);
+            $place['temporalDescription'] = array();
+            if ($tmp->isValid()) {
+                $place['temporalDescription']['formal'] = $input['gx:temporalDescription'];
+            } else {
+                $place['temporalDescription']['original'] = $input['gx:temporalDescription'];
+            }
         }
 
         if (! empty($input['rdf:type'])) {
@@ -193,7 +202,10 @@ class PlacesImporter extends GeniBaseImporter
         foreach ($rows['result']['rows'] as $row) {
             $enc = PlacesProcessor::processURI($row['encId'], PlacesProcessor::CONTRACT_URI);
 
-            $content = file_get_contents($row['encUri']);
+            $content = Fetcher::fetchUrl($row['encUri'], [], [
+                'requireProxy' => false,
+                'userAgent' => Util::USER_AGENT,
+            ]);
 
             $regex = '!^.*<span id="ws-title">(.*?)</span>.*$!us';
             $title = preg_replace($regex, '\\1', $content);
@@ -240,14 +252,14 @@ class PlacesImporter extends GeniBaseImporter
 
     protected function getPlaces($fname = 'russia_1913')
     {
-        $fpath = BASE_DIR . "/var/store/{$fname}.plc";
+        $fpath = $this->app['places.store'] . "/{$fname}.plc";
         $places = file_get_contents($fpath);
         return $places;
     }
 
     public function updatePlaceGeoCoordinates(Application $app, Request $request)
     {
-        $plc = $this->gbs->newStorager('Gedcomx\Conclusion\PlaceDescription');
+        $plc = $this->gbs->newStorager(PlaceDescription::class);
 
         $t_places = $app['gb.db']->getTableName('places');
 

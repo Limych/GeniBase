@@ -84,7 +84,7 @@ class PlacesProcessor
 
         $this->cnt = $this->cnt_entity = 0;
         $this->lastPlace = null;
-        $this->processBlock();
+        return $this->processBlock();
     }
 
     protected static function parseInput($data)
@@ -188,29 +188,36 @@ class PlacesProcessor
     }
 
     static $namespaces = array(
-        'wd:' => 'http://www.wikidata.org/entity/',
-        'gb:' => 'http://genibase.net/',
+        'http://genibase.net/' => 'gb:',
+        'http://genibase.ru/' => 'gb:',
+        'http://www.wikidata.org/entity/' => 'wd:',
+        'https://www.wikidata.org/wiki/Special:EntityPage/' => 'wd:',
+        'https://www.wikidata.org/wiki/' => 'wd:',
     );
 
     public static function registerNamespace($namespace, $uri)
     {
-        self::$namespaces[$namespace . ':'] = $uri;
+        $namespace .= ':';
+        foreach ((is_array($uri) ? $uri : array( $uri )) as $val) {
+            self::$namespaces[$val] = $namespace;
+        }
     }
 
     public static function processURI($uri, $mode = self::EXPAND_URI)
     {
         switch ($mode) {
             case self::EXPAND_URI:
+                $ns = array_reverse(array_flip(array_reverse(self::$namespaces)));
                 $uri = preg_replace(
-                    array_map(__CLASS__ . '::pregPrepare', array_keys(self::$namespaces)),
-                    array_values(self::$namespaces),
+                    array_map(__CLASS__ . '::pregPrepare', array_keys($ns)),
+                    array_values($ns),
                     $uri
                 );
                 break;
             case self::CONTRACT_URI:
                 $uri = preg_replace(
-                    array_map(__CLASS__ . '::pregPrepare', array_values(self::$namespaces)),
-                    array_keys(self::$namespaces),
+                    array_map(__CLASS__ . '::pregPrepare', array_keys(self::$namespaces)),
+                    array_values(self::$namespaces),
                     $uri
                 );
                 break;
