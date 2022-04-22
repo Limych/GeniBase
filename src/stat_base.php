@@ -1,38 +1,36 @@
 <?php
-require_once ('gb-config.php'); // Load GeniBase
-require_once ('inc.php'); // Основной подключаемый файл-заплатка
+require_once('gb-config.php'); // Load GeniBase
+require_once('inc.php'); // Основной подключаемый файл-заплатка
 
 html_header('Статистика по запросам к базе данных');
 ?>
-<p>
-	<a href="/">« Вернуться к поиску</a>
-</p>
-<h1>Статистика по запросам к базе данных</h1>
-<table class="stat">
-	<caption>Распределение по периодам</caption>
-	<thead>
-		<tr>
-			<th>Период</th>
-			<th>Запросов всего</th>
-			<th>Чёткий поиск (без подстановок)</th>
-			<th>Положительных результатов</th>
-			<th>Поиск по фамилии</th>
-			<th>Поиск по имени/отчеству</th>
-			<th>Поиск по месту</th>
-			<th>Поиск по № списка</th>
-			<th>Поиск по № страницы</th>
-			<th>Поиск по вероисповеданию</th>
-			<th>Поиск по семейному положению</th>
-			<th>Поиск по событиям</th>
-			<th>Поиск по званию</th>
-			<th>Поиск по периоду</th>
-		</tr>
-	</thead>
-	<tbody>
-<?php
-$even = 0;
+    <p><a href="/">« Вернуться к поиску</a></p>
+    <h1>Статистика по запросам к базе данных</h1>
+    <table class="stat">
+        <caption>Распределение по периодам</caption>
+        <thead>
+        <tr>
+            <th>Период</th>
+            <th>Запросов всего</th>
+            <th>Чёткий поиск (без подстановок)</th>
+            <th>Положительных результатов</th>
+            <th>Поиск по фамилии</th>
+            <th>Поиск по имени/отчеству</th>
+            <th>Поиск по месту</th>
+            <th>Поиск по № списка</th>
+            <th>Поиск по № страницы</th>
+            <th>Поиск по вероисповеданию</th>
+            <th>Поиск по семейному положению</th>
+            <th>Поиск по событиям</th>
+            <th>Поиск по званию</th>
+            <th>Поиск по периоду</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        $even = 0;
 
-$result = gbdb()->query("SELECT
+        $result = gbdb()->query("SELECT
  CASE WHEN `Год` IS NULL 
       THEN 'Всего'
       ELSE
@@ -91,17 +89,31 @@ GROUP BY
   DATE_FORMAT(datetime,'%Y'),DATE_FORMAT(datetime,'%m-%Y'),DATE_FORMAT(datetime,'%d/%m/%Y') WITH rollup
 ) xx
 WHERE 1=1");
-while ($row = $result->fetch_array(MYSQLI_NUM)) {
-    $even = 1 - $even;
-    print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>" . 
-    // . format_date($row[0]) . "</td>\n\t"
-    // . esc_html(date_create($row[0])->format('d-M-Y')) . "</td>\n\t"
-    // . "<td class='align-right'>" . format_num($row[0]) . "</td>\n"
-    esc_html($row[0]) . "</td>\n\t" . "<td class='align-right'>" . format_num($row[1]) . "</td>\n" . "<td class='align-right'>" . format_num($row[2]) . "</td>\n" . "<td class='align-right'>" . format_num($row[3]) . "</td>\n" . "<td class='align-right'>" . format_num($row[4]) . "</td>\n" . "<td class='align-right'>" . format_num($row[5]) . "</td>\n" . "<td class='align-right'>" . format_num($row[6]) . "</td>\n" . "<td class='align-right'>" . format_num($row[7]) . "</td>\n" . "<td class='align-right'>" . format_num($row[8]) . "</td>\n" . "<td class='align-right'>" . format_num($row[9]) . "</td>\n" . "<td class='align-right'>" . format_num($row[10]) . "</td>\n" . "<td class='align-right'>" . format_num($row[11]) . "</td>\n" . "<td class='align-right'>" . format_num($row[12]) . "</td>\n" . "<td class='align-right'>" . format_num($row[13]) . "</td>\n" . "</tr>";
-}
-$result->free();
-?>
-</tbody>
-</table>
+        while ($row = $result->fetch_array(MYSQLI_NUM)) {
+            $even = 1 - $even;
+            print "<tr class='" . ($even ? 'even' : 'odd') . "'>\n\t<td>"
+                // . format_date($row[0]) . "</td>\n\t"
+                // . esc_html(date_create($row[0])->format('d-M-Y'))      . "</td>\n\t"
+                // . "<td class='align-right'>" . format_num($row[0]) . "</td>\n"
+                . esc_html($row[0]) . "</td>\n\t"
+                . "<td class='align-right'>" . format_num($row[1]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[2]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[3]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[4]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[5]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[6]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[7]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[8]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[9]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[10]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[11]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[12]) . "</td>\n"
+                . "<td class='align-right'>" . format_num($row[13]) . "</td>\n"
+                . "</tr>";
+        }
+        $result->free();
+        ?>
+        </tbody>
+    </table>
 <?php
 html_footer();

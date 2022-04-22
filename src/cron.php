@@ -18,4 +18,7 @@ if (empty($_SERVER['PHP_SELF']) || (basename($_SERVER['PHP_SELF']) == basename(_
     @header('Content-Type: text/plain; charset=utf-8');
 
 publish_cron(true);
-db_update();
+if(get_request_attr('monthly') == '')
+    db_update();
+else
+    db_update_monthly();
